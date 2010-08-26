@@ -1,0 +1,8 @@
+Rotamer library downloaded from http://dunbrack.fccc.edu/bbdep/bbdepdownload.php June 2007. 
+
+References
+# R. L. Dunbrack, Jr. Rotamer libraries in the 21st century. Curr. Opin. Struct. Biol. 12, 431-440 (2002).
+# R. L. Dunbrack, Jr. and F. E. Cohen. "Bayesian statistical analysis of protein sidechain rotamer preferences ." Protein Science 6, 1661-1681 (1997).
+# R. L. Dunbrack, Jr. and M. Karplus. Backbone-dependent Rotamer Library for Proteins: Application to Side-chain prediction. J. Mol. Biol. 230, 543-574 (1993).
+# R. L. Dunbrack, Jr. Conformational analysis of protein sidechains: Empirical energy parameters for proline and development of a backbone-dependent rotamer library. Ph. D. dissertation, Harvard University (1993).
+# R. L. Dunbrack, Jr. and M. Karplus. "Conformational analysis of the backbone-dependent rotamer preferences of protein sidechains." Nature Struct. Biol. 1, 334-340 (1994).

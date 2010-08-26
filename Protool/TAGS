@@ -1,0 +1,342 @@
+
+accessibility.py,139
+class access:access10,213
+    def __init__(12,228
+    def get_residue_number_of_contacts(21,362
+    def calculate_all_contacts(30,537
+
+analyse_structure.py,231
+class find_pattern:find_pattern4,36
+    def acid_amide_Gly(6,57
+    def cis_Pro(25,702
+    def find_sequence(55,1658
+class distances:distances99,3189
+    def calc_distance_matrix(101,3207
+    def get_min_distance(144,4584
+
+APBS_interface.py,55
+class APBS_calc:APBS_calc5,28
+    def __init__(7,46
+
+apbs.py,283
+class APBSError(36,793
+    def __init__(43,985
+    def __str__(52,1189
+class runAPBS:runAPBS58,1302
+    def __init__(60,1318
+    def getUnitConversion(64,1363
+    def runAPBS(75,1647
+    def get_potentials(275,9068
+    def get_potential(298,9981
+    def cleanup(315,10451
+
+assign_parameters.py,181
+class assign_parameters:assign_parameters9,121
+    def __init__(11,147
+    def clear_all_charges_and_radii(54,1226
+    def set_all_radii(65,1480
+    def assign_charge(79,1854
+
+dummy_sequence.py,48
+class sequence:sequence2,1
+    def junk(4,26
+
+electrostatics.py,507
+class electrostatics:electrostatics29,448
+    def get_titratable_groups(31,471
+    def calculate_titgroup_center(120,4375
+    def calculate_group_center(134,4918
+    def calculate_center(145,5185
+    def calculate_matrix_PBE(160,5588
+    def calculate_matrix(216,7584
+    def get_titgroup_name(321,11856
+    def get_net_charge_from_Bfact(331,12144
+    def get_atoms_around(348,12629
+    def divide_atoms(411,14892
+    def calculate_desolvation(426,15216
+    def calculate_background(459,16205
+
+energy.py,190
+class energy:energy3,2
+    def VdWr(5,17
+    def Van_der_Waals_sum(24,507
+    def get_hbonds(39,874
+    def construct_distance_cubes(56,1371
+    def find_coordinates_extremes(67,1511
+
+errors.py,712
+class ProtoolError(18,382
+    def __init__(20,418
+class TypeCheckError(24,503
+class ParseLineError(28,547
+    def __init__(30,584
+class ParseAtomError(34,677
+    def __init__(36,714
+class InvalidAtomError(40,815
+    def __init__(42,854
+class HydrogenInTorsionError(46,961
+    def __init__(48,1006
+class NotAnAminoAcidError(52,1135
+    def __init__(54,1177
+class AtomNotFoundError(64,1390
+    def __init__(66,1430
+class ResidueNotFoundError(75,1639
+    def __init__(77,1682
+class Nterm(89,1926
+    def __init__(91,1954
+class Cterm(95,2055
+    def __init__(97,2083
+class IncompletePositionError(104,2207
+    def __init__(106,2253
+class FileNotFoundError(113,2412
+    def __init__(114,2451
+
+flags.py,766
+class flags:flags12,363
+    def bound(14,381
+    def is_hydrogen_bond(31,743
+    def is_hbond_donor(50,1510
+    def is_hbond_acceptor(78,2321
+    def is_hydrophilic(109,3212
+    def Nterminal(120,3438
+    def Cterminal(132,3731
+    def is_backbone(144,4014
+    def is_mainchain(151,4109
+    def is_CB(167,4483
+    def phosphorylated(176,4704
+    def is_residue(187,5035
+    def is_atom(196,5347
+    def isaa(203,5617
+    def is_hydrogen(211,5915
+    def atomname_is_hydrogen(221,6125
+    def is_oxygen(234,6407
+    def is_nitrogen(241,6608
+    def is_carbon(248,6812
+    def is_sulphur(255,7012
+    def is_phosphor(262,7213
+    def get_atom_element(269,7415
+    def is_backbone(314,8656
+    def is_CA(323,8889
+    def is_SSbonded(334,9092
+
+geometry.py,265
+def length(20,339
+def normalise 28,522
+class geometry:geometry41,758
+    def distance(44,800
+    def dist(52,951
+    def CA_positions(63,1182
+    def CA_distance_matrix(73,1481
+    def superpose(98,2087
+    def translate(124,2927
+    def center(151,3616
+
+hydrogens.py,168
+class Hydrogens(19,320
+    def __init__(21,361
+    def repair_all_atoms(34,587
+    def build_all_HNs(56,1347
+    def build_HN(70,1650
+    def build_atom(138,4001
+
+inputgen_APBS.py,274
+class inputGen:inputGen7,96
+    def __init__(12,181
+    def getCenter(82,2277
+    def setfineCenter(119,3459
+    def set_method(126,3615
+    def set_type(133,3736
+    def getText_sub(158,4580
+    def getText(210,6822
+    def printInput(239,7574
+def main(251,7927
+
+ligand.py,214
+class ligand:ligand8,148
+    def __init__(11,194
+    def readmol2(19,284
+    def parse_mol2lines(43,950
+    def parseBonds(91,2712
+    def createlBondedAtoms(109,3220
+    def createPDBlineFromMOL2(135,3970
+
+Modify.py,50
+class modify:modify8,164
+    def delete(10,179
+
+mutate.py,967
+class Mutate:Mutate17,306
+    def __init__(19,321
+    def new_PDB(42,912
+    def read_aa_defs(51,1049
+    def get_nonH_torsions(110,3041
+    def get_torsion_atoms(131,3645
+    def get_chi(157,4444
+    def set_chi(167,4721
+    def getbound(210,6329
+    def get_bb_rotamers(272,8345
+    def new_mutation(302,9205
+    def mutate(309,9381
+    def fast_mutatetoALA(556,19143
+    def fast_mutatetoGLY(572,19718
+    def undo_last_mutate_operation(588,20250
+    def get_number_of_chis(597,20424
+    def get_best_rotamer(607,20578
+    def use_rotamer(674,22836
+    def get_bump_value(697,23478
+    def find_debump_atoms(708,23841
+    def show_all_bumps(733,24662
+    def find_bumps(746,25010
+    def are_bound(773,25994
+    def are_1_3_bound(783,26200
+    def are_1_4_bound(794,26441
+    def get_overlap(805,26705
+def Model_Mutations(857,28287
+    class FFF_fix:FFF_fix911,30106
+        def __init__(913,30126
+def Model_Mutations_old(927,30329
+
+phipsi.py,340
+def angle(25,401
+def cross 37,930
+def angleFromSineAndCosine(44,1235
+def GetPhiPsi(57,1544
+def GetPhi(86,2149
+def GetPsi(107,2658
+def GetDefAngle(128,3161
+def GetOmega(183,4432
+def GetDihedral(208,4968
+class Plot:Plot248,6428
+    def __init__(252,6512
+    def plot_phi_psi(256,6574
+    def show(260,6663
+def example(275,7182
+
+quatfit.py,228
+def findCoordinates(65,2112
+def qtransform(88,3154
+def qfit(113,3982
+def qchichange(136,4810
+def rotmol(183,6482
+def qtrfit(203,7150
+def jacobi(274,9210
+def q2mat(360,11947
+def center(389,12796
+def translate(424,13837
+
+structure.py,2530
+class display:display28,525
+    def showtot(33,591
+class structure(65,1793
+    def __init__(69,1994
+    def resnum(157,6427
+    def resname(167,6913
+    def pKa_ID(202,8658
+    def chainid(212,8969
+    def atname(217,9132
+    def isnormal(222,9313
+    def ispresent(229,9579
+    def PreviousResidue(243,9943
+    def NextResidue(279,11214
+    def GetPosition(307,12374
+    def add_atom(323,12989
+    def renumber_residues(377,15171
+    def remove_residue(397,15838
+    def remove_atom(407,16255
+    def RemoveALT(419,16595
+    def Remove_All_NonAminoAcids(429,16875
+    def remove_atoms_with_tag(438,17187
+    def remove_all_hydrogens(446,17488
+    def Update(454,17732
+    def makeresidues(470,18082
+    def makechains(487,18466
+    def makesequence(502,18794
+    def make_boxes(532,19690
+    def get_neighbour_atoms(564,20811
+    def name_checks(592,21684
+    def identical_positions(630,23343
+    def select(643,23654
+class PDBparser:PDBparser670,24642
+    def __init__(672,24664
+    def parse(724,26426
+    def nameclash(744,26932
+    def enternewname(762,27799
+    def parseline(799,29651
+    def parseatom(877,32008
+    def parsehet(1077,39669
+    def parseheader(1081,39745
+    def parsecompnd(1084,39793
+    def parsesource(1087,39845
+    def parseauthor(1090,39893
+    def parserevdat(1093,39941
+    def parseremark(1096,39989
+    def parsescale(1099,40037
+    def parsejournal(1102,40084
+    def parseseqres(1105,40133
+    def parsehelix(1108,40181
+    def parsesheet(1111,40232
+    def parseturn(1114,40279
+    def parsessbond(1117,40325
+    def parsecryst(1120,40373
+    def parseorig(1123,40420
+    def parseconnect(1126,40466
+    def parsemaster(1129,40515
+    def parseter(1132,40563
+    def parsejournal(1142,40874
+    def parsefootnote(1145,40923
+    def parsehetheader(1148,40973
+    def parseformul(1151,41024
+    def parseend(1154,41072
+    def parseexpdta(1157,41117
+    def parsemodel(1160,41165
+    def parseendmodel(1163,41212
+    def renumber(1166,41262
+class structureIO(1182,41840
+    def readpdb(1185,41872
+    def renumber_atoms(1211,42537
+    def writepqr(1225,42893
+    def writepdb(1234,43037
+    def parsepdb(1340,47275
+    def addpdblines(1355,47597
+    def Read_DSSP(1380,48259
+    def rundssp(1415,49668
+class structureIO_fast(1455,51098
+    def readpdb(1457,51134
+    def parsepdb(1476,51704
+    def writepdb(1488,51988
+class fast_PDBparser(1537,53780
+    def parseline(1539,53814
+    def parseatom(1553,54123
+
+typecheck.py,88
+def isnumber(12,256
+def isint(23,555
+def isstring(34,861
+def containsletter(40,1001
+
+utilities.py,354
+class Matrix:Matrix54,1699
+    def __init__(60,1789
+    def __str__(75,2235
+    def LU(89,2590
+def shortestPath(154,4442
+def analyzeMap(189,5700
+def getFile(230,6941
+def distance(254,7642
+def add(276,8206
+def subtract(291,8627
+def cross(306,9052
+def dot(323,9565
+def normalize(338,9955
+def getDihedral(360,10440
+def placeOxygen(396,11372
+
+rotamer_lib.py,0
+
+paths.py,0
+
+__init__.py,0
+
+example_mut.py,0
+
+examine_modelling.py,0
