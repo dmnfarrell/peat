@@ -1,0 +1,9 @@
+#PBS -l nodes=1:ppn=1
+#PBS -d /home/predrag/pKa_calculations/2vb1
+#PBS -o /home/predrag/pKa_caluclations/2vb1
+#PBS -q long
+#PBS -j oe
+#PBS -k oe
+
+python /home/predrag/pKa_calculations/submit_calculations.py --pdb 2vb1.pdb
+
