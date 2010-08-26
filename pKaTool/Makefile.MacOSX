@@ -1,0 +1,36 @@
+CPP = g++ -O3
+FLAGS = -c
+.SUFFIXES: .cpp.o
+.cpp.o:
+	$(CPP) $(FLAGS) $<
+
+all:	clean pKa_MC 
+
+clean:	
+	rm -f $(ALLOBJS) pMC_wrap* pMC.o _pMC.so 
+
+PKA_MCOBJS =	pMC.o
+
+ALLOBJS = 	$(PKA_MCOBJS) 
+
+#
+# To find the correct linker option
+# python
+# >>> import distutils.sysconfig
+#>>> distutils.sysconfig.get_config_var('LINKFORSHARED')
+#'-Xlinker -export-dynamic'
+#
+
+
+pKa_MC:	$(PKA_MCOBJS)
+	swig -python -c++ pMC.i
+	$(CPP) -c pMC.cpp pMC_wrap.cxx -I/software/Python-2.4.1/include/python2.4/ -I/usr/include/python2.4/ -I/usr/include/python2.5
+	$(CPP) -u _PyMac_Error -framework Python -bundle -flat_namespace pMC.o pMC_wrap.o  -o _pMC.so 
+
+
+depend:
+	makedepend -I/usr/include/c++/3.2/ -- -E --  pMC.cpp 
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+
+pMCo: pMC.h

@@ -1,0 +1,50 @@
+CPP = g++ -O3
+FLAGS = -c -fPIC
+PYTHON_INCLUDE_PATH ?= /usr/include/python2.5
+
+.SUFFIXES: .cpp.o
+.cpp.o:
+	$(CPP) $(FLAGS) $<
+
+all:	clean pKa_MC 
+
+clean:	
+	rm -f $(ALLOBJS) pMC_wrap* pMC.o _pMC.so 
+
+PKA_MCOBJS =	pMC.o
+
+ALLOBJS = 	$(PKA_MCOBJS) 
+
+#
+# To find the correct linker option
+# python
+# >>> import distutils.sysconfig
+#>>> distutils.sysconfig.get_config_var('LINKFORSHARED')
+#'-Xlinker -export-dynamic'
+#
+
+
+pKa_MC:	$(PKA_MCOBJS)
+	swig -python -c++ pMC.i
+	$(CPP) $(FLAGS) -c pMC.cpp pMC_wrap.cxx -I$(PYTHON_INCLUDE_PATH)
+	$(CPP) -fPIC -rdynamic -shared pMC.o pMC_wrap.o  -o _pMC.so 
+
+depend:
+	makedepend -I/usr/include/c++/3.2/ -- -E --  pMC.cpp 
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+
+pMC.o: pMC.h /usr/include/math.h /usr/include/features.h
+pMC.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
+pMC.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-64.h
+pMC.o: /usr/include/bits/huge_val.h /usr/include/bits/mathdef.h
+pMC.o: /usr/include/bits/mathcalls.h /usr/include/time.h
+pMC.o: /usr/include/bits/time.h /usr/include/bits/types.h
+pMC.o: /usr/include/bits/typesizes.h
+pMC_mult.o: pMC_mult.h /usr/include/math.h /usr/include/features.h
+pMC_mult.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
+pMC_mult.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-64.h
+pMC_mult.o: /usr/include/bits/huge_val.h /usr/include/bits/mathdef.h
+pMC_mult.o: /usr/include/bits/mathcalls.h /usr/include/time.h
+pMC_mult.o: /usr/include/bits/time.h /usr/include/bits/types.h
+pMC_mult.o: /usr/include/bits/typesizes.h
