@@ -1,0 +1,1756 @@
+Control reads commands from stability_example.cfg.
+1 model found in stability_example/structures/1aye.pdb - creating 1 soup
+1 model found in stability_example/structures/1aye_f67a.pdb - creating 1 soup
+Created lists:
+  Soup 0 of list 1 is: 1AYE
+  Soup 0 of list 2 is: 1AYE_F67A
+******* Now doing no 1 of 1: 1AYE_F67A
+1AYE_F67ADE beginDE end
+ de:1089.00max_dist: 3.500000box begin
+xnum: 9, ynum: 9, znum 11
+Total number of boxes:1200
+box end
+Hbond found: 39 36 dist   6.9, factor:    0.01
+ai: O THR 6 - bi N THR 6
+Hbond found: 86 53 dist   9.6, factor:    0.13
+ai: N GLY 9 - bi O PHE 7
+Hbond found: 93 53 dist   9.1, factor:    0.32
+ai: N ASP 10 - bi O PHE 7
+Hbond found: 108 105 dist   7.8, factor:    0.01
+ai: O GLN 11 - bi N GLN 11
+Hbond found: 175 172 dist   7.4, factor:    0.01
+ai: O ILE 15 - bi N ILE 15
+Hbond found: 235 232 dist   7.5, factor:    0.04
+ai: O ASN 19 - bi N ASN 19
+Hbond found: 261 235 dist  11.3, factor:    0.02
+ai: N GLU 21 - bi O ASN 19
+Hbond found: 276 238 dist   8.6, factor:    0.30
+ai: N GLN 22 - bi OD1 ASN 19
+Hbond found: 283 221 dist   8.4, factor:    0.27
+ai: OE1 GLN 22 - bi N SER 18
+Hbond found: 283 226 dist  10.1, factor:    0.08
+ai: OE1 GLN 22 - bi OG SER 18
+Hbond found: 293 264 dist  10.8, factor:    0.02
+ai: N ILE 23 - bi O GLU 21
+Hbond found: 312 264 dist  10.1, factor:    0.16
+ai: N LYS 24 - bi O GLU 21
+Hbond found: 334 279 dist  10.0, factor:    0.20
+ai: N ASN 25 - bi O GLN 22
+Hbond found: 341 268 dist   9.4, factor:    0.16
+ai: ND2 ASN 25 - bi OE1 GLU 21
+Hbond found: 348 279 dist   8.7, factor:    0.46
+ai: N LEU 26 - bi O GLN 22
+Hbond found: 367 296 dist   8.3, factor:    0.53
+ai: N LEU 27 - bi O ILE 23
+Hbond found: 386 351 dist  11.2, factor:    0.01
+ai: N GLN 28 - bi O LEU 26
+Hbond found: 403 351 dist  10.7, factor:    0.14
+ai: N LEU 29 - bi O LEU 26
+Hbond found: 422 370 dist  11.6, factor:    0.04
+ai: N GLU 30 - bi O LEU 27
+Hbond found: 437 406 dist  10.9, factor:    0.02
+ai: N ALA 31 - bi O LEU 29
+Hbond found: 447 406 dist   9.2, factor:    0.23
+ai: N GLN 32 - bi O LEU 29
+Hbond found: 464 440 dist   8.2, factor:    0.09
+ai: N GLU 33 - bi O ALA 31
+Hbond found: 479 450 dist   9.3, factor:    0.05
+ai: N HIS 34 - bi O GLN 32
+Hbond found: 496 450 dist   9.0, factor:    0.18
+ai: N LEU 34 - bi O GLN 32
+Hbond found: 515 467 dist  10.1, factor:    0.05
+ai: N GLN 34 - bi O GLU 33
+Hbond found: 532 499 dist  10.7, factor:    0.02
+ai: N LEU 35 - bi O LEU 34
+Hbond found: 583 554 dist  10.6, factor:    0.10
+ai: N TRP 38 - bi O ASP 36
+Hbond found: 591 558 dist   9.3, factor:    0.16
+ai: NE1 TRP 38 - bi OD2 ASP 36
+Hbond found: 634 430 dist   7.7, factor:    0.22
+ai: OG SER 40 - bi OE2 GLU 30
+Hbond found: 668 659 dist   7.7, factor:    0.14
+ai: N THR 47 - bi OG1 THR 42
+Hbond found: 696 210 dist   7.7, factor:    0.26
+ai: N GLY 49 - bi O PRO 17
+Hbond found: 703 671 dist   9.5, factor:    0.19
+ai: N GLU 50 - bi O THR 47
+Hbond found: 723 615 dist   8.4, factor:    0.25
+ai: OG1 THR 51 - bi NZ LYS 39
+Hbond found: 732 175 dist   7.9, factor:    0.42
+ai: N ALA 52 - bi O ILE 15
+Hbond found: 742 610 dist   8.2, factor:    0.43
+ai: N HIS 53 - bi O LYS 39
+Hbond found: 745 607 dist   9.5, factor:    0.28
+ai: O HIS 53 - bi N LYS 39
+Hbond found: 751 165 dist  10.9, factor:    0.06
+ai: NE2 HIS 53 - bi OE2 GLU 14
+Hbond found: 759 141 dist   9.3, factor:    0.36
+ai: N VAL 54 - bi O LEU 13
+Hbond found: 762 138 dist   8.7, factor:    0.43
+ai: O VAL 54 - bi N LEU 13
+Hbond found: 775 554 dist   7.1, factor:    0.56
+ai: N ARG 55 - bi O ASP 36
+Hbond found: 778 551 dist   8.7, factor:    0.38
+ai: O ARG 55 - bi N ASP 36
+Hbond found: 782 558 dist   8.6, factor:    0.27
+ai: NE ARG 55 - bi OD2 ASP 36
+Hbond found: 784 100 dist   7.2, factor:    0.50
+ai: NH1 ARG 55 - bi OD2 ASP 10
+Hbond found: 799 108 dist   8.4, factor:    0.55
+ai: N VAL 56 - bi O GLN 11
+Hbond found: 829 99 dist   9.1, factor:    0.27
+ai: N PHE 58 - bi OD1 ASP 10
+Hbond found: 849 818 dist   9.9, factor:    0.05
+ai: N VAL 59 - bi O PRO 57
+Hbond found: 865 818 dist   8.3, factor:    0.44
+ai: N ASN 60 - bi O PRO 57
+Hbond found: 872 499 dist   8.3, factor:    0.30
+ai: ND2 ASN 60 - bi O LEU 34
+Hbond found: 879 832 dist  10.0, factor:    0.18
+ai: N VAL 61 - bi O PHE 58
+Hbond found: 895 868 dist  11.4, factor:    0.01
+ai: N GLN 62 - bi O ASN 60
+Hbond found: 912 868 dist  12.1, factor:    0.01
+ai: N ALA 63 - bi O ASN 60
+Hbond found: 922 898 dist  10.7, factor:    0.02
+ai: N VAL 64 - bi O GLN 62
+Hbond found: 938 898 dist   9.6, factor:    0.28
+ai: N LYS 65 - bi O GLN 62
+Hbond found: 946 112 dist   8.4, factor:    0.28
+ai: NZ LYS 65 - bi OE1 GLN 11
+Hbond found: 960 915 dist  11.6, factor:    0.03
+ai: N VAL 66 - bi O ALA 63
+Hbond found: 976 915 dist   9.5, factor:    0.19
+ai: N ALA 67 - bi O ALA 63
+Hbond found: 986 941 dist   9.9, factor:    0.21
+ai: N LEU 68 - bi O LYS 65
+Hbond found: 1005 963 dist  11.5, factor:    0.03
+ai: N GLU 69 - bi O VAL 66
+Hbond found: 1020 963 dist   7.9, factor:    0.22
+ai: N SER 70 - bi O VAL 66
+Hbond found: 1025 979 dist   8.0, factor:    0.19
+ai: OG SER 70 - bi O ALA 67
+Hbond found: 1031 979 dist   9.8, factor:    0.13
+ai: N GLN 71 - bi O ALA 67
+Hbond found: 1039 1025 dist   7.7, factor:    0.08
+ai: NE2 GLN 71 - bi OG SER 70
+Hbond found: 1048 1008 dist   7.4, factor:    0.10
+ai: N GLY 72 - bi O GLU 69
+Hbond found: 1051 284 dist   9.9, factor:    0.07
+ai: O GLY 72 - bi NE2 GLN 22
+Hbond found: 1055 989 dist   8.2, factor:    0.33
+ai: N ILE 73 - bi O LEU 68
+Hbond found: 1077 191 dist  10.2, factor:    0.23
+ai: O ALA 74 - bi N VAL 16
+Hbond found: 1087 1084 dist   7.2, factor:    0.01
+ai: O TYR 75 - bi N TYR 75
+Hbond found: 1095 1013 dist   7.1, factor:    0.28
+ai: OH TYR 75 - bi OE2 GLU 69
+Hbond found: 1105 160 dist   8.4, factor:    0.34
+ai: N SER 76 - bi O GLU 14
+Hbond found: 1108 157 dist   7.9, factor:    0.52
+ai: O SER 76 - bi N GLU 14
+Hbond found: 1135 125 dist   7.5, factor:    0.52
+ai: N MET 78 - bi O VAL 12
+Hbond found: 1152 125 dist   9.2, factor:    0.33
+ai: N ILE 79 - bi O VAL 12
+Hbond found: 1155 122 dist   8.5, factor:    0.51
+ai: O ILE 79 - bi N VAL 12
+Hbond found: 1179 1171 dist   9.6, factor:    0.03
+ai: OE2 GLU 80 - bi N GLU 80
+Hbond found: 1198 96 dist   8.6, factor:    0.40
+ai: N VAL 82 - bi O ASP 10
+Hbond found: 1214 1192 dist   9.1, factor:    0.33
+ai: N GLN 83 - bi OD1 ASP 81
+Hbond found: 1221 50 dist   7.8, factor:    0.40
+ai: OE1 GLN 83 - bi N PHE 7
+Hbond found: 1231 1201 dist  10.2, factor:    0.05
+ai: N VAL 84 - bi O VAL 82
+Hbond found: 1247 1201 dist   9.6, factor:    0.32
+ai: N LEU 85 - bi O VAL 82
+Hbond found: 1266 1217 dist  10.9, factor:    0.10
+ai: N LEU 86 - bi O GLN 83
+Hbond found: 1285 1217 dist   8.4, factor:    0.30
+ai: N ASP 87 - bi O GLN 83
+Hbond found: 1291 1222 dist   7.5, factor:    0.27
+ai: OD1 ASP 87 - bi NE2 GLN 83
+Hbond found: 1297 1234 dist  11.6, factor:    0.04
+ai: N LYS 88 - bi O VAL 84
+Hbond found: 1319 1269 dist  10.7, factor:    0.08
+ai: N GLU 89 - bi O LEU 86
+Hbond found: 1334 1269 dist   8.6, factor:    0.26
+ai: N ASN 90 - bi O LEU 86
+Hbond found: 1348 1288 dist   8.6, factor:    0.27
+ai: N GLU 91 - bi O ASP 87
+Hbond found: 1363 1300 dist   8.3, factor:    0.28
+ai: N GLU 92 - bi O LYS 88
+Hbond found: 1378 1351 dist  10.9, factor:    0.01
+ai: N MET 93 - bi O GLU 91
+Hbond found: 1395 1351 dist  11.6, factor:    0.04
+ai: N LEU 94 - bi O GLU 91
+Hbond found: 1434 1381 dist  11.7, factor:    0.03
+ai: N ASN 96 - bi O MET 93
+Hbond found: 1448 1381 dist   9.0, factor:    0.25
+ai: N ARG 97 - bi O MET 93
+Hbond found: 1472 1417 dist  11.1, factor:    0.06
+ai: N ARG 98 - bi O PHE 95
+Hbond found: 1496 1417 dist  10.0, factor:    0.17
+ai: N ARG 99 - bi O PHE 95
+Hbond found: 1503 1440 dist   9.3, factor:    0.17
+ai: NE ARG 99 - bi OD1 ASN 96
+Hbond found: 1506 1440 dist  10.3, factor:    0.05
+ai: NH2 ARG 99 - bi OD1 ASN 96
+Hbond found: 1520 1475 dist  10.6, factor:    0.02
+ai: N GLU 1 - bi O ARG 98
+Hbond found: 1528 1441 dist   8.7, factor:    0.11
+ai: OE2 GLU 1 - bi ND2 ASN 96
+Hbond found: 1535 1475 dist   9.2, factor:    0.13
+ai: N ARG 2 - bi O ARG 98
+Hbond found: 1570 1564 dist   8.4, factor:    0.02
+ai: N GLY 4 - bi OG SER 3
+Hbond found: 1611 1528 dist   7.6, factor:    0.42
+ai: N ASN 8 - bi OE2 GLU 1
+Hbond found: 1618 1506 dist   9.3, factor:    0.20
+ai: ND2 ASN 8 - bi NH2 ARG 99
+Hbond found: 1625 1617 dist  10.3, factor:    0.05
+ai: N PHE 9 - bi OD1 ASN 8
+Hbond found: 1645 1617 dist   8.6, factor:    0.26
+ai: N GLY 10 - bi OD1 ASN 8
+Hbond found: 1652 1628 dist   9.7, factor:    0.09
+ai: N ALA 11 - bi O PHE 9
+Hbond found: 1686 1683 dist   7.4, factor:    0.02
+ai: O HIS 13 - bi N HIS 13
+Hbond found: 1692 1614 dist   9.8, factor:    0.21
+ai: NE2 HIS 13 - bi O ASN 8
+Hbond found: 1703 1700 dist   6.9, factor:    0.01
+ai: O THR 14 - bi N THR 14
+Hbond found: 1733 1703 dist  10.4, factor:    0.03
+ai: N GLU 16 - bi O THR 14
+Hbond found: 1748 1705 dist  10.5, factor:    0.12
+ai: N GLU 17 - bi OG1 THR 14
+Hbond found: 1763 1717 dist  10.5, factor:    0.11
+ai: N ILE 18 - bi O LEU 15
+Hbond found: 1782 1736 dist  10.4, factor:    0.10
+ai: N SER 19 - bi O GLU 16
+Hbond found: 1787 1717 dist   9.4, factor:    0.12
+ai: OG SER 19 - bi O LEU 15
+Hbond found: 1793 1736 dist   8.3, factor:    0.21
+ai: N GLN 20 - bi O GLU 16
+Hbond found: 1801 1741 dist  11.1, factor:    0.02
+ai: NE2 GLN 20 - bi OE2 GLU 16
+Hbond found: 1810 1751 dist   9.3, factor:    0.30
+ai: N GLU 21 - bi O GLU 17
+Hbond found: 1825 1785 dist  10.0, factor:    0.13
+ai: N MET 22 - bi O SER 19
+Hbond found: 1842 1785 dist   9.4, factor:    0.18
+ai: N ASP 23 - bi O SER 19
+Hbond found: 1854 1796 dist   8.9, factor:    0.17
+ai: N ASN 24 - bi O GLN 20
+Hbond found: 1868 1813 dist   9.0, factor:    0.29
+ai: N LEU 25 - bi O GLU 21
+Hbond found: 1887 1845 dist  11.4, factor:    0.05
+ai: N VAL 26 - bi O ASP 23
+Hbond found: 1903 1845 dist   8.6, factor:    0.25
+ai: N ALA 27 - bi O ASP 23
+Hbond found: 1913 1857 dist   8.1, factor:    0.27
+ai: N GLU 28 - bi O ASN 24
+Hbond found: 1928 1890 dist  11.4, factor:    0.04
+ai: N HIS 29 - bi O VAL 26
+Hbond found: 1934 1871 dist   9.2, factor:    0.32
+ai: ND1 HIS 29 - bi O LEU 25
+Hbond found: 1959 1931 dist   9.4, factor:    0.06
+ai: N GLY 31 - bi O HIS 29
+Hbond found: 1966 1931 dist   9.6, factor:    0.16
+ai: N LEU 32 - bi O HIS 29
+Hbond found: 2004 2001 dist   7.0, factor:    0.05
+ai: O SER 34 - bi N SER 34
+Hbond found: 2020 1848 dist   7.9, factor:    0.12
+ai: NZ LYS 35 - bi OD1 ASP 23
+Hbond found: 2083 2057 dist   9.6, factor:    0.09
+ai: N GLY 39 - bi ND2 ASN 37
+Hbond found: 2086 2057 dist  11.1, factor:    0.02
+ai: O GLY 39 - bi ND2 ASN 37
+Hbond found: 2093 2090 dist   7.4, factor:    0.01
+ai: O SER 40 - bi N SER 40
+Hbond found: 2132 2104 dist  10.7, factor:    0.02
+ai: N GLU 43 - bi O SER 41
+Hbond found: 2147 2115 dist  10.4, factor:    0.01
+ai: N ASN 44 - bi O PHE 42
+Hbond found: 2161 2106 dist   8.1, factor:    0.26
+ai: N ARG 45 - bi OG SER 41
+Hbond found: 2164 2101 dist   7.3, factor:    0.24
+ai: O ARG 45 - bi N SER 41
+Hbond found: 2164 2106 dist  11.6, factor:    0.01
+ai: O ARG 45 - bi OG SER 41
+Hbond found: 2170 2139 dist   8.1, factor:    0.30
+ai: NH1 ARG 45 - bi OE1 GLU 43
+Hbond found: 2199 2086 dist   8.2, factor:    0.21
+ai: N MET 47 - bi O GLY 39
+Hbond found: 2202 2064 dist   8.7, factor:    0.32
+ai: O MET 47 - bi N ILE 38
+Hbond found: 2216 2188 dist  11.5, factor:    0.02
+ai: N ASN 48 - bi O PRO 46
+Hbond found: 2223 2056 dist  10.7, factor:    0.06
+ai: ND2 ASN 48 - bi OD1 ASN 37
+Hbond found: 2230 2037 dist   8.0, factor:    0.48
+ai: N VAL 49 - bi O VAL 36
+Hbond found: 2233 2034 dist   7.7, factor:    0.40
+ai: O VAL 49 - bi N VAL 36
+Hbond found: 2265 2004 dist   7.9, factor:    0.66
+ai: N LYS 51 - bi O SER 34
+Hbond found: 2307 1969 dist   8.2, factor:    0.41
+ai: N SER 53 - bi O LEU 32
+Hbond found: 2318 2312 dist   8.7, factor:    0.05
+ai: N THR 54 - bi OG SER 53
+Hbond found: 2332 2312 dist   8.1, factor:    0.11
+ai: N GLY 55 - bi OG SER 53
+Hbond found: 2366 2323 dist   6.5, factor:    0.24
+ai: NZ LYS 59 - bi OG1 THR 54
+Hbond found: 2366 2335 dist   8.3, factor:    0.05
+ai: NZ LYS 59 - bi O GLY 55
+Hbond found: 2397 2394 dist   8.1, factor:    0.02
+ai: O ALA 61 - bi N ALA 61
+Hbond found: 2469 2466 dist   7.4, factor:    0.04
+ai: O ASP 65 - bi N ASP 65
+Hbond found: 2473 2431 dist   8.5, factor:    0.55
+ai: OD2 ASP 65 - bi NE1 TRP 63
+Hbond found: 2478 2472 dist  11.2, factor:    0.02
+ai: N ALA 66 - bi OD1 ASP 65
+Hbond found: 2495 2481 dist  11.6, factor:    0.01
+ai: N ILE 68 - bi O ALA 66
+Hbond found: 2514 2491 dist  10.6, factor:    0.01
+ai: N HIS 69 - bi O GLY 67
+Hbond found: 2541 2517 dist  10.9, factor:    0.02
+ai: N ARG 71 - bi O HIS 69
+Hbond found: 2550 557 dist   8.0, factor:    0.20
+ai: NH1 ARG 71 - bi OD1 ASP 36
+Hbond found: 2551 557 dist  11.6, factor:    0.02
+ai: NH2 ARG 71 - bi OD1 ASP 36
+Hbond found: 2565 2534 dist  10.7, factor:    0.04
+ai: N GLU 72 - bi O ALA 70
+Hbond found: 2580 2544 dist   8.5, factor:    0.15
+ai: N TRP 73 - bi O ARG 71
+Hbond found: 2588 2534 dist  11.1, factor:    0.09
+ai: NE1 TRP 73 - bi O ALA 70
+Hbond found: 2604 2568 dist  10.2, factor:    0.05
+ai: N VAL 74 - bi O GLU 72
+Hbond found: 2620 2568 dist   8.7, factor:    0.32
+ai: N THR 75 - bi O GLU 72
+Hbond found: 2625 2488 dist   8.8, factor:    0.20
+ai: OG1 THR 75 - bi N GLY 67
+Hbond found: 2634 2583 dist  11.2, factor:    0.08
+ai: N GLN 76 - bi O TRP 73
+Hbond found: 2641 2625 dist  10.5, factor:    0.07
+ai: OE1 GLN 76 - bi OG1 THR 75
+Hbond found: 2651 2583 dist  11.2, factor:    0.09
+ai: N ALA 77 - bi O TRP 73
+Hbond found: 2661 2607 dist   8.2, factor:    0.41
+ai: N THR 78 - bi O VAL 74
+Hbond found: 2666 2607 dist   7.7, factor:    0.29
+ai: OG1 THR 78 - bi O VAL 74
+Hbond found: 2675 2637 dist  11.0, factor:    0.08
+ai: N ALA 79 - bi O GLN 76
+Hbond found: 2685 2637 dist   9.5, factor:    0.27
+ai: N LEU 80 - bi O GLN 76
+Hbond found: 2704 2654 dist   9.9, factor:    0.24
+ai: N TRP 81 - bi O ALA 77
+Hbond found: 2728 2678 dist  11.2, factor:    0.08
+ai: N THR 82 - bi O ALA 79
+Hbond found: 2733 2664 dist   7.5, factor:    0.37
+ai: OG1 THR 82 - bi O THR 78
+Hbond found: 2742 2678 dist   9.8, factor:    0.31
+ai: N ALA 83 - bi O ALA 79
+Hbond found: 2752 2688 dist  10.4, factor:    0.23
+ai: N ASN 84 - bi O LEU 80
+Hbond found: 2766 2707 dist   8.3, factor:    0.38
+ai: N LYS 85 - bi O TRP 81
+Hbond found: 2788 2745 dist  12.1, factor:    0.01
+ai: N ILE 86 - bi O ALA 83
+Hbond found: 2807 2745 dist  11.8, factor:    0.06
+ai: N VAL 87 - bi O ALA 83
+Hbond found: 2823 2755 dist   8.8, factor:    0.23
+ai: N SER 88 - bi O ASN 84
+Hbond found: 2828 2755 dist   7.2, factor:    0.17
+ai: OG SER 88 - bi O ASN 84
+Hbond found: 2834 2791 dist  10.6, factor:    0.14
+ai: N ASP 89 - bi O ILE 86
+Hbond found: 2841 2774 dist   9.6, factor:    0.04
+ai: OD2 ASP 89 - bi NZ LYS 85
+Hbond found: 2846 2791 dist   8.4, factor:    0.45
+ai: N TYR 90 - bi O ILE 86
+Hbond found: 2867 2837 dist  10.6, factor:    0.07
+ai: N GLY 91 - bi O ASP 89
+Hbond found: 2874 2837 dist   8.8, factor:    0.28
+ai: N LYS 92 - bi O ASP 89
+Hbond found: 2922 2899 dist  10.0, factor:    0.03
+ai: N SER 95 - bi O ASP 93
+Hbond found: 2933 2899 dist  12.0, factor:    0.02
+ai: N ILE 96 - bi O ASP 93
+Hbond found: 2952 2925 dist  10.3, factor:    0.03
+ai: N THR 97 - bi O SER 95
+Hbond found: 2966 2911 dist   9.0, factor:    0.10
+ai: N SER 98 - bi O PRO 94
+Hbond found: 2971 2911 dist   8.4, factor:    0.05
+ai: OG SER 98 - bi O PRO 94
+Hbond found: 2977 2936 dist  11.4, factor:    0.06
+ai: N ILE 99 - bi O ILE 96
+Hbond found: 2996 2936 dist   8.9, factor:    0.42
+ai: N LEU 100 - bi O ILE 96
+Hbond found: 3015 2955 dist   8.8, factor:    0.27
+ai: N ASP 101 - bi O THR 97
+Hbond found: 3021 2857 dist  10.3, factor:    0.11
+ai: OD1 ASP 101 - bi OH TYR 90
+Hbond found: 3027 2969 dist  10.2, factor:    0.13
+ai: N ALA 102 - bi O SER 98
+Hbond found: 3037 2980 dist   7.6, factor:    0.51
+ai: N LEU 103 - bi O ILE 99
+Hbond found: 3056 2383 dist   9.5, factor:    0.31
+ai: N ASP 104 - bi O PRO 60
+Hbond found: 3059 2404 dist   8.6, factor:    0.58
+ai: O ASP 104 - bi N ILE 62
+Hbond found: 3062 2312 dist   8.5, factor:    0.06
+ai: OD1 ASP 104 - bi OG SER 53
+Hbond found: 3068 2290 dist   9.1, factor:    0.39
+ai: N ILE 105 - bi O PHE 52
+Hbond found: 3071 2287 dist   7.8, factor:    0.52
+ai: O ILE 105 - bi N PHE 52
+Hbond found: 3087 2407 dist   8.4, factor:    0.50
+ai: N PHE 106 - bi O ILE 62
+Hbond found: 3090 2447 dist   8.4, factor:    0.48
+ai: O PHE 106 - bi N LEU 64
+Hbond found: 3107 2249 dist   8.1, factor:    0.66
+ai: N LEU 107 - bi O LEU 50
+Hbond found: 3110 2246 dist   8.0, factor:    0.53
+ai: O LEU 107 - bi N LEU 50
+Hbond found: 3126 2450 dist   8.4, factor:    0.52
+ai: N LEU 108 - bi O LEU 64
+Hbond found: 3175 2481 dist   8.5, factor:    0.37
+ai: N THR 111 - bi O ALA 66
+Hbond found: 3189 2491 dist  11.1, factor:    0.09
+ai: N ASN 112 - bi O GLY 67
+Hbond found: 3196 2498 dist   9.3, factor:    0.15
+ai: ND2 ASN 112 - bi O ILE 68
+Hbond found: 3223 2170 dist   8.6, factor:    0.31
+ai: OD1 ASP 114 - bi NH1 ARG 45
+Hbond found: 3223 3217 dist   8.6, factor:    0.08
+ai: OD1 ASP 114 - bi N ASP 114
+Hbond found: 3224 2112 dist  10.4, factor:    0.15
+ai: OD2 ASP 114 - bi N PHE 42
+Hbond found: 3229 3195 dist   9.5, factor:    0.20
+ai: N GLY 115 - bi OD1 ASN 112
+Hbond found: 3236 3206 dist  10.9, factor:    0.10
+ai: N TYR 116 - bi O PRO 113
+Hbond found: 3247 1686 dist   7.8, factor:    0.45
+ai: OH TYR 116 - bi O HIS 13
+Hbond found: 3257 3220 dist  11.3, factor:    0.07
+ai: N VAL 117 - bi O ASP 114
+Hbond found: 3273 3220 dist   9.1, factor:    0.28
+ai: N PHE 118 - bi O ASP 114
+Hbond found: 3293 3260 dist  11.4, factor:    0.01
+ai: N SER 119 - bi O VAL 117
+Hbond found: 3298 2588 dist  10.1, factor:    0.18
+ai: OG SER 119 - bi NE1 TRP 73
+Hbond found: 3304 3260 dist  10.0, factor:    0.10
+ai: N GLN 120 - bi O VAL 117
+Hbond found: 3312 3247 dist  10.3, factor:    0.10
+ai: NE2 GLN 120 - bi OH TYR 116
+Hbond found: 3335 3326 dist   8.8, factor:    0.10
+ai: N LYS 122 - bi OG1 THR 121
+Hbond found: 3338 21 dist   9.5, factor:    0.25
+ai: O LYS 122 - bi N GLU 5
+Hbond found: 3357 3276 dist   8.6, factor:    0.36
+ai: N ASN 123 - bi O PHE 118
+Hbond found: 3371 3363 dist  10.3, factor:    0.09
+ai: N ARG 124 - bi OD1 ASN 123
+Hbond found: 3378 1326 dist   8.0, factor:    0.54
+ai: NE ARG 124 - bi OE1 GLU 89
+Hbond found: 3380 3374 dist  10.5, factor:    0.14
+ai: NH1 ARG 124 - bi O ARG 124
+Hbond found: 3380 2544 dist   8.7, factor:    0.36
+ai: NH1 ARG 124 - bi O ARG 71
+Hbond found: 3381 1327 dist   8.4, factor:    0.43
+ai: NH2 ARG 124 - bi OE2 GLU 89
+Hbond found: 3395 3363 dist   9.0, factor:    0.33
+ai: N MET 125 - bi OD1 ASN 123
+Hbond found: 3398 2550 dist   9.9, factor:    0.16
+ai: O MET 125 - bi NH1 ARG 71
+Hbond found: 3412 3360 dist   9.4, factor:    0.23
+ai: N TRP 126 - bi O ASN 123
+Hbond found: 3439 2531 dist  10.8, factor:    0.08
+ai: O ARG 127 - bi N ALA 70
+Hbond found: 3463 3420 dist   7.8, factor:    0.29
+ai: O LYS 128 - bi NE1 TRP 126
+Hbond found: 3463 3196 dist   9.1, factor:    0.16
+ai: O LYS 128 - bi ND2 ASN 112
+Hbond found: 3580 3556 dist   9.2, factor:    0.04
+ai: N GLY 135 - bi O VAL 133
+Hbond found: 3587 3556 dist  10.4, factor:    0.04
+ai: N SER 136 - bi O VAL 133
+Hbond found: 3617 3592 dist  11.6, factor:    0.03
+ai: N CYS 138 - bi OG SER 136
+Hbond found: 3630 3468 dist   9.8, factor:    0.06
+ai: O VAL 139 - bi NZ LYS 128
+Hbond found: 3643 3523 dist   8.7, factor:    0.35
+ai: N GLY 140 - bi O SER 131
+Hbond found: 3646 3468 dist  10.2, factor:    0.09
+ai: O GLY 140 - bi NZ LYS 128
+Hbond found: 3650 3487 dist   9.8, factor:    0.21
+ai: N VAL 141 - bi OG1 THR 129
+Hbond found: 3653 3482 dist   9.3, factor:    0.27
+ai: O VAL 141 - bi N THR 129
+Hbond found: 3672 2523 dist   7.4, factor:    0.28
+ai: OD1 ASP 142 - bi NE2 HIS 69
+Hbond found: 3673 3445 dist   8.8, factor:    0.07
+ai: OD2 ASP 142 - bi NH1 ARG 127
+Hbond found: 3692 3669 dist   9.2, factor:    0.09
+ai: N ASN 144 - bi O ASP 142
+Hbond found: 3706 3669 dist   9.1, factor:    0.21
+ai: N ARG 145 - bi O ASP 142
+Hbond found: 3715 3673 dist   7.4, factor:    0.12
+ai: NH1 ARG 145 - bi OD2 ASP 142
+Hbond found: 3752 3681 dist   8.6, factor:    0.38
+ai: NE1 TRP 147 - bi O PRO 143
+Hbond found: 3780 3747 dist   8.5, factor:    0.20
+ai: N ALA 149 - bi O TRP 147
+Hbond found: 3817 3793 dist  11.3, factor:    0.02
+ai: N GLY 152 - bi O GLY 150
+Hbond found: 3824 3793 dist   9.5, factor:    0.08
+ai: N GLY 153 - bi O GLY 150
+Hbond found: 3848 3713 dist   7.8, factor:    0.19
+ai: O GLY 155 - bi NE ARG 145
+Hbond found: 3848 3716 dist  10.3, factor:    0.03
+ai: O GLY 155 - bi NH2 ARG 145
+Hbond found: 3873 3867 dist   8.6, factor:    0.06
+ai: N SER 158 - bi OG SER 157
+Hbond found: 3884 3867 dist   8.9, factor:    0.13
+ai: N ASN 159 - bi OG SER 157
+Hbond found: 3891 471 dist   9.5, factor:    0.04
+ai: ND2 ASN 159 - bi OE1 GLU 33
+Hbond found: 3901 3468 dist   9.7, factor:    0.15
+ai: O PRO 160 - bi NZ LYS 128
+Hbond found: 3912 3890 dist   9.9, factor:    0.08
+ai: N CYS 161 - bi OD1 ASN 159
+Hbond found: 3922 3887 dist   8.3, factor:    0.30
+ai: N SER 162 - bi O ASN 159
+Hbond found: 3933 3927 dist   9.2, factor:    0.03
+ai: N ASP 163 - bi OG SER 162
+Hbond found: 3936 3445 dist   7.9, factor:    0.27
+ai: O ASP 163 - bi NH1 ARG 127
+Hbond found: 3945 3925 dist  10.4, factor:    0.02
+ai: N SER 164 - bi O SER 162
+Hbond found: 3948 3862 dist   8.6, factor:    0.20
+ai: O SER 164 - bi N SER 157
+Hbond found: 3950 3715 dist  11.0, factor:    0.01
+ai: OG SER 164 - bi NH1 ARG 145
+Hbond found: 3956 3925 dist  11.0, factor:    0.06
+ai: N TYR 165 - bi O SER 162
+Hbond found: 3959 3666 dist   8.2, factor:    0.49
+ai: O TYR 165 - bi N ASP 142
+Hbond found: 3977 3948 dist  11.1, factor:    0.05
+ai: N HIS 166 - bi O SER 164
+Hbond found: 3980 3737 dist   8.1, factor:    0.50
+ai: O HIS 166 - bi ND2 ASN 146
+Hbond found: 3994 3983 dist  11.0, factor:    0.09
+ai: N GLY 167 - bi ND1 HIS 166
+Hbond found: 3997 3983 dist   7.7, factor:    0.41
+ai: O GLY 167 - bi ND1 HIS 166
+Hbond found: 4015 3997 dist  11.0, factor:    0.02
+ai: N SER 169 - bi O GLY 167
+Hbond found: 4018 3737 dist  10.0, factor:    0.21
+ai: O SER 169 - bi ND2 ASN 146
+Hbond found: 4036 3736 dist  11.0, factor:    0.07
+ai: N ASN 171 - bi OD1 ASN 146
+Hbond found: 4050 3736 dist   9.3, factor:    0.22
+ai: N SER 172 - bi OD1 ASN 146
+Hbond found: 4055 3737 dist   8.2, factor:    0.32
+ai: OG SER 172 - bi ND2 ASN 146
+Hbond found: 4061 4055 dist   9.9, factor:    0.05
+ai: N GLU 173 - bi OG SER 172
+Hbond found: 4068 3487 dist   7.2, factor:    0.28
+ai: OE1 GLU 173 - bi OG1 THR 129
+Hbond found: 4068 3525 dist   7.6, factor:    0.25
+ai: OE1 GLU 173 - bi OG SER 131
+Hbond found: 4092 4064 dist  10.0, factor:    0.04
+ai: N GLU 175 - bi O GLU 173
+Hbond found: 4107 4064 dist   8.7, factor:    0.39
+ai: N VAL 176 - bi O GLU 173
+Hbond found: 4123 4079 dist  11.6, factor:    0.02
+ai: N LYS 177 - bi O VAL 174
+Hbond found: 4145 4079 dist   8.3, factor:    0.21
+ai: N SER 178 - bi O VAL 174
+Hbond found: 4156 4110 dist   9.6, factor:    0.29
+ai: N ILE 179 - bi O VAL 176
+Hbond found: 4175 4110 dist   8.9, factor:    0.51
+ai: N VAL 180 - bi O VAL 176
+Hbond found: 4191 4159 dist  11.1, factor:    0.02
+ai: N ASP 181 - bi O ILE 179
+Hbond found: 4198 4131 dist  10.1, factor:    0.04
+ai: OD2 ASP 181 - bi NZ LYS 177
+Hbond found: 4203 4148 dist   8.9, factor:    0.26
+ai: N PHE 182 - bi O SER 178
+Hbond found: 4223 4159 dist   8.9, factor:    0.47
+ai: N ILE 183 - bi O ILE 179
+Hbond found: 4242 4178 dist   8.8, factor:    0.42
+ai: N LYS 184 - bi O VAL 180
+Hbond found: 4264 4194 dist   8.5, factor:    0.16
+ai: N SER 185 - bi O ASP 181
+Hbond found: 4269 4194 dist   9.5, factor:    0.04
+ai: OG SER 185 - bi O ASP 181
+Hbond found: 4275 4206 dist   8.0, factor:    0.17
+ai: N HIS 186 - bi O PHE 182
+Hbond found: 4292 4226 dist   9.7, factor:    0.13
+ai: N GLY 187 - bi O ILE 183
+Hbond found: 4299 4278 dist   9.9, factor:    0.03
+ai: N LYS 188 - bi O HIS 186
+Hbond found: 4337 2397 dist   7.6, factor:    0.65
+ai: N LYS 190 - bi O ALA 61
+Hbond found: 4362 2423 dist   8.1, factor:    0.63
+ai: O ALA 191 - bi N TRP 63
+Hbond found: 4362 4359 dist   7.0, factor:    0.05
+ai: O ALA 191 - bi N ALA 191
+Hbond found: 4389 2426 dist   7.7, factor:    0.61
+ai: N ILE 193 - bi O TRP 63
+Hbond found: 4427 2469 dist   8.7, factor:    0.50
+ai: N LEU 195 - bi O ASP 65
+Hbond found: 4449 4446 dist   6.8, factor:    0.07
+ai: O HIS 196 - bi N HIS 196
+Hbond found: 4452 2520 dist  10.1, factor:    0.14
+ai: ND1 HIS 196 - bi ND1 HIS 69
+Hbond found: 4463 2572 dist  10.8, factor:    0.09
+ai: N SER 197 - bi OE1 GLU 72
+Hbond found: 4477 4474 dist   6.7, factor:    0.03
+ai: O TYR 198 - bi N TYR 198
+Hbond found: 4485 748 dist   6.9, factor:    0.46
+ai: OH TYR 198 - bi ND1 HIS 53
+Hbond found: 4500 4477 dist   7.1, factor:    0.05
+ai: OG SER 199 - bi O TYR 198
+Hbond found: 4526 4523 dist   7.4, factor:    0.03
+ai: O LEU 201 - bi N LEU 201
+Hbond found: 4564 4561 dist   8.0, factor:    0.02
+ai: O MET 203 - bi N MET 203
+Hbond found: 4581 4578 dist   6.4, factor:    0.07
+ai: O PHE 204 - bi N PHE 204
+Hbond found: 4615 4612 dist   7.9, factor:    0.01
+ai: O TYR 206 - bi N TYR 206
+Hbond found: 4661 4636 dist  11.5, factor:    0.01
+ai: N LYS 209 - bi O GLY 207
+Hbond found: 4696 4693 dist   6.6, factor:    0.02
+ai: O THR 211 - bi N THR 211
+Hbond found: 4760 4732 dist  10.5, factor:    0.03
+ai: N ASP 215 - bi O LEU 213
+Hbond found: 4772 4732 dist   9.6, factor:    0.24
+ai: N PHE 216 - bi O LEU 213
+Hbond found: 4792 4763 dist  10.8, factor:    0.03
+ai: N ASP 217 - bi O ASP 215
+Hbond found: 4804 4763 dist  10.6, factor:    0.18
+ai: N GLU 218 - bi O ASP 215
+Hbond found: 4819 4775 dist  11.8, factor:    0.03
+ai: N LEU 219 - bi O PHE 216
+Hbond found: 4838 4807 dist  11.0, factor:    0.02
+ai: N SER 220 - bi O GLU 218
+Hbond found: 4849 4807 dist   9.7, factor:    0.15
+ai: N GLU 221 - bi O GLU 218
+Hbond found: 4864 4822 dist  11.1, factor:    0.09
+ai: N VAL 222 - bi O LEU 219
+Hbond found: 4880 4822 dist   8.2, factor:    0.65
+ai: N ALA 223 - bi O LEU 219
+Hbond found: 4890 4867 dist  11.2, factor:    0.02
+ai: N GLN 224 - bi O VAL 222
+Hbond found: 4907 4867 dist  10.3, factor:    0.16
+ai: N LYS 225 - bi O VAL 222
+Hbond found: 4929 4883 dist  11.3, factor:    0.08
+ai: N ALA 226 - bi O ALA 223
+Hbond found: 4939 4883 dist   8.2, factor:    0.50
+ai: N ALA 227 - bi O ALA 223
+Hbond found: 4949 4893 dist   8.7, factor:    0.23
+ai: N GLN 228 - bi O GLN 224
+Hbond found: 4966 4932 dist  11.0, factor:    0.06
+ai: N SER 229 - bi O ALA 226
+Hbond found: 4971 4910 dist   8.4, factor:    0.18
+ai: OG SER 229 - bi O LYS 225
+Hbond found: 4977 4932 dist   9.0, factor:    0.23
+ai: N LEU 230 - bi O ALA 226
+Hbond found: 4996 4942 dist   9.3, factor:    0.25
+ai: N ARG 231 - bi O ALA 227
+Hbond found: 5006 4956 dist   9.1, factor:    0.04
+ai: NH2 ARG 231 - bi OE1 GLN 228
+Hbond found: 5020 4980 dist  11.2, factor:    0.01
+ai: N SER 232 - bi O LEU 230
+Hbond found: 5025 4969 dist   7.5, factor:    0.30
+ai: OG SER 232 - bi O SER 229
+Hbond found: 5031 5025 dist   9.3, factor:    0.05
+ai: N LEU 233 - bi OG SER 232
+Hbond found: 5067 4999 dist   7.1, factor:    0.12
+ai: N GLY 235 - bi O ARG 231
+Hbond found: 5088 5070 dist  11.7, factor:    0.02
+ai: N LYS 237 - bi O GLY 235
+Hbond found: 5091 4514 dist   7.6, factor:    0.35
+ai: O LYS 237 - bi NE2 GLN 200
+Hbond found: 5131 4509 dist   8.9, factor:    0.36
+ai: N LYS 239 - bi O GLN 200
+Hbond found: 5134 4542 dist   8.5, factor:    0.53
+ai: O LYS 239 - bi N LEU 202
+Hbond found: 5169 4545 dist  10.4, factor:    0.21
+ai: N GLY 241 - bi O LEU 202
+Hbond found: 5190 4581 dist   8.4, factor:    0.36
+ai: N ILE 243 - bi O PHE 204
+Hbond found: 5209 5179 dist  10.9, factor:    0.01
+ai: N CYS 244 - bi O PRO 242
+Hbond found: 5219 5193 dist   9.8, factor:    0.04
+ai: N SER 245 - bi O ILE 243
+Hbond found: 5230 5193 dist  10.7, factor:    0.07
+ai: N VAL 246 - bi O ILE 243
+Hbond found: 5268 5265 dist   6.9, factor:    0.04
+ai: O TYR 248 - bi N TYR 248
+Hbond found: 5294 4643 dist   7.7, factor:    0.20
+ai: NE2 GLN 249 - bi O TYR 208
+Hbond found: 5303 4636 dist   8.9, factor:    0.19
+ai: N ALA 250 - bi O GLY 207
+Hbond found: 5306 4640 dist   9.9, factor:    0.04
+ai: O ALA 250 - bi N TYR 208
+Hbond found: 5313 3834 dist  12.0, factor:    0.01
+ai: N SER 251 - bi O PRO 154
+Hbond found: 5318 3827 dist   7.8, factor:    0.13
+ai: OG SER 251 - bi O GLY 153
+Hbond found: 5324 3783 dist   8.2, factor:    0.29
+ai: N GLY 252 - bi O ALA 149
+Hbond found: 5327 3730 dist  11.2, factor:    0.06
+ai: O GLY 252 - bi N ASN 146
+Hbond found: 5327 3744 dist   8.7, factor:    0.31
+ai: O GLY 252 - bi N TRP 147
+Hbond found: 5338 3698 dist   9.2, factor:    0.24
+ai: N SER 254 - bi OD1 ASN 144
+Hbond found: 5343 3698 dist  11.5, factor:    0.04
+ai: OG SER 254 - bi OD1 ASN 144
+Hbond found: 5349 5343 dist   9.7, factor:    0.09
+ai: N ILE 255 - bi OG SER 254
+Hbond found: 5368 5334 dist  11.5, factor:    0.06
+ai: N ASP 256 - bi O GLY 253
+Hbond found: 5374 4633 dist  10.3, factor:    0.12
+ai: OD1 ASP 256 - bi N GLY 207
+Hbond found: 5380 5334 dist  11.3, factor:    0.08
+ai: N TRP 257 - bi O GLY 253
+Hbond found: 5404 5341 dist   8.7, factor:    0.50
+ai: N SER 258 - bi O SER 254
+Hbond found: 5409 5352 dist  10.2, factor:    0.14
+ai: OG SER 258 - bi O ILE 255
+Hbond found: 5415 5352 dist   9.3, factor:    0.25
+ai: N TYR 259 - bi O ILE 255
+Hbond found: 5426 4767 dist   7.3, factor:    0.46
+ai: OH TYR 259 - bi OD2 ASP 215
+Hbond found: 5436 5371 dist   9.3, factor:    0.25
+ai: N ASP 260 - bi O ASP 256
+Hbond found: 5442 4623 dist   7.2, factor:    0.30
+ai: OD1 ASP 260 - bi OH TYR 206
+Hbond found: 5443 4651 dist   7.5, factor:    0.30
+ai: OD2 ASP 260 - bi OH TYR 208
+Hbond found: 5448 5383 dist   7.7, factor:    0.24
+ai: N TYR 261 - bi O TRP 257
+Hbond found: 5469 5407 dist  10.3, factor:    0.17
+ai: N GLY 262 - bi O SER 258
+Hbond found: 5476 5407 dist   8.2, factor:    0.38
+ai: N ILE 263 - bi O SER 258
+Hbond found: 5495 5472 dist  10.8, factor:    0.06
+ai: N LYS 264 - bi O GLY 262
+Hbond found: 5520 4369 dist   8.4, factor:    0.54
+ai: O TYR 265 - bi N PHE 192
+Hbond found: 5528 4812 dist   6.9, factor:    0.29
+ai: OH TYR 265 - bi OE2 GLU 218
+Hbond found: 5538 5498 dist   9.4, factor:    0.22
+ai: N SER 266 - bi O LYS 264
+Hbond found: 5543 5409 dist   7.4, factor:    0.37
+ai: OG SER 266 - bi OG SER 258
+Hbond found: 5549 4372 dist   8.8, factor:    0.38
+ai: N PHE 267 - bi O PHE 192
+Hbond found: 5552 4408 dist   8.7, factor:    0.54
+ai: O PHE 267 - bi N ILE 194
+Hbond found: 5569 4564 dist   8.5, factor:    0.59
+ai: N ALA 268 - bi O MET 203
+Hbond found: 5579 4411 dist   8.4, factor:    0.40
+ai: N PHE 269 - bi O ILE 194
+Hbond found: 5599 4526 dist   8.1, factor:    0.54
+ai: N GLU 270 - bi O LEU 201
+Hbond found: 5602 4506 dist   8.1, factor:    0.51
+ai: O GLU 270 - bi N GLN 200
+Hbond found: 5614 4449 dist   7.7, factor:    0.54
+ai: N LEU 271 - bi O HIS 196
+Hbond found: 5617 4495 dist   9.5, factor:    0.25
+ai: O LEU 271 - bi N SER 199
+Hbond found: 5663 5657 dist   8.3, factor:    0.18
+ai: OD1 ASP 273 - bi N ASP 273
+Hbond found: 5669 5663 dist   9.3, factor:    0.08
+ai: N THR 274 - bi OD1 ASP 273
+Hbond found: 5714 5664 dist   8.8, factor:    0.31
+ai: N TYR 277 - bi OD2 ASP 273
+Hbond found: 5725 5700 dist   9.2, factor:    0.03
+ai: OH TYR 277 - bi NH2 ARG 276
+Hbond found: 5725 5697 dist  10.5, factor:    0.01
+ai: OH TYR 277 - bi NE ARG 276
+Hbond found: 5742 5717 dist  10.9, factor:    0.09
+ai: N PHE 279 - bi O TYR 277
+Hbond found: 5745 3381 dist   9.1, factor:    0.29
+ai: O PHE 279 - bi NH2 ARG 124
+Hbond found: 5762 5717 dist   9.5, factor:    0.32
+ai: N LEU 280 - bi O TYR 277
+Hbond found: 5781 5745 dist  10.2, factor:    0.04
+ai: N LEU 281 - bi O PHE 279
+Hbond found: 5784 1673 dist   8.1, factor:    0.42
+ai: O LEU 281 - bi OH TYR 12
+Hbond found: 5824 5803 dist   9.2, factor:    0.07
+ai: N ARG 284 - bi O PRO 282
+Hbond found: 5834 1371 dist  11.5, factor:    0.02
+ai: NH2 ARG 284 - bi OE2 GLU 92
+Hbond found: 5848 5803 dist   8.3, factor:    0.45
+ai: N GLN 285 - bi O PRO 282
+Hbond found: 5855 5642 dist   9.8, factor:    0.17
+ai: OE1 GLN 285 - bi NH1 ARG 272
+Hbond found: 5865 5817 dist   8.5, factor:    0.37
+ai: N ILE 286 - bi O ALA 283
+Hbond found: 5917 5868 dist  10.7, factor:    0.11
+ai: N THR 289 - bi O ILE 286
+Hbond found: 5922 5851 dist   7.5, factor:    0.31
+ai: OG1 THR 289 - bi O GLN 285
+Hbond found: 5931 5868 dist   8.3, factor:    0.33
+ai: N ALA 290 - bi O ILE 286
+Hbond found: 5941 5887 dist   8.4, factor:    0.38
+ai: N GLU 291 - bi O LEU 287
+Hbond found: 5956 5906 dist  10.3, factor:    0.21
+ai: N GLU 292 - bi O PRO 288
+Hbond found: 5963 5079 dist   7.6, factor:    0.23
+ai: OE1 GLU 292 - bi OG1 THR 236
+Hbond found: 5963 5643 dist   8.2, factor:    0.22
+ai: OE1 GLU 292 - bi NH2 ARG 272
+Hbond found: 5964 5640 dist   8.4, factor:    0.30
+ai: OE2 GLU 292 - bi NE ARG 272
+Hbond found: 5971 5920 dist   9.0, factor:    0.32
+ai: N THR 293 - bi O THR 289
+Hbond found: 5976 5920 dist   7.2, factor:    0.35
+ai: OG1 THR 293 - bi O THR 289
+Hbond found: 5985 5934 dist   8.8, factor:    0.40
+ai: N TRP 294 - bi O ALA 290
+Hbond found: 6009 5959 dist  10.2, factor:    0.19
+ai: N LEU 295 - bi O GLU 292
+Hbond found: 6028 5974 dist   9.3, factor:    0.34
+ai: N GLY 296 - bi O THR 293
+Hbond found: 6035 5974 dist   8.7, factor:    0.46
+ai: N LEU 297 - bi O THR 293
+Hbond found: 6054 5988 dist   8.0, factor:    0.48
+ai: N LYS 298 - bi O TRP 294
+Hbond found: 6062 2903 dist   9.5, factor:    0.04
+ai: NZ LYS 298 - bi OD2 ASP 93
+Hbond found: 6076 6012 dist  10.2, factor:    0.16
+ai: N ALA 299 - bi O LEU 295
+Hbond found: 6086 6038 dist  10.3, factor:    0.15
+ai: N ILE 300 - bi O LEU 297
+Hbond found: 6105 6038 dist   8.5, factor:    0.46
+ai: N MET 301 - bi O LEU 297
+Hbond found: 6122 6057 dist   8.1, factor:    0.44
+ai: N GLU 302 - bi O LYS 298
+Hbond found: 6130 2927 dist   6.6, factor:    0.25
+ai: OE2 GLU 302 - bi OG SER 95
+Hbond found: 6137 6089 dist   9.9, factor:    0.14
+ai: N HIS 303 - bi O ILE 300
+Hbond found: 6146 4812 dist   7.6, factor:    0.39
+ai: NE2 HIS 303 - bi OE2 GLU 218
+Hbond found: 6154 6089 dist   9.0, factor:    0.30
+ai: N VAL 304 - bi O ILE 300
+Hbond found: 6170 6108 dist   8.7, factor:    0.52
+ai: N ARG 305 - bi O MET 301
+Hbond found: 6179 2971 dist   8.4, factor:    0.17
+ai: NH1 ARG 305 - bi OG SER 98
+Hbond found: 6194 6125 dist   8.9, factor:    0.19
+ai: N ASP 306 - bi O GLU 302
+Hbond found: 6200 6177 dist   9.0, factor:    0.10
+ai: OD1 ASP 306 - bi NE ARG 305
+Hbond found: 6201 6180 dist   9.8, factor:    0.05
+ai: OD2 ASP 306 - bi NH2 ARG 305
+Hbond found: 6206 6157 dist  10.4, factor:    0.09
+ai: N HIS 307 - bi O VAL 304
+Hbond found: 6212 6140 dist   6.8, factor:    0.22
+ai: ND1 HIS 307 - bi O HIS 303
+Hbond found: 6240 4345 dist   8.2, factor:    0.14
+ai: O TYR 309 - bi NZ LYS 190
+Hbond found: 6240 6237 dist   6.7, factor:    0.02
+ai: O TYR 309 - bi N TYR 309
+Hbond found: 6248 4340 dist   6.6, factor:    0.62
+ai: OH TYR 309 - bi O LYS 190
+Number of Hbonds: 432.000000
+ hb:-514.17 vdw:-2344.08 es:-22.86 bb:-590.58 pe:0.00 le:0.00
+calc is done1AYEDE beginDE end
+ de:1089.42max_dist: 3.500000box begin
+xnum: 9, ynum: 9, znum 11
+Total number of boxes:1200
+box end
+Hbond found: 39 36 dist   6.9, factor:    0.01
+ai: O THR 6 - bi N THR 6
+Hbond found: 86 53 dist   9.6, factor:    0.13
+ai: N GLY 9 - bi O PHE 7
+Hbond found: 93 53 dist   9.1, factor:    0.32
+ai: N ASP 10 - bi O PHE 7
+Hbond found: 108 105 dist   7.8, factor:    0.01
+ai: O GLN 11 - bi N GLN 11
+Hbond found: 175 172 dist   7.4, factor:    0.01
+ai: O ILE 15 - bi N ILE 15
+Hbond found: 235 232 dist   7.5, factor:    0.04
+ai: O ASN 19 - bi N ASN 19
+Hbond found: 261 235 dist  11.3, factor:    0.02
+ai: N GLU 21 - bi O ASN 19
+Hbond found: 276 238 dist   8.6, factor:    0.30
+ai: N GLN 22 - bi OD1 ASN 19
+Hbond found: 283 221 dist   8.4, factor:    0.27
+ai: OE1 GLN 22 - bi N SER 18
+Hbond found: 283 226 dist  10.1, factor:    0.08
+ai: OE1 GLN 22 - bi OG SER 18
+Hbond found: 293 264 dist  10.8, factor:    0.02
+ai: N ILE 23 - bi O GLU 21
+Hbond found: 312 264 dist  10.1, factor:    0.16
+ai: N LYS 24 - bi O GLU 21
+Hbond found: 334 279 dist  10.0, factor:    0.20
+ai: N ASN 25 - bi O GLN 22
+Hbond found: 341 268 dist   9.4, factor:    0.17
+ai: ND2 ASN 25 - bi OE1 GLU 21
+Hbond found: 348 279 dist   8.7, factor:    0.47
+ai: N LEU 26 - bi O GLN 22
+Hbond found: 367 296 dist   8.3, factor:    0.53
+ai: N LEU 27 - bi O ILE 23
+Hbond found: 386 351 dist  11.2, factor:    0.01
+ai: N GLN 28 - bi O LEU 26
+Hbond found: 403 351 dist  10.7, factor:    0.14
+ai: N LEU 29 - bi O LEU 26
+Hbond found: 422 370 dist  11.6, factor:    0.04
+ai: N GLU 30 - bi O LEU 27
+Hbond found: 437 406 dist  10.9, factor:    0.02
+ai: N ALA 31 - bi O LEU 29
+Hbond found: 447 406 dist   9.2, factor:    0.23
+ai: N GLN 32 - bi O LEU 29
+Hbond found: 464 440 dist   8.2, factor:    0.09
+ai: N GLU 33 - bi O ALA 31
+Hbond found: 479 450 dist   9.3, factor:    0.05
+ai: N HIS 34 - bi O GLN 32
+Hbond found: 496 450 dist   9.0, factor:    0.18
+ai: N LEU 34 - bi O GLN 32
+Hbond found: 515 467 dist  10.1, factor:    0.05
+ai: N GLN 34 - bi O GLU 33
+Hbond found: 532 499 dist  10.7, factor:    0.02
+ai: N LEU 35 - bi O LEU 34
+Hbond found: 583 554 dist  10.6, factor:    0.10
+ai: N TRP 38 - bi O ASP 36
+Hbond found: 591 558 dist   9.3, factor:    0.16
+ai: NE1 TRP 38 - bi OD2 ASP 36
+Hbond found: 634 430 dist   7.7, factor:    0.22
+ai: OG SER 40 - bi OE2 GLU 30
+Hbond found: 668 659 dist   7.7, factor:    0.14
+ai: N THR 47 - bi OG1 THR 42
+Hbond found: 696 210 dist   7.7, factor:    0.26
+ai: N GLY 49 - bi O PRO 17
+Hbond found: 703 671 dist   9.5, factor:    0.19
+ai: N GLU 50 - bi O THR 47
+Hbond found: 723 615 dist   8.4, factor:    0.25
+ai: OG1 THR 51 - bi NZ LYS 39
+Hbond found: 732 175 dist   7.9, factor:    0.42
+ai: N ALA 52 - bi O ILE 15
+Hbond found: 742 610 dist   8.2, factor:    0.43
+ai: N HIS 53 - bi O LYS 39
+Hbond found: 745 607 dist   9.5, factor:    0.28
+ai: O HIS 53 - bi N LYS 39
+Hbond found: 751 165 dist  10.9, factor:    0.06
+ai: NE2 HIS 53 - bi OE2 GLU 14
+Hbond found: 759 141 dist   9.3, factor:    0.36
+ai: N VAL 54 - bi O LEU 13
+Hbond found: 762 138 dist   8.7, factor:    0.43
+ai: O VAL 54 - bi N LEU 13
+Hbond found: 775 554 dist   7.1, factor:    0.56
+ai: N ARG 55 - bi O ASP 36
+Hbond found: 778 551 dist   8.7, factor:    0.38
+ai: O ARG 55 - bi N ASP 36
+Hbond found: 782 558 dist   8.6, factor:    0.27
+ai: NE ARG 55 - bi OD2 ASP 36
+Hbond found: 784 100 dist   7.2, factor:    0.50
+ai: NH1 ARG 55 - bi OD2 ASP 10
+Hbond found: 799 108 dist   8.4, factor:    0.55
+ai: N VAL 56 - bi O GLN 11
+Hbond found: 829 99 dist   9.1, factor:    0.27
+ai: N PHE 58 - bi OD1 ASP 10
+Hbond found: 849 818 dist   9.9, factor:    0.05
+ai: N VAL 59 - bi O PRO 57
+Hbond found: 865 818 dist   8.3, factor:    0.44
+ai: N ASN 60 - bi O PRO 57
+Hbond found: 872 499 dist   8.3, factor:    0.30
+ai: ND2 ASN 60 - bi O LEU 34
+Hbond found: 879 832 dist  10.0, factor:    0.18
+ai: N VAL 61 - bi O PHE 58
+Hbond found: 895 868 dist  11.4, factor:    0.01
+ai: N GLN 62 - bi O ASN 60
+Hbond found: 912 868 dist  12.1, factor:    0.01
+ai: N ALA 63 - bi O ASN 60
+Hbond found: 922 898 dist  10.7, factor:    0.02
+ai: N VAL 64 - bi O GLN 62
+Hbond found: 938 898 dist   9.6, factor:    0.28
+ai: N LYS 65 - bi O GLN 62
+Hbond found: 946 112 dist   8.4, factor:    0.28
+ai: NZ LYS 65 - bi OE1 GLN 11
+Hbond found: 960 915 dist  11.6, factor:    0.04
+ai: N VAL 66 - bi O ALA 63
+Hbond found: 976 915 dist   9.5, factor:    0.21
+ai: N PHE 67 - bi O ALA 63
+Hbond found: 996 941 dist   9.9, factor:    0.23
+ai: N LEU 68 - bi O LYS 65
+Hbond found: 1015 963 dist  11.5, factor:    0.03
+ai: N GLU 69 - bi O VAL 66
+Hbond found: 1030 963 dist   7.9, factor:    0.23
+ai: N SER 70 - bi O VAL 66
+Hbond found: 1035 979 dist   8.0, factor:    0.25
+ai: OG SER 70 - bi O PHE 67
+Hbond found: 1041 979 dist   9.8, factor:    0.13
+ai: N GLN 71 - bi O PHE 67
+Hbond found: 1049 1035 dist   7.7, factor:    0.23
+ai: NE2 GLN 71 - bi OG SER 70
+Hbond found: 1058 1018 dist   7.4, factor:    0.10
+ai: N GLY 72 - bi O GLU 69
+Hbond found: 1061 284 dist   9.9, factor:    0.07
+ai: O GLY 72 - bi NE2 GLN 22
+Hbond found: 1065 999 dist   8.2, factor:    0.34
+ai: N ILE 73 - bi O LEU 68
+Hbond found: 1087 191 dist  10.2, factor:    0.23
+ai: O ALA 74 - bi N VAL 16
+Hbond found: 1097 1094 dist   7.2, factor:    0.01
+ai: O TYR 75 - bi N TYR 75
+Hbond found: 1105 1023 dist   7.1, factor:    0.28
+ai: OH TYR 75 - bi OE2 GLU 69
+Hbond found: 1115 160 dist   8.4, factor:    0.34
+ai: N SER 76 - bi O GLU 14
+Hbond found: 1118 157 dist   7.9, factor:    0.52
+ai: O SER 76 - bi N GLU 14
+Hbond found: 1145 125 dist   7.5, factor:    0.52
+ai: N MET 78 - bi O VAL 12
+Hbond found: 1162 125 dist   9.2, factor:    0.33
+ai: N ILE 79 - bi O VAL 12
+Hbond found: 1165 122 dist   8.5, factor:    0.51
+ai: O ILE 79 - bi N VAL 12
+Hbond found: 1189 1181 dist   9.6, factor:    0.03
+ai: OE2 GLU 80 - bi N GLU 80
+Hbond found: 1208 96 dist   8.6, factor:    0.40
+ai: N VAL 82 - bi O ASP 10
+Hbond found: 1224 1202 dist   9.1, factor:    0.33
+ai: N GLN 83 - bi OD1 ASP 81
+Hbond found: 1231 50 dist   7.8, factor:    0.40
+ai: OE1 GLN 83 - bi N PHE 7
+Hbond found: 1241 1211 dist  10.2, factor:    0.05
+ai: N VAL 84 - bi O VAL 82
+Hbond found: 1257 1211 dist   9.6, factor:    0.32
+ai: N LEU 85 - bi O VAL 82
+Hbond found: 1276 1227 dist  10.9, factor:    0.10
+ai: N LEU 86 - bi O GLN 83
+Hbond found: 1295 1227 dist   8.4, factor:    0.30
+ai: N ASP 87 - bi O GLN 83
+Hbond found: 1301 1232 dist   7.5, factor:    0.27
+ai: OD1 ASP 87 - bi NE2 GLN 83
+Hbond found: 1307 1244 dist  11.6, factor:    0.04
+ai: N LYS 88 - bi O VAL 84
+Hbond found: 1329 1279 dist  10.7, factor:    0.08
+ai: N GLU 89 - bi O LEU 86
+Hbond found: 1344 1279 dist   8.6, factor:    0.26
+ai: N ASN 90 - bi O LEU 86
+Hbond found: 1358 1298 dist   8.6, factor:    0.27
+ai: N GLU 91 - bi O ASP 87
+Hbond found: 1373 1310 dist   8.3, factor:    0.28
+ai: N GLU 92 - bi O LYS 88
+Hbond found: 1388 1361 dist  10.9, factor:    0.01
+ai: N MET 93 - bi O GLU 91
+Hbond found: 1405 1361 dist  11.6, factor:    0.04
+ai: N LEU 94 - bi O GLU 91
+Hbond found: 1444 1391 dist  11.7, factor:    0.03
+ai: N ASN 96 - bi O MET 93
+Hbond found: 1458 1391 dist   9.0, factor:    0.25
+ai: N ARG 97 - bi O MET 93
+Hbond found: 1482 1427 dist  11.1, factor:    0.06
+ai: N ARG 98 - bi O PHE 95
+Hbond found: 1506 1427 dist  10.0, factor:    0.17
+ai: N ARG 99 - bi O PHE 95
+Hbond found: 1513 1450 dist   9.3, factor:    0.17
+ai: NE ARG 99 - bi OD1 ASN 96
+Hbond found: 1516 1450 dist  10.3, factor:    0.05
+ai: NH2 ARG 99 - bi OD1 ASN 96
+Hbond found: 1530 1485 dist  10.6, factor:    0.02
+ai: N GLU 1 - bi O ARG 98
+Hbond found: 1538 1451 dist   8.7, factor:    0.11
+ai: OE2 GLU 1 - bi ND2 ASN 96
+Hbond found: 1545 1485 dist   9.2, factor:    0.13
+ai: N ARG 2 - bi O ARG 98
+Hbond found: 1580 1574 dist   8.4, factor:    0.02
+ai: N GLY 4 - bi OG SER 3
+Hbond found: 1621 1538 dist   7.6, factor:    0.42
+ai: N ASN 8 - bi OE2 GLU 1
+Hbond found: 1628 1516 dist   9.3, factor:    0.20
+ai: ND2 ASN 8 - bi NH2 ARG 99
+Hbond found: 1635 1627 dist  10.3, factor:    0.05
+ai: N PHE 9 - bi OD1 ASN 8
+Hbond found: 1655 1627 dist   8.6, factor:    0.26
+ai: N GLY 10 - bi OD1 ASN 8
+Hbond found: 1662 1638 dist   9.7, factor:    0.09
+ai: N ALA 11 - bi O PHE 9
+Hbond found: 1696 1693 dist   7.4, factor:    0.02
+ai: O HIS 13 - bi N HIS 13
+Hbond found: 1702 1624 dist   9.8, factor:    0.21
+ai: NE2 HIS 13 - bi O ASN 8
+Hbond found: 1713 1710 dist   6.9, factor:    0.01
+ai: O THR 14 - bi N THR 14
+Hbond found: 1743 1713 dist  10.4, factor:    0.03
+ai: N GLU 16 - bi O THR 14
+Hbond found: 1758 1715 dist  10.5, factor:    0.12
+ai: N GLU 17 - bi OG1 THR 14
+Hbond found: 1773 1727 dist  10.5, factor:    0.11
+ai: N ILE 18 - bi O LEU 15
+Hbond found: 1792 1746 dist  10.4, factor:    0.10
+ai: N SER 19 - bi O GLU 16
+Hbond found: 1797 1727 dist   9.4, factor:    0.12
+ai: OG SER 19 - bi O LEU 15
+Hbond found: 1803 1746 dist   8.3, factor:    0.21
+ai: N GLN 20 - bi O GLU 16
+Hbond found: 1811 1751 dist  11.1, factor:    0.02
+ai: NE2 GLN 20 - bi OE2 GLU 16
+Hbond found: 1820 1761 dist   9.3, factor:    0.30
+ai: N GLU 21 - bi O GLU 17
+Hbond found: 1835 1795 dist  10.0, factor:    0.13
+ai: N MET 22 - bi O SER 19
+Hbond found: 1852 1795 dist   9.4, factor:    0.18
+ai: N ASP 23 - bi O SER 19
+Hbond found: 1864 1806 dist   8.9, factor:    0.17
+ai: N ASN 24 - bi O GLN 20
+Hbond found: 1878 1823 dist   9.0, factor:    0.29
+ai: N LEU 25 - bi O GLU 21
+Hbond found: 1897 1855 dist  11.4, factor:    0.05
+ai: N VAL 26 - bi O ASP 23
+Hbond found: 1913 1855 dist   8.6, factor:    0.25
+ai: N ALA 27 - bi O ASP 23
+Hbond found: 1923 1867 dist   8.1, factor:    0.27
+ai: N GLU 28 - bi O ASN 24
+Hbond found: 1938 1900 dist  11.4, factor:    0.04
+ai: N HIS 29 - bi O VAL 26
+Hbond found: 1944 1881 dist   9.2, factor:    0.32
+ai: ND1 HIS 29 - bi O LEU 25
+Hbond found: 1969 1941 dist   9.4, factor:    0.06
+ai: N GLY 31 - bi O HIS 29
+Hbond found: 1976 1941 dist   9.6, factor:    0.16
+ai: N LEU 32 - bi O HIS 29
+Hbond found: 2014 2011 dist   7.0, factor:    0.05
+ai: O SER 34 - bi N SER 34
+Hbond found: 2030 1858 dist   7.9, factor:    0.12
+ai: NZ LYS 35 - bi OD1 ASP 23
+Hbond found: 2093 2067 dist   9.6, factor:    0.09
+ai: N GLY 39 - bi ND2 ASN 37
+Hbond found: 2096 2067 dist  11.1, factor:    0.02
+ai: O GLY 39 - bi ND2 ASN 37
+Hbond found: 2103 2100 dist   7.4, factor:    0.01
+ai: O SER 40 - bi N SER 40
+Hbond found: 2142 2114 dist  10.7, factor:    0.02
+ai: N GLU 43 - bi O SER 41
+Hbond found: 2157 2125 dist  10.4, factor:    0.01
+ai: N ASN 44 - bi O PHE 42
+Hbond found: 2171 2116 dist   8.1, factor:    0.26
+ai: N ARG 45 - bi OG SER 41
+Hbond found: 2174 2111 dist   7.3, factor:    0.24
+ai: O ARG 45 - bi N SER 41
+Hbond found: 2174 2116 dist  11.6, factor:    0.01
+ai: O ARG 45 - bi OG SER 41
+Hbond found: 2180 2149 dist   8.1, factor:    0.30
+ai: NH1 ARG 45 - bi OE1 GLU 43
+Hbond found: 2209 2096 dist   8.2, factor:    0.21
+ai: N MET 47 - bi O GLY 39
+Hbond found: 2212 2074 dist   8.7, factor:    0.32
+ai: O MET 47 - bi N ILE 38
+Hbond found: 2226 2198 dist  11.5, factor:    0.02
+ai: N ASN 48 - bi O PRO 46
+Hbond found: 2233 2066 dist  10.7, factor:    0.06
+ai: ND2 ASN 48 - bi OD1 ASN 37
+Hbond found: 2240 2047 dist   8.0, factor:    0.48
+ai: N VAL 49 - bi O VAL 36
+Hbond found: 2243 2044 dist   7.7, factor:    0.40
+ai: O VAL 49 - bi N VAL 36
+Hbond found: 2275 2014 dist   7.9, factor:    0.66
+ai: N LYS 51 - bi O SER 34
+Hbond found: 2317 1979 dist   8.2, factor:    0.41
+ai: N SER 53 - bi O LEU 32
+Hbond found: 2328 2322 dist   8.7, factor:    0.05
+ai: N THR 54 - bi OG SER 53
+Hbond found: 2342 2322 dist   8.1, factor:    0.11
+ai: N GLY 55 - bi OG SER 53
+Hbond found: 2376 2333 dist   6.5, factor:    0.24
+ai: NZ LYS 59 - bi OG1 THR 54
+Hbond found: 2376 2345 dist   8.3, factor:    0.05
+ai: NZ LYS 59 - bi O GLY 55
+Hbond found: 2407 2404 dist   8.1, factor:    0.02
+ai: O ALA 61 - bi N ALA 61
+Hbond found: 2479 2476 dist   7.4, factor:    0.04
+ai: O ASP 65 - bi N ASP 65
+Hbond found: 2483 2441 dist   8.5, factor:    0.55
+ai: OD2 ASP 65 - bi NE1 TRP 63
+Hbond found: 2488 2482 dist  11.2, factor:    0.02
+ai: N ALA 66 - bi OD1 ASP 65
+Hbond found: 2505 2491 dist  11.6, factor:    0.01
+ai: N ILE 68 - bi O ALA 66
+Hbond found: 2524 2501 dist  10.6, factor:    0.01
+ai: N HIS 69 - bi O GLY 67
+Hbond found: 2551 2527 dist  10.9, factor:    0.02
+ai: N ARG 71 - bi O HIS 69
+Hbond found: 2560 557 dist   8.0, factor:    0.20
+ai: NH1 ARG 71 - bi OD1 ASP 36
+Hbond found: 2561 557 dist  11.6, factor:    0.02
+ai: NH2 ARG 71 - bi OD1 ASP 36
+Hbond found: 2575 2544 dist  10.7, factor:    0.04
+ai: N GLU 72 - bi O ALA 70
+Hbond found: 2590 2554 dist   8.5, factor:    0.15
+ai: N TRP 73 - bi O ARG 71
+Hbond found: 2598 2544 dist  11.1, factor:    0.09
+ai: NE1 TRP 73 - bi O ALA 70
+Hbond found: 2614 2578 dist  10.2, factor:    0.05
+ai: N VAL 74 - bi O GLU 72
+Hbond found: 2630 2578 dist   8.7, factor:    0.32
+ai: N THR 75 - bi O GLU 72
+Hbond found: 2635 2498 dist   8.8, factor:    0.20
+ai: OG1 THR 75 - bi N GLY 67
+Hbond found: 2644 2593 dist  11.2, factor:    0.08
+ai: N GLN 76 - bi O TRP 73
+Hbond found: 2651 2635 dist  10.5, factor:    0.07
+ai: OE1 GLN 76 - bi OG1 THR 75
+Hbond found: 2661 2593 dist  11.2, factor:    0.09
+ai: N ALA 77 - bi O TRP 73
+Hbond found: 2671 2617 dist   8.2, factor:    0.41
+ai: N THR 78 - bi O VAL 74
+Hbond found: 2676 2617 dist   7.7, factor:    0.29
+ai: OG1 THR 78 - bi O VAL 74
+Hbond found: 2685 2647 dist  11.0, factor:    0.08
+ai: N ALA 79 - bi O GLN 76
+Hbond found: 2695 2647 dist   9.5, factor:    0.27
+ai: N LEU 80 - bi O GLN 76
+Hbond found: 2714 2664 dist   9.9, factor:    0.24
+ai: N TRP 81 - bi O ALA 77
+Hbond found: 2738 2688 dist  11.2, factor:    0.08
+ai: N THR 82 - bi O ALA 79
+Hbond found: 2743 2674 dist   7.5, factor:    0.37
+ai: OG1 THR 82 - bi O THR 78
+Hbond found: 2752 2688 dist   9.8, factor:    0.31
+ai: N ALA 83 - bi O ALA 79
+Hbond found: 2762 2698 dist  10.4, factor:    0.23
+ai: N ASN 84 - bi O LEU 80
+Hbond found: 2776 2717 dist   8.3, factor:    0.38
+ai: N LYS 85 - bi O TRP 81
+Hbond found: 2798 2755 dist  12.1, factor:    0.01
+ai: N ILE 86 - bi O ALA 83
+Hbond found: 2817 2755 dist  11.8, factor:    0.06
+ai: N VAL 87 - bi O ALA 83
+Hbond found: 2833 2765 dist   8.8, factor:    0.23
+ai: N SER 88 - bi O ASN 84
+Hbond found: 2838 2765 dist   7.2, factor:    0.17
+ai: OG SER 88 - bi O ASN 84
+Hbond found: 2844 2801 dist  10.6, factor:    0.14
+ai: N ASP 89 - bi O ILE 86
+Hbond found: 2851 2784 dist   9.6, factor:    0.04
+ai: OD2 ASP 89 - bi NZ LYS 85
+Hbond found: 2856 2801 dist   8.4, factor:    0.45
+ai: N TYR 90 - bi O ILE 86
+Hbond found: 2877 2847 dist  10.6, factor:    0.07
+ai: N GLY 91 - bi O ASP 89
+Hbond found: 2884 2847 dist   8.8, factor:    0.28
+ai: N LYS 92 - bi O ASP 89
+Hbond found: 2932 2909 dist  10.0, factor:    0.03
+ai: N SER 95 - bi O ASP 93
+Hbond found: 2943 2909 dist  12.0, factor:    0.02
+ai: N ILE 96 - bi O ASP 93
+Hbond found: 2962 2935 dist  10.3, factor:    0.03
+ai: N THR 97 - bi O SER 95
+Hbond found: 2976 2921 dist   9.0, factor:    0.10
+ai: N SER 98 - bi O PRO 94
+Hbond found: 2981 2921 dist   8.4, factor:    0.05
+ai: OG SER 98 - bi O PRO 94
+Hbond found: 2987 2946 dist  11.4, factor:    0.06
+ai: N ILE 99 - bi O ILE 96
+Hbond found: 3006 2946 dist   8.9, factor:    0.42
+ai: N LEU 100 - bi O ILE 96
+Hbond found: 3025 2965 dist   8.8, factor:    0.27
+ai: N ASP 101 - bi O THR 97
+Hbond found: 3031 2867 dist  10.3, factor:    0.11
+ai: OD1 ASP 101 - bi OH TYR 90
+Hbond found: 3037 2979 dist  10.2, factor:    0.13
+ai: N ALA 102 - bi O SER 98
+Hbond found: 3047 2990 dist   7.6, factor:    0.51
+ai: N LEU 103 - bi O ILE 99
+Hbond found: 3066 2393 dist   9.5, factor:    0.31
+ai: N ASP 104 - bi O PRO 60
+Hbond found: 3069 2414 dist   8.6, factor:    0.58
+ai: O ASP 104 - bi N ILE 62
+Hbond found: 3072 2322 dist   8.5, factor:    0.06
+ai: OD1 ASP 104 - bi OG SER 53
+Hbond found: 3078 2300 dist   9.1, factor:    0.39
+ai: N ILE 105 - bi O PHE 52
+Hbond found: 3081 2297 dist   7.8, factor:    0.52
+ai: O ILE 105 - bi N PHE 52
+Hbond found: 3097 2417 dist   8.4, factor:    0.50
+ai: N PHE 106 - bi O ILE 62
+Hbond found: 3100 2457 dist   8.4, factor:    0.48
+ai: O PHE 106 - bi N LEU 64
+Hbond found: 3117 2259 dist   8.1, factor:    0.66
+ai: N LEU 107 - bi O LEU 50
+Hbond found: 3120 2256 dist   8.0, factor:    0.53
+ai: O LEU 107 - bi N LEU 50
+Hbond found: 3136 2460 dist   8.4, factor:    0.52
+ai: N LEU 108 - bi O LEU 64
+Hbond found: 3185 2491 dist   8.5, factor:    0.37
+ai: N THR 111 - bi O ALA 66
+Hbond found: 3199 2501 dist  11.1, factor:    0.09
+ai: N ASN 112 - bi O GLY 67
+Hbond found: 3206 2508 dist   9.3, factor:    0.15
+ai: ND2 ASN 112 - bi O ILE 68
+Hbond found: 3233 2180 dist   8.6, factor:    0.31
+ai: OD1 ASP 114 - bi NH1 ARG 45
+Hbond found: 3233 3227 dist   8.6, factor:    0.08
+ai: OD1 ASP 114 - bi N ASP 114
+Hbond found: 3234 2122 dist  10.4, factor:    0.15
+ai: OD2 ASP 114 - bi N PHE 42
+Hbond found: 3239 3205 dist   9.5, factor:    0.20
+ai: N GLY 115 - bi OD1 ASN 112
+Hbond found: 3246 3216 dist  10.9, factor:    0.10
+ai: N TYR 116 - bi O PRO 113
+Hbond found: 3257 1696 dist   7.8, factor:    0.45
+ai: OH TYR 116 - bi O HIS 13
+Hbond found: 3267 3230 dist  11.3, factor:    0.07
+ai: N VAL 117 - bi O ASP 114
+Hbond found: 3283 3230 dist   9.1, factor:    0.28
+ai: N PHE 118 - bi O ASP 114
+Hbond found: 3303 3270 dist  11.4, factor:    0.01
+ai: N SER 119 - bi O VAL 117
+Hbond found: 3308 2598 dist  10.1, factor:    0.18
+ai: OG SER 119 - bi NE1 TRP 73
+Hbond found: 3314 3270 dist  10.0, factor:    0.10
+ai: N GLN 120 - bi O VAL 117
+Hbond found: 3322 3257 dist  10.3, factor:    0.10
+ai: NE2 GLN 120 - bi OH TYR 116
+Hbond found: 3345 3336 dist   8.8, factor:    0.10
+ai: N LYS 122 - bi OG1 THR 121
+Hbond found: 3348 21 dist   9.5, factor:    0.25
+ai: O LYS 122 - bi N GLU 5
+Hbond found: 3367 3286 dist   8.6, factor:    0.36
+ai: N ASN 123 - bi O PHE 118
+Hbond found: 3381 3373 dist  10.3, factor:    0.09
+ai: N ARG 124 - bi OD1 ASN 123
+Hbond found: 3388 1336 dist   8.0, factor:    0.54
+ai: NE ARG 124 - bi OE1 GLU 89
+Hbond found: 3390 3384 dist  10.5, factor:    0.14
+ai: NH1 ARG 124 - bi O ARG 124
+Hbond found: 3390 2554 dist   8.7, factor:    0.36
+ai: NH1 ARG 124 - bi O ARG 71
+Hbond found: 3391 1337 dist   8.4, factor:    0.43
+ai: NH2 ARG 124 - bi OE2 GLU 89
+Hbond found: 3405 3373 dist   9.0, factor:    0.33
+ai: N MET 125 - bi OD1 ASN 123
+Hbond found: 3408 2560 dist   9.9, factor:    0.16
+ai: O MET 125 - bi NH1 ARG 71
+Hbond found: 3422 3370 dist   9.4, factor:    0.23
+ai: N TRP 126 - bi O ASN 123
+Hbond found: 3449 2541 dist  10.8, factor:    0.08
+ai: O ARG 127 - bi N ALA 70
+Hbond found: 3473 3430 dist   7.8, factor:    0.29
+ai: O LYS 128 - bi NE1 TRP 126
+Hbond found: 3473 3206 dist   9.1, factor:    0.16
+ai: O LYS 128 - bi ND2 ASN 112
+Hbond found: 3590 3566 dist   9.2, factor:    0.04
+ai: N GLY 135 - bi O VAL 133
+Hbond found: 3597 3566 dist  10.4, factor:    0.04
+ai: N SER 136 - bi O VAL 133
+Hbond found: 3627 3602 dist  11.6, factor:    0.03
+ai: N CYS 138 - bi OG SER 136
+Hbond found: 3640 3478 dist   9.8, factor:    0.06
+ai: O VAL 139 - bi NZ LYS 128
+Hbond found: 3653 3533 dist   8.7, factor:    0.35
+ai: N GLY 140 - bi O SER 131
+Hbond found: 3656 3478 dist  10.2, factor:    0.09
+ai: O GLY 140 - bi NZ LYS 128
+Hbond found: 3660 3497 dist   9.8, factor:    0.21
+ai: N VAL 141 - bi OG1 THR 129
+Hbond found: 3663 3492 dist   9.3, factor:    0.27
+ai: O VAL 141 - bi N THR 129
+Hbond found: 3682 2533 dist   7.4, factor:    0.28
+ai: OD1 ASP 142 - bi NE2 HIS 69
+Hbond found: 3683 3455 dist   8.8, factor:    0.07
+ai: OD2 ASP 142 - bi NH1 ARG 127
+Hbond found: 3702 3679 dist   9.2, factor:    0.09
+ai: N ASN 144 - bi O ASP 142
+Hbond found: 3716 3679 dist   9.1, factor:    0.21
+ai: N ARG 145 - bi O ASP 142
+Hbond found: 3725 3683 dist   7.4, factor:    0.12
+ai: NH1 ARG 145 - bi OD2 ASP 142
+Hbond found: 3762 3691 dist   8.6, factor:    0.38
+ai: NE1 TRP 147 - bi O PRO 143
+Hbond found: 3790 3757 dist   8.5, factor:    0.20
+ai: N ALA 149 - bi O TRP 147
+Hbond found: 3827 3803 dist  11.3, factor:    0.02
+ai: N GLY 152 - bi O GLY 150
+Hbond found: 3834 3803 dist   9.5, factor:    0.08
+ai: N GLY 153 - bi O GLY 150
+Hbond found: 3858 3723 dist   7.8, factor:    0.19
+ai: O GLY 155 - bi NE ARG 145
+Hbond found: 3858 3726 dist  10.3, factor:    0.03
+ai: O GLY 155 - bi NH2 ARG 145
+Hbond found: 3883 3877 dist   8.6, factor:    0.06
+ai: N SER 158 - bi OG SER 157
+Hbond found: 3894 3877 dist   8.9, factor:    0.13
+ai: N ASN 159 - bi OG SER 157
+Hbond found: 3901 471 dist   9.5, factor:    0.04
+ai: ND2 ASN 159 - bi OE1 GLU 33
+Hbond found: 3911 3478 dist   9.7, factor:    0.15
+ai: O PRO 160 - bi NZ LYS 128
+Hbond found: 3922 3900 dist   9.9, factor:    0.08
+ai: N CYS 161 - bi OD1 ASN 159
+Hbond found: 3932 3897 dist   8.3, factor:    0.30
+ai: N SER 162 - bi O ASN 159
+Hbond found: 3943 3937 dist   9.2, factor:    0.03
+ai: N ASP 163 - bi OG SER 162
+Hbond found: 3946 3455 dist   7.9, factor:    0.27
+ai: O ASP 163 - bi NH1 ARG 127
+Hbond found: 3955 3935 dist  10.4, factor:    0.02
+ai: N SER 164 - bi O SER 162
+Hbond found: 3958 3872 dist   8.6, factor:    0.20
+ai: O SER 164 - bi N SER 157
+Hbond found: 3960 3725 dist  11.0, factor:    0.01
+ai: OG SER 164 - bi NH1 ARG 145
+Hbond found: 3966 3935 dist  11.0, factor:    0.06
+ai: N TYR 165 - bi O SER 162
+Hbond found: 3969 3676 dist   8.2, factor:    0.49
+ai: O TYR 165 - bi N ASP 142
+Hbond found: 3987 3958 dist  11.1, factor:    0.05
+ai: N HIS 166 - bi O SER 164
+Hbond found: 3990 3747 dist   8.1, factor:    0.50
+ai: O HIS 166 - bi ND2 ASN 146
+Hbond found: 4004 3993 dist  11.0, factor:    0.09
+ai: N GLY 167 - bi ND1 HIS 166
+Hbond found: 4007 3993 dist   7.7, factor:    0.41
+ai: O GLY 167 - bi ND1 HIS 166
+Hbond found: 4025 4007 dist  11.0, factor:    0.02
+ai: N SER 169 - bi O GLY 167
+Hbond found: 4028 3747 dist  10.0, factor:    0.21
+ai: O SER 169 - bi ND2 ASN 146
+Hbond found: 4046 3746 dist  11.0, factor:    0.07
+ai: N ASN 171 - bi OD1 ASN 146
+Hbond found: 4060 3746 dist   9.3, factor:    0.22
+ai: N SER 172 - bi OD1 ASN 146
+Hbond found: 4065 3747 dist   8.2, factor:    0.32
+ai: OG SER 172 - bi ND2 ASN 146
+Hbond found: 4071 4065 dist   9.9, factor:    0.05
+ai: N GLU 173 - bi OG SER 172
+Hbond found: 4078 3497 dist   7.2, factor:    0.28
+ai: OE1 GLU 173 - bi OG1 THR 129
+Hbond found: 4078 3535 dist   7.6, factor:    0.25
+ai: OE1 GLU 173 - bi OG SER 131
+Hbond found: 4102 4074 dist  10.0, factor:    0.04
+ai: N GLU 175 - bi O GLU 173
+Hbond found: 4117 4074 dist   8.7, factor:    0.39
+ai: N VAL 176 - bi O GLU 173
+Hbond found: 4133 4089 dist  11.6, factor:    0.02
+ai: N LYS 177 - bi O VAL 174
+Hbond found: 4155 4089 dist   8.3, factor:    0.21
+ai: N SER 178 - bi O VAL 174
+Hbond found: 4166 4120 dist   9.6, factor:    0.29
+ai: N ILE 179 - bi O VAL 176
+Hbond found: 4185 4120 dist   8.9, factor:    0.51
+ai: N VAL 180 - bi O VAL 176
+Hbond found: 4201 4169 dist  11.1, factor:    0.02
+ai: N ASP 181 - bi O ILE 179
+Hbond found: 4208 4141 dist  10.1, factor:    0.04
+ai: OD2 ASP 181 - bi NZ LYS 177
+Hbond found: 4213 4158 dist   8.9, factor:    0.26
+ai: N PHE 182 - bi O SER 178
+Hbond found: 4233 4169 dist   8.9, factor:    0.47
+ai: N ILE 183 - bi O ILE 179
+Hbond found: 4252 4188 dist   8.8, factor:    0.42
+ai: N LYS 184 - bi O VAL 180
+Hbond found: 4274 4204 dist   8.5, factor:    0.16
+ai: N SER 185 - bi O ASP 181
+Hbond found: 4279 4204 dist   9.5, factor:    0.04
+ai: OG SER 185 - bi O ASP 181
+Hbond found: 4285 4216 dist   8.0, factor:    0.17
+ai: N HIS 186 - bi O PHE 182
+Hbond found: 4302 4236 dist   9.7, factor:    0.13
+ai: N GLY 187 - bi O ILE 183
+Hbond found: 4309 4288 dist   9.9, factor:    0.03
+ai: N LYS 188 - bi O HIS 186
+Hbond found: 4347 2407 dist   7.6, factor:    0.65
+ai: N LYS 190 - bi O ALA 61
+Hbond found: 4372 2433 dist   8.1, factor:    0.63
+ai: O ALA 191 - bi N TRP 63
+Hbond found: 4372 4369 dist   7.0, factor:    0.05
+ai: O ALA 191 - bi N ALA 191
+Hbond found: 4399 2436 dist   7.7, factor:    0.61
+ai: N ILE 193 - bi O TRP 63
+Hbond found: 4437 2479 dist   8.7, factor:    0.50
+ai: N LEU 195 - bi O ASP 65
+Hbond found: 4459 4456 dist   6.8, factor:    0.07
+ai: O HIS 196 - bi N HIS 196
+Hbond found: 4462 2530 dist  10.1, factor:    0.14
+ai: ND1 HIS 196 - bi ND1 HIS 69
+Hbond found: 4473 2582 dist  10.8, factor:    0.09
+ai: N SER 197 - bi OE1 GLU 72
+Hbond found: 4487 4484 dist   6.7, factor:    0.03
+ai: O TYR 198 - bi N TYR 198
+Hbond found: 4495 748 dist   6.9, factor:    0.46
+ai: OH TYR 198 - bi ND1 HIS 53
+Hbond found: 4510 4487 dist   7.1, factor:    0.05
+ai: OG SER 199 - bi O TYR 198
+Hbond found: 4536 4533 dist   7.4, factor:    0.03
+ai: O LEU 201 - bi N LEU 201
+Hbond found: 4574 4571 dist   8.0, factor:    0.02
+ai: O MET 203 - bi N MET 203
+Hbond found: 4591 4588 dist   6.4, factor:    0.07
+ai: O PHE 204 - bi N PHE 204
+Hbond found: 4625 4622 dist   7.9, factor:    0.01
+ai: O TYR 206 - bi N TYR 206
+Hbond found: 4671 4646 dist  11.5, factor:    0.01
+ai: N LYS 209 - bi O GLY 207
+Hbond found: 4706 4703 dist   6.6, factor:    0.02
+ai: O THR 211 - bi N THR 211
+Hbond found: 4770 4742 dist  10.5, factor:    0.03
+ai: N ASP 215 - bi O LEU 213
+Hbond found: 4782 4742 dist   9.6, factor:    0.24
+ai: N PHE 216 - bi O LEU 213
+Hbond found: 4802 4773 dist  10.8, factor:    0.03
+ai: N ASP 217 - bi O ASP 215
+Hbond found: 4814 4773 dist  10.6, factor:    0.18
+ai: N GLU 218 - bi O ASP 215
+Hbond found: 4829 4785 dist  11.8, factor:    0.03
+ai: N LEU 219 - bi O PHE 216
+Hbond found: 4848 4817 dist  11.0, factor:    0.02
+ai: N SER 220 - bi O GLU 218
+Hbond found: 4859 4817 dist   9.7, factor:    0.15
+ai: N GLU 221 - bi O GLU 218
+Hbond found: 4874 4832 dist  11.1, factor:    0.09
+ai: N VAL 222 - bi O LEU 219
+Hbond found: 4890 4832 dist   8.2, factor:    0.65
+ai: N ALA 223 - bi O LEU 219
+Hbond found: 4900 4877 dist  11.2, factor:    0.02
+ai: N GLN 224 - bi O VAL 222
+Hbond found: 4917 4877 dist  10.3, factor:    0.16
+ai: N LYS 225 - bi O VAL 222
+Hbond found: 4939 4893 dist  11.3, factor:    0.08
+ai: N ALA 226 - bi O ALA 223
+Hbond found: 4949 4893 dist   8.2, factor:    0.50
+ai: N ALA 227 - bi O ALA 223
+Hbond found: 4959 4903 dist   8.7, factor:    0.23
+ai: N GLN 228 - bi O GLN 224
+Hbond found: 4976 4942 dist  11.0, factor:    0.06
+ai: N SER 229 - bi O ALA 226
+Hbond found: 4981 4920 dist   8.4, factor:    0.18
+ai: OG SER 229 - bi O LYS 225
+Hbond found: 4987 4942 dist   9.0, factor:    0.23
+ai: N LEU 230 - bi O ALA 226
+Hbond found: 5006 4952 dist   9.3, factor:    0.25
+ai: N ARG 231 - bi O ALA 227
+Hbond found: 5016 4966 dist   9.1, factor:    0.04
+ai: NH2 ARG 231 - bi OE1 GLN 228
+Hbond found: 5030 4990 dist  11.2, factor:    0.01
+ai: N SER 232 - bi O LEU 230
+Hbond found: 5035 4979 dist   7.5, factor:    0.30
+ai: OG SER 232 - bi O SER 229
+Hbond found: 5041 5035 dist   9.3, factor:    0.05
+ai: N LEU 233 - bi OG SER 232
+Hbond found: 5077 5009 dist   7.1, factor:    0.12
+ai: N GLY 235 - bi O ARG 231
+Hbond found: 5098 5080 dist  11.7, factor:    0.02
+ai: N LYS 237 - bi O GLY 235
+Hbond found: 5101 4524 dist   7.6, factor:    0.35
+ai: O LYS 237 - bi NE2 GLN 200
+Hbond found: 5141 4519 dist   8.9, factor:    0.36
+ai: N LYS 239 - bi O GLN 200
+Hbond found: 5144 4552 dist   8.5, factor:    0.53
+ai: O LYS 239 - bi N LEU 202
+Hbond found: 5179 4555 dist  10.4, factor:    0.21
+ai: N GLY 241 - bi O LEU 202
+Hbond found: 5200 4591 dist   8.4, factor:    0.36
+ai: N ILE 243 - bi O PHE 204
+Hbond found: 5219 5189 dist  10.9, factor:    0.01
+ai: N CYS 244 - bi O PRO 242
+Hbond found: 5229 5203 dist   9.8, factor:    0.04
+ai: N SER 245 - bi O ILE 243
+Hbond found: 5240 5203 dist  10.7, factor:    0.07
+ai: N VAL 246 - bi O ILE 243
+Hbond found: 5278 5275 dist   6.9, factor:    0.04
+ai: O TYR 248 - bi N TYR 248
+Hbond found: 5304 4653 dist   7.7, factor:    0.20
+ai: NE2 GLN 249 - bi O TYR 208
+Hbond found: 5313 4646 dist   8.9, factor:    0.19
+ai: N ALA 250 - bi O GLY 207
+Hbond found: 5316 4650 dist   9.9, factor:    0.04
+ai: O ALA 250 - bi N TYR 208
+Hbond found: 5323 3844 dist  12.0, factor:    0.01
+ai: N SER 251 - bi O PRO 154
+Hbond found: 5328 3837 dist   7.8, factor:    0.13
+ai: OG SER 251 - bi O GLY 153
+Hbond found: 5334 3793 dist   8.2, factor:    0.29
+ai: N GLY 252 - bi O ALA 149
+Hbond found: 5337 3740 dist  11.2, factor:    0.06
+ai: O GLY 252 - bi N ASN 146
+Hbond found: 5337 3754 dist   8.7, factor:    0.31
+ai: O GLY 252 - bi N TRP 147
+Hbond found: 5348 3708 dist   9.2, factor:    0.24
+ai: N SER 254 - bi OD1 ASN 144
+Hbond found: 5353 3708 dist  11.5, factor:    0.04
+ai: OG SER 254 - bi OD1 ASN 144
+Hbond found: 5359 5353 dist   9.7, factor:    0.09
+ai: N ILE 255 - bi OG SER 254
+Hbond found: 5378 5344 dist  11.5, factor:    0.06
+ai: N ASP 256 - bi O GLY 253
+Hbond found: 5384 4643 dist  10.3, factor:    0.12
+ai: OD1 ASP 256 - bi N GLY 207
+Hbond found: 5390 5344 dist  11.3, factor:    0.08
+ai: N TRP 257 - bi O GLY 253
+Hbond found: 5414 5351 dist   8.7, factor:    0.50
+ai: N SER 258 - bi O SER 254
+Hbond found: 5419 5362 dist  10.2, factor:    0.14
+ai: OG SER 258 - bi O ILE 255
+Hbond found: 5425 5362 dist   9.3, factor:    0.25
+ai: N TYR 259 - bi O ILE 255
+Hbond found: 5436 4777 dist   7.3, factor:    0.46
+ai: OH TYR 259 - bi OD2 ASP 215
+Hbond found: 5446 5381 dist   9.3, factor:    0.25
+ai: N ASP 260 - bi O ASP 256
+Hbond found: 5452 4633 dist   7.2, factor:    0.30
+ai: OD1 ASP 260 - bi OH TYR 206
+Hbond found: 5453 4661 dist   7.5, factor:    0.30
+ai: OD2 ASP 260 - bi OH TYR 208
+Hbond found: 5458 5393 dist   7.7, factor:    0.24
+ai: N TYR 261 - bi O TRP 257
+Hbond found: 5479 5417 dist  10.3, factor:    0.17
+ai: N GLY 262 - bi O SER 258
+Hbond found: 5486 5417 dist   8.2, factor:    0.38
+ai: N ILE 263 - bi O SER 258
+Hbond found: 5505 5482 dist  10.8, factor:    0.06
+ai: N LYS 264 - bi O GLY 262
+Hbond found: 5530 4379 dist   8.4, factor:    0.54
+ai: O TYR 265 - bi N PHE 192
+Hbond found: 5538 4822 dist   6.9, factor:    0.29
+ai: OH TYR 265 - bi OE2 GLU 218
+Hbond found: 5548 5508 dist   9.4, factor:    0.22
+ai: N SER 266 - bi O LYS 264
+Hbond found: 5553 5419 dist   7.4, factor:    0.37
+ai: OG SER 266 - bi OG SER 258
+Hbond found: 5559 4382 dist   8.8, factor:    0.38
+ai: N PHE 267 - bi O PHE 192
+Hbond found: 5562 4418 dist   8.7, factor:    0.54
+ai: O PHE 267 - bi N ILE 194
+Hbond found: 5579 4574 dist   8.5, factor:    0.59
+ai: N ALA 268 - bi O MET 203
+Hbond found: 5589 4421 dist   8.4, factor:    0.40
+ai: N PHE 269 - bi O ILE 194
+Hbond found: 5609 4536 dist   8.1, factor:    0.54
+ai: N GLU 270 - bi O LEU 201
+Hbond found: 5612 4516 dist   8.1, factor:    0.51
+ai: O GLU 270 - bi N GLN 200
+Hbond found: 5624 4459 dist   7.7, factor:    0.54
+ai: N LEU 271 - bi O HIS 196
+Hbond found: 5627 4505 dist   9.5, factor:    0.25
+ai: O LEU 271 - bi N SER 199
+Hbond found: 5673 5667 dist   8.3, factor:    0.18
+ai: OD1 ASP 273 - bi N ASP 273
+Hbond found: 5679 5673 dist   9.3, factor:    0.08
+ai: N THR 274 - bi OD1 ASP 273
+Hbond found: 5724 5674 dist   8.8, factor:    0.31
+ai: N TYR 277 - bi OD2 ASP 273
+Hbond found: 5735 5710 dist   9.2, factor:    0.03
+ai: OH TYR 277 - bi NH2 ARG 276
+Hbond found: 5735 5707 dist  10.5, factor:    0.01
+ai: OH TYR 277 - bi NE ARG 276
+Hbond found: 5752 5727 dist  10.9, factor:    0.09
+ai: N PHE 279 - bi O TYR 277
+Hbond found: 5755 3391 dist   9.1, factor:    0.29
+ai: O PHE 279 - bi NH2 ARG 124
+Hbond found: 5772 5727 dist   9.5, factor:    0.32
+ai: N LEU 280 - bi O TYR 277
+Hbond found: 5791 5755 dist  10.2, factor:    0.04
+ai: N LEU 281 - bi O PHE 279
+Hbond found: 5794 1683 dist   8.1, factor:    0.42
+ai: O LEU 281 - bi OH TYR 12
+Hbond found: 5834 5813 dist   9.2, factor:    0.07
+ai: N ARG 284 - bi O PRO 282
+Hbond found: 5844 1381 dist  11.5, factor:    0.02
+ai: NH2 ARG 284 - bi OE2 GLU 92
+Hbond found: 5858 5813 dist   8.3, factor:    0.45
+ai: N GLN 285 - bi O PRO 282
+Hbond found: 5865 5652 dist   9.8, factor:    0.17
+ai: OE1 GLN 285 - bi NH1 ARG 272
+Hbond found: 5875 5827 dist   8.5, factor:    0.37
+ai: N ILE 286 - bi O ALA 283
+Hbond found: 5927 5878 dist  10.7, factor:    0.11
+ai: N THR 289 - bi O ILE 286
+Hbond found: 5932 5861 dist   7.5, factor:    0.31
+ai: OG1 THR 289 - bi O GLN 285
+Hbond found: 5941 5878 dist   8.3, factor:    0.33
+ai: N ALA 290 - bi O ILE 286
+Hbond found: 5951 5897 dist   8.4, factor:    0.38
+ai: N GLU 291 - bi O LEU 287
+Hbond found: 5966 5916 dist  10.3, factor:    0.21
+ai: N GLU 292 - bi O PRO 288
+Hbond found: 5973 5089 dist   7.6, factor:    0.23
+ai: OE1 GLU 292 - bi OG1 THR 236
+Hbond found: 5973 5653 dist   8.2, factor:    0.22
+ai: OE1 GLU 292 - bi NH2 ARG 272
+Hbond found: 5974 5650 dist   8.4, factor:    0.30
+ai: OE2 GLU 292 - bi NE ARG 272
+Hbond found: 5981 5930 dist   9.0, factor:    0.32
+ai: N THR 293 - bi O THR 289
+Hbond found: 5986 5930 dist   7.2, factor:    0.35
+ai: OG1 THR 293 - bi O THR 289
+Hbond found: 5995 5944 dist   8.8, factor:    0.40
+ai: N TRP 294 - bi O ALA 290
+Hbond found: 6019 5969 dist  10.2, factor:    0.19
+ai: N LEU 295 - bi O GLU 292
+Hbond found: 6038 5984 dist   9.3, factor:    0.34
+ai: N GLY 296 - bi O THR 293
+Hbond found: 6045 5984 dist   8.7, factor:    0.46
+ai: N LEU 297 - bi O THR 293
+Hbond found: 6064 5998 dist   8.0, factor:    0.48
+ai: N LYS 298 - bi O TRP 294
+Hbond found: 6072 2913 dist   9.5, factor:    0.04
+ai: NZ LYS 298 - bi OD2 ASP 93
+Hbond found: 6086 6022 dist  10.2, factor:    0.16
+ai: N ALA 299 - bi O LEU 295
+Hbond found: 6096 6048 dist  10.3, factor:    0.15
+ai: N ILE 300 - bi O LEU 297
+Hbond found: 6115 6048 dist   8.5, factor:    0.46
+ai: N MET 301 - bi O LEU 297
+Hbond found: 6132 6067 dist   8.1, factor:    0.44
+ai: N GLU 302 - bi O LYS 298
+Hbond found: 6140 2937 dist   6.6, factor:    0.25
+ai: OE2 GLU 302 - bi OG SER 95
+Hbond found: 6147 6099 dist   9.9, factor:    0.14
+ai: N HIS 303 - bi O ILE 300
+Hbond found: 6156 4822 dist   7.6, factor:    0.39
+ai: NE2 HIS 303 - bi OE2 GLU 218
+Hbond found: 6164 6099 dist   9.0, factor:    0.30
+ai: N VAL 304 - bi O ILE 300
+Hbond found: 6180 6118 dist   8.7, factor:    0.52
+ai: N ARG 305 - bi O MET 301
+Hbond found: 6189 2981 dist   8.4, factor:    0.17
+ai: NH1 ARG 305 - bi OG SER 98
+Hbond found: 6204 6135 dist   8.9, factor:    0.19
+ai: N ASP 306 - bi O GLU 302
+Hbond found: 6210 6187 dist   9.0, factor:    0.10
+ai: OD1 ASP 306 - bi NE ARG 305
+Hbond found: 6211 6190 dist   9.8, factor:    0.05
+ai: OD2 ASP 306 - bi NH2 ARG 305
+Hbond found: 6216 6167 dist  10.4, factor:    0.09
+ai: N HIS 307 - bi O VAL 304
+Hbond found: 6222 6150 dist   6.8, factor:    0.22
+ai: ND1 HIS 307 - bi O HIS 303
+Hbond found: 6250 4355 dist   8.2, factor:    0.14
+ai: O TYR 309 - bi NZ LYS 190
+Hbond found: 6250 6247 dist   6.7, factor:    0.02
+ai: O TYR 309 - bi N TYR 309
+Hbond found: 6258 4350 dist   6.6, factor:    0.62
+ai: OH TYR 309 - bi O LYS 190
+Number of Hbonds: 432.000000
+ hb:-515.86 vdw:-2353.86 es:-22.86 bb:-589.40 pe:0.00 le:0.00
+calc is doneDone writting to octave file
+All values below are in kJ/mol
+          |                       WILDTYPE                   |                        MUTANT                    |            DG components            |       DG total       
+----------+--------------------------------------------------+--------------------------------------------------+-------------------------------------+----------------------
+Structure |        vdW        ES        HB       DE       BB |        vdW        ES        HB       DE       BB |     vdW     ES     HB     DE     BB |  Target   Prediction 
+----------+--------------------------------------------------+--------------------------------------------------+-------------------------------------+----------------------
+1AYE_F67A |  0.00e+00 0.00e+00 0.00e+00 0.00e+00 0.00e+00 |  0.00e+00 0.00e+00 0.00e+00 0.00e+00 0.00e+00 |    9.77   0.00   1.69  -0.42  -1.18 |   0.000       10.643 

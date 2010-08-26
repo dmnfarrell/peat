@@ -1,0 +1,1096 @@
+
+backbone_entropy.h,156
+#define BACKBONEENTROPY_H2,26
+using namespace std;15,346
+namespace la 17,368
+struct propensity_map 20,408
+class BackboneEntropy:BackboneEntropy28,533
+
+bfactor.h,78
+#define BFACTOR_H2,18
+using namespace std;7,80
+class Bfactor:Bfactor9,102
+
+bondmatrix.h,88
+#define BONDMATRIX_H2,21
+using namespace std;7,105
+class BondMatrix:BondMatrix9,127
+
+Boxes.h,69
+#define BOXES_H2,16
+using namespace std;10,161
+class Boxes 12,183
+
+chemical_shift_changes.h,126
+#define CHEMICAL_SHIFT_CHANGES_H2,33
+using namespace std;10,199
+class Chemical_Shift_Changes:Chemical_Shift_Changes12,221
+
+complementarity.h,104
+#define COMPLEMENTARITY_H2,26
+using namespace std;8,135
+class Complementarity:Complementarity10,157
+
+correct_atomnames.h,109
+#define CORRECT_ATOMNAMES_H2,28
+using namespace std;7,101
+class Correct_Atomnames:Correct_Atomnames9,123
+
+crystallized_water_bridges.h,136
+#define CRYSTALLIZED_WATER_BRIDGES_H2,37
+using namespace std;7,138
+class Crystallized_Water_Bridges:Crystallized_Water_Bridges9,160
+
+desolvation.h,93
+#define DESOLVATION_H2,22
+using namespace std;11,188
+class Desolvation:Desolvation13,210
+
+distancenn.h,87
+#define DISTANCENN_H2,21
+using namespace std;5,64
+class DistanceNN:DistanceNN9,100
+
+distances.h,87
+#define DISTANCES_H2,20
+using namespace std;11,181
+class Distances:Distances13,203
+
+elementsnn2.h,92
+#define ELEMENTSNN2_H2,22
+using namespace std;8,132
+class Elementsnn2:Elementsnn212,168
+
+elementsnn.h,87
+#define ELEMENTSNN_H2,21
+using namespace std;5,64
+class ElementsNN:ElementsNN9,100
+
+energy.h,71
+#define ENERGY_H2,17
+namespace la 30,782
+class Energy:Energy34,843
+
+es.h,66
+#define ES_H2,13
+using namespace std;11,200
+class Es:Es13,222
+
+fragmental_volume.h,111
+#define FRAGMENTAL_VOLUME_H2,28
+using namespace std;10,173
+class Fragmental_Volume:Fragmental_Volume12,195
+
+generalparameters.h,111
+#define GENERALPARAMETERS_H2,28
+using namespace std;11,212
+class Generalparameters:Generalparameters13,234
+
+genericnn.h,83
+#define GENERICNN_H2,20
+using namespace std;5,62
+class GenericNN:GenericNN9,98
+
+hbonds.h,78
+#define HBONDS_H2,17
+using namespace std;11,182
+class Hbonds:Hbonds13,204
+
+hp.h,65
+#define HP_H2,13
+using namespace std;9,145
+class Hp:Hp11,167
+
+ligand_entropy.h,100
+#define LIGAND_ENTROPY_H2,25
+using namespace std;11,212
+class LigandEntropy:LigandEntropy15,236
+
+matrix_io.h,106
+#define MATRIX_IO_H2,20
+using namespace std;7,104
+namespace la 8,125
+class Matrix_IO:Matrix_IO10,164
+
+metal.h,71
+#define METAL_H2,16
+using namespace std;7,77
+class Metal:Metal9,99
+
+method.h,78
+#define METHOD_H2,17
+using namespace std;12,197
+class Method{Method14,219
+
+mutant_stability_change.h,90
+#define MSC_H2,14
+using namespace std;27,703
+namespace la 28,724
+class MSC:MSC30,763
+
+newmethod.h,83
+#define NEWMETHOD_H2,20
+using namespace std;5,61
+class Newmethod:Newmethod7,83
+
+newnn.h,87
+#define ELEMENTSNN_H2,21
+using namespace std;5,64
+class ElementsNN:ElementsNN9,100
+
+nn_discrimination.h,263
+#define NN_DISCRIMINATION_H2,28
+using namespace std;9,173
+struct DecoyCmp 13,209
+  bool operator(15,228
+struct PDBDecoyCmp 22,342
+  bool operator(24,364
+struct DecoyDecoyCmp 48,819
+  bool operator(50,843
+class NN_DISCRIMINATION{NN_DISCRIMINATION70,1297
+
+nn_discrimination_preparation.h,146
+#define NN_DISCRIMINATION_PREPARATION_H2,40
+using namespace std;6,110
+class NN_DISCRIMINATION_PREPARATION{NN_DISCRIMINATION_PREPARATION29,475
+
+nn_es.h,71
+#define NN_ES_H2,16
+using namespace std;5,54
+class NN_ES:NN_ES9,90
+
+nn_fitter.h,86
+#define NN_FITTER_H2,20
+using namespace std;7,118
+class NN_FITTER{NN_FITTER11,154
+
+nn_hbond.h,80
+#define NN_HBOND_H2,19
+using namespace std;5,60
+class NN_HBOND:NN_HBOND9,96
+
+nn_ls.h,73
+#define NN_LS_H2,16
+using namespace std;6,82
+class NN_LS:NN_LS10,118
+
+nnmodel.h,1212
+#define NNMODEL_H2,18
+using namespace std;13,230
+class Nnmodel{Nnmodel15,252
+  virtual void create_network(Nnmodel::create_network21,313
+  virtual void define_input(Nnmodel::define_input22,347
+  virtual void test_pose(Nnmodel::test_pose23,379
+  virtual void train_pose(Nnmodel::train_pose24,416
+  virtual void update_weights(Nnmodel::update_weights25,454
+  virtual void build_inputs(Nnmodel::build_inputs26,542
+  virtual void write_network(Nnmodel::write_network27,582
+  virtual void read_network(Nnmodel::read_network28,626
+  virtual int get_no_epochs(Nnmodel::get_no_epochs30,670
+  virtual int get_max_epochs_since_record(Nnmodel::get_max_epochs_since_record31,711
+  virtual float get_target_factor(Nnmodel::get_target_factor32,766
+  virtual string get_dataset(Nnmodel::get_dataset33,815
+  virtual float get_train_pct(Nnmodel::get_train_pct34,858
+  virtual float get_validate_pct(Nnmodel::get_validate_pct35,903
+  virtual float get_test_pct(Nnmodel::get_test_pct36,951
+  virtual int get_smoothing(Nnmodel::get_smoothing37,995
+  virtual bool get_include_co_factors(Nnmodel::get_include_co_factors38,1036
+  virtual bool get_include_water(Nnmodel::get_include_water39,1091
+
+nnpot.h,75
+#define NNPOT_H2,16
+using namespace std;23,470
+class Nnpot:Nnpot25,492
+
+nnsecstruc.h,89
+#define NNSECSTRUC_H2,21
+using namespace std;9,116
+class Nnsecstruc:Nnsecstruc11,138
+
+nn_vdw.h,74
+#define NN_VDW_H2,17
+using namespace std;5,56
+class NN_VDW:NN_VDW9,92
+
+pdbwriter.h,83
+#define PDBWRITER_H2,20
+using namespace std;5,61
+class Pdbwriter:Pdbwriter7,83
+
+peoe.h,72
+#define PEOE_H2,15
+using namespace std;13,193
+class Peoe:Peoe15,215
+
+pose.h,43
+#define POSE_H2,15
+struct pose{pose4,31
+
+prepinreader.h,95
+#define PREPINREADER_H2,23
+using namespace std;8,118
+class PrepinReader:PrepinReader10,140
+
+protein_entropy.h,102
+#define PROTEIN_ENTROPY_H2,26
+using namespace std;8,134
+class ProteinEntropy:ProteinEntropy12,158
+
+reverse_chemical_shift_changes.h,175
+#define REVERSE_CHEMICAL_SHIFT_CHANGES_H2,41
+using namespace std;7,162
+struct amide{amide9,184
+class Reverse_Chemical_Shift_Changes:Reverse_Chemical_Shift_Changes17,314
+
+simplelj.h,84
+#define SIMPLELJ_H2,19
+using namespace std;11,171
+class SimpleLJ:SimpleLJ13,193
+
+simple_parameters.h,109
+#define SIMPLE_PARAMETERS_H2,28
+using namespace std;7,126
+class Simple_Parameters:Simple_Parameters9,148
+
+targets.h,79
+#define TARGETS_H2,18
+using namespace std;8,79
+class Targets:Targets10,101
+
+topology.h,83
+#define TOPOLOGY_H2,19
+using namespace std;8,126
+class Topology:Topology10,148
+
+up_complementarity.h,113
+#define UP_COMPLEMENTARITY_H2,29
+using namespace std;8,141
+class Up_Complementarity:Up_Complementarity10,163
+
+vdw_flat.h,84
+#define VDW_FLAT_H2,19
+using namespace std;10,150
+class Vdw_Flat:Vdw_Flat12,172
+
+vdw.h,69
+#define VDW_H2,14
+using namespace std;10,140
+class Vdw:Vdw12,162
+
+vdw_line.h,84
+#define VDW_LINE_H2,19
+using namespace std;15,269
+class Vdw_Line:Vdw_Line17,291
+
+water_bridges.h,235
+#define WATER_BRIDGES_H2,24
+using namespace std;15,239
+typedef vector<int> index_list;17,261
+struct potential_water_struct20,295
+  potential_water_struct(26,388
+  void add_contact(32,483
+class Water_Bridges:Water_Bridges40,565
+
+water_entropy.h,97
+#define WATER_ENTROPY_H2,24
+using namespace std;7,109
+class Water_Entropy:Water_Entropy9,131
+
+write_file.h,86
+#define WRITE_FILE_H2,21
+using namespace std;5,63
+class Write_File:Write_File7,85
+
+backbone_entropy.cpp,895
+BackboneEntropy::BackboneEntropy(7,98
+BackboneEntropy::BackboneEntropy(14,195
+BackboneEntropy::BackboneEntropy(22,375
+BackboneEntropy::~BackboneEntropy(38,652
+void BackboneEntropy::calculate(41,692
+float BackboneEntropy::calculate(51,854
+float BackboneEntropy::calculate(65,1246
+void BackboneEntropy::read_in_maps(86,1742
+void BackboneEntropy::precalculate_energies(150,3371
+void BackboneEntropy::do_statistics(192,4791
+void BackboneEntropy::print_all_maps(241,6383
+void BackboneEntropy::print_map(267,7185
+void BackboneEntropy::insert_angles(290,7775
+int BackboneEntropy::make_index(303,8043
+propensity_map BackboneEntropy::new_propensity_map(317,8244
+bool BackboneEntropy::set_phi_and_psi(334,8531
+la::vector<float> BackboneEntropy::cross(417,10545
+float BackboneEntropy::dot(427,10828
+float BackboneEntropy::norm(433,10965
+void BackboneEntropy::writeDescription(440,11089
+
+bfactor.cpp,289
+Bfactor::Bfactor(8,84
+Bfactor::Bfactor(15,206
+Bfactor::Bfactor(25,377
+Bfactor::~Bfactor(36,580
+float Bfactor::surface_dist_factor(39,604
+void Bfactor::calculate(52,850
+void Bfactor::calculate(169,3852
+inline bool Bfactor::is_close(201,4620
+void Bfactor::writeDescription(213,4804
+
+bondmatrix.cpp,838
+BondMatrix::BondMatrix(8,89
+BondMatrix::BondMatrix(16,249
+BondMatrix::BondMatrix(25,411
+BondMatrix::BondMatrix(31,536
+BondMatrix::~BondMatrix(34,574
+void BondMatrix::calculate(37,604
+void BondMatrix::calculate(42,680
+void BondMatrix::assign_bonds(183,4843
+void BondMatrix::calculate_list(193,5014
+void BondMatrix::make_list_entry(287,7557
+void BondMatrix::only_bond(317,8101
+int BondMatrix::no_bonds(348,8832
+bool BondMatrix::is_in_list(358,9004
+void BondMatrix::change_type(387,9761
+vector<vector<int> > BondMatrix::getResult(401,10023
+int BondMatrix::no_bonds_matrix(409,10203
+int BondMatrix::noBondsCompExp(424,10475
+bool BondMatrix::connection(447,10804
+vector<int> BondMatrix::find_bonding_atoms(479,11706
+void BondMatrix::store_bonding_information_in_atoms(497,12131
+void BondMatrix::writeDescription(546,13054
+
+Boxes.cpp,114
+Boxes::Boxes(3,20
+Boxes::Boxes(9,160
+void Boxes::make_boxes(20,308
+vector<int> Boxes::get_close_atoms(78,1702
+
+chemical_shift_changes.cpp,822
+Chemical_Shift_Changes::Chemical_Shift_Changes(8,112
+Chemical_Shift_Changes::Chemical_Shift_Changes(14,196
+Chemical_Shift_Changes::Chemical_Shift_Changes(21,365
+Chemical_Shift_Changes::~Chemical_Shift_Changes(33,652
+void Chemical_Shift_Changes::amide_shifts(36,706
+void Chemical_Shift_Changes::write_out_chemical_shifts(135,3014
+void Chemical_Shift_Changes::generate_list_of_amides(156,3628
+vector<Atom*>::iterator Chemical_Shift_Changes::has_element_bonded(190,4400
+vector<Atom*>::iterator Chemical_Shift_Changes::has_atom_name_bonded(208,4775
+int Chemical_Shift_Changes::no_hydrogen_bounded(228,5145
+float Chemical_Shift_Changes::induced_shift(244,5420
+float Chemical_Shift_Changes::angle(338,7145
+void Chemical_Shift_Changes::set_parameters(341,7232
+void Chemical_Shift_Changes::writeDescription(387,8339
+
+complementarity.cpp,178
+Complementarity::Complementarity(8,100
+Complementarity::~Complementarity(65,1612
+void Complementarity::set_parameters(84,1668
+void Complementarity::writeDescription(136,2654
+
+correct_atomnames.cpp,557
+Correct_Atomnames::Correct_Atomnames(8,104
+Correct_Atomnames::Correct_Atomnames(19,292
+Correct_Atomnames::~Correct_Atomnames(24,365
+void Correct_Atomnames::go(27,409
+void Correct_Atomnames::correct_heavy_atoms(48,877
+void Correct_Atomnames::correct_hydrogen_atoms(69,1173
+vector<int> Correct_Atomnames::find_bounded_hydrogens(124,2464
+int Correct_Atomnames::get_number_of_bounded_heavy_atoms(136,2707
+float Correct_Atomnames::get_distance(155,3088
+void Correct_Atomnames::set_parameters(167,3414
+void Correct_Atomnames::writeDescription(179,3622
+
+crystallized_water_bridges.cpp,684
+Crystallized_Water_Bridges::Crystallized_Water_Bridges(8,120
+Crystallized_Water_Bridges::Crystallized_Water_Bridges(13,213
+Crystallized_Water_Bridges::Crystallized_Water_Bridges(20,392
+Crystallized_Water_Bridges::Crystallized_Water_Bridges(54,1265
+Crystallized_Water_Bridges::~Crystallized_Water_Bridges(72,1676
+float Crystallized_Water_Bridges::calculate(77,1740
+float Crystallized_Water_Bridges::calculate(101,2227
+float Crystallized_Water_Bridges::check_for_interal_water_bridge(133,2889
+float Crystallized_Water_Bridges::check_for_water_bridge(192,4108
+void Crystallized_Water_Bridges::set_parameters(244,5594
+void Crystallized_Water_Bridges::writeDescription(255,5755
+
+desolvation.cpp,789
+Desolvation::Desolvation(8,91
+Desolvation::Desolvation(15,238
+Desolvation::Desolvation(21,300
+Desolvation::Desolvation(39,725
+Desolvation::~Desolvation(56,1119
+float Desolvation::calculate(60,1166
+float Desolvation::calculate(72,1406
+float Desolvation::calculate_contact_between_A_and_B(91,1806
+void Desolvation::prepare_soup(121,2559
+float Desolvation::sum_atoms(134,2776
+float Desolvation::atomic_desolvation(158,3382
+float Desolvation::get_min_desolvation_factor(185,4480
+float Desolvation::get_max_desolvation_factor(200,4912
+void Desolvation::set_desolvation_factors(215,5344
+void Desolvation::set_desolvation_factors(227,5575
+void Desolvation::set_desolvation_factors(247,5990
+void Desolvation::set_parameters(390,10985
+void Desolvation::writeDescription(487,13378
+
+distancenn.cpp,824
+DistanceNN::DistanceNN(8,90
+DistanceNN::~DistanceNN(19,275
+void DistanceNN::create_network(22,305
+void DistanceNN::build_inputs(47,887
+void DistanceNN::define_input(99,2716
+void DistanceNN::test_pose(122,3164
+void DistanceNN::train_pose(138,3611
+void DistanceNN::write_network(155,3930
+void DistanceNN::read_network(169,4196
+void DistanceNN::set_parameters(189,4601
+int DistanceNN::get_no_epochs(356,8482
+float DistanceNN::get_target_factor(357,8533
+int DistanceNN::get_max_epochs_since_record(358,8594
+string DistanceNN::get_dataset(359,8673
+float DistanceNN::get_train_pct(361,8724
+float DistanceNN::get_validate_pct(362,8777
+float DistanceNN::get_test_pct(363,8836
+bool DistanceNN::get_include_co_factors(365,8888
+bool DistanceNN::get_include_water(372,9006
+void DistanceNN::writeDescription(382,9117
+
+distances.cpp,567
+Distances::Distances(7,87
+Distances::Distances(13,210
+Distances::~Distances(15,245
+void Distances::calculate(17,272
+void Distances::calculate(28,439
+void Distances::calculate(63,1156
+void Distances::calculate(78,1426
+void Distances::calculate(94,1682
+void Distances::calculate(162,3366
+void Distances::calculate(199,4239
+void Distances::print_result(213,4488
+float Distances::calculate(232,4757
+vector<vector<float> > Distances::getResult(255,5101
+vector<vector<float> > * Distances::getResultPointer(256,5163
+void Distances::writeDescription(258,5236
+
+elementsnn2.cpp,1108
+Elementsnn2::Elementsnn2(8,91
+Elementsnn2::~Elementsnn2(23,338
+void Elementsnn2::create_network(26,370
+void Elementsnn2::build_inputs(38,622
+vector<vector<int> >  Elementsnn2::first_build(171,3966
+void Elementsnn2::define_input(199,4891
+void Elementsnn2::test_pose(271,6484
+void Elementsnn2::train_pose(289,6897
+void Elementsnn2::update_weights(300,7161
+vector<float> Elementsnn2::get_protein_freqs(305,7229
+vector<float> Elementsnn2::get_ligand_freqs(342,8111
+void Elementsnn2::write_network(378,8992
+void Elementsnn2::read_network(385,9104
+void Elementsnn2::set_parameters(396,9339
+int Elementsnn2::get_no_epochs(620,14609
+int Elementsnn2::get_smoothing(621,14661
+float Elementsnn2::get_target_factor(622,14713
+int Elementsnn2::get_max_epochs_since_record(623,14775
+string Elementsnn2::get_dataset(624,14855
+float Elementsnn2::get_train_pct(626,14907
+float Elementsnn2::get_validate_pct(627,14961
+float Elementsnn2::get_test_pct(628,15021
+bool Elementsnn2::get_include_co_factors(630,15074
+bool Elementsnn2::get_include_water(637,15193
+void Elementsnn2::writeDescription(646,15304
+
+elementsnn.cpp,824
+ElementsNN::ElementsNN(8,90
+ElementsNN::~ElementsNN(21,278
+void ElementsNN::create_network(24,308
+void ElementsNN::build_inputs(37,562
+void ElementsNN::define_input(81,2019
+void ElementsNN::test_pose(124,2911
+void ElementsNN::train_pose(140,3321
+void ElementsNN::write_network(153,3587
+void ElementsNN::read_network(160,3698
+void ElementsNN::set_parameters(169,3852
+int ElementsNN::get_no_epochs(304,6966
+float ElementsNN::get_target_factor(305,7017
+int ElementsNN::get_max_epochs_since_record(306,7078
+string ElementsNN::get_dataset(307,7157
+float ElementsNN::get_train_pct(309,7208
+float ElementsNN::get_validate_pct(310,7261
+float ElementsNN::get_test_pct(311,7320
+bool ElementsNN::get_include_co_factors(313,7372
+bool ElementsNN::get_include_water(320,7490
+void ElementsNN::writeDescription(329,7600
+
+energy.cpp,581
+Energy::Energy(8,82
+Energy::Energy(58,1195
+Energy::~Energy(60,1224
+void Energy::initiate(62,1245
+void Energy::generate_target_vector(76,1470
+void Energy::test(88,1720
+void Energy::train(128,2740
+void Energy::set_coefficients(170,3792
+double Energy::calc_total_binding_energy(177,3910
+void Energy::stream_results(183,4102
+double Energy::calculate_binding(202,4946
+void Energy::calculate_result(263,6702
+vector<double> Energy::get_components(271,6934
+int Energy::get_no_components(286,7158
+void Energy::read_parameters(289,7215
+void Energy::writeDescription(368,8658
+
+es.cpp,277
+Es::Es(7,73
+Es::Es(12,116
+Es::Es(22,323
+Es::Es(80,1543
+Es::~Es(121,2225
+double Es::calculate(124,2239
+double Es::calculate(167,3346
+double Es::calculate_es(204,4338
+double Es::permittivity(239,5286
+void Es::set_parameters(262,5787
+void Es::writeDescription(334,7432
+
+fragmental_volume.cpp,1113
+Fragmental_Volume::Fragmental_Volume(8,104
+Fragmental_Volume::Fragmental_Volume(14,178
+Fragmental_Volume::Fragmental_Volume(22,375
+Fragmental_Volume::Fragmental_Volume(62,1411
+Fragmental_Volume::~Fragmental_Volume(74,1649
+void Fragmental_Volume::calculate(79,1707
+void Fragmental_Volume::calculate(94,2012
+void Fragmental_Volume::set_precalculated_fragmental_volumes(109,2320
+void Fragmental_Volume::apply_precalculated_volumes(129,2830
+void Fragmental_Volume::calculate(170,3700
+float Fragmental_Volume::calculate_molecular_volume(273,6903
+float Fragmental_Volume::calculate_molecular_volume_by_integration(290,7217
+void Fragmental_Volume::find_touching_atoms(381,9070
+float Fragmental_Volume::atom_fragmental_volume(401,9564
+inline bool Fragmental_Volume::inside(446,10497
+void Fragmental_Volume::set_bonding_atoms(524,12173
+void Fragmental_Volume::calculate_protein_fraction_in_ellipse(544,12548
+void Fragmental_Volume::set_mode(718,17738
+float Fragmental_Volume::atomic_radius(721,17810
+void Fragmental_Volume::set_parameters(730,17959
+ void Fragmental_Volume::writeDescription(875,20971
+
+generalparameters.cpp,575
+Generalparameters::Generalparameters(8,104
+Generalparameters::Generalparameters(21,357
+Generalparameters::Generalparameters(30,518
+Generalparameters::~Generalparameters(36,592
+void Generalparameters::apply_parameters(39,636
+void Generalparameters::set_vdw_radii(82,1734
+void Generalparameters::set_protein_charges(101,2361
+void Generalparameters::set_ion_charges(109,2522
+void Generalparameters::check_parameters(128,2976
+void Generalparameters::print_all(131,3047
+void Generalparameters::set_parameters(156,3774
+void Generalparameters::writeDescription(231,5660
+
+genericnn.cpp,844
+GenericNN::GenericNN(17,170
+GenericNN::~GenericNN(29,352
+void GenericNN::create_network(32,380
+void GenericNN::build_inputs(57,886
+void GenericNN::define_input(158,3841
+void GenericNN::test_pose(168,3884
+void GenericNN::train_pose(191,4543
+void GenericNN::write_network(204,4809
+void GenericNN::read_network(211,4919
+void GenericNN::update_weights(218,5028
+int GenericNN::get_no_epochs(225,5096
+int GenericNN::get_max_epochs_since_record(226,5142
+int GenericNN::get_smoothing(227,5202
+float GenericNN::get_target_factor(228,5244
+string GenericNN::get_dataset(229,5296
+float GenericNN::get_train_pct(231,5345
+float GenericNN::get_validate_pct(232,5390
+float GenericNN::get_test_pct(233,5438
+bool GenericNN::get_include_co_factors(235,5483
+bool GenericNN::get_include_water(236,5535
+void GenericNN::writeDescription(243,5590
+
+hbonds.cpp,1025
+Hbonds::Hbonds(8,81
+Hbonds::Hbonds(11,173
+Hbonds::Hbonds(20,312
+Hbonds::Hbonds(62,1221
+Hbonds::~Hbonds(83,1609
+float Hbonds::calculate(88,1633
+float Hbonds::calculate(184,4514
+float Hbonds::hbond_factor(260,6739
+bool Hbonds::is_hbond(299,8060
+bool Hbonds::water_bridge_hbond(318,8673
+bool Hbonds::is_potential_hbond(335,9132
+bool Hbonds::is_potential_acceptor(350,9480
+bool Hbonds::is_potential_donor(362,9707
+void Hbonds::register_bond(375,9919
+bool Hbonds::number_of_hbonds_ok(397,10364
+int Hbonds::number_bounded_hydrogens(437,11416
+void Hbonds::make_list_of_number_of_bonded_hydrogens(443,11503
+float Hbonds::distance_factor(467,12238
+float Hbonds::angle_factors(479,12448
+float Hbonds::angle_factors_internal(533,13685
+float Hbonds::angle_factor(586,14930
+float Hbonds::find_angle(600,15123
+float Hbonds::find_lenght(633,15795
+vector<float> Hbonds::find_root_A(644,15953
+vector<float> Hbonds::find_root_B(689,16978
+void Hbonds::set_parameters(735,18024
+void Hbonds::writeDescription(845,20324
+
+hp.cpp,468
+Hp::Hp(8,74
+Hp::Hp(17,207
+Hp::Hp(23,253
+Hp::Hp(60,1038
+Hp::~Hp(81,1410
+float Hp::calculate(85,1425
+float Hp::calculate(113,2046
+float Hp::calculate(187,4285
+float Hp::calculate(208,4595
+inline float Hp::interaction(254,5602
+void Hp::find_hydrophobic_atoms(271,5934
+bool Hp::is_non_hetero_hydrogen(302,6585
+bool Hp::is_non_hetero_carbon(337,7236
+bool Hp::is_non_ionic_halogen(362,7815
+void Hp::set_parameters(386,8300
+void Hp::writeDescription(455,9635
+
+ligand_entropy.cpp,648
+LigandEntropy::LigandEntropy(8,98
+LigandEntropy::LigandEntropy(15,191
+LigandEntropy::LigandEntropy(28,377
+LigandEntropy::LigandEntropy(59,1054
+LigandEntropy::~LigandEntropy(92,1773
+float LigandEntropy::calculate(94,1808
+float LigandEntropy::calculate_using_desolvation(99,1894
+float LigandEntropy::calculate(130,2811
+float LigandEntropy::no_rot_bonds(160,3519
+bool LigandEntropy::is_ring_bond(260,5797
+bool LigandEntropy::is_terminal(272,6012
+void LigandEntropy::determine_ring_memberships(289,6327
+bool LigandEntropy::is_ring_member(298,6461
+void LigandEntropy::set_parameters(341,7406
+void LigandEntropy::writeDescription(389,8237
+
+matrix_io.cpp,422
+Matrix_IO::Matrix_IO(8,92
+Matrix_IO::Matrix_IO(17,280
+Matrix_IO::~Matrix_IO(19,315
+int Matrix_IO::open(21,342
+void Matrix_IO::write_string_vector(31,481
+void Matrix_IO::write_matrix(46,724
+void Matrix_IO::write_vector(60,1020
+void Matrix_IO::write_matrix(72,1236
+void Matrix_IO::write_vector(86,1539
+void Matrix_IO::update_lists(99,1752
+void Matrix_IO::close(122,2287
+void Matrix_IO::writeDescription(129,2373
+
+metal.cpp,171
+Metal::Metal(8,80
+Metal::Metal(17,219
+Metal::~Metal(61,1166
+float Metal::calculate(63,1185
+void Metal::set_parameters(102,2024
+void Metal::writeDescription(124,2275
+
+method.cpp,172
+Method::Method(4,22
+Method::Method(9,108
+Method::~Method(20,399
+void Method::setReporter(26,526
+string Method::getDescription(31,589
+string Method::getVersion(32,642
+
+mutant_stability_change.cpp,545
+MSC::MSC(7,114
+MSC::MSC(72,1475
+MSC::~MSC(76,1529
+void MSC::initiate(79,1545
+void MSC::test(95,1797
+void MSC::train(159,3354
+void MSC::set_coefficients(198,4319
+string MSC::print_matrix(205,4433
+string MSC::print_matrix(218,4626
+double MSC::calc_total_DDG(234,4872
+void MSC::stream_results(246,5132
+double MSC::calculate_stability(284,7124
+void MSC::calculate_result(348,8724
+vector<double> MSC::get_components(354,8829
+int MSC::get_no_components(369,9050
+void MSC::read_parameters(373,9105
+void MSC::writeDescription(509,11753
+
+newmethod.cpp,98
+Newmethod::Newmethod(8,88
+Newmethod::~Newmethod(15,214
+void Newmethod::writeDescription(18,242
+
+newnn.cpp,378
+ElementsNN::ElementsNN(8,85
+ElementsNN::~ElementsNN(20,270
+void ElementsNN::create_network(23,300
+void ElementsNN::build_inputs(38,596
+void ElementsNN::define_input(80,1864
+void ElementsNN::test_pose(137,3625
+void ElementsNN::train_pose(153,4026
+void ElementsNN::write_network(166,4283
+void ElementsNN::read_network(173,4394
+void ElementsNN::writeDescription(258,6657
+
+nn_discrimination.cpp,736
+NN_DISCRIMINATION::NN_DISCRIMINATION(8,104
+NN_DISCRIMINATION::~NN_DISCRIMINATION(26,425
+void NN_DISCRIMINATION::create_network(29,469
+void NN_DISCRIMINATION::build_inputs(41,801
+vector<float> NN_DISCRIMINATION::get_target(186,4248
+void NN_DISCRIMINATION::organise(205,4518
+void NN_DISCRIMINATION::prepare_set(273,6454
+void NN_DISCRIMINATION::go(340,7963
+float NN_DISCRIMINATION::train(397,9384
+float NN_DISCRIMINATION::validate(425,10114
+float NN_DISCRIMINATION::test(452,10670
+void NN_DISCRIMINATION::rank_results(516,12200
+void NN_DISCRIMINATION::write_network(580,13535
+void NN_DISCRIMINATION::read_network(587,13653
+void NN_DISCRIMINATION::set_parameters(598,13896
+void NN_DISCRIMINATION::writeDescription(703,16188
+
+nn_discrimination_preparation.cpp,316
+NN_DISCRIMINATION_PREPARATION::NN_DISCRIMINATION_PREPARATION(8,128
+NN_DISCRIMINATION_PREPARATION::~NN_DISCRIMINATION_PREPARATION(18,317
+void NN_DISCRIMINATION_PREPARATION::build_inputs(21,385
+void NN_DISCRIMINATION_PREPARATION::set_parameters(26,442
+void NN_DISCRIMINATION_PREPARATION::writeDescription(69,1235
+
+nn_es.cpp,715
+NN_ES::NN_ES(8,80
+NN_ES::~NN_ES(19,252
+void NN_ES::create_network(22,272
+void NN_ES::build_inputs(47,849
+void NN_ES::define_input(115,3081
+void NN_ES::test_pose(136,3522
+void NN_ES::train_pose(152,3964
+void NN_ES::write_network(169,4278
+void NN_ES::read_network(183,4540
+void NN_ES::set_parameters(203,4941
+int NN_ES::get_no_epochs(355,8463
+float NN_ES::get_target_factor(356,8509
+int NN_ES::get_max_epochs_since_record(357,8565
+string NN_ES::get_dataset(358,8639
+float NN_ES::get_train_pct(360,8685
+float NN_ES::get_validate_pct(361,8733
+float NN_ES::get_test_pct(362,8787
+bool NN_ES::get_include_co_factors(364,8834
+bool NN_ES::get_include_water(371,8947
+void NN_ES::writeDescription(381,9053
+
+nn_fitter.cpp,539
+NN_FITTER::NN_FITTER(8,88
+NN_FITTER::~NN_FITTER(23,352
+void NN_FITTER::create_network(26,380
+void NN_FITTER::build_inputs(38,658
+float NN_FITTER::get_contacts(95,2003
+void NN_FITTER::set_targets(128,2673
+void NN_FITTER::organise(143,3050
+void NN_FITTER::go(215,5238
+float NN_FITTER::train(265,6330
+float NN_FITTER::validate(276,6551
+float NN_FITTER::test(295,7024
+void NN_FITTER::write_network(334,8182
+void NN_FITTER::read_network(341,8292
+void NN_FITTER::set_parameters(354,8628
+void NN_FITTER::writeDescription(504,11871
+
+nn_hbond.cpp,781
+NN_HBOND::NN_HBOND(8,86
+NN_HBOND::~NN_HBOND(19,267
+void NN_HBOND::create_network(22,293
+void NN_HBOND::build_inputs(47,873
+void NN_HBOND::define_input(121,3215
+void NN_HBOND::test_pose(142,3659
+void NN_HBOND::train_pose(158,4104
+void NN_HBOND::write_network(175,4421
+void NN_HBOND::read_network(189,4685
+void NN_HBOND::set_parameters(209,5088
+int NN_HBOND::get_no_epochs(361,8623
+float NN_HBOND::get_target_factor(362,8672
+int NN_HBOND::get_max_epochs_since_record(363,8731
+string NN_HBOND::get_dataset(364,8808
+float NN_HBOND::get_train_pct(366,8857
+float NN_HBOND::get_validate_pct(367,8908
+float NN_HBOND::get_test_pct(368,8965
+bool NN_HBOND::get_include_co_factors(370,9015
+bool NN_HBOND::get_include_water(377,9131
+void NN_HBOND::writeDescription(387,9240
+
+nn_ls.cpp,627
+NN_LS::NN_LS(8,80
+NN_LS::~NN_LS(19,252
+void NN_LS::create_network(22,272
+void NN_LS::build_inputs(34,546
+void NN_LS::define_input(66,1402
+void NN_LS::test_pose(69,1433
+void NN_LS::train_pose(86,1839
+void NN_LS::write_network(101,2114
+void NN_LS::read_network(108,2220
+void NN_LS::set_parameters(118,2448
+int NN_LS::get_no_epochs(226,4898
+float NN_LS::get_target_factor(227,4944
+int NN_LS::get_max_epochs_since_record(228,5000
+string NN_LS::get_dataset(229,5074
+float NN_LS::get_train_pct(231,5120
+float NN_LS::get_validate_pct(232,5168
+float NN_LS::get_test_pct(233,5222
+void NN_LS::writeDescription(236,5270
+
+nnmodel.cpp,47
+Nnmodel::Nnmodel(5,24
+Nnmodel::~Nnmodel(6,45
+
+nnpot.cpp,436
+Nnpot::Nnpot(8,80
+Nnpot::~Nnpot(141,3146
+void Nnpot::organise(144,3166
+void Nnpot::train(270,6681
+void Nnpot::test(381,9258
+void Nnpot:: reorganise_lists(461,11726
+void Nnpot::write_train_status(487,12499
+void Nnpot::write_status(509,13310
+void Nnpot::write_poses(537,14326
+void Nnpot::prepare_pose(555,15233
+void Nnpot::prepare_decoy_pose(573,15768
+void Nnpot::set_targets(603,16503
+void Nnpot::writeDescription(631,17207
+
+nnsecstruc.cpp,527
+Nnsecstruc::Nnsecstruc(8,90
+Nnsecstruc::Nnsecstruc(22,330
+Nnsecstruc::~Nnsecstruc(34,567
+void Nnsecstruc::train(38,598
+void Nnsecstruc::test(195,5086
+void Nnsecstruc::flushHistogram(278,7160
+void Nnsecstruc::count(296,7520
+vector<vector<double> > Nnsecstruc::compute(436,10772
+double Nnsecstruc::sgm(496,12005
+vector<double> Nnsecstruc::getAnswer(504,12092
+void Nnsecstruc::setWeights(531,12658
+void Nnsecstruc::setup(1271,33654
+double Nnsecstruc::randomNo(1343,35169
+void Nnsecstruc::writeDescription(1362,35476
+
+nn_vdw.cpp,737
+NN_VDW::NN_VDW(8,82
+NN_VDW::~NN_VDW(19,257
+void NN_VDW::create_network(22,279
+void NN_VDW::build_inputs(47,857
+void NN_VDW::define_input(121,3179
+void NN_VDW::test_pose(142,3621
+void NN_VDW::train_pose(158,4064
+void NN_VDW::write_network(175,4379
+void NN_VDW::read_network(189,4641
+void NN_VDW::set_parameters(209,5042
+int NN_VDW::get_no_epochs(361,8569
+float NN_VDW::get_target_factor(362,8616
+int NN_VDW::get_max_epochs_since_record(363,8673
+string NN_VDW::get_dataset(364,8748
+float NN_VDW::get_train_pct(366,8795
+float NN_VDW::get_validate_pct(367,8844
+float NN_VDW::get_test_pct(368,8899
+bool NN_VDW::get_include_co_factors(370,8947
+bool NN_VDW::get_include_water(377,9061
+void NN_VDW::writeDescription(387,9168
+
+pdbwriter.cpp,222
+Pdbwriter::Pdbwriter(7,87
+Pdbwriter::Pdbwriter(9,122
+Pdbwriter::Pdbwriter(16,248
+Pdbwriter::~Pdbwriter(25,410
+void Pdbwriter::write(28,438
+void Pdbwriter::make_atoms(70,1117
+void Pdbwriter::writeDescription(99,1493
+
+peoe.cpp,40
+Peoe::Peoe(8,78
+Peoe::~Peoe(400,10567
+
+prepinreader.cpp,1124
+PrepinReader::PrepinReader(8,94
+PrepinReader::PrepinReader(15,250
+PrepinReader::PrepinReader(17,291
+PrepinReader::~PrepinReader(24,421
+void PrepinReader::go(27,455
+void PrepinReader::find_protein_chain_charges(74,1809
+void PrepinReader::do_proteinChain(99,2480
+void PrepinReader::do_molecule(121,3025
+void PrepinReader::do_water(133,3321
+void PrepinReader::read_prep(143,3483
+void PrepinReader::read_parm(216,4990
+void PrepinReader::compare(263,5832
+void PrepinReader::set_parameters(318,7298
+string PrepinReader::make_search_key(379,8986
+bool PrepinReader::look_up_key(386,9121
+bool PrepinReader::look_up_non_bound_key(398,9306
+void PrepinReader::set_protonation_state_HIS(410,9515
+void PrepinReader::set_protonation_state_LYS(451,10574
+void PrepinReader::set_protonation_state_GLU(483,11360
+void PrepinReader::set_protonation_state_ASP(516,12159
+void PrepinReader::set_protonation_state_CYS(549,12950
+string PrepinReader::correct_hydrogen_name(584,13829
+string PrepinReader::correct_1_3_error(599,14115
+string PrepinReader::correct_WI_names(637,15074
+void PrepinReader::writeDescription(656,15451
+
+protein_entropy.cpp,379
+ProteinEntropy::ProteinEntropy(8,100
+ProteinEntropy::ProteinEntropy(15,195
+ProteinEntropy::ProteinEntropy(28,383
+ProteinEntropy::~ProteinEntropy(67,1395
+float ProteinEntropy::calculate(70,1433
+float ProteinEntropy::check_residue(91,1894
+float ProteinEntropy::calculate(127,2915
+void ProteinEntropy::set_parameters(157,3592
+void ProteinEntropy::writeDescription(243,5412
+
+reverse_chemical_shift_changes.cpp,736
+Reverse_Chemical_Shift_Changes::Reverse_Chemical_Shift_Changes(8,128
+Reverse_Chemical_Shift_Changes::Reverse_Chemical_Shift_Changes(17,317
+Reverse_Chemical_Shift_Changes::~Reverse_Chemical_Shift_Changes(28,607
+void Reverse_Chemical_Shift_Changes::calculate_dielectrics(32,678
+void Reverse_Chemical_Shift_Changes::calculate_dielectrics(39,867
+void Reverse_Chemical_Shift_Changes::calculate_dielectrics(47,1012
+void Reverse_Chemical_Shift_Changes::read_in_chemical_shifts(97,3479
+void Reverse_Chemical_Shift_Changes::insert_amide(155,4717
+void Reverse_Chemical_Shift_Changes::set_affector_atom(191,5475
+void Reverse_Chemical_Shift_Changes::set_parameters(215,6220
+void Reverse_Chemical_Shift_Changes::writeDescription(266,7219
+
+simplelj.cpp,132
+SimpleLJ::SimpleLJ(8,86
+SimpleLJ::~SimpleLJ(75,2444
+void SimpleLJ::writeDescription(79,2471
+double SimpleLJ::getResult(163,4356
+
+simple_parameters.cpp,711
+Simple_Parameters::Simple_Parameters(8,102
+Simple_Parameters::Simple_Parameters(14,167
+Simple_Parameters::Simple_Parameters(22,327
+Simple_Parameters::~Simple_Parameters(32,519
+void Simple_Parameters::prepare(34,562
+void Simple_Parameters::prepare(40,701
+void Simple_Parameters::set_electrostatic_parameters(56,1058
+void Simple_Parameters::set_electrostatic_parameters_for_protein_chain(78,2024
+void Simple_Parameters::set_electrostatic_parameters_for_molecule(120,3260
+void Simple_Parameters::set_electrostatic_parameters_for_water(128,3462
+void Simple_Parameters::set_dispersive_parameters(142,3753
+void Simple_Parameters::set_parameters(166,4166
+void Simple_Parameters::writeDescription(180,4469
+
+targets.cpp,456
+Targets::Targets(8,84
+Targets::~Targets(29,805
+float Targets::get_mlogKi(32,829
+float Targets::get_G(45,1056
+float Targets::get_decoy_G(58,1273
+float Targets::get_rmsd(80,1695
+float Targets::get_resolution(117,2432
+float Targets::get_no_rotor(129,2666
+int Targets::find_key(143,2898
+void Targets::read_file_wang(156,3053
+void Targets::read_file_pdbbind(235,4669
+void Targets::read_file_fictive(288,5902
+void Targets::writeDescription(336,6747
+
+topology.cpp,611
+Topology::Topology(8,86
+Topology::Topology(16,228
+Topology::~Topology(28,463
+void Topology::generate_topology(31,489
+void Topology::generate_topology(41,695
+void Topology::generate_topology(54,973
+float Topology::find_surface_distace(231,5311
+vector<float> Topology::get_protein_surface_distances(268,5914
+vector<float> Topology::get_ligand_surface_distances(277,6123
+inline float Topology::search_box(290,6333
+inline vector<float> Topology::get_coordinates(345,7272
+inline vector<int> Topology::get_indexes(356,7510
+void Topology::set_parameters(371,7854
+void Topology::writeDescription(385,8035
+
+up_complementarity.cpp,196
+Up_Complementarity::Up_Complementarity(8,106
+Up_Complementarity::~Up_Complementarity(71,1747
+void Up_Complementarity::set_parameters(90,1809
+void Up_Complementarity::writeDescription(142,2804
+
+vdw.cpp,154
+Vdw::Vdw(8,76
+Vdw::Vdw(20,265
+Vdw::~Vdw(70,1431
+double Vdw::calculate(73,1447
+double Vdw::calculate_vdw(93,1978
+void Vdw::writeDescription(110,2405
+
+vdw_flat.cpp,204
+Vdw_Flat::Vdw_Flat(8,86
+Vdw_Flat::Vdw_Flat(20,299
+Vdw_Flat::~Vdw_Flat(70,1487
+double Vdw_Flat::calculate(73,1513
+double Vdw_Flat::calculate_vdw_flat(93,2054
+void Vdw_Flat::writeDescription(105,2294
+
+vdw_line.cpp,347
+Vdw_Line::Vdw_Line(7,85
+Vdw_Line::Vdw_Line(29,400
+Vdw_Line::Vdw_Line(42,633
+Vdw_Line::Vdw_Line(103,2120
+Vdw_Line::~Vdw_Line(166,3322
+double Vdw_Line::calculate(169,3348
+double Vdw_Line::calculate(216,4722
+inline double Vdw_Line::calculate_vdw_line(268,6277
+void Vdw_Line::set_parameters(318,7370
+void Vdw_Line::writeDescription(393,9001
+
+water_bridges.cpp,901
+Water_Bridges::Water_Bridges(8,94
+Water_Bridges::Water_Bridges(13,161
+Water_Bridges::Water_Bridges(20,314
+Water_Bridges::Water_Bridges(54,1254
+Water_Bridges::~Water_Bridges(72,1639
+float Water_Bridges::calculate(77,1677
+float Water_Bridges::calculate(149,3877
+void Water_Bridges::find_water_contacts(226,6136
+void Water_Bridges::place_water_contacts(253,6845
+void Water_Bridges::make_boxes(303,8326
+void Water_Bridges::write_water_atoms(440,12139
+void Water_Bridges::place_potential_water_contacts(475,12915
+Vector Water_Bridges::find_root(542,14423
+void Water_Bridges::remove_overlaps_with_protein(575,15012
+void Water_Bridges::merge_waters(633,16904
+void Water_Bridges::merge(723,20509
+void Water_Bridges::remove_water_bumps(745,21253
+void Water_Bridges::set_parameters(768,22206
+bool Water_Bridges::no_heavy_atoms_bonded(811,23810
+void Water_Bridges::writeDescription(829,24119
+
+water_entropy.cpp,279
+Water_Entropy::Water_Entropy(8,96
+Water_Entropy::Water_Entropy(15,165
+Water_Entropy::Water_Entropy(26,322
+Water_Entropy::~Water_Entropy(72,1206
+float Water_Entropy::calculate(75,1242
+void Water_Entropy::set_parameters(95,1620
+void Water_Entropy::writeDescription(104,1667
+
+write_file.cpp,314
+Write_File::Write_File(8,90
+Write_File::Write_File(10,127
+Write_File::Write_File(17,255
+Write_File::~Write_File(25,478
+void Write_File::write(27,507
+void Write_File::write_objects(67,1395
+void Write_File::write_atoms(78,1699
+void Write_File::write_atoms(96,1992
+void Write_File::writeDescription(157,3482
