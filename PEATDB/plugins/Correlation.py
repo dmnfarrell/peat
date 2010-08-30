@@ -45,6 +45,8 @@ try:
 except:
     pass
 from PEATDB.TableModels import TableModel
+from PEATDB.Ekin.Base import EkinDataset
+from PEATDB.Ekin.Fitting import Fitting
 
 class CorrelationAnalyser(Plugin):
     """A class for processing specific Kinetics exp data"""
@@ -568,8 +570,6 @@ class CorrelationAnalyser(Plugin):
         """Test how fitting the Tm to res activity data varies with 
            actual Tm using simulated data with noise added"""
            
-        from PEATDB.Ekin.Base import EkinDataset
-        from PEATDB.Ekin.Fitting import Fitting
         from mpl_toolkits.axes_grid import AxesGrid
         if DB == None:
             DB=self.DB
@@ -629,11 +629,10 @@ class CorrelationAnalyser(Plugin):
         f1.savefig('tmrange.png')
         plt.show()
         return
-    
+
     def testSN(self):
         """test signal-noise for absorbance->velocity measurements"""
-        from PEATDB.Ekin.Base import EkinDataset
-        from PEATDB.Ekin.Fitting import Fitting
+
         from mpl_toolkits.axes_grid import AxesGrid       
             
         f=plt.figure(figsize=(8,8))  
@@ -655,6 +654,23 @@ class CorrelationAnalyser(Plugin):
 
         return        
 
+    def fitarrhenius(self):                             
+        x=range(270,400,5)
+        y=[]
+        A=1e10; Ea=1e-3;R=8.3144e-3
+        for T in x:            
+            val = A * math.exp(-Ea/R*T)            
+            y.append(val)
+            print T,val
+        A,X=Fitting.doFit(expdata=zip(x,y),model='Arrhenius',silent=True)     
+        fitx=numpy.arange(0,100)
+        fity = X.getFitLine(fitx)
+        f=plt.figure()
+        ax=f.add_subplot(111)
+        p=ax.plot(x,y,lw=2)
+        plt.show()
+        return
+    
     def analyseMutations(self, sheet, filterby=None,
                             xcol='exp', ycol='Total'):
         """Analyse mutations"""
@@ -835,7 +851,7 @@ def main():
         from PEATDB.Base import PDatabase
         app.DB = PDatabase(server='peat', username='farrell',
                              password='tafa', project='novo', port=8080)
-        print app.DB
+        #print app.DB
     ph='7'
     if opts.createstability10R == True:
         app.extract10RStability(ph=ph)
@@ -845,7 +861,8 @@ def main():
       
     if opts.tests == True:
         #app.testSN()
-        app.testResActFit()
+        #app.testResActFit()
+        app.fitarrhenius()
         
     #10R plot/analysis
     if opts.novo == True:

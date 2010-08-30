@@ -1393,7 +1393,7 @@ class Arrhenius(LM_Fitter):
         self.names = ['A', 'Ea']
         self.labels = ['temp', 'k']
         if self.variables == None:
-            self.variables = [1,100]
+            self.variables = [10,1e-3]
         else:
             self.variables = variables
         self.setChangeVars()
@@ -1413,6 +1413,6 @@ class Arrhenius(LM_Fitter):
         A=variables[0]
         Ea=variables[1]     
         R=8.3144e-3
-        value = A * math.exp(-Ea/R*x)
+        value = A * math.exp(-(Ea/R*x))
         return value  
         
