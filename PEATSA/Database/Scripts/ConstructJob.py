@@ -28,11 +28,11 @@
 #
 '''Exports all the data corresponding to a job in PEAT-SA webserver database and creates all files neccessary to run that job
 
-Note: Requires a correct webApplication.conf file to be present in PEATSA/WebApp/Resources/'''
+Note: Requires a correct webApplication.conf file to be present in PEAT_SA/WebApp/Resources/'''
 import math,sys, optparse, os
-import PEATSA.WebApp as WebApp
-import PEATSA.Core as Core
-import PEATSA.Core.PEATSAParallel as Parallel
+import PEAT_SA.WebApp as WebApp
+import PEAT_SA.Core as Core
+import PEAT_SA.Core.PEATSAParallel as Parallel
 
 def ConstructJob(jobId, outputDir, configuration, connection, jobConfigurationFile=None):
 
@@ -50,7 +50,7 @@ def ConstructJob(jobId, outputDir, configuration, connection, jobConfigurationFi
 	# In the following we
 	# 1. retrieve the data from the db
 	# 2. write the data to files (if necessary)
-	# 3. construct the PEATsSA command line arguments
+	# 3. construct the PEAT_SA command line arguments
 	#
 
 	#Get the mutation data
@@ -114,6 +114,8 @@ if __name__ == '__main__':
 			  help="A valid job id.", metavar="JOBID")
 	parser.add_option("-d", "--directory", dest="dir",
 			  help="Where to write to job data.", metavar="DIR")
+	parser.add_option("-c", "--configurationFile", dest="configurationFile",
+			  help="Configuration file containing DATABASE section", metavar="CONF")
 			  
 	(options, args) = parser.parse_args()
 
@@ -121,10 +123,17 @@ if __name__ == '__main__':
 		print 'Job id must be provided'
 		sys.exit(1)
 
+	if options.configurationFile is None:
+		print 'PEAT-SA configuration file must be provided'
+		sys.exit(1)
+	else:
+		configurationFile = os.path.abspath(options.configurationFile)
+		print 'Using configuration file ', configurationFile
+
 	outputDir = options.dir
 
 	#Connect to the database as get the job
 	connection = WebApp.UtilityFunctions.ConnectionFromDefaultConfiguration()
-	configuration = WebApp.UtilityFunctions.DefaultWebAppConfiguration()
+	configuration = Core.Environment.Configuration(filename=configurationFile)
 	ConstructJob(options.jobID, outputDir, configuration, connection)
 	connection.close()
