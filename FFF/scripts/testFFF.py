@@ -32,16 +32,22 @@ class FFF:
         #
         import FFF.FFFcontrol as FFFC
             
-        Rotamerlib=FFFC.Rotamer_class('parameters/bbdep02.May.sortlib')
+        Rotamerlib=FFFC.Rotamer_class('parameters/small_lib')
         self.FFF=FFFC.FFF()
-        self.FFF.read_pdb('2oh4.pdb')
-        self.FFF.write_pdb('teset1000.pdb')
-        stop
-        #lines=X.writepdb('junk',nowrite=True)
-        #self.FFF=FFFcontrol.FFF()
-        #self.FFF.parse_lines(lines)
-        self.Model=FFFC.model_class(self.FFF,Rotamerlib,'parameters')
+        self.FFF.read_pdb('2lzt.pdb')
+        self.Model=FFFC.pKa_class(self.FFF,Rotamerlib,'parameters')
         #self.Model.repair_all()
+        #
+        # Build all hydrogens - standard protonation state
+        #
+        self.Model.build_hydrogens()
+        self.FFF.write_pqr('2lzt.pqr.pdb')
+        return
+        
+
+
+    def mutate_test(self):
+        """Full mutation scan test"""
         energies={}
         for count in range(15,350):
             if not energies.has_key(count):
@@ -65,6 +71,8 @@ class FFF:
                 if energies[count][aa]<0.1:
                     count=count+1
         print '%d mutations modelled with energy of 0.1 or less' %count
+
+        return
 
 if __name__=='__main__':
     X=FFF()

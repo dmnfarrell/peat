@@ -51,19 +51,21 @@
 using namespace std;
 
 class FFF {
-public:
-    FFF() {
-        //
-        // Intialize environment
-        //
-        _pH=7.0;
-    };
+ public:
+  FFF() {
+    //
+    // Intialize environment
+    //
+    _pH=7.0;
+  };
   void read_pdb(const std::string pdbfilename);
   void write_pdb(const std::string pdbfilename);
   void writepdb(const std::string pdbfilename);
-    void parse_lines(const std::vector<std::string> lines);
-    void remove_atoms_with_tag(const std::string);
-    void remove_atom(atom_class& atom);
+  void write_pqr(const std::string pdbfilename);
+  vector<string> make_pdblines(const std::string type);
+  void parse_lines(const std::vector<std::string> lines);
+  void remove_atoms_with_tag(const std::string);
+  void remove_atom(atom_class& atom);
   void soup_stat(); // Prints a summary of the soup
   void check_soup(); // Check the integrety of the soup
     void update_all_atoms(); //Update the all_atoms array
@@ -89,6 +91,7 @@ public:
   // variables
   //
   vector<chain_class> chains;
+  vector<string> amino_acids;
   string pdbname;
   int nresidues;
   int natoms;

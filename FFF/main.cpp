@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
   Rotamer_class ROT("parameters/small_lib");
   pKa_class PKA(Protein,ROT,"parameters");
     //PKA.resolve_clashes();
-    Protein.write_pdb("resolved.pdb");
+    //Protein.write_pdb("resolved.pdb");
     exit(0);
     //M.repair_all();
     //M.build_hydrogens();

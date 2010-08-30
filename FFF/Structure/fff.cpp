@@ -193,6 +193,31 @@ void FFF::parse_lines(const std::vector<std::string> lines) {
 //
 // --------------------------------------
 //
+
+void FFF::write_pqr(const std::string filename) {
+  //
+  // Write PQR file using the current assigned charges and radii 
+  //
+  char pdbfile[200];
+  strcpy(pdbfile,filename.c_str());
+  FILE* outfile;
+  //
+  // Does the dir exist?
+  //
+  vector<string> spath=splitpath(filename);
+  if (not isdirectory(spath[0]) and spath[0]!="") {
+    printf ("Directory for writing does not exist: '%s'\n",spath[0].c_str());
+    exit(0);
+  }
+  outfile=fopen(pdbfile, "w");
+  vector<string> pdblines=make_pdblines("PQR");
+  for (unsigned int count=0;count<pdblines.size();count++) {
+    fprintf(outfile,"%s",pdblines[count].c_str());
+  }
+  fclose(outfile);
+  return;
+}
+
 void FFF::writepdb(const std::string filename) {
   write_pdb(filename);
   return;
@@ -214,6 +239,19 @@ void FFF::write_pdb(const std::string filename) {
     exit(0);
   }
   outfile=fopen(pdbfile, "w");
+  vector<string> pdblines=make_pdblines("PDB");
+  for (unsigned int count=0;count<pdblines.size();count++) {
+    fprintf(outfile,"%s",pdblines[count].c_str());
+  }
+  fclose(outfile);
+  return;
+}
+
+vector<string> FFF::make_pdblines(string type) {
+  //
+  // Create a vector with all the lines
+  //
+  vector<string> pdblines;
   //
   // Loop over all atoms and residues and write
   //
@@ -221,43 +259,58 @@ void FFF::write_pdb(const std::string filename) {
   for (unsigned int chain=0;chain<chains.size();chain++) {
     for (unsigned int resnum=0;resnum<chains[chain].residues.size();resnum++) {
       for (unsigned int atom=0;atom<chains[chain].residues[resnum].atoms.size();atom++) {
+	char buffer [100];
 	atomcounter++;
-	fprintf(outfile,"ATOM  %4d",atomcounter);
+	sprintf(buffer,"ATOM  %4d",atomcounter);
+	string s1(buffer);
 	//
 	// Special checks for the atomname
 	//
 	string atname(strip(chains[chain].residues[resnum].atoms[atom].name),0,1);
 	if (atname=="1" || atname=="2" || atname=="3") {
-	  fprintf (outfile,"  %-4s",strip(chains[chain].residues[resnum].atoms[atom].name).c_str());
+	  sprintf(buffer,"  %-4s",strip(chains[chain].residues[resnum].atoms[atom].name).c_str());
 	} else {
-	  fprintf (outfile,"   %-3s",strip(chains[chain].residues[resnum].atoms[atom].name).c_str());
+	  sprintf(buffer,"   %-3s",strip(chains[chain].residues[resnum].atoms[atom].name).c_str());
 	}
+	s1=s1+string(buffer);
 	// Chain identifier is missing 
 	// Residue name
-	fprintf (outfile," %3s ",strip(chains[chain].residues[resnum].name).c_str());
-	fprintf (outfile,"%1s",chains[chain].name.c_str());
+	sprintf(buffer," %3s %1s",strip(chains[chain].residues[resnum].name).c_str(),
+		chains[chain].name.c_str());
+	s1=s1+string(buffer);
 	//
 	// Handle residue numbers > 999
 	//
 	if (strip(chains[chain].residues[resnum].pdbnum).size()==4) {
-	  fprintf(outfile,"%4s ",strip(chains[chain].residues[resnum].pdbnum).c_str());
+	  sprintf(buffer,"%4s ",strip(chains[chain].residues[resnum].pdbnum).c_str());
 	} else {
-	  fprintf(outfile," %3s ",strip(chains[chain].residues[resnum].pdbnum).c_str());
+	  sprintf(buffer," %3s ",strip(chains[chain].residues[resnum].pdbnum).c_str());
 	}
+	s1=s1+string(buffer);
 	// Coordinates
-	fprintf (outfile,"    %7.3f %7.3f %7.3f",
-		 chains[chain].residues[resnum].atoms[atom].x,
-		 chains[chain].residues[resnum].atoms[atom].y,
-		 chains[chain].residues[resnum].atoms[atom].z);
+	sprintf(buffer,"    %7.3f %7.3f %7.3f",
+		chains[chain].residues[resnum].atoms[atom].x,
+		chains[chain].residues[resnum].atoms[atom].y,
+		chains[chain].residues[resnum].atoms[atom].z);
+	s1=s1+string(buffer);
 	//
 	// Occupancy
 	//
-	fprintf(outfile,"  %4.2f %5.2f\n",1.00,chains[chain].residues[resnum].atoms[atom].bfactor);
+	if (type=="PDB") {
+	  sprintf(buffer,"  %4.2f %5.2f\n",1.00,chains[chain].residues[resnum].atoms[atom].bfactor);
+	} else if (type=="PQR") {
+	  sprintf(buffer,"  %4.2f %5.2f\n",chains[chain].residues[resnum].atoms[atom].charge,
+		  chains[chain].residues[resnum].atoms[atom].radius);
+	} else {
+	  printf ("Incorrect type for make_pdblines: %s\n",type.c_str());
+	  exit(0);
+	}
+	s1=s1+string(buffer);
+	pdblines.push_back(s1);
       }
     }
   }
-  fclose(outfile);
-  return;
+  return pdblines;
 }
 
 //
@@ -286,7 +339,7 @@ void FFF::update_all_atoms() {
     //
     // Loop over all atoms and do lots of stuff
     //
-    printf ("in update_all atoms\n");
+    //printf ("in update_all atoms\n");
     all_atoms.resize(0);
     int count=0;
     unsigned int numchains=chains.size();
@@ -300,7 +353,15 @@ void FFF::update_all_atoms() {
         //
         unsigned int numres=chains[chain].residues.size();
         for (unsigned residue=0;residue<numres;residue++) {
-            unsigned int numatoms=chains[chain].residues[residue].atoms.size();
+	  // set the is_aa flag
+	  chains[chain].residues[residue].is_aa=false;
+	  for (unsigned int i=0;i<amino_acids.size();i++) {
+	    if (chains[chain].residues[residue].name==amino_acids[i]) {
+	      chains[chain].residues[residue].is_aa=true;
+	    }
+	  }
+	  //
+	  unsigned int numatoms=chains[chain].residues[residue].atoms.size();
             for (unsigned int atom=0;atom<numatoms;atom++) {
                 //
                 // Fill all_atoms
@@ -314,7 +375,7 @@ void FFF::update_all_atoms() {
             }
         }
     }
-    printf ("all_atoms.size(): %d\n",static_cast<int>(all_atoms.size()));
+    //printf ("all_atoms.size(): %d\n",static_cast<int>(all_atoms.size()));
     return ;
 }
 

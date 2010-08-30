@@ -86,7 +86,7 @@ void model_class::build_hydrogens() {
     _use_hydrogens=true;
     for (unsigned int chain=0;chain<_P.chains.size();chain++) {
         for (unsigned int residue=0;residue<_P.chains[chain].residues.size();residue++) {
-            Mutate_2(chain,residue,_P.chains[chain].residues[residue].name,1,10.0);
+	  Mutate_2(chain,residue,_P.chains[chain].residues[residue].name,1,10.0);
         }
     }
     assign_all_charges_and_radii();

@@ -1,0 +1,10 @@
+#
+# Tasks to do for FFF
+#
+
+* Rewrite atom_class isacceptor, is_metal and is_donor functions to base them on parameter files
+* Write Hydrogen optimisation algorithm
+* Write charge and radius assignment algorithm
+* Write Titgroup finding function
+* Write titgroup class
+* Write code for handling protonation state list

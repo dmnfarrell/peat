@@ -1,5 +1,7 @@
 #
-# Standard coordinates for the 20 naturally occurring amino acids
+# Standard coordinates for amino acids
+# Note that all topologies in this file must be amino acids
+# Topologies for other entities should be put in OTHER.DAT
 #
 *
 ALA

@@ -44,6 +44,10 @@ vector<double> model_class::Mutate(const std::string chainname,const std::string
     return dummy;
 }
 
+//
+// -------------
+//
+
 
 vector<double> model_class::Mutate_2(int chainnumber,int resnumber,const std::string newresidue,int mode,double max_clash) {
   //
@@ -106,10 +110,15 @@ void model_class::_mutate(int chainnumber,int resnumber,string newresidue) {
   // Make backup of original 
   //
   string oldresiduename=_P.chains[chainnumber].residues[resnumber].name;
-  printf ("chain: %d, residue: %d, oldres: %s, newres: %s\n",chainnumber,resnumber,oldresiduename.c_str(),newresidue.c_str());
+  printf ("chain: %d, residue: %d, oldres: %s, newres: %s\n",
+	  chainnumber,
+	  resnumber,
+	  oldresiduename.c_str(),
+	  newresidue.c_str());
   
   vector<atom_class> oldatoms;
-  for (unsigned int oldatom=0;oldatom<_P.chains[chainnumber].residues[resnumber].atoms.size();oldatom++) {
+  for (unsigned int oldatom=0;oldatom<_P.chains[chainnumber].residues[resnumber].atoms.size();
+       oldatom++) {
     oldatoms.push_back(_P.chains[chainnumber].residues[resnumber].atoms[oldatom]);
   }
   _org_atoms.push_back(oldatoms);
@@ -126,8 +135,9 @@ void model_class::_mutate(int chainnumber,int resnumber,string newresidue) {
   int respointer=-1;
   printf ("Number of AA definitions: %d \n",static_cast<int>(AAsets[0].aadefs.size()));
   for (int tempres=0;tempres<static_cast<int>(AAsets[0].aadefs.size());tempres++) {
+    //printf ("name: %s\n",AAsets[0].aadefs[tempres].name.c_str());
     if (newresidue==AAsets[0].aadefs[tempres].name) {
-      printf ("newres %s\n",AAsets[0].aadefs[tempres].name.c_str());
+      //printf ("newres %s\n",AAsets[0].aadefs[tempres].name.c_str());
       respointer=tempres;
       break;
     }
@@ -137,97 +147,107 @@ void model_class::_mutate(int chainnumber,int resnumber,string newresidue) {
     throw FFFError();
   }
   //
-  // Find the N, CA & C coordinates in the protein and in the definition and store them in a vector
-  //
-  //
-  // Coordinates from the protein
-  //
-  string old_pdbresnum;
-  vector<atom_class> refcoords;
-  atom_class N("N",
-	       _P.chains[chainnumber].residues[resnumber].N->x,
-	       _P.chains[chainnumber].residues[resnumber].N->y,
-	       _P.chains[chainnumber].residues[resnumber].N->z);
-  refcoords.push_back(N);
-  old_pdbresnum=_P.chains[chainnumber].residues[resnumber].N->pdbresnum;
-  //
-  atom_class CA("CA",
-	       _P.chains[chainnumber].residues[resnumber].CA->x,
-	       _P.chains[chainnumber].residues[resnumber].CA->y,
-	       _P.chains[chainnumber].residues[resnumber].CA->z);
-  refcoords.push_back(CA);
-  //
-  atom_class C("C",
-	       _P.chains[chainnumber].residues[resnumber].C->x,
-	       _P.chains[chainnumber].residues[resnumber].C->y,
-	       _P.chains[chainnumber].residues[resnumber].C->z);
-  refcoords.push_back(C);
-  //
-  // Coordinates from the defintion
-  //
-  vector<atom_class> fitcoords;
-  fitcoords.push_back(AAsets[0].aadefs[respointer].N());
-  fitcoords.push_back(AAsets[0].aadefs[respointer].CA());
-  fitcoords.push_back(AAsets[0].aadefs[respointer].C());
-  //
-  // Superpose the N, CA and C
-  //
-  quatfit_class Q;
-  Q.fit(3,refcoords,fitcoords);
-  //
-  // Now transform the coordinates of the entire amino acid definition
-  //
-  fitcoords.resize(0);
-  int numcoords=static_cast<int>(AAsets[0].aadefs[respointer].atoms.size());
-  for (int atom=0;atom<numcoords;atom++) {
-    fitcoords.push_back(AAsets[0].aadefs[respointer].atoms[atom]);
-  }
-  Q.transform(numcoords,fitcoords);
-  for (int atom=0;atom<numcoords;atom++) {
-    AAsets[0].aadefs[respointer].atoms[atom].x=fitcoords[atom].x;
-    AAsets[0].aadefs[respointer].atoms[atom].y=fitcoords[atom].y;
-    AAsets[0].aadefs[respointer].atoms[atom].z=fitcoords[atom].z;
-  }
-  //
-  // Preserve the coordinates for the backbone atoms (identical names required)
+  // Mutate_special takes care of waters, ions etc. The rest
+  // is handled here in this routine
   //
   vector<atom_class> newcoords;
-  for (int atom=0;atom<numcoords;atom++) {
-    atom_class NEWATOM=AAsets[0].aadefs[respointer].atoms[atom];
-    bool found=false;
+  //    
+  if (!_P.chains[chainnumber].residues[resnumber].is_aa) {
+    newcoords=mutate_special(chainnumber,resnumber,newresidue);
+  } 
+  else {
     //
-    // See which atoms to copy in
+    // Find the N, CA & C coordinates in the protein and in the definition and store them in a vector
     //
-    for (unsigned int oldatom=0;oldatom<_P.chains[chainnumber].residues[resnumber].atoms.size();oldatom++) {
-      string oldname(_P.chains[chainnumber].residues[resnumber].atoms[oldatom].name);
-      if (strip(NEWATOM.name)==strip(oldname)) {
-	//
-	// Identical names. Find out which atom to choose
-	//
-	found=true;
-	if (NEWATOM.is_backbone()) {	
-	  atom_class newatom(oldname,
-			     _P.chains[chainnumber].residues[resnumber].atoms[oldatom].x,
-			     _P.chains[chainnumber].residues[resnumber].atoms[oldatom].y,
-			     _P.chains[chainnumber].residues[resnumber].atoms[oldatom].z);
-	  newcoords.push_back(newatom);
+    //
+    // Coordinates from the protein
+    //
+    string old_pdbresnum;
+    vector<atom_class> refcoords;
+    atom_class N("N",
+		 _P.chains[chainnumber].residues[resnumber].N->x,
+		 _P.chains[chainnumber].residues[resnumber].N->y,
+		 _P.chains[chainnumber].residues[resnumber].N->z);
+    refcoords.push_back(N);
+    old_pdbresnum=_P.chains[chainnumber].residues[resnumber].N->pdbresnum;
+    //
+    atom_class CA("CA",
+		  _P.chains[chainnumber].residues[resnumber].CA->x,
+		  _P.chains[chainnumber].residues[resnumber].CA->y,
+		  _P.chains[chainnumber].residues[resnumber].CA->z);
+    refcoords.push_back(CA);
+    //
+    atom_class C("C",
+		 _P.chains[chainnumber].residues[resnumber].C->x,
+		 _P.chains[chainnumber].residues[resnumber].C->y,
+		 _P.chains[chainnumber].residues[resnumber].C->z);
+    refcoords.push_back(C);
+    //
+    // Coordinates from the defintion
+    //
+    vector<atom_class> fitcoords;
+    fitcoords.push_back(AAsets[0].aadefs[respointer].N());
+    fitcoords.push_back(AAsets[0].aadefs[respointer].CA());
+    fitcoords.push_back(AAsets[0].aadefs[respointer].C());
+    //
+    // Superpose the N, CA and C
+    //
+    quatfit_class Q;
+    Q.fit(3,refcoords,fitcoords);
+    //
+    // Now transform the coordinates of the entire amino acid definition
+    //
+    fitcoords.resize(0);
+    int numcoords=static_cast<int>(AAsets[0].aadefs[respointer].atoms.size());
+    for (int atom=0;atom<numcoords;atom++) {
+      fitcoords.push_back(AAsets[0].aadefs[respointer].atoms[atom]);
+    }
+    Q.transform(numcoords,fitcoords);
+    for (int atom=0;atom<numcoords;atom++) {
+      AAsets[0].aadefs[respointer].atoms[atom].x=fitcoords[atom].x;
+      AAsets[0].aadefs[respointer].atoms[atom].y=fitcoords[atom].y;
+      AAsets[0].aadefs[respointer].atoms[atom].z=fitcoords[atom].z;
+    }
+    //
+    // Preserve the coordinates for the backbone atoms (identical names required)
+    //
+    for (int atom=0;atom<numcoords;atom++) {
+      atom_class NEWATOM=AAsets[0].aadefs[respointer].atoms[atom];
+      bool found=false;
+      //
+      // See which atoms to copy in
+      //
+      for (unsigned int oldatom=0;oldatom<_P.chains[chainnumber].residues[resnumber].atoms.size();oldatom++) {
+	string oldname(_P.chains[chainnumber].residues[resnumber].atoms[oldatom].name);
+	if (strip(NEWATOM.name)==strip(oldname)) {
+	  //
+	  // Identical names. Find out which atom to choose
+	  //
+	  found=true;
+	  if (NEWATOM.is_backbone()) {	
+	    atom_class newatom(oldname,
+			       _P.chains[chainnumber].residues[resnumber].atoms[oldatom].x,
+			       _P.chains[chainnumber].residues[resnumber].atoms[oldatom].y,
+			       _P.chains[chainnumber].residues[resnumber].atoms[oldatom].z);
+	    newcoords.push_back(newatom);
+	  }
+	  else {
+	    //
+	    // No, it is not a backbone atom, so we want the new coordinates
+	    //
+	    atom_class newatom(NEWATOM.name,NEWATOM.x,NEWATOM.y,NEWATOM.z);
+	    newcoords.push_back(newatom);
+	  }
 	}
-	else {
-	  //
-	  // No, it is not a backbone atom, so we want the new coordinates
-	  //
+      }   
+      //
+      // If we did not find an atom with the same name, then add the new atom
+      //
+      if (!found) {
+	if (!NEWATOM.is_hydrogen() || NEWATOM.name=="HN" || _use_hydrogens==true) {
 	  atom_class newatom(NEWATOM.name,NEWATOM.x,NEWATOM.y,NEWATOM.z);
 	  newcoords.push_back(newatom);
 	}
-      }
-    }   
-    //
-    // If we did not find an atom with the same name, then add the new atom
-    //
-    if (!found) {
-      if (!NEWATOM.is_hydrogen() || NEWATOM.name=="HN" || _use_hydrogens==true) {
-	atom_class newatom(NEWATOM.name,NEWATOM.x,NEWATOM.y,NEWATOM.z);
-	newcoords.push_back(newatom);
       }
     }
   }
@@ -253,6 +273,50 @@ void model_class::_mutate(int chainnumber,int resnumber,string newresidue) {
     update_bonds();
    return;
 };
+
+//
+// ----------
+//
+
+vector<atom_class> model_class::mutate_special(int chainnumber,int resnumber,string newresidue) {
+  // 
+  // Mutate groups that are not amino acids
+  //
+  unsigned int respointer=_get_AA_template(newresidue);
+  //
+  // Find the atoms that are needed to superimpose coordinates
+  //
+  vector<atom_class> add_atoms;
+  string resname=_P.chains[chainnumber].residues[resnumber].name;
+  if (resname=="WAT") {
+    int atnum=_P.chains[chainnumber].residues[resnumber].get_atom_number("O");
+    atom_class refcoord("O",
+			_P.chains[chainnumber].residues[resnumber].atoms[atnum].x,
+			_P.chains[chainnumber].residues[resnumber].atoms[atnum].y,
+			_P.chains[chainnumber].residues[resnumber].atoms[atnum].z);
+    //
+    // Get the definition coords
+    //
+    atom_class fitcoord=AAsets[0].aadefs[respointer].get_atom("O");
+    // 
+    // Calculate offset
+    //
+    vector3d offset=refcoord-fitcoord;
+    //
+    // Add all the atoms in the definition
+    //
+    for (unsigned atom=0;atom<AAsets[0].aadefs[respointer].atoms.size();atom++) {
+      atom_class NEWATOM=AAsets[0].aadefs[respointer].atoms[atom];
+      NEWATOM.x=NEWATOM.x+offset.x;
+      NEWATOM.y=NEWATOM.y+offset.y;
+      NEWATOM.z=NEWATOM.z+offset.z;
+      add_atoms.push_back(NEWATOM);
+    }
+  }
+  return add_atoms;
+}
+    
+
 
 //
 // -----------
@@ -887,9 +951,9 @@ void model_class::_read_aa_defs(const std::string aadef_dir) {
   // HYDROGENS.DAT holds information on all the conformations of hydrogens
   //
   //if (DEBUG>=3) {
-  cout << "Reading Amino Acid Definition file\n";
+  cout << "Reading AA.DAT\n";
   //}
-    string aadef_file=aadef_dir+"/AA.DAT";
+  string aadef_file=aadef_dir+"/AA.DAT";
   ifstream file(aadef_file.c_str());
   if (!file) {
     cout << "ERROR: File AA.DAT was not found!\n";
@@ -901,15 +965,36 @@ void model_class::_read_aa_defs(const std::string aadef_dir) {
     lines.push_back(line);
   }
   file.close();
-  cout << "Amino Acid Definition file has been read\n";
+  cout << "AA.DAT has been read\n";
+  //
+  // Read OTHER.DAT
+  //
+  aadef_file=aadef_dir+"/OTHER.DAT";
+  ifstream file2(aadef_file.c_str());
+  if (!file2) {
+    printf ("ERROR: File %s was not found!\n",aadef_file.c_str());
+    exit(0);
+  }
+  //string line;
+  //vector<string> lines;
+  while(getline(file2,line)) {
+    lines.push_back(line);
+  }
+  file.close();
+  cout << "OTHER.DAT has been read\n";
   //
   // Parse the aa def file
   //
   parse_aadefs X(lines);
+  printf ("returned from parsing\n");
   AAsets.push_back(X);
+  // Copy the information on amino acids to the array in _P
+  for (unsigned int count=0;count<X.amino_acids.size();count++) {
+    _P.amino_acids.push_back(X.amino_acids[count]);
+  }
   // ----------------------------
   //
-  // Read HYDORGENS.DAT
+  // Read HYDROGENS.DAT
   //
   printf ("Reading HYDROGENS.DAT\n");
   string Hdef_file=aadef_dir+"/HYDROGENS.DAT";

@@ -63,6 +63,9 @@ void atom_class::initialize() {
 void atom_class::update() {
     // Update by setting the vdw radii
     set_vdw();
+    if (bfactor>10000.0) {
+      bfactor=0.0;
+    }
     return;
 }
 
@@ -128,6 +131,7 @@ bool atom_class::is_backbone() const {
 //
 
 bool atom_class::isacceptor() const {
+  // Redo based on parameter file
     if (_element=="O" || 
         (name=="ND1" && inresiduename=="HIS") ||
         (name=="NE2" && inresiduename=="HIS")) {
@@ -139,6 +143,7 @@ bool atom_class::isacceptor() const {
 }
 
 bool atom_class::is_metal() const {
+  // Redo with Parameter file
     if (_element=="MN") return true;
     return false;
 }
@@ -147,6 +152,7 @@ bool atom_class::is_metal() const {
 //
 
 bool atom_class::isdonor() const {
+  // Redot properly based on parameter files
     if (_element=="N") return true;
     if (_element=="O" and name!="O") return true; // This is only very approximately true
     return false;

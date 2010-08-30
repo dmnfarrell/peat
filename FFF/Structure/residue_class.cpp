@@ -62,7 +62,7 @@ residue_class::residue_class(chain_class* C,vector<string> lines): _C(C) {
    //
    // Set the residue name
    //
-   name=resname;
+   name=correct_resname(resname);
    //
    // and the number that the residue has in the pdb file
    //
@@ -75,6 +75,33 @@ residue_class::residue_class(chain_class* C,vector<string> lines): _C(C) {
    return;
 };
 
+//
+// -------------
+//
+
+string residue_class::correct_resname(string resname) {
+  //
+  // Correct common resnames
+  //
+  if (resname=="HOH") resname="WAT";
+  return resname;
+}
+
+atom_class* residue_class::get_atom(string atomname) {
+  return &(atoms[get_atom_number(atomname)]);
+}
+
+int residue_class::get_atom_number(string atomname) {
+  //
+  // Get this atom
+  //
+  for (unsigned int atom=0;atom<atoms.size();atom++) {
+    if (atoms[atom].name==atomname) {
+      return atom;
+    }
+  }
+  return -1;
+}
 //
 // ----------------------------------------------------------------------
 //
@@ -132,3 +159,4 @@ void residue_class::print() {
         atoms[at].print_detail();
     }
 }
+

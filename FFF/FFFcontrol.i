@@ -31,6 +31,7 @@
 #include "Structure/fff.h"
 #include "Modelling/Model.h"
 #include "Modelling/Rotamers.h"
+#include "pKa.h"
 %}
 %include "std_string.i"
 %include "std_vector.i"
@@ -47,3 +48,4 @@ namespace std {
 %include "Structure/fff.h"
 %include "Modelling/Model.h"
 %include "Modelling/Rotamers.h"
+%include "pKa.h"

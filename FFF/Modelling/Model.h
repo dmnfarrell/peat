@@ -95,6 +95,7 @@ class model_class {
   //
   vector<double> Mutate(const std::string chainname,const std::string pdbresnumber, const std::string newresidue,int mode,double max_clash);
   vector<double> Mutate_2(int chainnumber,int resnumber,const std::string newresidue,int mode,double max_clash);
+  vector<atom_class> mutate_special(int chainnumber,int resnumber,const std::string newresidue);
   void undo_mutation();
   bool simple_mutate(int chainnumber,int resnumber,string oldres,string newres);
   void setchi(int chainnumber,int residuenumber,int chinum,double chiang) throw(exception);
@@ -131,7 +132,7 @@ class model_class {
   //
   // Hydrogens
   //
-    void build_hydrogens();
+  void build_hydrogens();
   void delete_all_hydrogens();
   void delete_hydrogens(residue_class& residue);
   // 

@@ -35,16 +35,27 @@ parse_aadefs::parse_aadefs(vector<string> aadeflines) {
   // Split the amino acid definition files up into sections separated by "*"
   // and send each block of lines to parse_aadef (parse_aadef parses 1 amino acid definition)
   //      
-  printf ("Parsing Amino Acid Definition File with %d lines\n",static_cast<int>(aadeflines.size()));
+  printf ("Parsing Topology files containing %d lines\n",static_cast<int>(aadeflines.size()));
   bool done=false;
   unsigned int count=0;
   string line,name;
   vector<string> lines;
   //
+  // Init array for amino acids
+  //
+  amino_acids.resize(0);
+  //
   // Skip comments
   //
+  bool aapart=true;
   while (!done) {
     if (!aadeflines[count].substr(0,2).compare("//") || !aadeflines[count].substr(0,1).compare("#"))  {
+      //
+      if (aadeflines[count].size()>25) {
+	if (aadeflines[count].substr(0,25).compare("#$$$Entering OTHER.DAT$$$")==0) {
+	  aapart=false;
+	}
+      }
       count++;
       continue;
     }
@@ -66,6 +77,12 @@ parse_aadefs::parse_aadefs(vector<string> aadeflines) {
       //
       if (!line.substr(0,2).compare("//") || !line.substr(0,1).compare("#"))  {
 	count++;
+	printf ("Line:%s %d\n",line.c_str(),line.size());
+	if (line.size()>25) {
+	  if (line.substr(0,25).compare("#$$$Entering OTHER.DAT$$$")==0) {
+	    aapart=false;
+	  }
+	}
 	if (count>=aadeflines.size()) {
 	  break;
 	}
@@ -75,10 +92,18 @@ parse_aadefs::parse_aadefs(vector<string> aadeflines) {
       if (line.substr(0,1).compare("*")==0 || count==aadeflines.size()-1) {
 	if (count==aadeflines.size()-1) {
 	  lines.push_back(line);
+	  printf ("Parsing last record: %s\n",name.c_str());
+	  if (aapart) {
+	    amino_acids.push_back(name);
+	  }
 	  aadefs.push_back(parse_aadef(name,lines));
 	  return;
 	}
+	//
 	printf ("Parsing: %s\n",name.c_str());
+	if (aapart) {
+	  amino_acids.push_back(name);
+	}
 	aadefs.push_back(parse_aadef(name,lines));
 	lines.resize(0);
 	count++;
@@ -97,6 +122,15 @@ parse_aadefs::parse_aadefs(vector<string> aadeflines) {
     cout << "ERROR: Wrong format for Amino Acid definition file\n";
     exit(0);
   }
+  //
+  // Parse the last record
+  //
+  printf ("Parsing last rescord: %s\n",name.c_str());
+  if (aapart) {
+    amino_acids.push_back(name);
+  }
+  aadefs.push_back(parse_aadef(name,lines));
+  lines.resize(0);
   cout << "Parsing done\n";
   return;
 }
@@ -174,6 +208,7 @@ parse_aadef::parse_aadef (string exname,vector<string> lines) {
   // Bonds are between 1 and 2, and between 3 and 4
   //
   line=lines[lines.size()-2];
+  //printf ("line: %s\n",line.c_str());
   vector<int> numbers;
   //
   // Get the numbers out of the line
@@ -213,55 +248,57 @@ parse_aadef::parse_aadef (string exname,vector<string> lines) {
   //
   // Construct the information on the # of bonds from CA
   //
-  for (int atom=0;atom<static_cast<int>(atoms.size());atom++) {
-    //
-    // Start at CA, and count number of bonds until we reach the atom
-    //
-    if (atoms[atom].is_backbone()) {
+  if (c_alpha!=-1) {
+    for (int atom=0;atom<static_cast<int>(atoms.size());atom++) {
       //
-      // For backbone atoms we set the value to -1
+      // Start at CA, and count number of bonds until we reach the atom
       //
-      bonds_from_CA[strip(atoms[atom].name)]=-1;
-    } 
-    else {
-      //
-      // Get the real value for all other atoms
-      //
-      vector<int> unchecked_atoms;
-      vector<int> bonds_away;
-      unchecked_atoms.push_back(c_alpha);
-      bonds_away.push_back(0);
-      int exam_atom=0;
-      while (true) {
-	if (unchecked_atoms[exam_atom]==atom) {
-	  bonds_from_CA[strip(atoms[atom].name)]=bonds_away[exam_atom];
-	  //printf ("Bonds from CA:%4s  %2d\n-------------\n",atoms[atom].name.c_str(),
-	  //		  bonds_from_CA[strip(atoms[atom].name)]);
-	  break;
-	}
+      if (atoms[atom].is_backbone()) {
 	//
-	// Fill in the next atoms to be checked
+	// For backbone atoms we set the value to -1
 	//
-	for (int bond=0;
-	     bond<static_cast<int>(atoms[unchecked_atoms[exam_atom]].bonds.size())
-	       ;bond++) {
+	bonds_from_CA[strip(atoms[atom].name)]=-1;
+      } 
+      else {
+	//
+	// Get the real value for all other atoms
+	//
+	vector<int> unchecked_atoms;
+	vector<int> bonds_away;
+	unchecked_atoms.push_back(c_alpha);
+	bonds_away.push_back(0);
+	int exam_atom=0;
+	while (true) {
+	  if (unchecked_atoms[exam_atom]==atom) {
+	    bonds_from_CA[strip(atoms[atom].name)]=bonds_away[exam_atom];
+	    //printf ("Bonds from CA:%4s  %2d\n-------------\n",atoms[atom].name.c_str(),
+	    //		  bonds_from_CA[strip(atoms[atom].name)]);
+	    break;
+	  }
 	  //
-	  // Check that we didn't examine this atom already
+	  // Fill in the next atoms to be checked
 	  //
-	  int atom_to_check=atoms[unchecked_atoms[exam_atom]].bonds[bond];
-	  bool already_done=false;
-	  for (int test=0;test<static_cast<int>(unchecked_atoms.size());test++) {
-	    if (atom_to_check==unchecked_atoms[test]) {
-	      already_done=true;
-	      break;
+	  for (int bond=0;
+	       bond<static_cast<int>(atoms[unchecked_atoms[exam_atom]].bonds.size())
+		 ;bond++) {
+	    //
+	    // Check that we didn't examine this atom already
+	    //
+	    int atom_to_check=atoms[unchecked_atoms[exam_atom]].bonds[bond];
+	    bool already_done=false;
+	    for (int test=0;test<static_cast<int>(unchecked_atoms.size());test++) {
+	      if (atom_to_check==unchecked_atoms[test]) {
+		already_done=true;
+		break;
+	      }
+	    }
+	    if (!already_done) {
+	      unchecked_atoms.push_back(atoms[unchecked_atoms[exam_atom]].bonds[bond]);
+	      bonds_away.push_back(bonds_away[exam_atom]+1);
 	    }
 	  }
-	  if (!already_done) {
-	    unchecked_atoms.push_back(atoms[unchecked_atoms[exam_atom]].bonds[bond]);
-	    bonds_away.push_back(bonds_away[exam_atom]+1);
-	  }
+	  exam_atom=exam_atom+1;
 	}
-	exam_atom=exam_atom+1;
       }
     }
   }

@@ -42,17 +42,22 @@ public:
   // First initialisation is when reading the pdb file
   //
   residue_class(chain_class* C,vector<string> lines);
-    residue_class(string resname,vector<string> charge_lines) {
-        //
-        // Initialise charges and radii
-        //
-        name=resname;
-        for (unsigned int count=0;count<charge_lines.size();count++) {
-            vector<string> sp=split(charge_lines[count]);
-            //printf ("Atom: %s charge: %6s radius: %6s\n",sp[0].c_str(),sp[1].c_str(),sp[2].c_str());
-            atoms.push_back(atom_class(sp[0],sp[1],sp[2]));
-        }
+  residue_class(string resname,vector<string> charge_lines) {
+    //
+    // Initialise charges and radii
+    //
+    name=correct_resname(resname);
+    for (unsigned int count=0;count<charge_lines.size();count++) {
+      vector<string> sp=split(charge_lines[count]);
+      //printf ("Atom: %s charge: %6s radius: %6s\n",sp[0].c_str(),sp[1].c_str(),sp[2].c_str());
+      atoms.push_back(atom_class(sp[0],sp[1],sp[2]));
     }
+  }
+  
+  //
+  string correct_resname(string resname);
+  int get_atom_number(string atomname);
+  atom_class *get_atom(string atomname);
   //
   // This initialisation is for putting in instances of atom_class
   //
@@ -61,8 +66,9 @@ public:
   // Update 
   //
   void update();
-    void print();
-     //bool is_aa();
+  void print();
+  bool is_aa;
+  //bool is_mutatable();
   //
   //Variables
   //
@@ -72,7 +78,7 @@ public:
   double phi, psi, omega;
   string chain;
   atom_class *N,*CA,*C;
-    chain_class* _C;
+  chain_class* _C;
    
 } ;
 #endif

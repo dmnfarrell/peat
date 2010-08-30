@@ -41,6 +41,7 @@
 //
 // ---------------------------------------------------------------
 //
+class AADefError {};
 
 class parse_aadef {
   //
@@ -66,6 +67,10 @@ public:
   int numchi;
   string name;
   //
+  // Amino acid names
+  //
+  //vector<string> amino_acids;
+  //
   // Array for storing the # of bonds that an atom is from the CA
   //
   map<string,int> bonds_from_CA;
@@ -90,6 +95,15 @@ public:
     if (c_mainchain!=-1) {return atoms[c_mainchain];}
     cout << "C not defined\n";
     exit(0);
+  }
+  atom_class inline get_atom(string atomname) throw(AADefError) {
+    for (unsigned int atom=0;atom<atoms.size();atom++) {
+      if (atomname==atoms[atom].name) {
+	return atoms[atom];
+      }
+    }
+    printf ("Could not find atom %s in definition\n",atomname.c_str());
+    throw AADefError();
   }
     //
     // Function for getting the atoms that are bonded
@@ -124,6 +138,7 @@ class parse_aadefs  {
  public:
   parse_aadefs(vector<string> aadeflines);
   vector<parse_aadef> aadefs;
+  vector<string> amino_acids;
 };
 
 #endif

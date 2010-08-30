@@ -31,6 +31,7 @@
 #include <stdio.h>
 #include "fff.h"
 #include "energy.h"
+#include "pKa.h"
 #include "Model.h"
 #include "string_tools.h"
 
