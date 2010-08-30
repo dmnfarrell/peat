@@ -70,7 +70,8 @@ class DSCFitter:
 
 		'''Returns a DSCFitter instance initialised to fit the data in matrix
 
-		Note the DSC measurements are assumed to be in calories/kelvin and the temperature to be in degrees
+		Note the DSC data is assumed to be in calories/kelvin and the temperature to be in degrees celsius.
+		The data is immediately converted to be kevlin and relative molar heat-capacity (kcal.mol/K)
 
 		Parameters:
 			matrix - A Core.Matrix.Matrix instance containing the DSC data
@@ -151,11 +152,24 @@ class DSCFitter:
 
 	def progressBaseline(self):
 
-		'''Calculates the progress baseline for the dsc peak defined by the matrix data
+		'''Calculates the progress baseline for the dsc peak defined by the matrix data.
+		
+		Note the region corresponding to the peak is defined by the folded and unfolded range
+		passed on initialisation.
 
 		Parameters:
 			deltaCp - Estimate of the heat-capacity different between the folded and unfolded states
-			offset - The value of the heat-capacity just before the transition'''
+			offset - The value of the heat-capacity just before the transition
+			
+		Retursn:
+			A Core.Matrix instance with the following columns
+				Temperature - Temperature in kelvin
+				Integral - The value of the integral of the data at T (kcal/mol)
+					   This is the total calorimetric enthalpy released/absorbed up to this point. 
+				AreaFraction - The fraction of the total area under the curve integrated at this temperature
+				Baseline - The value of the baseline at this temperature (kcal/(mol.K))
+				lnKu - The log of the equilibrium unfolding constant at this temperature
+				'''
 
 		#The linear segements must be fitted to get the progress baseline
 		if self.linearFitted == False:
