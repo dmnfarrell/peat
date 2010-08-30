@@ -1234,7 +1234,7 @@ class DSC2stateIrreversible(LM_Fitter):
         self.names = ['Tm','deltaH','E']
         self.labels = ['T','e']
         if variables == None:
-            self.variables = [350, 1e-8, 320]
+            self.variables = [350, 100, 300]
         else:
             self.variables = variables
         self.setChangeVars()
@@ -1251,7 +1251,7 @@ class DSC2stateIrreversible(LM_Fitter):
         E=variables[2]
         R=8.3144e-3
         uT=(E/R) * (1/Tm - 1/x)       
-        value = (deltaH * E / R*math.pow(x,2)) * math.exp(uT) * (math.exp(-math.exp(uT)))
+        value = (deltaH * E /(R*math.pow(x,2))) * math.exp(uT) * (math.exp(-math.exp(uT)))
         return value
         
 class DSC2stateIrreversibleII(LM_Fitter):
@@ -1295,7 +1295,7 @@ class DSC2stateIrreversibleII(LM_Fitter):
         b=2*deltacp/deltaH * (R*math.pow(Tm,2)/E)
         uT=(E/R) * (1/Tm - 1/x)
         z=-(1+b)*math.exp(uT)
-        value = deltaH * (E/R*math.pow(x,2)) * (1+b) * math.exp(uT) * math.exp(z) + (deltacp* (1-math.exp(z)))
+        value = deltaH * (E/(R*math.pow(x,2))) * (1+b) * math.exp(uT) * math.exp(z) + (deltacp* (1-math.exp(z)))
         return value
         
 class power(LM_Fitter):
