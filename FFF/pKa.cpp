@@ -158,6 +158,13 @@ void pKa_class::guess_best_protonation_state() {
     return;    
 }
 
+void pKa_class::set_standard_protonation_state(float pH) {
+  //
+  // Set the standard protonation state for this pH
+  //
+  
+}
+
 //
 // -----
 //

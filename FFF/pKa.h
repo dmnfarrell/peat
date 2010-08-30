@@ -43,6 +43,7 @@ public:
         printf ("Instantiating pKa class\n");
         read_titgroup_definitions();
         find_titratable_groups();
+	set_standard_protonation_state(7.0);
         //
         // Initialise random number generator
         //
@@ -63,6 +64,7 @@ private:
     void change_protstate();
     double get_current_energy();
     void guess_best_protonation_state();
+    void set_standard_protonation_state(float pH);
     void test_protstate();
     void record_protstate();
     void read_titgroup_definitions(); // Read the definition file for the titratable groups
