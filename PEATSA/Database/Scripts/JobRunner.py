@@ -15,7 +15,7 @@ parser.add_option("-d", "--directory", dest="dir",
 (options, args) = parser.parse_args()
 
 if options.configurationFile is None:
-        print 'Job id must be provided'
+        print 'Configuration file must be provided'
         sys.exit(1)
 else:
 	options.configurationFile = os.path.abspath(options.configurationFile)

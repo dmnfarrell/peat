@@ -26,13 +26,13 @@
 # University College Dublin
 # Dublin 4, Ireland
 #
-'''Exports all the data corresponding to a job in PEAT-SA webserver database and creates all files neccessary to run that job
+'''Exports all the data corresponding to a job in PEATSA webserver database and creates all files neccessary to run that job
 
-Note: Requires a correct webApplication.conf file to be present in PEAT_SA/WebApp/Resources/'''
+Note: Requires a correct webApplication.conf file to be present in PEATSA/WebApp/Resources/'''
 import math,sys, optparse, os
-import PEAT_SA.WebApp as WebApp
-import PEAT_SA.Core as Core
-import PEAT_SA.Core.PEATSAParallel as Parallel
+import PEATSA.WebApp as WebApp
+import PEATSA.Core as Core
+import PEATSA.Core.PEATSAParallel as Parallel
 
 def ConstructJob(jobId, outputDir, configuration, connection, jobConfigurationFile=None):
 
