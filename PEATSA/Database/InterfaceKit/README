@@ -1,6 +1,10 @@
 Contains PHP code for accessing and displaying PEAT_SA job data through the web.
 Each job data is stored in a PEAT-SA MySQL database and is accessed using the jobs unique identification.
 
+To access these files using include(), the containing PEATSA directory must be in php include path.
+One way to do this is to create a link to the PEATSA dir in /usr/share/php/
+
+
 Note: This code does not provide a full interface on its own
 
 
