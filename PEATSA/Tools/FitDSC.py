@@ -4,7 +4,7 @@ in one column and the differential heat-capacity in the other. The heat-capacity
 to be in mols/K'''
 
 import optparse, operator
-import PEAT_SA.Core as Core
+import PEATSA.Core as Core
 from PEATDB.Ekin.Fitting import Fitting
 import numpy, math
 import scipy.interpolate
