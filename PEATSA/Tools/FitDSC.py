@@ -3,7 +3,7 @@
 in one column and the differential heat-capacity in the other. The heat-capacity is expected 
 to be in mols/K'''
 
-import optparse, operator
+import sys, optparse, operator
 import PEATSA.Core as Core
 from PEATDB.Ekin.Fitting import Fitting
 import numpy, math
@@ -38,7 +38,6 @@ class DSCFitter:
 		for el in data:
 			for i in range(len(temperatures)):
 				if temperatures[i] > el:
-					#print el, temperatures[i], temperatures[i-1]
 					indexes.append(i - 1)
 					break
 
@@ -67,7 +66,7 @@ class DSCFitter:
 		self.data = [el/(1000*self.mol) for el in self.data]
 		self.temperatures = [temp + 273.15 for temp in self.temperatures]
 
-	def __init__(self, matrix, temperatureColumn, dataColumn, foldedRange, unfoldedRange, mol, verbose=False):
+	def __init__(self, matrix, temperatureColumn, dataColumn, foldedRange, unfoldedRange, mol, useFolded, verbose=False):
 
 		'''Returns a DSCFitter instance initialised to fit the data in matrix
 
@@ -91,7 +90,7 @@ class DSCFitter:
 
 		self._normaliseData()
 		self.setRanges(foldedRange, unfoldedRange)
-		self.useFolded = False
+		self.useFolded = useFolded
 
 	def __str__(self):
 
@@ -131,8 +130,11 @@ class DSCFitter:
 		unfoldedIndexes = self._indexesForTemperatures(unfoldedRange, self.temperatures)
 		transitionIndexes = (foldedIndexes[1], unfoldedIndexes[0])
 
-		if(unfoldedIndexes[0] == unfoldedIndexes[1]):
-			raise Exception, 'Not enough data in unfolded region to fit'
+		if unfoldedIndexes[0] == unfoldedIndexes[1]:
+			print 'Limited unfolded data - %d %d' % (unfoldedIndexes[0], unfoldedIndexes[1])
+
+		if unfoldedRange[0] > unfoldedRange[1]:
+			raise Exception, 'Start of range exceeds end of range - %lf %lf' % (unfoldedRange[0], unfoldedRange[1])
 
 		self.foldedRange = foldedRange
 		self.unfoldedRange = unfoldedRange
@@ -302,33 +304,41 @@ class DSCFitter:
 		value = [el*4.184 for el in dscCurve.value]
 		
 		fittingParameters,fittingInstance=Fitting.doFit(expdata=zip(dscCurve.temperature,value),model='DSC2state', silent=True)
+		#Use fitData since it gives dict entries names - increased readibility
+		fitData = fittingInstance.getResult()
 
-		vantHoff = fittingParameters[1]/4.184
-		meltingTemp = fittingParameters[0]
+		vantHoff = fitData['deltaH']/4.184
+		meltingTemp = fitData['Tm']
 		res1 = ['TwoState', method, self.foldedRange[1], self.unfoldedRange[0], 
 			meltingTemp, vantHoff, 'N/A', fittingParameters['error']/(4.184*4.184), vantHoff/meltingTemp, '1.0']
 
 		fittingParameters,fittingInstance=Fitting.doFit(expdata=zip(dscCurve.temperature,value), model='DSCindependent', silent=True)
+		fitData = fittingInstance.getResult()
 
-		vantHoff = fittingParameters[2]/4.184
-		calorimetric = fittingParameters[0]*vantHoff
-		meltingTemp = fittingParameters[1]
+		vantHoff = fitData['deltaH']/4.184
+		calorimetric = fitData['A']*vantHoff
+		meltingTemp = fitData['Tm']
 		res2 = ['NonTwoState', method, self.foldedRange[1], self.unfoldedRange[0], 
 				meltingTemp, vantHoff, calorimetric, fittingParameters['error']/(4.184*4.184), vantHoff/meltingTemp, calorimetric/vantHoff]
 
-		'''fittingParameters,fittingInstance=Fitting.doFit(expdata=zip(dscCurve.temperature,value), model='DSC2stateIrreversible', silent=True)
+		fittingParameters,fittingInstance=Fitting.doFit(expdata=zip(dscCurve.temperature,value), model='DSC2stateIrreversible', silent=True)
+		fitData = fittingInstance.getResult()
+  
+  		activationEnergy = fitData['E']/4.184
+  		calorimetric = fitData['deltaH']/4.184
+  		meltingTemp = fitData['Tm']
+  		res3 = ['Irreversible', method, self.foldedRange[1], self.unfoldedRange[0], 
+  				meltingTemp, calorimetric, activationEnergy, fitData['error']/(4.184*4.184), vantHoff/meltingTemp]
+  		
+		return [res1, res2, res3]
 
-		E = fittingParameters[2]/4.184
-		calorimetric = fittingParameters[1]*vantHoff
-		meltingTemp = fittingParameters[0]
-		res3 = ['Irreversible', method, self.foldedRange[1], self.unfoldedRange[0], 
-				meltingTemp, vantHoff, calorimetric, fittingParameters['error']/(4.184*4.184), vantHoff/meltingTemp, calorimetric/vantHoff]
-		'''
-		return [res1, res2]
-
-	def fitHeaders(self):
+	def fitHeaders(self, model):
 	
-		return ['Model', 'LinearMethod', 'Tstart', 'Tend', 'MeltingTemp', 'VantHoff', 'Calormetric', 'Error', 'Entropy', 'Cooperativity']
+		if model == 'TwoState' or model == 'NonTwoState':
+			return ['Model', 'LinearMethod', 'Tstart', 'Tend', 'MeltingTemp', 'VantHoff', 'Calormetric', 'Error', 'Entropy', 'Cooperativity']
+		else:
+			return ['Model', 'LinearMethod', 'Tstart', 'Tend', 'MeltingTemp', 'Calormetric', 'ActivationEnergy', 'Error', 'Entropy']
+		
 
 if __name__ == "__main__":
 
@@ -366,39 +376,49 @@ if __name__ == "__main__":
 	foldedRange = [float(el) for el in options.foldedRange.split(",")]
 	unfoldedRange = [float(el) for el in options.unfoldedRange.split(",")]
 
-	fitter = DSCFitter(m, options.tempCol, options.dataCol, foldedRange, unfoldedRange, options.mol)
-	print fitter
+	fitter = DSCFitter(m, options.tempCol, options.dataCol, foldedRange, unfoldedRange, options.mol, options.foldedOnly)
 
 	twoState = []
 	nonTwoState = []
+	irreversible = []
 	if options.twiddle is True:
 		end = foldedRange[1]
-		foldedRange = numpy.arange(end - options.checkInterval, end + options.checkInterval, options.checkStep)
+		foldedEndRange = numpy.arange(end - options.checkInterval, end + options.checkInterval, options.checkStep)
 
-		start = unfoldedRange[1]
-		unfoldedRange = numpy.arange(start - options.checkInterval, start + options.checkInterval, options.checkStep)
+		start = unfoldedRange[0]
+		unfoldedStartRange = numpy.arange(start - options.checkInterval, start + options.checkInterval, options.checkStep)
+		print foldedEndRange, unfoldedStartRange
 
-		for end in foldedRange:
-			for start in unfoldedRange: 
+		for end in foldedEndRange:
+			for start in unfoldedStartRange: 
 				try:
+					print 'Setting ranges to %lf %lf (%lf %lf)' % (end, start, end+273.15, start+273.15)
 					fitter.setRanges([foldedRange[0], end], [start, unfoldedRange[1]])
 					print '\n'
-					print fitter
+					print fitter	
 					results = fitter.fit()
 					twoState.append(results[0])
 					nonTwoState.append(results[1])
+					irreversible.append(results[2])
 				except Exception ,data:
 					print data
 	else:
 		results = fitter.fit()
 		twoState.append(results[0])
 		nonTwoState.append(results[1])
+		irreversible.append(results[2])
 		print fitter
 
-	results = Core.Matrix.Matrix(rows=twoState, headers=fitter.fitHeaders())
+	results = Core.Matrix.Matrix(rows=twoState, headers=fitter.fitHeaders('TwoState'))
+	results.sort('Error', descending=False)	
 	print results.csvRepresentation()
 
-	results = Core.Matrix.Matrix(rows=nonTwoState, headers=fitter.fitHeaders())
+	results = Core.Matrix.Matrix(rows=nonTwoState, headers=fitter.fitHeaders('NonTwoState'))
+	results.sort('Error', descending=False)	
+	print results.csvRepresentation()
+
+	results = Core.Matrix.Matrix(rows=irreversible, headers=fitter.fitHeaders('Irreversible'))
+	results.sort('Error', descending=False)	
 	print results.csvRepresentation()
 
 	stream = open('IntegrationData.csv' ,'w+')
