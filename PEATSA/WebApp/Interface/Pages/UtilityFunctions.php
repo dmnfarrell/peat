@@ -58,8 +58,8 @@
 			$smtp = Mail::factory('smtp', array ('host' => 'mail.ucd.ie', 'auth' => false));
 			
 			//admin
-			$headers = array("From"=>"peatadmin@ucd.ie", "Subject"=>"PEAT_SA Job Finished");
-			$body = "Your job has finished\n\nSee http://peat.ucd.ie/PEAT_SA/Pages/Results.php?jobId=$jobID\nRegards,\n\nThe PEAT-SA developers.";
+			$headers = array("From"=>"peatadmin@ucd.ie", "Subject"=>"PEATSA Job Finished");
+			$body = "Your job has finished\n\nSee http://peat.ucd.ie/PEATSA/Pages/Results.php?jobId=$jobID\nRegards,\n\nThe PEAT-SA developers.";
 			$mail = $smtp->send($email, $headers, $body);
 			set_email_sent($jobID);
 		}
@@ -94,8 +94,8 @@
 			$smtp = Mail::factory('smtp', array ('host' => 'mail.ucd.ie', 'auth' => false));
 			
 			//admin
-			$headers = array("From"=>"peatadmin@ucd.ie", "Subject"=>"PEAT_SA Job Error");
-			$body = "Unfortunately we encountered an error when running your job\n\nPlease see http://peat.ucd.ie/PEAT_SA/Pages/Results.php?jobId=$jobID for more information,\nRegards,\n\nThe PEAT-SA developers.";
+			$headers = array("From"=>"peatadmin@ucd.ie", "Subject"=>"PEATSA Job Error");
+			$body = "Unfortunately we encountered an error when running your job\n\nPlease see http://peat.ucd.ie/PEATSA/Pages/Results.php?jobId=$jobID for more information,\nRegards,\n\nThe PEAT-SA developers.";
 			$mail = $smtp->send($email, $headers, $body);
 			set_email_sent($jobID);
 		}
@@ -111,7 +111,7 @@
 		//				"query" => $query);
 		$server = $_SERVER['SERVER_NAME'];
 		$port = $_SERVER['SERVER_PORT'];
-		$errorURL = "http://$server:$port/PEAT_SA/Pages/Error.php?$query";
+		$errorURL = "http://$server:$port/PEATSA/Pages/Error.php?$query";
 		
 		return $errorURL;
 	}

@@ -149,7 +149,7 @@ def ConstructErrorURL(domain="PDT.UnknownDomain",
 	query = "&".join(data)
 	
 	location = os.environ['SERVER_NAME'] + ":" + os.environ['SERVER_PORT']
-	components = ("http", location, "PEAT_SA/Pages/Error.php", "", query, "")	
+	components = ("http", location, "PEATSA/Pages/Error.php", "", query, "")	
 	return urlparse.urlunparse(components)	
 	
 def ProcessPDBFilename(filename):
@@ -457,7 +457,7 @@ class JobConstructor:
 			#Pass the information on what is being calculated on aswell
 			#The elements here are scheme, location, hierarchical path, parameters, query, fragment
 			location = os.environ['SERVER_NAME'] + ":" + os.environ['SERVER_PORT']
-			components = ("http", location, "PEAT_SA/Pages/Results.php", "", "jobId=%s" % self.job.identification, "")
+			components = ("http", location, "PEATSA/Pages/Results.php", "", "jobId=%s" % self.job.identification, "")
 			resultURL = urlparse.urlunparse(components)
 	
 		except BaseException, data:

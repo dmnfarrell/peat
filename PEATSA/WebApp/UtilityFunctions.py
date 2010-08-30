@@ -134,11 +134,11 @@ def SendNotificationEmail(job):
 	if job.error()[0] == 0:
 		message['Subject'] = 'PEATSA Job Finished'
 		text = "Your job has finished.\n\n"
-		text = text + "See http://peat.ucd.ie/PEAT_SA/Pages/Results.php?jobId=%s" % job.identification
+		text = text + "See http://peat.ucd.ie/PEATSA/Pages/Results.php?jobId=%s" % job.identification
 	else:
-		message['Subject'] = 'PEAT_SA Job Error'
+		message['Subject'] = 'PEATSA Job Error'
 		text = "Unfortunately we encountered an error when running your job.\n\n"
-		text = text + "Please see http://peat.ucd.ie/PEAT_SA/Pages/Results.php?jobId=%s for more information." % job.identification
+		text = text + "Please see http://peat.ucd.ie/PEATSA/Pages/Results.php?jobId=%s for more information." % job.identification
 			
 	text = text + "\n\nRegards,\n\tThe PEAT-SA developers."
 

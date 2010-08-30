@@ -139,7 +139,7 @@
 		$query = http_build_query($array, '&amp');
 		$server = $_SERVER['SERVER_NAME'];
 		$port = $_SERVER['SERVER_PORT'];
-		$javascriptURL =  "http://$server:$port/PEAT_SA/Pages/JSGetCalculationData.php?$query";
+		$javascriptURL =  "http://$server:$port/PEATSA/Pages/JSGetCalculationData.php?$query";
 			
 		//Next call JSCalculationData - 
 		echo "<script  type=\"text/javascript\" src='$javascriptURL'></script>";

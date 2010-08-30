@@ -38,12 +38,12 @@
 		$port = $_SERVER['SERVER_PORT'];
 		echo '<div id="navigation">';
 		echo '<p class="navigation">';
-		echo "<a class='navigation' href='http://$server:$port/PEAT_SA/Pages/FrontPage.php'>Home</a><br><br>";
+		echo "<a class='navigation' href='http://$server:$port/PEATSA/Pages/FrontPage.php'>Home</a><br><br>";
 		echo "<a class='navigation' href='http://enzyme.ucd.ie'>Group Site</a><br><br>";
-		echo "<a class='navigation' href='http://$server:$port/PEAT_SA/Pages/MutationList.php'>Mutation Lists</a><br><br>";
-		echo "<a class='navigation' href='http://$server:$port/PEAT_SA/Pages/Methods.php'>Methods</a><br><br>";
-		echo "<a class='navigation' href='http://$server:$port/PEAT_SA/Pages/Technology.php'>Technology</a><br><br>";
-		echo "<a class='navigation' href='http://$server:$port/PEAT_SA/Pages/FAQ.php'>FAQ</a><br>";
+		echo "<a class='navigation' href='http://$server:$port/PEATSA/Pages/MutationList.php'>Mutation Lists</a><br><br>";
+		echo "<a class='navigation' href='http://$server:$port/PEATSA/Pages/Methods.php'>Methods</a><br><br>";
+		echo "<a class='navigation' href='http://$server:$port/PEATSA/Pages/Technology.php'>Technology</a><br><br>";
+		echo "<a class='navigation' href='http://$server:$port/PEATSA/Pages/FAQ.php'>FAQ</a><br>";
 		echo '</p>';
 		echo '<div id=sfiLogoDiv>';
 		echo '<img id=sfiLogo alt="SFI Logo" src="Resources/sfi_cmyk.png">';

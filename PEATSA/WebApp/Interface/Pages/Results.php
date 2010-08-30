@@ -109,7 +109,7 @@
 			$query = http_build_query($array, '&amp');
 			$server = $_SERVER['SERVER_NAME'];
 			$port = $_SERVER['SERVER_PORT'];
-			$javascriptURL =  "http://$server:$port/PEAT_SA/Pages/JSGetCalculationData.php?$query";
+			$javascriptURL =  "http://$server:$port/PEATSA/Pages/JSGetCalculationData.php?$query";
 			
 			//Next call JSCalculationData - This will dynamically create the requried JS functions
 			//It also contains the color_calculation function
@@ -216,7 +216,7 @@
 				$server = $_SERVER['SERVER_NAME'];
 				$port = $_SERVER['SERVER_PORT'];
 				
-				$downloadURL = "http://$server:$port/PEAT_SA/Pages/DownloadMatrix.php?$query";
+				$downloadURL = "http://$server:$port/PEATSA/Pages/DownloadMatrix.php?$query";
 				$graphLink = "(<a title='Click for interactive results graph' href=javascript:ShowResultsGraph('$calculation')>Graph</a>)";
 
 				//FIXME: Hack - Replace 'Scan' with deltapKa
