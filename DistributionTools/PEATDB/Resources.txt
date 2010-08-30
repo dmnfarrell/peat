@@ -1,0 +1,7 @@
+../../PEAT_DB/DNAtool/restriction_enzymes.DAT
+../../PEAT_DB/DNAtool/DNAtool.ico
+../../PEAT_DB/DB_Main.ico
+../../PEAT_DB/data/AA_masses.txt
+../../Protool/AA.DAT
+../../Protool/bbdep02.May.sortlib
+../../Pmw/Pmw_1_2/lib/Pmw.def

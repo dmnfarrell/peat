@@ -1,0 +1,60 @@
+*** PREPERATION ***
+
+1. Ensure no "zope" module is present in standard system locations.
+	These are under one/all of
+	- /LibraryFrameworks/Python.framework/Versions/2.5/
+	- /System/Library/Frameworks/Python.framework/Versions/2.5/
+	- /Library/Python/2.5/
+
+	/Library/Frameworks is the Leopard (or possibly Tiger) location, /System/Library/Frameworks is the SnowLeopard location.
+	If you've been upgrading OS's you may have both.
+
+	The existance of necessary zope sub-modules under 'zope' in one of these locations will cause that module not be fetched when getting ZODB/relstorage.
+	py2app then can't handle the multiple 'zope' modules being in different locations and leaves out the system one.
+	As an aside import can't handle this either so even if you have the missing module in a system location the app still fails (The reasons are too complicated to explain here).
+
+2. Install MySQL 5.14 32bit
+	N.B. Make sure its the 32 bit version.
+	Using a 64 bit version will lead to incompatiblities when used with python 2.5 (32 bit) - the 32 bit MySQLdb module won't be able to link the mysqlclient libraries.
+
+	Its assumed that the installation will be under /usr/local/mysql/ - changing this will mean mysql_config cannot be found and MySQLdb will fail to build.
+
+
+*** GET PACKAGES ***
+
+To ensure the package creation works you should build all required packages from scratch in ExternalPackages.
+This prevents any problems with py2app incorporating wrong/incompatible modules etc. etc. which may arise using already installed packages.
+N.B. ALL packages must be built for python2.5.
+python 2.6 is 64 bit on SnowLeopard and as a result doesn't work properly with py2app.
+NOTE: Its possible that you could build using 2.6 if you installed it 32 bit on Leopard.
+
+1. Use GetPackages.sh 
+	This will retrieve zope and MySQLdb packages
+
+2. Manually build matplotlib (version 0.99 required)
+	easy_install retrieves version 0.91 which is incompatible.
+	You can get the correct version at http://sourceforge.net/projects/matplotlib/files/matplotlib/matplotlib-0.99.3/matplotlib-0.99.3.tar.gz/download
+	Note you NEED the source package (not an auto installer package)!
+
+	Once you have it run
+
+	python2.5 setup.py install --install-lib=$PACKAGEDIR/ExternalPackages 
+
+3. Manually build numpy
+	It is usually OK to use an installed version of this ...
+	You must manually build it because using easy_install it fails (SnowLeopard)
+
+4. Pmw
+	Make sure to use pmw-static - add the 3 py files to ExternalPackage (i.e. NOT in a directory)
+
+*** BUILD PACKAGE ***
+
+Run 
+
+BuildPackage.sh $PEATSOURCEDIRECTORY $VERSIONNUMBER 
+
+e.g
+
+./BuildPackage.sh $HOME/PEAT 1.0
+
+VERSIONNUMBER can be omitted.

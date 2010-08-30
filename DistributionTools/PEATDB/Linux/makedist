@@ -1,0 +1,6 @@
+svn up ../../../PEAT_DB --username=apache --password=apache
+#do rpm
+python setup.py bdist_rpm
+#do standalone distr using bbfreeze
+python freeze.py
+sudo -u apache cp peat_db* /var/www/html/peatdownload/packages
