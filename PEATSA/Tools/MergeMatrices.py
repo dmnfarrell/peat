@@ -40,7 +40,7 @@ for matrix in matrices:
 		try:
 			matrix.indexOfColumnWithHeader(header)
 		except ValueError:
-			print 'Column %s not present in all matrices', header	
+			print 'Column %s not present in all matrices' % header	
 			sys.exit(1)
 
 #Create the id columns for each matrix
@@ -54,10 +54,13 @@ for matrix in matrices:
 	columns = [matrix.columnWithHeader(header) for header in keyColumns]
 	for j in range(matrix.numberOfRows()):
 		for i in range(len(keyColumns)):
-			id.append(columns[i][j])
+			id.append(str(columns[i][j]))
 		
 		ids.append("+".join(id))
 		id = []
+
+	if options.verbose is True:
+		print '\tKey-Code Example: %s' % ids[0]
 
 	print '\tHashing key-column'
 	matrix.addColumn(ids)
@@ -123,6 +126,7 @@ for column in keyColumns:
 	indexes.extend(data)
 
 indexes.sort()
+keyColumns.remove('Key')
 
 indexes = indexes[len(keyColumns):]
 indexes.reverse()
