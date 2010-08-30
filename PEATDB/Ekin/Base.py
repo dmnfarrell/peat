@@ -75,7 +75,7 @@ class EkinProject(object):
                          'Bell-shaped pH-act profile (2 pKas)',
                          'Sigmoid', 'Modified Hill'
                          'Denaturation','diffDenaturation','Unfolding',
-                         'Residual Activity',
+                         'Residual Activity','Arrhenius',
                          'DSC2state','DSCindependent','DSC2stateIrreversible','DSC2stateIrreversibleII'],
                      'Simple enzyme kinetic':['Michaelis-Menten','Michaelis-Menten-competitive-inhibition',
                                               'Competitive inhibition','Non-competitive inhibition'],
@@ -563,6 +563,8 @@ class EkinProject(object):
         fitresult, X = Fitting.doFit(datatofit, fitdata=currfitdata, model=model,
                                      noiter=noiter, conv=conv, grad=grad, silent=silent,
                                      guess=guess, callback=callback)
+        print X.getResult()
+        
         if fitresult == None:
             print 'Fitter returned None..'
             return

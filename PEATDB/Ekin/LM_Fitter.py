@@ -128,6 +128,13 @@ class LM_Fitter:
         return fity
         
     def getResult(self):
+        """Return the fit results for printing"""       
+        fd = self.getFitDict()
+        fd['error'] = self.getError() 
+        fd['model'] = self.name
+        return fd 
+        
+    def printResult(self):
         """Return the fit results for printing"""
         result=''
         fd = self.getFitDict()

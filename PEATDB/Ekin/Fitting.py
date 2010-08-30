@@ -113,6 +113,9 @@ class Fitting(object):
             return DSC2stateIrreversibleII(variables=vrs,exp_data=expdata,callback=callback,name=model)             
         elif model == 'Residual Activity':
             return residualActivity(variables=vrs,exp_data=expdata,callback=callback,name=model)
+        elif model == 'Arrhenius':
+            return Arrhenius(variables=vrs,exp_data=expdata,callback=callback,name=model)          
+            
         else:
             return None
 
@@ -1327,7 +1330,6 @@ class power(LM_Fitter):
         for a in self.exp_data:
             x.append(float(a[0]))
             y.append(float(a[1]))
-
         return
 
     def get_equation(self):
@@ -1354,7 +1356,7 @@ class residualActivity(LM_Fitter):
         LM_Fitter.__init__(self,variables,exp_data, callback,name)
         self.name = name
         self.names = ['t50', 'slope', 'top']
-        self.labels = ['mdeg', 'temp']
+        self.labels = ['temp', 'mdeg']
         if self.variables == None:
             self.variables = [2, .5, 1]
         else:
@@ -1392,7 +1394,37 @@ class residualActivity(LM_Fitter):
         if slope >300: slope = 300
         if slope<0.001: slope = 0.001  #prevent a range errors
 
-        #print slope, t50
         value = top/(1+math.pow((x/t50),slope))
         return value
 
+class Arrhenius(LM_Fitter):
+    """Fit Ea to derived rate constants from Arrhenius equation"""
+    def __init__(self, variables, exp_data, callback, name):
+        LM_Fitter.__init__(self,variables,exp_data, callback,name)
+        self.name = name
+        self.names = ['A', 'Ea']
+        self.labels = ['temp', 'k']
+        if self.variables == None:
+            self.variables = [1, 200]
+        else:
+            self.variables = variables
+        self.setChangeVars()
+        return
+
+    def get_equation(self):
+        """Return a text form of the model for printing"""
+        eq ='A*exp(-Ea/RT)'
+        return eq
+
+    def get_value(self, variables, data_point):
+        """Res act: t50, slope, top"""
+        try:
+            x=data_point[0]
+        except:
+            x=data_point
+        A=variables[0]
+        Ea=variables[1]     
+        R=8.3144e-3
+        value = A * math.exp(-Ea/R*x)
+        return value  
+        
