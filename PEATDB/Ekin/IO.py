@@ -30,7 +30,7 @@ from Tkinter import *
 import Pmw
 import csv
 import tkFileDialog, tkMessageBox, tkSimpleDialog
-from Convert import EkinConvert
+from Dataset import EkinDataset
 
 class Importer:
     """
@@ -411,9 +411,7 @@ class Importer:
                        y=[]
                        for i in range(1,len(importdata)):
                            y.append(importdata[i][j])
-                       name = cols[j]
-                       #print name, x,y
-                       #datasets[name] = EkinConvert.xy2ekin([x,y])
+                       name = cols[j]                      
 		       datasets[name] = EkinDataset(xy=[x,y])
 
                else:
@@ -425,9 +423,8 @@ class Importer:
                            x.append(xval)
                            y.append(yval)
                        except:
-                           pass                   
-                   #datasets[showname] = EkinConvert.xy2ekin([x,y])
-		   datasets[name] = EkinDataset(xy=[x,y])
+                           pass              
+		   datasets[showname] = EkinDataset(xy=[x,y])
         #print 'datasets', datasets
         return datasets
 

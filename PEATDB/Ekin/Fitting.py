@@ -1234,23 +1234,11 @@ class DSC2stateIrreversible(LM_Fitter):
         self.names = ['Tm','deltaH','E']
         self.labels = ['T','e']
         if variables == None:
-            self.variables = [340, 40,1]
+            self.variables = [350, 1e-8, 320]
         else:
             self.variables = variables
         self.setChangeVars()
         return
-
-    def guess_start(self):
-        """Guess start vals for this model"""
-        x=[];y=[]
-        for a in self.exp_data:
-            x.append(float(a[0]))
-            y.append(float(a[1]))            
-        R=8.3144e-3
-        Tm = x[y.index(max(y))]
-        deltaH = 270
-        self.variables = [Tm,deltaH,1]
-        return self.variables
         
     def get_value(self, variables, data_point):
         """DSC"""
@@ -1405,7 +1393,7 @@ class Arrhenius(LM_Fitter):
         self.names = ['A', 'Ea']
         self.labels = ['temp', 'k']
         if self.variables == None:
-            self.variables = [1, 200]
+            self.variables = [1,100]
         else:
             self.variables = variables
         self.setChangeVars()

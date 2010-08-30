@@ -135,10 +135,9 @@ class LM_Fitter:
         return fd 
         
     def printResult(self):
-        """Return the fit results for printing"""
-        result=''
-        fd = self.getFitDict()
-        for v in fd.keys():
+        """Return the fit results for printing"""       
+        res=self.getResult()
+        for v in res.keys():
             result+= v +':'+ "%E" %fd[v] +' '
         return result
 
@@ -154,7 +153,7 @@ class LM_Fitter:
             fit_value=self.get_value(function_variables,datapoint)
             diff=diff+math.pow(exp_value-fit_value,2)
             fit_values.append([datapoint,fit_value])    
-        #print 'Difference',diff#,function_variables
+       
         if return_values:
             return diff,fit_values
         else:

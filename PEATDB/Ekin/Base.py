@@ -563,8 +563,7 @@ class EkinProject(object):
         fitresult, X = Fitting.doFit(datatofit, fitdata=currfitdata, model=model,
                                      noiter=noiter, conv=conv, grad=grad, silent=silent,
                                      guess=guess, callback=callback)
-        print X.getResult()
-        
+               
         if fitresult == None:
             print 'Fitter returned None..'
             return
