@@ -1,0 +1,7 @@
+VALID
+
+Must contain all necessary files for performing a scan on 1crn.pdb and nothing else.
+
+INVALID
+
+Must contain only 1crn.pdb

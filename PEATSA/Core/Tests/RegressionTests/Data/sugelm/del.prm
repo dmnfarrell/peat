@@ -1,0 +1,16 @@
+gsize=65                                                                        
+scale=2.850                                                                     
+bndcon=3                                                                        
+in(phi,file="del3.phi")                                                         
+in(pdb,file="del.pdb")
+in(siz,file="dummy.siz")
+in(crg,file="dummy.crg")
+out(modpdb,file="del.modpdb")
+energy(g)
+out(phi,file="del.phi")                                                         
+salt=0.144                                                                      
+ionrad=2.00                                                                     
+prbrad=1.40                                                                     
+indi=8.00                                                                       
+exdi=80.00                                                                      
+acenter( 10.86, 10.16,  6.54)

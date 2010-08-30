@@ -1,0 +1,120 @@
+GNU Octave, version 2.9.8 (i686-redhat-linux-gnu).
+Copyright (C) 2006 John W. Eaton.
+This is free software; see the source code for copying conditions.
+There is ABSOLUTELY NO WARRANTY; not even for MERCHANTIBILITY or
+FITNESS FOR A PARTICULAR PURPOSE.  For details, type `warranty'.
+
+Additional information about Octave is available at http://www.octave.org.
+
+Please contribute if you find this software useful.
+For more information, visit http://www.octave.org/help-wanted.html
+
+Report bugs to <bug@octave.org> (but first, please read
+http://www.octave.org/bugs.html to learn how to write a helpful report).
+
+c =
+
+   -1.01882
+   -0.76393
+    3.58770
+    5.58058
+    7.42775
+    1.48673
+    7.90982
+    4.97340
+    0.14943
+    6.78263
+   -0.90402
+   -0.47322
+    1.74070
+   -6.73702
+   -8.73658
+   -4.22124
+   -3.79542
+  -10.16822
+   -8.48035
+
+predictions =
+
+   13.7944
+   24.1268
+   21.9439
+   21.5916
+   13.9439
+   20.5728
+   21.1800
+   14.8133
+   14.4761
+   10.7380
+   10.7380
+   17.5206
+   11.9062
+    8.3703
+   11.7568
+   18.7678
+   20.2034
+    6.0891
+   13.3438
+   11.7568
+   20.2205
+   -6.5487
+  -20.8524
+    1.4936
+    5.1126
+   -6.5487
+  -23.4374
+
+corr =  0.99353
+Desolvation energies:
+Molecule   exp. desolvation   regression desolvation
+---------------------------------------------------
+ALA             16.3717 kJ/mol           13.7944 kJ/mol
+ARG             24.1268 kJ/mol           24.1268 kJ/mol
+ASN             21.9439 kJ/mol           21.9439 kJ/mol
+ASP             21.1396 kJ/mol           21.5916 kJ/mol
+CYS             14.3612 kJ/mol           13.9439 kJ/mol
+GLU             21.0248 kJ/mol           20.5728 kJ/mol
+GLN             18.0951 kJ/mol           21.1800 kJ/mol
+GLY             18.4397 kJ/mol           14.8133 kJ/mol
+HIS             14.4761 kJ/mol           14.4761 kJ/mol
+ILE             10.1103 kJ/mol           10.7380 kJ/mol
+LEU              9.9954 kJ/mol           10.7380 kJ/mol
+LYS             17.5206 kJ/mol           17.5206 kJ/mol
+MET             11.4889 kJ/mol           11.9062 kJ/mol
+PHE              8.7316 kJ/mol            8.3703 kJ/mol
+PRO             14.5910 kJ/mol           11.7568 kJ/mol
+SER             19.1291 kJ/mol           18.7678 kJ/mol
+THR             17.1185 kJ/mol           20.2034 kJ/mol
+TRP              6.0891 kJ/mol            6.0891 kJ/mol
+TYR             12.9825 kJ/mol           13.3438 kJ/mol
+VAL             12.9825 kJ/mol           11.7568 kJ/mol
+2ak3-ligand     20.2205 kJ/mol           20.2205 kJ/mol
+4cla-ligand     -6.5487 kJ/mol           -6.5487 kJ/mol
+2pcp_ligand    -20.8524 kJ/mol          -20.8524 kJ/mol
+1ydd_ligand      1.4936 kJ/mol            1.4936 kJ/mol
+1upf_ligand      5.1126 kJ/mol            5.1126 kJ/mol
+4cla-ligand     -6.5487 kJ/mol           -6.5487 kJ/mol
+1e5a_ligand    -23.4374 kJ/mol          -23.4374 kJ/mol
+
+
+Atomic desolvation parameters
+-----------------------------
+ADP: C.3     -1.0188 kJ/mol
+ADP: C.2     -0.7639 kJ/mol
+ADP: O.2      3.5877 kJ/mol
+ADP: N.am     5.5806 kJ/mol
+ADP: O.3      7.4277 kJ/mol
+ADP: N.pl3    1.4867 kJ/mol
+ADP: C.cat    7.9098 kJ/mol
+ADP: O.co2    4.9734 kJ/mol
+ADP: S.3      0.1494 kJ/mol
+ADP: N.4      6.7826 kJ/mol
+ADP: C.ar    -0.9040 kJ/mol
+ADP: N.ar    -0.4732 kJ/mol
+ADP: P.3      1.7407 kJ/mol
+ADP: N.2     -6.7370 kJ/mol
+ADP: Cl      -8.7366 kJ/mol
+ADP: N.3     -4.2212 kJ/mol
+ADP: S.o2    -3.7954 kJ/mol
+ADP: F       -10.1682 kJ/mol
+ADP: Br      -8.4803 kJ/mol

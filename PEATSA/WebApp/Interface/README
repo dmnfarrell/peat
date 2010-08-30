@@ -1,0 +1,24 @@
+This directory contains the web interface to the Protein Design Tool.
+It is best viewed as a Web Application.
+The construction of the WebApp is decoupled into interface, submission manager, and a calculation backend which does the work.
+This is basically a model-view-controller layout.
+
+The Pages directory contains the html and php pages that define the user interface. 
+This correpsonds to the MVC view.
+
+The cgi directory contains the python script that processes job requests from the interface and launches calculations.
+The corresponds to a view-controller in MVC.
+
+The actual program that runs the calculations is completely separate from the web interface.
+It is called PDTWebScript and can be found in the WebApp.Backend directory.
+It is only a small wrapper around the main PDT program (Core/ProteinDesignTool.py).
+The wrapper simply stores information on the job being run and its results in a MySQL database.
+This can be seen as the model-controller in the MVC pattern.
+
+The model is then, essentially, the MySQL database and the data it contains.
+
+This structure minimises the coupling between the layers allowing them to be modified independantly without affecting the others e.g. the layout of the interface, or the details on how jobs are submitted can be changed without affecting anything else.
+
+The final important file is the WebApps configuration file.
+This contains information on the database (name, password etc.), I/O dirs etc. that is required by both the submission manager and the calculation backend.
+The default configuration is stored in the Resources directory of the ProteinDesignTool module for security. 

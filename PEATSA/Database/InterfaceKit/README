@@ -1,0 +1,68 @@
+Contains PHP code for accessing and displaying PEAT_SA job data through the web.
+Each job data is stored in a PEAT-SA MySQL database and is accessed using the jobs unique identification.
+
+Note: This code does not provide a full interface on its own
+
+
+*** Modules ***
+
+The provide php modules can be broken into two types. 
+The first provide functionality related to accessing data. 
+The second for displaying that data ("views").
+In addition some of the php modules provide functions for use in creating a php scripts while others are complete
+php scripts themselves.
+
+* Data Access 
+
+DataRetrieval.php
+	- Provides core php functions for retrieving job data from a PEAT-SA database	
+
+Session.php
+	- Provides functions for setting which database the retreival functions will use by default
+	- These functions can also be used to set a default database for an entire website or for specific users etc.
+	
+Utilities.php
+	- Functions useful for working with PEAT-SA data - includes functions for querying a jobs state.	
+
+DownloadMatrix.php
+	-  A complete php script for downloading PEAT-SA data. 	
+
+* Data Display
+
+MatrixViewer.php 
+	- Use to display a PEAT-SA csv data on a webpage
+	
+JobBrowser.php 	
+	- Use to display information on the jobs in a database on a webpage
+
+StructureViewer.php
+	- Use to display the structure associated with a PEATSA job on a webapge
+	
+
+*** Sessions ***
+
+Information on the database to access can be provided directly to retrieval functions OR be stored in a session specific variable.
+The second option allows applications using these modules to set the database to access per-user/per-server and automatically
+have all retrieval functions use it.
+
+To set the database in this way you use 
+
+start_peatsa_database_session($DOMAIN);
+set_peatsa_database_session_configuration_file($FILE)
+
+The first call creates a session for $DOMAIN.
+$DOMAIN specifies the pages on your server that the session will apply to.
+
+For example if the pages of your website lie under http://myserver.com/PEAT_SA/ then setting $DOMAIN to PEAT_SA
+will create a session for each user that applies every time they visit a page under PEAT_SA.
+
+$FILE is the location of a correctly formatted PEAT-SA configuration file containing the database parameters.
+
+
+On errors many function return an error array.
+The array entries are
+	jobID (optional)
+	domain
+	description
+	detailedDescription
+	recoverySuggestion

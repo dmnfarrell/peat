@@ -1,0 +1,257 @@
+bash-3.2$ /home/people/johnston/pKD_install/pKa/pKa_alascan.py 1crn.pdb T:0043:ASP
+Calculating for residue T:0001 THR
+THRT:0001:ALA
+**** Selection of titratable groups ****
+All titratable groups are included at the same level
+
+**** Combination of dpKa values ****
+All residues are included in calculation. Higher order dpKa values are found by linear combination
+
+**** pKa calculation method *****
+Using Monte Carlo sampling for calculating pKa values. pKa values are evaluated for all residues
+Desolvation and background interaction energies of mutated residues are taken into account
+Parameters:
+Initialising Protool mutate class ...
+Reading amino acid definition file from /home/people/johnston/pKD_install/Protool/AA.DAT... done
+Importing rotamer library from /home/people/johnston/pKD_install/Protool/bbdep02.May.sortlib..... Done
+Done
+--------------------------------------
+Loading SUGELM data from existing file
+--------------------------------------
+
+                Target pKa values
+ residue   cur. pKa     new pKa   change    weight
+---------------------------------------------------
+T:0043:ASP      4.4       4.4       0.0        1.0
+
+
+
+Loading wild type pKa values........
+done
+T:0001:THR:NTERM 8.520
+     T:0010:ARG -9999.900
+     T:0017:ARG -9999.900
+     T:0023:GLU 3.639
+     T:0029:TYR 9.832
+     T:0043:ASP 4.403
+     T:0044:TYR 10.855
+T:0046:ASN:CTERM 1.624
+
+                Target pKa values
+ residue   cur. pKa     new pKa   change    weight
+---------------------------------------------------
+T:0043:ASP      4.4       4.4       0.0        1.0
+
+
+Filtering mutations.....
+Modelling point mutation T:0031:GLY:ARG
+Doing rotamer search
+    1 T:0031 GLY -> ARG bump score 0.681594329495
+Modelling point mutation T:0031:GLY:ASP
+T:0031 GLY -> ASP bump score 0.0
+Modelling point mutation T:0031:GLY:GLU
+Doing rotamer search
+    1 T:0031 GLY -> GLU bump score 0.731810188144
+Modelling point mutation T:0031:GLY:HIS
+Doing rotamer search
+    1 T:0031 GLY -> HIS bump score 0.580268041821
+Modelling point mutation T:0031:GLY:LYS
+Doing rotamer search
+    1 T:0031 GLY -> LYS bump score 0.679696763059
+Modelling point mutation T:0032:CYS:LYS
+Doing rotamer search
+    1 T:0032 CYS -> LYS bump score 0.159941528615
+Modelling point mutation T:0033:ILE:ARG
+T:0033 ILE -> ARG bump score 0.0
+Modelling point mutation T:0033:ILE:ASP
+T:0033 ILE -> ASP bump score 0.0
+Modelling point mutation T:0033:ILE:GLU
+T:0033 ILE -> GLU bump score 0.0
+Modelling point mutation T:0033:ILE:HIS
+T:0033 ILE -> HIS bump score 0.0
+Modelling point mutation T:0033:ILE:LYS
+T:0033 ILE -> LYS bump score 0.0
+Modelling point mutation T:0034:ILE:ARG
+Doing rotamer search
+    1 T:0034 ILE -> ARG bump score 0.0
+Modelling point mutation T:0034:ILE:ASP
+T:0034 ILE -> ASP bump score 0.0
+Modelling point mutation T:0034:ILE:GLU
+Doing rotamer search
+    1 T:0034 ILE -> GLU bump score 0.0
+Modelling point mutation T:0034:ILE:HIS
+T:0034 ILE -> HIS bump score 0.0
+Modelling point mutation T:0034:ILE:LYS
+Doing rotamer search
+    1 T:0034 ILE -> LYS bump score 0.0
+Modelling point mutation T:0035:ILE:ARG
+Doing rotamer search
+    1 T:0035 ILE -> ARG bump score 0.0
+Modelling point mutation T:0035:ILE:ASP
+T:0035 ILE -> ASP bump score 0.0
+Modelling point mutation T:0035:ILE:GLU
+T:0035 ILE -> GLU bump score 0.0
+Modelling point mutation T:0035:ILE:HIS
+Doing rotamer search
+    1 T:0035 ILE -> HIS bump score 0.324061348716
+Modelling point mutation T:0035:ILE:LYS
+Doing rotamer search
+    1 T:0035 ILE -> LYS bump score 0.0
+Modelling point mutation T:0036:PRO:ARG
+T:0036 PRO -> ARG bump score 0.0
+Modelling point mutation T:0036:PRO:ASP
+T:0036 PRO -> ASP bump score 0.0
+Modelling point mutation T:0036:PRO:GLU
+T:0036 PRO -> GLU bump score 0.0
+Modelling point mutation T:0036:PRO:HIS
+T:0036 PRO -> HIS bump score 0.0
+Modelling point mutation T:0036:PRO:LYS
+T:0036 PRO -> LYS bump score 0.0
+Modelling point mutation T:0037:GLY:ARG
+T:0037 GLY -> ARG bump score 0.0
+Modelling point mutation T:0037:GLY:ASP
+T:0037 GLY -> ASP bump score 0.0
+Modelling point mutation T:0037:GLY:GLU
+T:0037 GLY -> GLU bump score 0.0
+Modelling point mutation T:0037:GLY:HIS
+T:0037 GLY -> HIS bump score 0.0
+Modelling point mutation T:0037:GLY:LYS
+T:0037 GLY -> LYS bump score 0.0
+Modelling point mutation T:0038:ALA:ARG
+T:0038 ALA -> ARG bump score 0.0
+Modelling point mutation T:0038:ALA:ASP
+T:0038 ALA -> ASP bump score 0.0
+Modelling point mutation T:0038:ALA:GLU
+T:0038 ALA -> GLU bump score 0.0
+Modelling point mutation T:0038:ALA:HIS
+T:0038 ALA -> HIS bump score 0.0
+Modelling point mutation T:0038:ALA:LYS
+T:0038 ALA -> LYS bump score 0.0
+Modelling point mutation T:0039:THR:ARG
+T:0039 THR -> ARG bump score 0.0
+Modelling point mutation T:0039:THR:ASP
+Doing rotamer search
+    1 T:0039 THR -> ASP bump score 0.0
+Modelling point mutation T:0039:THR:GLU
+T:0039 THR -> GLU bump score 0.0
+Modelling point mutation T:0039:THR:HIS
+T:0039 THR -> HIS bump score 0.0
+Modelling point mutation T:0039:THR:LYS
+T:0039 THR -> LYS bump score 0.0
+Modelling point mutation T:0040:CYS:ARG
+Doing rotamer search
+    1 T:0040 CYS -> ARG bump score 0.0
+Modelling point mutation T:0040:CYS:ASP
+Doing rotamer search
+    1 T:0040 CYS -> ASP bump score 0.0
+Modelling point mutation T:0040:CYS:GLU
+Doing rotamer search
+    1 T:0040 CYS -> GLU bump score 0.0
+Modelling point mutation T:0040:CYS:HIS
+Doing rotamer search
+    1 T:0040 CYS -> HIS bump score 0.0
+Modelling point mutation T:0040:CYS:LYS
+Doing rotamer search
+    1 T:0040 CYS -> LYS bump score 0.0
+Modelling point mutation T:0041:PRO:ARG
+T:0041 PRO -> ARG bump score 0.0
+Modelling point mutation T:0041:PRO:ASP
+T:0041 PRO -> ASP bump score 0.0
+Modelling point mutation T:0041:PRO:GLU
+T:0041 PRO -> GLU bump score 0.0
+Modelling point mutation T:0041:PRO:HIS
+T:0041 PRO -> HIS bump score 0.0
+Modelling point mutation T:0041:PRO:LYS
+T:0041 PRO -> LYS bump score 0.0
+Modelling point mutation T:0042:GLY:ARG
+T:0042 GLY -> ARG bump score 0.0
+Modelling point mutation T:0042:GLY:ASP
+T:0042 GLY -> ASP bump score 0.0
+Modelling point mutation T:0042:GLY:GLU
+T:0042 GLY -> GLU bump score 0.0
+Modelling point mutation T:0042:GLY:HIS
+T:0042 GLY -> HIS bump score 0.0
+Modelling point mutation T:0042:GLY:LYS
+T:0042 GLY -> LYS bump score 0.0
+Modelling point mutation T:0043:ASP:ARG
+Doing rotamer search
+    1 T:0043 ASP -> ARG bump score 0.0
+Modelling point mutation T:0043:ASP:GLU
+T:0043 ASP -> GLU bump score 0.0
+Modelling point mutation T:0043:ASP:HIS
+T:0043 ASP -> HIS bump score 0.0
+Modelling point mutation T:0043:ASP:LYS
+T:0043 ASP -> LYS bump score 0.0
+Modelling point mutation T:0044:TYR:ARG
+Doing rotamer search
+    1 T:0044 TYR -> ARG bump score 0.0
+Modelling point mutation T:0044:TYR:ASP
+T:0044 TYR -> ASP bump score 0.0
+Modelling point mutation T:0044:TYR:GLU
+Doing rotamer search
+    1 T:0044 TYR -> GLU bump score 0.0
+Modelling point mutation T:0044:TYR:HIS
+T:0044 TYR -> HIS bump score 0.0
+Modelling point mutation T:0044:TYR:LYS
+Doing rotamer search
+    1 T:0044 TYR -> LYS bump score 0.0
+Modelling point mutation T:0045:ALA:ARG
+T:0045 ALA -> ARG bump score 0.0
+Modelling point mutation T:0045:ALA:ASP
+T:0045 ALA -> ASP bump score 0.0
+Modelling point mutation T:0045:ALA:GLU
+T:0045 ALA -> GLU bump score 0.0
+Modelling point mutation T:0045:ALA:HIS
+T:0045 ALA -> HIS bump score 0.0
+Modelling point mutation T:0045:ALA:LYS
+T:0045 ALA -> LYS bump score 0.0
+Modelling point mutation T:0046:ASN:ARG
+Cterm T:0046
+Doing rotamer search
+    1 T:0046 ASN -> ARG bump score 0.0
+Modelling point mutation T:0046:ASN:ASP
+T:0046 ASN -> ASP bump score 0.0
+Modelling point mutation T:0046:ASN:GLU
+Cterm T:0046
+T:0046 ASN -> GLU bump score 0.0
+Modelling point mutation T:0046:ASN:HIS
+Cterm T:0046
+T:0046 ASN -> HIS bump score 0.0
+Modelling point mutation T:0046:ASN:LYS
+Cterm T:0046
+T:0046 ASN -> LYS bump score 0.0
+done filtering
+Residue   Old pKa   New pKa   Difference   Energy     Mutation(s)
+-------------------------------------------------------------------
+Finding new reporter groups
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+this piece of code needs to be fixed
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+Modelling a mutation which is not in the pre-approved set of mutations THRT:0001:ALA
+Modelling point mutation THRT:0001:ALA
+Traceback (most recent call last):
+  File "/home/people/johnston/pKD_install/pKa/pKa_alascan.py", line 138, in <module>
+    main()
+  File "/home/people/johnston/pKD_install/pKa/pKa_alascan.py", line 119, in main
+    solutions=Design_pKa.run_opt(defaults)
+  File "/home/people/johnston/pKD_install/pKa/Design_pKa.py", line 2420, in run_opt
+    results=X.calc_dpKa()
+  File "/home/people/johnston/pKD_install/pKa/Design_pKa.py", line 600, in calc_dpKa
+    score,results[str(mutations)]=self.calc_dpKa_sub(mutations)
+  File "/home/people/johnston/pKD_install/pKa/Design_pKa.py", line 619, in calc_dpKa_sub
+    score,dpKas=self.calculate_pKa_change(mutation)
+  File "/home/people/johnston/pKD_install/pKa/Design_pKa.py", line 53, in calculate_pKa_change
+    dpKas=self.calculate_dpKas_tabulated(mutations)
+  File "/home/people/johnston/pKD_install/pKa/Design_pKa.py", line 359, in calculate_dpKas_tabulated
+    dpKa=self.tab_data.get_dpKa(mutation,target_residue,self)
+  File "/home/people/johnston/pKD_install/pKa/Design_pKa_help.py", line 572, in get_dpKa
+    mut_dpKas=Design_instance.calculate_dpKas_explicit(mutations=[mutation],find_reporter_groups=1)
+  File "/home/people/johnston/pKD_install/pKa/Design_pKa.py", line 221, in calculate_dpKas_explicit
+    rotamer_score=self.get_rotamer_score(test_mut)
+  File "/home/people/johnston/pKD_install/pKa/Design_pKa.py", line 2260, in get_rotamer_score
+    mutant_pdbfile,rotamer_score=Design_pKa_help.make_mutation(self.pdbfile,mutation)
+  File "/home/people/johnston/pKD_install/pKa/Design_pKa_help.py", line 212, in make_mutation
+    bump_score=MUT.mutate(resid,newres,orgtype=oldres)
+  File "/home/people/johnston/pKD_install/Protool/mutate.py", line 379, in mutate
+    raise Exception,"Invalid residue number"
+Exception: Invalid residue number

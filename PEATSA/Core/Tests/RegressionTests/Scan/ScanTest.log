@@ -1,0 +1,55 @@
+[PEAT-SA] Parallel environment disabled.
+
+[PEAT-SA] Output directory is Scan
+[PEAT-SA] Using pdb file at /local/johnston/Test/Data/1crn.pdb as working copy
+[PEAT-SA] Cleaning pdb - Removing water and ligands
+Using normal WHAT IF
+Using:  /home/people/johnston/WHATIF.FIG
+[PEAT-SA] Done
+[SCAN] Scanning the following mutations - 
+T:0001:THR -> ALA
+T:0002:THR -> ALA
+T:0003:CYS -> ALA
+T:0004:CYS -> ALA
+T:0005:PRO -> ALA
+T:0006:SER -> ALA
+T:0007:ILE -> ALA
+T:0008:VAL -> ALA
+T:0010:ARG -> ALA
+T:0011:SER -> ALA
+T:0012:ASN -> ALA
+T:0013:PHE -> ALA
+T:0014:ASN -> ALA
+T:0015:VAL -> ALA
+T:0016:CYS -> ALA
+T:0017:ARG -> ALA
+T:0018:LEU -> ALA
+T:0019:PRO -> ALA
+T:0021:THR -> ALA
+T:0022:PRO -> ALA
+T:0023:GLU -> ALA
+T:0025:ILE -> ALA
+T:0026:CYS -> ALA
+T:0028:THR -> ALA
+T:0029:TYR -> ALA
+T:0030:THR -> ALA
+T:0032:CYS -> ALA
+T:0033:ILE -> ALA
+T:0034:ILE -> ALA
+T:0035:ILE -> ALA
+T:0036:PRO -> ALA
+T:0039:THR -> ALA
+T:0040:CYS -> ALA
+T:0041:PRO -> ALA
+T:0043:ASP -> ALA
+T:0044:TYR -> ALA
+T:0046:ASN -> ALA
+
+[SCAN] Scan output redirected to file Scan.log ...
+[SCAN] Reading necessary scan information
+[SCAN] Calculating for residue T:0001:THR - Mutation ALA
+[SCAN] Initialising ...
+
+Encountered an unexpected error - This is likely a bug
+Please contact the developers with the following traceback information along with details on the calculation being run (arguments, configuration file etc.)
+

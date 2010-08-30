@@ -1,0 +1,64 @@
+**** Selection of titratable groups ****
+All titratable groups are included at the same level
+
+**** Combination of dpKa values ****
+All residues are included in calculation. Higher order dpKa values are found by linear combination
+
+**** Intrinsic pKa recalculation *****
+Intrinsic pKa values are calculated for mutated residues (if the new residue is titratable)
+Recalculating intrinsic pKa for target residues if mutation is closer than 20.000A
+ 
+**** pKa calculation method *****
+Using Monte Carlo sampling for calculating pKa values. pKa values are evaluated for all residues
+Desolvation and background interaction energies of mutated residues are taken into account
+Parameters:
+Initialising Protool mutate class ...
+Setting max tolerated bump to 0.500
+Reading amino acid definition file from /home/people/johnston/PDT/Protool/AA.DAT... done
+Importing rotamer library from /home/people/johnston/PDT/Protool/bbdep02.May.sortlib..... Done
+
+                Target pKa values
+     residue   cur. pKa     new pKa   change    weight
+-------------------------------------------------------
+T:0010:ARG     15.7      15.7       0.0        1.0
+T:0017:ARG     13.9      13.9       0.0        1.0
+T:0023:GLU      3.6       3.6       0.0        1.0
+T:0029:TYR      9.8       9.8       0.0        1.0
+T:0043:ASP      4.4       4.4       0.0        1.0
+T:0044:TYR     10.9      10.9       0.0        1.0
+
+
+
+Loading wild type pKa values........
+done
+   T:0001:NTERM 8.520
+     T:0010:ARG -9999.900
+     T:0017:ARG -9999.900
+     T:0023:GLU 3.646
+     T:0029:TYR 9.840
+     T:0043:ASP 4.407
+     T:0044:TYR 10.852
+   T:0046:CTERM 1.623
+
+                Target pKa values
+     residue   cur. pKa     new pKa   change    weight
+-------------------------------------------------------
+T:0010:ARG     15.7      15.7       0.0        1.0
+T:0017:ARG     13.9      13.9       0.0        1.0
+T:0023:GLU      3.6       3.6       0.0        1.0
+T:0029:TYR      9.8       9.8       0.0        1.0
+T:0043:ASP      4.4       4.4       0.0        1.0
+T:0044:TYR     10.9      10.9       0.0        1.0
+
+
+Filtering mutations.....
+done filtering
+Residue   Old pKa   New pKa   Difference   Energy     Mutation(s)
+-------------------------------------------------------------------
+  T:0010:ARG   0.000        0.000     0.000         0.0   T:0001:THR:ALA
+  T:0017:ARG   0.000        0.000     0.000         0.0   T:0001:THR:ALA
+  T:0023:GLU   3.646        3.646     0.000         0.0   T:0001:THR:ALA
+  T:0029:TYR   9.840        9.840     0.000         0.0   T:0001:THR:ALA
+  T:0043:ASP   4.407        4.407     0.000         0.0   T:0001:THR:ALA
+  T:0044:TYR  10.852       10.852     0.000         0.0   T:0001:THR:ALA
+({"['T:0001:THR:ALA']": {'T:0029:TYR': 0.0, 'T:0043:ASP': 0.0, 'T:0017:ARG': 0.0, 'T:0010:ARG': 0.0, 'T:0023:GLU': 0.0, 'T:0044:TYR': 0.0}}, <pKa.Design_pKa.Design_pKa instance at 0x7febd6f9b560>, None)

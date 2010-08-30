@@ -1,0 +1,234 @@
+There are three things that can be installed - the module, the command line program and the WebApp.
+The first is required for either of the other two to work.
+
+Furthermore this tool essentially combines a number of other programs that must be installed independently.
+The direct dependencies are Jen Nielsens PKA python modules and the UFFBAPS program - more may be necessary later.
+
+-------------------------------------------------
+BEFORE BEGINNING
+-------------------------------------------------
+
+A couple of terms are used to refer to things that will vary depending from user to user.
+
+$SOURCE_LOCATION = This is the directory containing the PEAT_SA source directory
+$SERVER = The name of the server the WebApp is to be run from e.g. www.myserver.com.
+This includes the port if not the standard 80.
+
+When there are multiple install options available I put my preferred way first and then list some alternatives.
+This might not be to some peoples taste so if you know what your doing you can install things whatever way you prefer - just don't come looking to me for help when things go wrong!
+My install method results in the set-up that makes future updates as easy as possible - e.g. just perform an svn update and thats it.
+
+-------------------------------------------------
+MODULE INSTALLATION
+-------------------------------------------------
+
+First you must install the module so python can find it.
+There are a couple of ways
+
+1. Create a link in the site-packages directory corresponding to your python version.
+
+For example if the version is 2.5 then for linux this will be something like
+	
+	ln -s $SOURCE_LOCATION/PEAT-SA /usr/lib/python2.5/site-packages/PEAT-SA
+
+or on Mac
+
+	ln -s $SOURCE_LOCATION/PEAT-SA /Library/python/2.5/site-packages/PEAT-SA
+
+This will enable the module to be used by everyone.
+
+2. Add the directory containing the PEAT-SA source to your $PYTHON_PATH
+
+This will only allow the module to be accessed by you
+
+3. Move the source directory to the site-packages dir.
+
+Similarly to the above everyone will have access to the module.
+
+
+NOTE: The WebApp installation guide assumes you used option 1.
+
+
+-------------------------------------------------
+COMMAND LINE TOOL
+-------------------------------------------------
+
+Next you might want to install the ProteinDesignTool command line script so you can run it from anywhere.
+To do this simply make a link to PEAT_SA/Core/ProteinDesignTool.py in a directory in your $PATH.
+For example
+
+	ln -s $SOURCE_LOCATION/PEAT_SA/Core/ProteinDesignTool.py /usr/local/bin/ProteinDesignTool
+
+You might have to change the permissions of the ProteinDesignTool.py script to make it executable.
+
+-------------------------------------------------
+PHP Database Module
+-------------------------------------------------
+
+First you must install a number of PHP modules from the pear project.
+Run 
+
+pear install 
+
+
+-------------------------------------------------
+WEB APPLICATION
+-------------------------------------------------
+
+The web app is a LAMP (Linux, Apache, PHP, MySQL) program and hence requires a few things to be present -
+
+1. An Apache web-server with PHP support. NOTE: Make sure apache has php enabled.
+2. An accessible MySQL database.
+
+In addition it requires -
+
+3. The python MySQLdb module (http://sourceforge.net/projects/mysql-python)
+4. The php Config module from PEAR. (Discussed in more detail in STEP 2).
+
+In the following I assume you have at least the first two components installed and have some idea of how to configure them.
+For the uninitiated the Apache terms used here are
+
+DocumentRoot - The directory from which your Apache serves pages.
+ScriptRoot - The directory from which your Apache serves cgi scripts.
+Alias - Creates a virtual link in DocumentRoot to another directory.
+ScriptAlias - As Alias except using ScriptRoot
+
+You can find out more about these on the Apache website.
+For issues like PHP and Apache security your mostly on your own (I can't cover everything ...).
+
+There are four steps - set up the MySQL database, set-up configuration, install the interface and finally install the JobSubmission script.
+As before if there are multiple possible methods in a step I give the preferred one first.
+Its quite straightforward ....
+
+
+********* STEP 1 - MySQL Database. *********
+
+The program uses MySQL to store various data.
+To create the database go to whichever host has the database server (probably the same as your apache server) and simply run
+
+mysql -u $USERNAME -p < $(SOURCE_LOCATION)/PEAT_SA/WebApp/DatabaseSchema.sql
+
+This will ask for the password for $USERNAME and then create the database (as long as $USERNAME has the correct privileges).
+If the MySQL database is not on the same host as $SOURCE_LOCATION you'll obviously have to copy DatabaseSchema.sql to the correct host.
+
+After this you may want to create a specific user the WebApp will access the database as.
+To do this you can use the script PEAT_SA/WebApp/CreateUser.sql.
+
+Firstly you need to edit this file to set the users password - replace the string 'Insert Password' with whatever you want it to be.
+Then run 
+
+mysql -u $USERNAME -p < $(SOURCE_LOCATION)/PEAT_SA/WebApp/CreateUser.sql
+
+using the same $USERNAME as above (usually root)
+
+
+********* STEP 2 - Configuration *********
+
+The WebApp uses a configuration file to determine how its supposed to do things.
+An example is located in PEAT_SA/WebApp/Resources/example.conf.
+Before continuing copy this file to a file called 'webApplication.conf' in the same directory - this will be the file that the program reads its configuration from.
+(This removes svn updates overwriting your configuration).
+NB: The configuration file must be kept in PEAT_SA/WebApp/Resources/
+
+In webApplication.conf you can set up specifics about how the calculations will be run but for this guide I'm just concentrating on the options necessary to get the app running.
+Every entry is given as an option = value pair.
+
+The things you need to set - 
+
+In the [PATHS] section:
+
+pKa Tools -  This is the path to the directory containing the pKa python modules (pKa, pKaTool etc.)
+uffbaps - The path to the directory containing the Uffbaps program.
+whatif - The path to the directory containing the .WHAT_IF file that describes where WHAT_IF is.
+
+In the [WEB APPLICATION] section:
+
+dataDirectory - The directory where the data directories for the pdbs will be stored.
+webOutputDirectory - The directory where the WebApp will write log files and other ancillary stuff (details on the jobs run etc.). 
+The contents of this directory can be deleted whenever without affecting the program.
+
+Both the dataDirectory and the webOutputDirectory must be write-able to by the user who the server runs as.
+(Easiest just to chmod 777 them - but you may want to change this ...)
+
+In the [DATABASE] section:
+
+user = The user to access the database as from the backend scripts. This will be pdt@localhost if you used the CreateUser script above
+password = The password for the user.
+host = The host the database is running on (usually localhost).
+database = The database the application uses - This will be PDT unless your customising things.
+
+NOTE: If you use 'root' to access the database you don't require the '@localhost' part of the username.
+
+NOTE 2: Installing the php Config module.
+
+The WebApp requires the Config module from the php PEAR project to parse the configuration file.
+The PEAR project has its own installer (like yum) and this is usually pre-installed with PHP.
+To get the Config module simply run
+
+pear install Config
+
+thats it. If the 'pear' command isn't present it can be installed via 'yum' or 'apt-get' etc.
+
+
+********* STEP 3 - The Interface  *********
+
+The interface is the html/php pages that the user of the web app interacts with.
+These are contained in PEAT_SA/WebApp/Interface/Pages/.
+Ways to install -
+
+1. Add an Alias in the Apache configuration file (httpd.conf).
+
+Alias /PEAT_SA/Pages "$SOURCE_LOCATION/PEAT_SA/WebApp/Interface/Pages"
+
+<Directory "$SOURCE_LOCATION/PEAT_SA/WebApp/Interface/Pages">
+    Options None
+    AllowOverride None
+    Order allow,deny
+    Allow from all
+</Directory>
+
+N.B: The presence/absence of the final forward slashes are important and must be entered as shown.
+
+2. Copy the directory (PEAT_SA/WebApp/Interface/Pages/) to your Apache DocumentRoot.
+
+3. Create a link to the directory in your Apache DocumentRoot there.
+
+Once this is done you should be able to navigate to $SEVER/PEAT_SA/Pages/FrontPage.php and see the input form for the server.
+If you click "Submit Job" you'll get an error like
+
+The requested URL /PEAT_SA/cgi-bin/ProcessSubmission.py was not found on this server.
+
+Since you have done that part yet.
+
+
+********* STEP 4 - CGI SCRIPT *********
+
+The web app uses a python cgi-script to process a users job submission.
+The script checks the input data and launches the backend program that actually does the work.
+Firstly you'll have to make sure the backend program - PEAT_SA/WebApp/WebScript.py - is executable by the web-server user.
+
+Next you have to install it - Again there are a couple of ways to do this -
+
+1. The most flexible is to add a script alias to Apache (the httpd.conf file as above).
+The only restriction is that the html pages expect the script to be accessible using $SERVER_ROOT/PEAT_SA/cgi-bin - so this is what the alias has to be.
+
+ScriptAlias /PEAT_SA/cgi-bin "$SOURCE_LOCATION/PEAT_SA/WebApp/Interface/cgi-bin"
+<Directory "$SOURCE_LOCATION/PEAT_SA/WebApp/Interface/cgi-bin">
+    AllowOverride None
+    Options None
+    Order allow,deny
+    Allow from all
+</Directory>
+
+2. You can just create a subdir the ScriptRoot and either copy the script there 
+
+3. Or create a link in the ScriptRoot. If you do this you must add FollowSymLinks to the cgi-bin directory options (Options FollowSymLink)
+
+The script alias is the best as it means no extra directories are created plus a simple svn update of the PEAT_SA dir will update the entire web app with no need for any further messing around.
+
+
+********* FINALLY *********
+
+The web-server is now installed.
+
+

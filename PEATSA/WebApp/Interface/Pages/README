@@ -1,0 +1,59 @@
+This directory contains the interface, in the form of php and css files, for the web tool.
+This file contains a brief description of the contents of this directory.
+
+For those unfamiliar with php, each php page is like a script.
+The script is "called" by navigating to the page using an URL.
+The "query" part of the URL contains the information on the 'scripts' arguments and their values.
+Note: These files utilize the php module provided in PEAT_SA/Database/InterfaceKit/
+
+FrontPage.php
+
+	The form used to submitted a job.
+	This sends the data to the cgi script ProcessSubmission.py
+
+Results.php
+
+	For a given job id this page monitors the status of the various calculations and provides access to the results.
+	This page is redirected to by ProcessSubmission.py once its has started a job.
+	It can also be accessed directly to see the status of a job once its id is known.
+
+Download.php
+
+	Retrieves the results of a specific calculation and downloads it to the users computer.
+	The information on what to retrieve is determined by the query part of the URL.
+
+Error.php
+
+	Formats and displays error information which is passed in the URL to the page.	
+
+UtilityFunctions.php
+
+	Defines a few php functions used by the other php pages.
+	
+PageComponents.php
+
+	Contains functions that add common elements e.g. navigation panel, to web-pages	
+
+SiteWideStyle.css
+
+	Style sheet for elements common on all pages
+
+FrontPageStyle.css
+
+	The style sheet defining extra styles for the form elements on the front-page
+	
+ResultsPageStyle.css
+
+	Style sheet defining styles/positions for Results page specific elements
+	
+FAQStyle.css
+
+	Defines style of the questions and answers on the FAQ page			
+
+Resources/
+
+	Directory containing auxillary files, e.g. images, used by the php/html pages.
+
+
+
+

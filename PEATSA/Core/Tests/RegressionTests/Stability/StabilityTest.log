@@ -1,0 +1,88 @@
+[PEAT-SA] Parallel environment disabled.
+
+[PEAT-SA] Output directory is Stability
+[PEAT-SA] Using pdb file at /local/johnston/Test/Data/1crn.pdb as working copy
+[PEAT-SA] Cleaning pdb - Removing water and ligands
+Using normal WHAT IF
+Using:  /home/people/johnston/WHATIF.FIG
+[PEAT-SA] Done
+
+[STABILITY] Running stability comparison between 1crn.pdb and 37 mutants
+[STABILITY] Using Uffbaps at /home/people/johnston/PDT/UFFBAPS/
+[STABILITY] Beginning stability calculation 
+[STABILITY] Mutant T:0001:THR:ALA_pKaDesignmut.pdb
+[STABILITY] [('Van der Waals', -3.3599999999999999), ('Electrostatic', 0.48999999999999999), ('H-Bond', 32.990000000000002), (' Desolvation', -0.64000000000000001), ('Backbone Entropy', 0.0), ('Total', 29.678000000000001)]
+[STABILITY] Mutant T:0002:THR:ALA_pKaDesignmut.pdb
+[STABILITY] [('Van der Waals', -2.8300000000000001), ('Electrostatic', 0.45000000000000001), ('H-Bond', 32.990000000000002), (' Desolvation', 0.33000000000000002), ('Backbone Entropy', 1.26), ('Total', 31.952999999999999)]
+[STABILITY] Mutant T:0003:CYS:ALA_pKaDesignmut.pdb
+[STABILITY] [('Van der Waals', -7.46), ('Electrostatic', 0.44), ('H-Bond', 32.990000000000002), (' Desolvation', 2.25), ('Backbone Entropy', 1.52), ('Total', 29.734000000000002)]
+[STABILITY] Mutant T:0004:CYS:ALA_pKaDesignmut.pdb
+[STABILITY] [('Van der Waals', -8.5999999999999996), ('Electrostatic', -0.10000000000000001), ('H-Bond', 32.990000000000002), (' Desolvation', 4.2800000000000002), ('Backbone Entropy', 2.7999999999999998), ('Total', 31.379999999999999)]
+[STABILITY] Mutant T:0005:PRO:ALA_pKaDesignmut.pdb
+[STABILITY] [('Van der Waals', 0.070000000000000007), ('Electrostatic', 0.44), ('H-Bond', 32.990000000000002), (' Desolvation', -0.51000000000000001), ('Backbone Entropy', -1.95), ('Total', 31.324999999999999)]
+[STABILITY] Mutant T:0006:SER:ALA_pKaDesignmut.pdb
+[STABILITY] [('Van der Waals', -5.4900000000000002), ('Electrostatic', 0.44), ('H-Bond', 32.990000000000002), (' Desolvation', 0.37), ('Backbone Entropy', 1.8100000000000001), ('Total', 30.114999999999998)]
+[STABILITY] Mutant T:0007:ILE:ALA_pKaDesignmut.pdb
+[STABILITY] [('Van der Waals', -2.8599999999999999), ('Electrostatic', 0.54000000000000004), ('H-Bond', 32.990000000000002), (' Desolvation', -1.1499999999999999), ('Backbone Entropy', -0.68999999999999995), ('Total', 28.837)]
+[STABILITY] Mutant T:0008:VAL:ALA_pKaDesignmut.pdb
+[STABILITY] [('Van der Waals', -3.6800000000000002), ('Electrostatic', 0.44), ('H-Bond', 32.990000000000002), (' Desolvation', -0.92000000000000004), ('Backbone Entropy', -1.1100000000000001), ('Total', 28.233000000000001)]
+[STABILITY] Mutant T:0010:ARG:ALA_pKaDesignmut.pdb
+[STABILITY] [('Van der Waals', 0.51000000000000001), ('Electrostatic', 5.79), ('H-Bond', 32.990000000000002), (' Desolvation', -1.74), ('Backbone Entropy', -0.64000000000000001), ('Total', 36.915999999999997)]
+[STABILITY] Mutant T:0011:SER:ALA_pKaDesignmut.pdb
+[STABILITY] [('Van der Waals', -7.6100000000000003), ('Electrostatic', 0.44), ('H-Bond', 32.990000000000002), (' Desolvation', 1.8899999999999999), ('Backbone Entropy', -1.99), ('Total', 25.407)]
+[STABILITY] Mutant T:0012:ASN:ALA_pKaDesignmut.pdb
+[STABILITY] [('Van der Waals', -4.5700000000000003), ('Electrostatic', 0.44), ('H-Bond', 32.990000000000002), (' Desolvation', -0.85999999999999999), ('Backbone Entropy', -2.23), ('Total', 27.831)]
+[STABILITY] Mutant T:0013:PHE:ALA_pKaDesignmut.pdb
+[STABILITY] [('Van der Waals', 15.779999999999999), ('Electrostatic', 1.1100000000000001), ('H-Bond', 32.990000000000002), (' Desolvation', -4.0700000000000003), ('Backbone Entropy', -1.1799999999999999), ('Total', 46.457000000000001)]
+[STABILITY] Mutant T:0014:ASN:ALA_pKaDesignmut.pdb
+[STABILITY] [('Van der Waals', -4.2300000000000004), ('Electrostatic', 0.44), ('H-Bond', 32.990000000000002), (' Desolvation', -0.68999999999999995), ('Backbone Entropy', -1.3100000000000001), ('Total', 27.190000000000001)]
+[STABILITY] Mutant T:0015:VAL:ALA_pKaDesignmut.pdb
+[STABILITY] [('Van der Waals', -2.3300000000000001), ('Electrostatic', 0.44), ('H-Bond', 32.990000000000002), (' Desolvation', -0.26000000000000001), ('Backbone Entropy', -1.1100000000000001), ('Total', 29.733000000000001)]
+[STABILITY] Mutant T:0016:CYS:ALA_pKaDesignmut.pdb
+[STABILITY] [('Van der Waals', -8.8800000000000008), ('Electrostatic', 0.44), ('H-Bond', 32.990000000000002), (' Desolvation', 2.3500000000000001), ('Backbone Entropy', -1.73), ('Total', 25.157)]
+[STABILITY] Mutant T:0017:ARG:ALA_pKaDesignmut.pdb
+[STABILITY] [('Van der Waals', 2.9399999999999999), ('Electrostatic', 3.9300000000000002), ('H-Bond', 32.990000000000002), (' Desolvation', -1.77), ('Backbone Entropy', -0.0), ('Total', 38.247999999999998)]
+[STABILITY] Mutant T:0018:LEU:ALA_pKaDesignmut.pdb
+[STABILITY] [('Van der Waals', -0.63), ('Electrostatic', 0.44), ('H-Bond', 32.990000000000002), (' Desolvation', -1.47), ('Backbone Entropy', -0.53000000000000003), ('Total', 30.797000000000001)]
+[STABILITY] Mutant T:0019:PRO:ALA_pKaDesignmut.pdb
+[STABILITY] [('Van der Waals', -2.29), ('Electrostatic', 0.44), ('H-Bond', 32.990000000000002), (' Desolvation', -0.88), ('Backbone Entropy', 0.34999999999999998), ('Total', 30.609000000000002)]
+[STABILITY] Mutant T:0021:THR:ALA_pKaDesignmut.pdb
+[STABILITY] [('Van der Waals', -3.8500000000000001), ('Electrostatic', 0.44), ('H-Bond', 32.990000000000002), (' Desolvation', -0.68999999999999995), ('Backbone Entropy', -1.1899999999999999), ('Total', 27.699999999999999)]
+[STABILITY] Mutant T:0022:PRO:ALA_pKaDesignmut.pdb
+[STABILITY] [('Van der Waals', -4.1699999999999999), ('Electrostatic', 0.44), ('H-Bond', 32.990000000000002), (' Desolvation', 0.14000000000000001), ('Backbone Entropy', 4.21), ('Total', 33.607999999999997)]
+[STABILITY] Mutant T:0023:GLU:ALA_pKaDesignmut.pdb
+[STABILITY] [('Van der Waals', -0.81999999999999995), ('Electrostatic', 8.4399999999999995), ('H-Bond', 32.990000000000002), (' Desolvation', -2.0299999999999998), ('Backbone Entropy', -0.31), ('Total', 41.399999999999999)]
+[STABILITY] Mutant T:0025:ILE:ALA_pKaDesignmut.pdb
+[STABILITY] [('Van der Waals', -2.1600000000000001), ('Electrostatic', 0.44), ('H-Bond', 32.990000000000002), (' Desolvation', -1.6100000000000001), ('Backbone Entropy', 0.94999999999999996), ('Total', 30.600999999999999)]
+[STABILITY] Mutant T:0026:CYS:ALA_pKaDesignmut.pdb
+[STABILITY] [('Van der Waals', -7.71), ('Electrostatic', 0.44), ('H-Bond', 32.990000000000002), (' Desolvation', 2.6699999999999999), ('Backbone Entropy', -1.95), ('Total', 26.433)]
+[STABILITY] Mutant T:0028:THR:ALA_pKaDesignmut.pdb
+[STABILITY] [('Van der Waals', -4.7400000000000002), ('Electrostatic', 0.44), ('H-Bond', 32.990000000000002), (' Desolvation', -0.59999999999999998), ('Backbone Entropy', -2.2000000000000002), ('Total', 25.876000000000001)]
+[STABILITY] Mutant T:0029:TYR:ALA_pKaDesignmut.pdb
+[STABILITY] [('Van der Waals', -1.6899999999999999), ('Electrostatic', 0.44), ('H-Bond', 32.990000000000002), (' Desolvation', -0.45000000000000001), ('Backbone Entropy', -1.3600000000000001), ('Total', 29.931000000000001)]
+[STABILITY] Mutant T:0030:THR:ALA_pKaDesignmut.pdb
+[STABILITY] [('Van der Waals', 0.79000000000000004), ('Electrostatic', 0.44), ('H-Bond', 32.990000000000002), (' Desolvation', -1.6100000000000001), ('Backbone Entropy', 3.73), ('Total', 36.387)]
+[STABILITY] Mutant T:0032:CYS:ALA_pKaDesignmut.pdb
+[STABILITY] [('Van der Waals', -8.0199999999999996), ('Electrostatic', 0.34000000000000002), ('H-Bond', 32.990000000000002), (' Desolvation', 2.79), ('Backbone Entropy', 0.22), ('Total', 28.068999999999999)]
+[STABILITY] Mutant T:0033:ILE:ALA_pKaDesignmut.pdb
+[STABILITY] [('Van der Waals', 5.6600000000000001), ('Electrostatic', 0.44), ('H-Bond', 32.990000000000002), (' Desolvation', -0.29999999999999999), ('Backbone Entropy', 0.44), ('Total', 39.228999999999999)]
+[STABILITY] Mutant T:0034:ILE:ALA_pKaDesignmut.pdb
+[STABILITY] [('Van der Waals', 2.8199999999999998), ('Electrostatic', 1.0800000000000001), ('H-Bond', 32.990000000000002), (' Desolvation', -3.0099999999999998), ('Backbone Entropy', 3.6699999999999999), ('Total', 38.960000000000001)]
+[STABILITY] Mutant T:0035:ILE:ALA_pKaDesignmut.pdb
+[STABILITY] [('Van der Waals', 2.6600000000000001), ('Electrostatic', 0.57999999999999996), ('H-Bond', 32.990000000000002), (' Desolvation', -4.9900000000000002), ('Backbone Entropy', 1.24), ('Total', 32.965000000000003)]
+[STABILITY] Mutant T:0036:PRO:ALA_pKaDesignmut.pdb
+[STABILITY] [('Van der Waals', -4.3700000000000001), ('Electrostatic', 0.44), ('H-Bond', 32.990000000000002), (' Desolvation', 0.14999999999999999), ('Backbone Entropy', -1.95), ('Total', 27.259)]
+[STABILITY] Mutant T:0039:THR:ALA_pKaDesignmut.pdb
+[STABILITY] [('Van der Waals', -4.8700000000000001), ('Electrostatic', 0.44), ('H-Bond', 32.990000000000002), (' Desolvation', 0.0), ('Backbone Entropy', 1.3999999999999999), ('Total', 29.962)]
+[STABILITY] Mutant T:0040:CYS:ALA_pKaDesignmut.pdb
+[STABILITY] [('Van der Waals', -7.4000000000000004), ('Electrostatic', 0.44), ('H-Bond', 32.990000000000002), (' Desolvation', 2.4199999999999999), ('Backbone Entropy', 0.26000000000000001), ('Total', 28.702000000000002)]
+[STABILITY] Mutant T:0041:PRO:ALA_pKaDesignmut.pdb
+[STABILITY] [('Van der Waals', -1.6699999999999999), ('Electrostatic', 0.45000000000000001), ('H-Bond', 32.990000000000002), (' Desolvation', 0.17000000000000001), ('Backbone Entropy', 5.2400000000000002), ('Total', 37.177999999999997)]
+[STABILITY] Mutant T:0043:ASP:ALA_pKaDesignmut.pdb
+[STABILITY] [('Van der Waals', -3.7400000000000002), ('Electrostatic', 1.21), ('H-Bond', 32.990000000000002), (' Desolvation', -1.2), ('Backbone Entropy', 0.92000000000000004), ('Total', 30.175999999999998)]
+[STABILITY] Mutant T:0044:TYR:ALA_pKaDesignmut.pdb
+[STABILITY] [('Van der Waals', 9.6099999999999994), ('Electrostatic', 0.46000000000000002), ('H-Bond', 32.990000000000002), (' Desolvation', -2.02), ('Backbone Entropy', 1.8300000000000001), ('Total', 42.872)]
+[STABILITY] Mutant T:0046:ASN:ALA_pKaDesignmut.pdb
+[STABILITY] [('Van der Waals', -2.3300000000000001), ('Electrostatic', 5.6299999999999999), ('H-Bond', 32.990000000000002), (' Desolvation', -2.1899999999999999), ('Backbone Entropy', 0.0), ('Total', 34.101999999999997)]
+
+[STABILITY] Stability run complete. Results output to StabilityResults.csv

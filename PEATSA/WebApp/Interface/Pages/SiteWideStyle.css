@@ -1,0 +1,220 @@
+/**
+ Protein Engineering Analysis Tool Structure Analysis (PEATSA)
+ Copyright (C) 2010 Michael Johnston & Jens Erik Nielsen
+ 
+ Author: Michael Johnston
+ 
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ 
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ 
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ 
+ Contact information:
+ Email: Jens.Nielsen_at_gmail.com
+ Normal mail:
+ Jens Nielsen
+ SBBS, Conway Institute
+ University College Dublin
+ Dublin 4, Ireland
+ **/
+
+
+/*
+ * This style-sheet defines the general site-wide layout
+ * and the general paragraph/header/link styles.
+ * Each page in the site has a main container div containing at least
+ * - The content div
+ * - The navigation panel div
+ * - The colophon div
+ * - The logo div
+ */
+ 
+/*
+	Note: this style sheet does not validate.
+	This is because the W3C validator is not
+	aware of RGBA colors, which are part of
+	the CSS3 specification.
+*/ 
+
+body {
+	font: 13px/1.5 "Lucida Grande", Lucida, Verdana, sans-serif;
+	color: #fff;
+	background: #555;
+	margin: 0 0 0;
+	padding: 0;
+	cursor: default;
+	height: 100%; 
+}
+
+/*Header styles*/
+h1 {
+	font: normal 36px "Helvetica Neue", Helvetica, Geneva, sans-serif;
+	color: #fff;
+	text-transform: capitalize;
+	text-shadow: 0 1px 1px rgba(0,0,0,0.75);
+	margin: 10px 0 20px;
+	text-indent: 1.2em;
+}
+
+h1 span {
+	color: rgba(0,0,0,0.6);
+	text-shadow: 0 1px 1px rgba(255,255,255,0.3);
+}
+
+h3 {
+	
+	font-size: 16px;
+	text-indent: 2.8em;
+	margin-bottom: 1.0em;
+}
+
+/*** 
+	General Link Style
+***/
+
+a:link { 
+	color: #FFFFFF;
+}
+
+/*override the standard content size*/
+	
+a:visited { 
+	color: #333333;
+}
+
+/**
+	General paragraph style
+**/
+p 
+{
+	color: rgba(255,255,255,0.7);
+	margin: 2.5em;
+	margin-left: 3.5em;
+	float: none;
+	left: 1.5em;
+	width: auto;
+}
+
+/*Style for class "center" paragraphs*/
+p.center
+{
+	text-align: center;
+}
+
+/*Style for <strong> elements within paragraphs*/
+p strong {
+	color: #fff;
+}
+
+/**
+	Main Divisions
+**/	
+
+/*Main div for each page*/
+div#container {
+	position: absolute;
+	min-height: 100%;
+	min-width: 98%;
+}
+
+/*Content div*/
+div#content {
+	position: relative;
+	padding-bottom: 4.0em;
+	width: 80%;
+}
+
+/*Navigation Div*/
+div#navigation {
+	position: absolute;
+	right: 0px;
+	top: 70px;
+	width: 20%;
+	padding-bottom: 4.0em;
+	bottom: 10px;
+}
+
+/*Logo Div*/
+div#sfiLogoDiv {
+	margin-top: 5em;
+	margin-left: 2em;
+	margin-bottom: 2em;
+	bottom: 5px;
+	width: 100%;
+	position: absolute;
+}
+
+div#colophon
+{
+	position: absolute;
+	bottom: 5px;
+	width: 100%;
+	margin-bottom: 1.5em;
+	margin-top: 1em;
+}
+
+/***
+	Navigation Panel Style
+***/	
+
+p.navigation {
+	margin: 0em;
+	margin-left: 0em;
+	float: none;
+	left: 0em;
+	line-height: 150%;
+	border-left: 2px solid;
+	width: auto;
+}
+
+a.navigation{
+	text-align: left;
+	text-indent: 2em;
+	font: normal 24px "Helvetica Neue", Helvetica, Geneva, sans-serif;
+	text-shadow: 0 1px 1px rgba(255,255,255,0.3);
+	text-transform: capitalize;
+	margin-left: 1.5em;
+	margin-bottom: 1em;
+	margin-top: 1em;
+	text-decoration: none;
+}
+		
+a.navigation:hover { 
+	color: #CCCCCC;
+	background-color: #333333;
+	text-decoration: none;
+}
+	
+#sfiLogo {
+	width: 60%;
+	height: auto;
+}
+
+/***
+	Colophon Style
+***/
+
+
+/*Style for the colophon paragraph*/
+
+p.colophon
+{
+	display: block;
+	text-align: center;
+	width: 50%;
+	border-style: groove;
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 0.5em;
+	margin-bottom: 1.5em;
+}
+
+

@@ -1,0 +1,13 @@
+Configuration File
+
+A number options can be set through the programs configuration file - proteinDesignTool.conf.
+If none is specified (using the  --configurationFile option) then one is searched for in the directory the
+program is being run from and then the users home directory.
+If no configuration file exists in either location one is created in the directory the program is run from.
+Due to the different programs this tool uses it is usually necessary to set a number of paths in this
+file in order to run it with any hope of success.
+	
+Output
+	
+For each residue mutated to alanine the program outputs a csv file containing the calculated data.
+[More To Folllow]

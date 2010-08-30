@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "/local/johnston/PEAT_SA/Core/ProteinDesignTool.py", line 618, in <module>
+    main()
+  File "/local/johnston/PEAT_SA/Core/ProteinDesignTool.py", line 587, in main
+    tool.runScan(mutation=parser.scanMutation(), verbose=parser.verbose())
+  File "/local/johnston/PEAT_SA/Core/ProteinDesignTool.py", line 391, in runScan
+    scanner.singleMutationScan(mutation, verbose=verbose)
+  File "/local/johnston/PEAT_SA/Core/Scanner.py", line 324, in singleMutationScan
+    self.scan(data, verbose=verbose, printList=False)
+  File "/local/johnston/PEAT_SA/Core/Scanner.py", line 259, in scan
+    aList = self.__singleScan__(residue, mutation, defaults)
+  File "/local/johnston/PEAT_SA/Core/Scanner.py", line 178, in __singleScan__
+    aList.append(solutions[key][residue])
+TypeError: tuple indices must be integers

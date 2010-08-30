@@ -1,0 +1,775 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 42;
+	objects = {
+
+/* Begin PBXAggregateTarget section */
+		4C21A3940F84FC7F0010B90C /* Test Core */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 4C21A39B0F84FCAB0010B90C /* Build configuration list for PBXAggregateTarget "Test Core" */;
+			buildPhases = (
+				4C21A39A0F84FC8D0010B90C /* ShellScript */,
+			);
+			dependencies = (
+			);
+			name = "Test Core";
+			productName = Tests;
+		};
+		4C75682311CF896C00484D8D /* Test Tools */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 4C75682A11CF899F00484D8D /* Build configuration list for PBXAggregateTarget "Test Tools" */;
+			buildPhases = (
+				4C75682211CF896C00484D8D /* ShellScript */,
+			);
+			dependencies = (
+			);
+			name = "Test Tools";
+			productName = "Test Tools";
+		};
+		4CA385DB0F861EF5006D71D7 /* WebApp */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 4CA385E00F861F13006D71D7 /* Build configuration list for PBXAggregateTarget "WebApp" */;
+			buildPhases = (
+				4CA385E50F861F21006D71D7 /* ShellScript */,
+			);
+			dependencies = (
+				4CA385E70F861F33006D71D7 /* PBXTargetDependency */,
+			);
+			name = WebApp;
+			productName = WebApp;
+		};
+/* End PBXAggregateTarget section */
+
+/* Begin PBXContainerItemProxy section */
+		4CA385E60F861F33006D71D7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4C083BC40DF6D1D900325A83 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4C21A3940F84FC7F0010B90C;
+			remoteInfo = Tests;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		4C06B4450F9E01F8003937EC /* Histogram.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = Histogram.py; sourceTree = "<group>"; };
+		4C083BCF0DF6D30F00325A83 /* __init__.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; name = __init__.py; path = ../__init__.py; sourceTree = "<group>"; };
+		4C083BD10DF6D30F00325A83 /* __init__.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = __init__.py; sourceTree = "<group>"; };
+		4C083BD20DF6D30F00325A83 /* Doxyfile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Doxyfile; path = ../Doxyfile; sourceTree = "<group>"; };
+		4C083BD30DF6D30F00325A83 /* Environment.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = Environment.py; sourceTree = "<group>"; };
+		4C083BD40DF6D30F00325A83 /* Exceptions.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = Exceptions.py; sourceTree = "<group>"; };
+		4C083BD50DF6D30F00325A83 /* Matrix.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = Matrix.py; sourceTree = "<group>"; };
+		4C083BD70DF6D30F00325A83 /* ProteinDesignTool.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = ProteinDesignTool.py; sourceTree = "<group>"; };
+		4C083BDA0DF6D30F00325A83 /* DELCRG.DAT */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = DELCRG.DAT; sourceTree = "<group>"; };
+		4C083BDB0DF6D30F00325A83 /* DELRAD.DAT */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = DELRAD.DAT; sourceTree = "<group>"; };
+		4C083BDC0DF6D30F00325A83 /* TOPOLOGY.H */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = TOPOLOGY.H; sourceTree = "<group>"; };
+		4C083BDE0DF6D30F00325A83 /* energy.cfg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = energy.cfg; sourceTree = "<group>"; };
+		4C083BDF0DF6D30F00325A83 /* es.cfg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = es.cfg; sourceTree = "<group>"; };
+		4C083BE00DF6D30F00325A83 /* hbonds.cfg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = hbonds.cfg; sourceTree = "<group>"; };
+		4C083BE10DF6D30F00325A83 /* hp.cfg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = hp.cfg; sourceTree = "<group>"; };
+		4C083BE20DF6D30F00325A83 /* ligand_entropy.cfg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ligand_entropy.cfg; sourceTree = "<group>"; };
+		4C083BE30DF6D30F00325A83 /* msc.cfg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = msc.cfg; sourceTree = "<group>"; };
+		4C083BE50DF6D30F00325A83 /* ALA_propensity_map.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ALA_propensity_map.m; sourceTree = "<group>"; };
+		4C083BE60DF6D30F00325A83 /* all_amino94.in */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = all_amino94.in; sourceTree = "<group>"; };
+		4C083BE70DF6D30F00325A83 /* all_aminoct94.in */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = all_aminoct94.in; sourceTree = "<group>"; };
+		4C083BE80DF6D30F00325A83 /* all_aminont94.in */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = all_aminont94.in; sourceTree = "<group>"; };
+		4C083BE90DF6D30F00325A83 /* all_propensity_map.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = all_propensity_map.m; sourceTree = "<group>"; };
+		4C083BEA0DF6D30F00325A83 /* ARG_propensity_map.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ARG_propensity_map.m; sourceTree = "<group>"; };
+		4C083BEB0DF6D30F00325A83 /* ASN_propensity_map.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASN_propensity_map.m; sourceTree = "<group>"; };
+		4C083BEC0DF6D30F00325A83 /* ASP_propensity_map.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASP_propensity_map.m; sourceTree = "<group>"; };
+		4C083BED0DF6D30F00325A83 /* CYS_propensity_map.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CYS_propensity_map.m; sourceTree = "<group>"; };
+		4C083BEE0DF6D30F00325A83 /* desolvation_parameters.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = desolvation_parameters.txt; sourceTree = "<group>"; };
+		4C083BEF0DF6D30F00325A83 /* gaff.dat */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = gaff.dat; sourceTree = "<group>"; };
+		4C083BF00DF6D30F00325A83 /* GLN_propensity_map.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GLN_propensity_map.m; sourceTree = "<group>"; };
+		4C083BF10DF6D30F00325A83 /* GLU_propensity_map.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GLU_propensity_map.m; sourceTree = "<group>"; };
+		4C083BF20DF6D30F00325A83 /* GLY_propensity_map.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GLY_propensity_map.m; sourceTree = "<group>"; };
+		4C083BF30DF6D30F00325A83 /* HIS_propensity_map.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HIS_propensity_map.m; sourceTree = "<group>"; };
+		4C083BF40DF6D30F00325A83 /* ILE_propensity_map.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ILE_propensity_map.m; sourceTree = "<group>"; };
+		4C083BF50DF6D30F00325A83 /* LEU_propensity_map.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LEU_propensity_map.m; sourceTree = "<group>"; };
+		4C083BF60DF6D30F00325A83 /* LYS_propensity_map.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LYS_propensity_map.m; sourceTree = "<group>"; };
+		4C083BF70DF6D30F00325A83 /* MET_propensity_map.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MET_propensity_map.m; sourceTree = "<group>"; };
+		4C083BF80DF6D30F00325A83 /* occupancies.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = occupancies.txt; sourceTree = "<group>"; };
+		4C083BF90DF6D30F00325A83 /* opls_uni.in */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = opls_uni.in; sourceTree = "<group>"; };
+		4C083BFA0DF6D30F00325A83 /* parm94.dat */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = parm94.dat; sourceTree = "<group>"; };
+		4C083BFB0DF6D30F00325A83 /* PHE_propensity_map.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PHE_propensity_map.m; sourceTree = "<group>"; };
+		4C083BFC0DF6D30F00325A83 /* precalculated_volumes.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = precalculated_volumes.txt; sourceTree = "<group>"; };
+		4C083BFD0DF6D30F00325A83 /* PRO_propensity_map.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PRO_propensity_map.m; sourceTree = "<group>"; };
+		4C083BFE0DF6D30F00325A83 /* SER_propensity_map.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SER_propensity_map.m; sourceTree = "<group>"; };
+		4C083BFF0DF6D30F00325A83 /* sybyl_types.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = sybyl_types.txt; sourceTree = "<group>"; };
+		4C083C000DF6D30F00325A83 /* THR_propensity_map.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = THR_propensity_map.m; sourceTree = "<group>"; };
+		4C083C010DF6D30F00325A83 /* TRP_propensity_map.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TRP_propensity_map.m; sourceTree = "<group>"; };
+		4C083C020DF6D30F00325A83 /* TYR_propensity_map.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TYR_propensity_map.m; sourceTree = "<group>"; };
+		4C083C030DF6D30F00325A83 /* VAL_propensity_map.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VAL_propensity_map.m; sourceTree = "<group>"; };
+		4C083C040DF6D30F00325A83 /* plot_results.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = plot_results.m; sourceTree = "<group>"; };
+		4C083C050DF6D30F00325A83 /* protein_entropy.cfg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = protein_entropy.cfg; sourceTree = "<group>"; };
+		4C083C060DF6D30F00325A83 /* vdw_line.cfg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = vdw_line.cfg; sourceTree = "<group>"; };
+		4C083C1B0DF6D30F00325A83 /* Programs.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = Programs.py; sourceTree = "<group>"; };
+		4C083C1C0DF6D30F00325A83 /* README */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = README; path = /Users/michael/PEAT/PEAT_SA/README; sourceTree = "<absolute>"; };
+		4C083C1E0DF6D30F00325A83 /* __init__.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = __init__.py; sourceTree = "<group>"; };
+		4C083C270DF6D30F00325A83 /* __init__.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = __init__.py; sourceTree = "<group>"; };
+		4C083C290DF6D30F00325A83 /* __init__.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = __init__.py; sourceTree = "<group>"; };
+		4C083C2A0DF6D30F00325A83 /* ProcessSubmission.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = ProcessSubmission.py; sourceTree = "<group>"; };
+		4C083C2D0DF6D30F00325A83 /* Error.php */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.php; path = Error.php; sourceTree = "<group>"; };
+		4C083C2E0DF6D30F00325A83 /* FrontPage.php */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.php; path = FrontPage.php; sourceTree = "<group>"; };
+		4C083C2F0DF6D30F00325A83 /* FrontPageStyle.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; name = FrontPageStyle.css; path = Pages/FrontPageStyle.css; sourceTree = "<group>"; };
+		4C083C300DF6D30F00325A83 /* UtilityFunctions.php */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.php; path = UtilityFunctions.php; sourceTree = "<group>"; };
+		4C083C310DF6D30F00325A83 /* README */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
+		4C083C330DF6D30F00325A83 /* ajax-loader.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = "ajax-loader.gif"; sourceTree = "<group>"; };
+		4C083C340DF6D30F00325A83 /* loadinfo.net.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = loadinfo.net.gif; sourceTree = "<group>"; };
+		4C083C350DF6D30F00325A83 /* Results.php */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.php; path = Results.php; sourceTree = "<group>"; };
+		4C083C360DF6D30F00325A83 /* README */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
+		4C083C370DF6D30F00325A83 /* README */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
+		4C0E4A99100DF12A00D1EB03 /* Binder.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = Binder.py; sourceTree = "<group>"; };
+		4C207F030F974A5A0032073C /* sfi_cmyk.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = sfi_cmyk.png; sourceTree = "<group>"; };
+		4C21A3770F84D1610010B90C /* MutationList.php */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.php; path = MutationList.php; sourceTree = "<group>"; };
+		4C21A38F0F84F92C0010B90C /* TestMutants.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = TestMutants.py; sourceTree = "<group>"; };
+		4C2B77A211A6B95200F3139C /* Visualize.php */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.php; path = Visualize.php; sourceTree = "<group>"; };
+		4C2FAC050E9236D900D01C37 /* Data.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = Data.py; sourceTree = "<group>"; };
+		4C3903C4109EFE4400DF01E9 /* Workflow.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Workflow.png; sourceTree = "<group>"; };
+		4C41FE0310CEB27D00774DF2 /* GetMutant.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = GetMutant.py; sourceTree = "<group>"; };
+		4C4269B00ECD847F00408350 /* TestScan.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = TestScan.py; sourceTree = "<group>"; };
+		4C4269B10ECD847F00408350 /* TestStability.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = TestStability.py; sourceTree = "<group>"; };
+		4C5F3FBB104D26880090B54B /* ResultsPageStyle.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; name = ResultsPageStyle.css; path = Pages/ResultsPageStyle.css; sourceTree = "<group>"; };
+		4C5F3FBC104D273C0090B54B /* SiteWideStyle.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; name = SiteWideStyle.css; path = Pages/SiteWideStyle.css; sourceTree = "<group>"; };
+		4C5F3FBD104D29470090B54B /* FAQStyle.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; name = FAQStyle.css; path = Pages/FAQStyle.css; sourceTree = "<group>"; };
+		4C6B7A710EA8C3FD00F8F698 /* proteinDesignTool.conf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = proteinDesignTool.conf; sourceTree = "<group>"; };
+		4C75681B11CF78B800484D8D /* FTest.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = FTest.py; sourceTree = "<group>"; };
+		4C79F7940F2E1F4B007DF6C6 /* ColourStructure.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = ColourStructure.js; sourceTree = "<group>"; };
+		4C7CC02F11CBA2D0008F7E4E /* MergeMatrices.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = MergeMatrices.py; sourceTree = "<group>"; };
+		4C7CC03011CBA2D0008F7E4E /* PLSolvation.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = PLSolvation.py; sourceTree = "<group>"; };
+		4C7CC03111CBA2D0008F7E4E /* Stat.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = Stat.py; sourceTree = "<group>"; };
+		4C7CC03411CBA32E008F7E4E /* ColumnStat.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = ColumnStat.py; sourceTree = "<group>"; };
+		4C80A4690F5FFBA700E36B05 /* ModelMutations.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = ModelMutations.py; sourceTree = "<group>"; };
+		4C82FA9610D7D14C00523FCC /* __init__.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = __init__.py; sourceTree = "<group>"; };
+		4C82FA9710D7D14C00523FCC /* Data.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = Data.py; sourceTree = "<group>"; };
+		4C82FA9810D7D14C00523FCC /* Exceptions.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = Exceptions.py; sourceTree = "<group>"; };
+		4C82FA9910D7D14C00523FCC /* Utilities.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = Utilities.py; sourceTree = "<group>"; };
+		4C82FAE710D7E14900523FCC /* README */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
+		4C82FAF610D7E2D100523FCC /* MatrixViewer.php */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.php; path = MatrixViewer.php; sourceTree = "<group>"; };
+		4C82FAF910D7E2F600523FCC /* DataRetrieval.php */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.php; path = DataRetrieval.php; sourceTree = "<group>"; };
+		4C82FAFA10D7E2F600523FCC /* DownloadMatrix.php */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.php; path = DownloadMatrix.php; sourceTree = "<group>"; };
+		4C82FAFD10D7E3F300523FCC /* Formatting.php */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.php; path = Formatting.php; sourceTree = "<group>"; };
+		4C82FB0010D7E40600523FCC /* StructureViewer.php */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.php; path = StructureViewer.php; sourceTree = "<group>"; };
+		4C82FB0110D7E40600523FCC /* JobBrowser.php */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.php; path = JobBrowser.php; sourceTree = "<group>"; };
+		4C82FB7110D8ECEC00523FCC /* Utilities.php */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.php; path = Utilities.php; sourceTree = "<group>"; };
+		4C82FB8B10D9315200523FCC /* Session.php */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.php; path = Session.php; sourceTree = "<group>"; };
+		4C873CE30F17B7C700574C99 /* TDCycle.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = TDCycle.py; sourceTree = "<group>"; };
+		4C87430C0F1B57D100DB3FCB /* RemoteLaunch.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = RemoteLaunch.py; sourceTree = "<group>"; };
+		4C923C790EA3547300612C2B /* example.conf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = example.conf; sourceTree = "<group>"; };
+		4C923C980EA3675900612C2B /* invalid.conf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = invalid.conf; sourceTree = "<group>"; };
+		4C923C9C0EA3675900612C2B /* 1crn.pdb */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = 1crn.pdb; sourceTree = "<group>"; };
+		4C923C9D0EA3675900612C2B /* README */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
+		4C923C9F0EA3675900612C2B /* 1crn.pdb */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = 1crn.pdb; sourceTree = "<group>"; };
+		4C923CA00EA3675900612C2B /* 1crn.pdb.BACKGR.DAT */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = 1crn.pdb.BACKGR.DAT; sourceTree = "<group>"; };
+		4C923CA10EA3675900612C2B /* 1crn.pdb.DESOLV.DAT */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = 1crn.pdb.DESOLV.DAT; sourceTree = "<group>"; };
+		4C923CA20EA3675900612C2B /* 1crn.pdb.MATRIX.DAT */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = 1crn.pdb.MATRIX.DAT; sourceTree = "<group>"; };
+		4C923CA30EA3675900612C2B /* 1crn.pdb.PKA.DAT */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = 1crn.pdb.PKA.DAT; sourceTree = "<group>"; };
+		4C923CA40EA3675900612C2B /* 1crn.pdb.TITCURV.DAT */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = 1crn.pdb.TITCURV.DAT; sourceTree = "<group>"; };
+		4C923CA50EA3675900612C2B /* DELCRG.DAT */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = DELCRG.DAT; sourceTree = "<group>"; };
+		4C923CA60EA3675900612C2B /* DELRAD.DAT */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = DELRAD.DAT; sourceTree = "<group>"; };
+		4C923CA70EA3675900612C2B /* TOPOLOGY.H */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = TOPOLOGY.H; sourceTree = "<group>"; };
+		4C923CA80EA3675900612C2B /* TestEnvironment.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = TestEnvironment.py; sourceTree = "<group>"; };
+		4C923CA90EA3675900612C2B /* TestMatrix.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = TestMatrix.py; sourceTree = "<group>"; };
+		4C923CAA0EA3675900612C2B /* TestScanner.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = TestScanner.py; sourceTree = "<group>"; };
+		4C923CAE0EA367BE00612C2B /* proteinDesignTool.conf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = proteinDesignTool.conf; sourceTree = "<group>"; };
+		4C923CAF0EA367BE00612C2B /* RegressionTest.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = RegressionTest.py; sourceTree = "<group>"; };
+		4C923CB20EA367BE00612C2B /* testList */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = testList; sourceTree = "<group>"; };
+		4C923D9F0EA4E18B00612C2B /* PEATSAParallel.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = PEATSAParallel.py; sourceTree = "<group>"; };
+		4C9750490E0293E50055AF54 /* INSTALL */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = INSTALL; path = ../INSTALL; sourceTree = SOURCE_ROOT; };
+		4C9851FA0E93AAC90082E904 /* Data.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = Data.py; sourceTree = "<group>"; };
+		4C9851FC0E93AAC90082E904 /* Exceptions.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = Exceptions.py; sourceTree = "<group>"; };
+		4C9851FD0E93AAC90082E904 /* WebScript.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = WebScript.py; sourceTree = "<group>"; };
+		4C9851FE0E93AAC90082E904 /* UtilityFunctions.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = UtilityFunctions.py; sourceTree = "<group>"; };
+		4C9DC7C70E597D2B00713B5D /* Utilities.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = Utilities.py; sourceTree = "<group>"; };
+		4C9DC8DA0E5C19DD00713B5D /* README */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
+		4C9F84F90F44324B0032F9D2 /* ExampleFunction.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = ExampleFunction.py; sourceTree = "<group>"; };
+		4CA030E50F94F18D0001B23E /* Graph.php */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.php; path = Graph.php; sourceTree = "<group>"; };
+		4CA030E80F94F1980001B23E /* ResultsGraphs.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = ResultsGraphs.js; sourceTree = "<group>"; };
+		4CAE8D740F2769F500543017 /* JSGetCalculationData.php */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.php; path = JSGetCalculationData.php; sourceTree = "<group>"; };
+		4CB52C9E1191C0B8007ED635 /* FilterMatrix.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = FilterMatrix.py; sourceTree = "<group>"; };
+		4CB9358611A2ACF4009E93B8 /* Classify.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = Classify.py; sourceTree = "<group>"; };
+		4CBDD0C310C529440028DC79 /* PageComponents.php */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.php; path = PageComponents.php; sourceTree = "<group>"; };
+		4CBDD1A010C560D70028DC79 /* Methods.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = Methods.pdf; sourceTree = "<group>"; };
+		4CBDD1B610C563890028DC79 /* Methods.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Methods.png; sourceTree = "<group>"; };
+		4CBF353A10F1F9F4003F8462 /* CreateJobEntry.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = CreateJobEntry.py; sourceTree = "<group>"; };
+		4CBF353B10F1F9F4003F8462 /* SetAdminError.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = SetAdminError.py; sourceTree = "<group>"; };
+		4CBF353C10F1F9F4003F8462 /* ConstructJob.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = ConstructJob.py; sourceTree = "<group>"; };
+		4CBF353D10F1F9F4003F8462 /* SetJobData.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = SetJobData.py; sourceTree = "<group>"; };
+		4CBF355210F2020A003F8462 /* ImportDataSet.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = ImportDataSet.py; sourceTree = "<group>"; };
+		4CBF355A10F204D8003F8462 /* ImportJob.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = ImportJob.py; sourceTree = "<group>"; };
+		4CC858990FC55F0900734C56 /* SortMatrixByMutation.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = SortMatrixByMutation.py; sourceTree = "<group>"; };
+		4CC8589A0FC55F0900734C56 /* PPInteraction.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = PPInteraction.py; sourceTree = "<group>"; };
+		4CE2CC360F8B3F3000CC0C88 /* FAQ.php */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.php; path = FAQ.php; sourceTree = "<group>"; };
+		4CE2CC370F8B3F3000CC0C88 /* Methods.php */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.php; path = Methods.php; sourceTree = "<group>"; };
+		4CE2CC380F8B3F3000CC0C88 /* Technology.php */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.php; path = Technology.php; sourceTree = "<group>"; };
+		4CF121E40F20A1180084250C /* CreatePDTUser.sql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CreatePDTUser.sql; sourceTree = "<group>"; };
+		4CF121E50F20A1180084250C /* DatabaseSchema.sql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = DatabaseSchema.sql; sourceTree = "<group>"; };
+		4CF121EB0F20A2FF0084250C /* JobSubmission.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = JobSubmission.py; sourceTree = "<group>"; };
+		4CF3CAB40F55AB6100C1B600 /* ExpandResults.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = ExpandResults.py; sourceTree = "<group>"; };
+		4CF760DF104FC51300E4EF35 /* Scale.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Scale.png; sourceTree = "<group>"; };
+		4CFFAE440F9CCA9F00133444 /* Vitality.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = Vitality.py; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		4C083BC20DF6D1D900325A83 = {
+			isa = PBXGroup;
+			children = (
+				4C083BCF0DF6D30F00325A83 /* __init__.py */,
+				4C9750490E0293E50055AF54 /* INSTALL */,
+				4C083C1C0DF6D30F00325A83 /* README */,
+				4C083BD00DF6D30F00325A83 /* Core */,
+				4C873CC30F17B2B400574C99 /* Tools */,
+				4C82FA9510D7D14C00523FCC /* Database */,
+				4C083C1D0DF6D30F00325A83 /* WebApp */,
+			);
+			sourceTree = "<group>";
+		};
+		4C083BD00DF6D30F00325A83 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				4C083BD10DF6D30F00325A83 /* __init__.py */,
+				4C2FAC050E9236D900D01C37 /* Data.py */,
+				4C083BD30DF6D30F00325A83 /* Environment.py */,
+				4C083BD40DF6D30F00325A83 /* Exceptions.py */,
+				4C083BD50DF6D30F00325A83 /* Matrix.py */,
+				4C923D9F0EA4E18B00612C2B /* PEATSAParallel.py */,
+				4C083C1B0DF6D30F00325A83 /* Programs.py */,
+				4C083BD70DF6D30F00325A83 /* ProteinDesignTool.py */,
+				4C9DC7C70E597D2B00713B5D /* Utilities.py */,
+				4C9DC8DA0E5C19DD00713B5D /* README */,
+				4CF121E80F20A1330084250C /* Tests */,
+				4C083BD80DF6D30F00325A83 /* Resources */,
+			);
+			name = Core;
+			path = ../Core;
+			sourceTree = "<group>";
+		};
+		4C083BD80DF6D30F00325A83 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				4C083BD20DF6D30F00325A83 /* Doxyfile */,
+				4C083BD90DF6D30F00325A83 /* RequiredScanFiles */,
+				4C083BDD0DF6D30F00325A83 /* UFFBAPSRun */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		4C083BD90DF6D30F00325A83 /* RequiredScanFiles */ = {
+			isa = PBXGroup;
+			children = (
+				4C083BDA0DF6D30F00325A83 /* DELCRG.DAT */,
+				4C083BDB0DF6D30F00325A83 /* DELRAD.DAT */,
+				4C083BDC0DF6D30F00325A83 /* TOPOLOGY.H */,
+			);
+			path = RequiredScanFiles;
+			sourceTree = "<group>";
+		};
+		4C083BDD0DF6D30F00325A83 /* UFFBAPSRun */ = {
+			isa = PBXGroup;
+			children = (
+				4C083BDE0DF6D30F00325A83 /* energy.cfg */,
+				4C083BDF0DF6D30F00325A83 /* es.cfg */,
+				4C083BE00DF6D30F00325A83 /* hbonds.cfg */,
+				4C083BE10DF6D30F00325A83 /* hp.cfg */,
+				4C083BE20DF6D30F00325A83 /* ligand_entropy.cfg */,
+				4C083BE30DF6D30F00325A83 /* msc.cfg */,
+				4C083BE40DF6D30F00325A83 /* parameters */,
+				4C083C040DF6D30F00325A83 /* plot_results.m */,
+				4C083C050DF6D30F00325A83 /* protein_entropy.cfg */,
+				4C083C060DF6D30F00325A83 /* vdw_line.cfg */,
+			);
+			path = UFFBAPSRun;
+			sourceTree = "<group>";
+		};
+		4C083BE40DF6D30F00325A83 /* parameters */ = {
+			isa = PBXGroup;
+			children = (
+				4C083BE50DF6D30F00325A83 /* ALA_propensity_map.m */,
+				4C083BE60DF6D30F00325A83 /* all_amino94.in */,
+				4C083BE70DF6D30F00325A83 /* all_aminoct94.in */,
+				4C083BE80DF6D30F00325A83 /* all_aminont94.in */,
+				4C083BE90DF6D30F00325A83 /* all_propensity_map.m */,
+				4C083BEA0DF6D30F00325A83 /* ARG_propensity_map.m */,
+				4C083BEB0DF6D30F00325A83 /* ASN_propensity_map.m */,
+				4C083BEC0DF6D30F00325A83 /* ASP_propensity_map.m */,
+				4C083BED0DF6D30F00325A83 /* CYS_propensity_map.m */,
+				4C083BEE0DF6D30F00325A83 /* desolvation_parameters.txt */,
+				4C083BEF0DF6D30F00325A83 /* gaff.dat */,
+				4C083BF00DF6D30F00325A83 /* GLN_propensity_map.m */,
+				4C083BF10DF6D30F00325A83 /* GLU_propensity_map.m */,
+				4C083BF20DF6D30F00325A83 /* GLY_propensity_map.m */,
+				4C083BF30DF6D30F00325A83 /* HIS_propensity_map.m */,
+				4C083BF40DF6D30F00325A83 /* ILE_propensity_map.m */,
+				4C083BF50DF6D30F00325A83 /* LEU_propensity_map.m */,
+				4C083BF60DF6D30F00325A83 /* LYS_propensity_map.m */,
+				4C083BF70DF6D30F00325A83 /* MET_propensity_map.m */,
+				4C083BF80DF6D30F00325A83 /* occupancies.txt */,
+				4C083BF90DF6D30F00325A83 /* opls_uni.in */,
+				4C083BFA0DF6D30F00325A83 /* parm94.dat */,
+				4C083BFB0DF6D30F00325A83 /* PHE_propensity_map.m */,
+				4C083BFC0DF6D30F00325A83 /* precalculated_volumes.txt */,
+				4C083BFD0DF6D30F00325A83 /* PRO_propensity_map.m */,
+				4C083BFE0DF6D30F00325A83 /* SER_propensity_map.m */,
+				4C083BFF0DF6D30F00325A83 /* sybyl_types.txt */,
+				4C083C000DF6D30F00325A83 /* THR_propensity_map.m */,
+				4C083C010DF6D30F00325A83 /* TRP_propensity_map.m */,
+				4C083C020DF6D30F00325A83 /* TYR_propensity_map.m */,
+				4C083C030DF6D30F00325A83 /* VAL_propensity_map.m */,
+			);
+			path = parameters;
+			sourceTree = "<group>";
+		};
+		4C083C1D0DF6D30F00325A83 /* WebApp */ = {
+			isa = PBXGroup;
+			children = (
+				4C083C1E0DF6D30F00325A83 /* __init__.py */,
+				4C9851FA0E93AAC90082E904 /* Data.py */,
+				4C9851FC0E93AAC90082E904 /* Exceptions.py */,
+				4C87430C0F1B57D100DB3FCB /* RemoteLaunch.py */,
+				4CF121EB0F20A2FF0084250C /* JobSubmission.py */,
+				4C9851FE0E93AAC90082E904 /* UtilityFunctions.py */,
+				4C9851FD0E93AAC90082E904 /* WebScript.py */,
+				4C083C370DF6D30F00325A83 /* README */,
+				4C083C260DF6D30F00325A83 /* Interface */,
+				4C923C780EA3547300612C2B /* Resources */,
+			);
+			name = WebApp;
+			path = ../WebApp;
+			sourceTree = "<group>";
+		};
+		4C083C260DF6D30F00325A83 /* Interface */ = {
+			isa = PBXGroup;
+			children = (
+				4C083C270DF6D30F00325A83 /* __init__.py */,
+				4C083C2B0DF6D30F00325A83 /* Pages */,
+				4CF760FF104FC98100E4EF35 /* Javascript */,
+				4C5F4018104D29F50090B54B /* Styles */,
+				4C083C320DF6D30F00325A83 /* Resources */,
+				4C083C280DF6D30F00325A83 /* cgi-bin */,
+				4C083C360DF6D30F00325A83 /* README */,
+			);
+			path = Interface;
+			sourceTree = "<group>";
+		};
+		4C083C280DF6D30F00325A83 /* cgi-bin */ = {
+			isa = PBXGroup;
+			children = (
+				4C41FE0310CEB27D00774DF2 /* GetMutant.py */,
+				4C083C290DF6D30F00325A83 /* __init__.py */,
+				4C083C2A0DF6D30F00325A83 /* ProcessSubmission.py */,
+			);
+			path = "cgi-bin";
+			sourceTree = "<group>";
+		};
+		4C083C2B0DF6D30F00325A83 /* Pages */ = {
+			isa = PBXGroup;
+			children = (
+				4C2B77A211A6B95200F3139C /* Visualize.php */,
+				4C083C310DF6D30F00325A83 /* README */,
+				4C083C2E0DF6D30F00325A83 /* FrontPage.php */,
+				4CE2CC360F8B3F3000CC0C88 /* FAQ.php */,
+				4C083C2D0DF6D30F00325A83 /* Error.php */,
+				4C21A3770F84D1610010B90C /* MutationList.php */,
+				4CE2CC380F8B3F3000CC0C88 /* Technology.php */,
+				4CE2CC370F8B3F3000CC0C88 /* Methods.php */,
+				4C083C350DF6D30F00325A83 /* Results.php */,
+				4CBDD0C310C529440028DC79 /* PageComponents.php */,
+				4C083C300DF6D30F00325A83 /* UtilityFunctions.php */,
+				4CA030E50F94F18D0001B23E /* Graph.php */,
+				4CAE8D740F2769F500543017 /* JSGetCalculationData.php */,
+			);
+			path = Pages;
+			sourceTree = "<group>";
+		};
+		4C083C320DF6D30F00325A83 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				4CBDD1B610C563890028DC79 /* Methods.png */,
+				4CBDD1A010C560D70028DC79 /* Methods.pdf */,
+				4CF760DF104FC51300E4EF35 /* Scale.png */,
+				4C083C330DF6D30F00325A83 /* ajax-loader.gif */,
+				4C3903C4109EFE4400DF01E9 /* Workflow.png */,
+				4C083C340DF6D30F00325A83 /* loadinfo.net.gif */,
+				4C207F030F974A5A0032073C /* sfi_cmyk.png */,
+			);
+			name = Resources;
+			path = Pages/Resources;
+			sourceTree = "<group>";
+		};
+		4C5F4018104D29F50090B54B /* Styles */ = {
+			isa = PBXGroup;
+			children = (
+				4C083C2F0DF6D30F00325A83 /* FrontPageStyle.css */,
+				4C5F3FBD104D29470090B54B /* FAQStyle.css */,
+				4C5F3FBC104D273C0090B54B /* SiteWideStyle.css */,
+				4C5F3FBB104D26880090B54B /* ResultsPageStyle.css */,
+			);
+			name = Styles;
+			sourceTree = "<group>";
+		};
+		4C82FA9510D7D14C00523FCC /* Database */ = {
+			isa = PBXGroup;
+			children = (
+				4CBF353910F1F9F4003F8462 /* Scripts */,
+				4C82FAE510D7E14900523FCC /* InterfaceKit */,
+				4C82FA9610D7D14C00523FCC /* __init__.py */,
+				4C82FA9710D7D14C00523FCC /* Data.py */,
+				4C82FA9810D7D14C00523FCC /* Exceptions.py */,
+				4C82FA9910D7D14C00523FCC /* Utilities.py */,
+			);
+			name = Database;
+			path = ../Database;
+			sourceTree = SOURCE_ROOT;
+		};
+		4C82FAE510D7E14900523FCC /* InterfaceKit */ = {
+			isa = PBXGroup;
+			children = (
+				4C82FAF910D7E2F600523FCC /* DataRetrieval.php */,
+				4C82FB8B10D9315200523FCC /* Session.php */,
+				4C82FB7110D8ECEC00523FCC /* Utilities.php */,
+				4C82FAFA10D7E2F600523FCC /* DownloadMatrix.php */,
+				4C82FAF610D7E2D100523FCC /* MatrixViewer.php */,
+				4C82FB0110D7E40600523FCC /* JobBrowser.php */,
+				4C82FB0010D7E40600523FCC /* StructureViewer.php */,
+				4C82FAFD10D7E3F300523FCC /* Formatting.php */,
+				4C82FAE610D7E14900523FCC /* Javascript */,
+				4C82FAE710D7E14900523FCC /* README */,
+				4C82FAE810D7E14900523FCC /* Styles */,
+			);
+			path = InterfaceKit;
+			sourceTree = "<group>";
+		};
+		4C82FAE610D7E14900523FCC /* Javascript */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Javascript;
+			sourceTree = "<group>";
+		};
+		4C82FAE810D7E14900523FCC /* Styles */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Styles;
+			sourceTree = "<group>";
+		};
+		4C873CC30F17B2B400574C99 /* Tools */ = {
+			isa = PBXGroup;
+			children = (
+				4CB9358611A2ACF4009E93B8 /* Classify.py */,
+				4CB52C9E1191C0B8007ED635 /* FilterMatrix.py */,
+				4CC858990FC55F0900734C56 /* SortMatrixByMutation.py */,
+				4C0E4A99100DF12A00D1EB03 /* Binder.py */,
+				4CC8589A0FC55F0900734C56 /* PPInteraction.py */,
+				4CFFAE440F9CCA9F00133444 /* Vitality.py */,
+				4C06B4450F9E01F8003937EC /* Histogram.py */,
+				4C7CC02F11CBA2D0008F7E4E /* MergeMatrices.py */,
+				4C7CC03011CBA2D0008F7E4E /* PLSolvation.py */,
+				4C7CC03111CBA2D0008F7E4E /* Stat.py */,
+				4C7CC03411CBA32E008F7E4E /* ColumnStat.py */,
+				4C75681B11CF78B800484D8D /* FTest.py */,
+				4CF3CAB40F55AB6100C1B600 /* ExpandResults.py */,
+				4C9F84F90F44324B0032F9D2 /* ExampleFunction.py */,
+				4C873CE30F17B7C700574C99 /* TDCycle.py */,
+				4C80A4690F5FFBA700E36B05 /* ModelMutations.py */,
+			);
+			name = Tools;
+			path = ../Tools;
+			sourceTree = SOURCE_ROOT;
+		};
+		4C923C780EA3547300612C2B /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				4C923C790EA3547300612C2B /* example.conf */,
+				4CF121E40F20A1180084250C /* CreatePDTUser.sql */,
+				4CF121E50F20A1180084250C /* DatabaseSchema.sql */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		4C923C970EA3675900612C2B /* UnitTests */ = {
+			isa = PBXGroup;
+			children = (
+				4C923C980EA3675900612C2B /* invalid.conf */,
+				4C923C9A0EA3675900612C2B /* TestDirs */,
+				4C923CA80EA3675900612C2B /* TestEnvironment.py */,
+				4C21A38F0F84F92C0010B90C /* TestMutants.py */,
+				4C6B7A710EA8C3FD00F8F698 /* proteinDesignTool.conf */,
+				4C923CA90EA3675900612C2B /* TestMatrix.py */,
+				4C923CAA0EA3675900612C2B /* TestScanner.py */,
+			);
+			name = UnitTests;
+			sourceTree = "<group>";
+		};
+		4C923C9A0EA3675900612C2B /* TestDirs */ = {
+			isa = PBXGroup;
+			children = (
+				4C923C9B0EA3675900612C2B /* Invalid */,
+				4C923C9D0EA3675900612C2B /* README */,
+				4C923C9E0EA3675900612C2B /* Valid */,
+			);
+			path = TestDirs;
+			sourceTree = "<group>";
+		};
+		4C923C9B0EA3675900612C2B /* Invalid */ = {
+			isa = PBXGroup;
+			children = (
+				4C923C9C0EA3675900612C2B /* 1crn.pdb */,
+			);
+			path = Invalid;
+			sourceTree = "<group>";
+		};
+		4C923C9E0EA3675900612C2B /* Valid */ = {
+			isa = PBXGroup;
+			children = (
+				4C923C9F0EA3675900612C2B /* 1crn.pdb */,
+				4C923CA00EA3675900612C2B /* 1crn.pdb.BACKGR.DAT */,
+				4C923CA10EA3675900612C2B /* 1crn.pdb.DESOLV.DAT */,
+				4C923CA20EA3675900612C2B /* 1crn.pdb.MATRIX.DAT */,
+				4C923CA30EA3675900612C2B /* 1crn.pdb.PKA.DAT */,
+				4C923CA40EA3675900612C2B /* 1crn.pdb.TITCURV.DAT */,
+				4C923CA50EA3675900612C2B /* DELCRG.DAT */,
+				4C923CA60EA3675900612C2B /* DELRAD.DAT */,
+				4C923CA70EA3675900612C2B /* TOPOLOGY.H */,
+			);
+			path = Valid;
+			sourceTree = "<group>";
+		};
+		4C923CAD0EA367BE00612C2B /* RegressionTests */ = {
+			isa = PBXGroup;
+			children = (
+				4C923CAE0EA367BE00612C2B /* proteinDesignTool.conf */,
+				4C923CAF0EA367BE00612C2B /* RegressionTest.py */,
+				4C4269B00ECD847F00408350 /* TestScan.py */,
+				4C4269B10ECD847F00408350 /* TestStability.py */,
+				4C923CB20EA367BE00612C2B /* testList */,
+			);
+			name = RegressionTests;
+			path = ../RegressionTests;
+			sourceTree = "<group>";
+		};
+		4CBF353910F1F9F4003F8462 /* Scripts */ = {
+			isa = PBXGroup;
+			children = (
+				4CBF353A10F1F9F4003F8462 /* CreateJobEntry.py */,
+				4CBF353C10F1F9F4003F8462 /* ConstructJob.py */,
+				4CBF355210F2020A003F8462 /* ImportDataSet.py */,
+				4CBF355A10F204D8003F8462 /* ImportJob.py */,
+				4CBF353B10F1F9F4003F8462 /* SetAdminError.py */,
+				4CBF353D10F1F9F4003F8462 /* SetJobData.py */,
+			);
+			path = Scripts;
+			sourceTree = "<group>";
+		};
+		4CF121E80F20A1330084250C /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				4C923CAD0EA367BE00612C2B /* RegressionTests */,
+				4C923C970EA3675900612C2B /* UnitTests */,
+			);
+			name = Tests;
+			path = Tests/UnitTests;
+			sourceTree = "<group>";
+		};
+		4CF760FF104FC98100E4EF35 /* Javascript */ = {
+			isa = PBXGroup;
+			children = (
+				4CA030E80F94F1980001B23E /* ResultsGraphs.js */,
+				4C79F7940F2E1F4B007DF6C6 /* ColourStructure.js */,
+			);
+			name = Javascript;
+			path = Pages;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXProject section */
+		4C083BC40DF6D1D900325A83 /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = 4C083BC70DF6D1D900325A83 /* Build configuration list for PBXProject "ProteinDesignTool" */;
+			compatibilityVersion = "Xcode 2.4";
+			hasScannedForEncodings = 0;
+			mainGroup = 4C083BC20DF6D1D900325A83;
+			projectDirPath = "";
+			projectRoot = ..;
+			targets = (
+				4C21A3940F84FC7F0010B90C /* Test Core */,
+				4C75682311CF896C00484D8D /* Test Tools */,
+				4CA385DB0F861EF5006D71D7 /* WebApp */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		4C21A39A0F84FC8D0010B90C /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/bash;
+			shellScript = "#!/bin/bash\n/usr/local/bin/pyflakes $HOME/PEAT/PEAT_SA/Core\ncd $HOME/PEAT/PEAT_SA/Core/Tests/UnitTests/\npython TestMutants.py\n";
+		};
+		4C75682211CF896C00484D8D /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "#!/bin/bash\n/usr/local/bin/pyflakes $HOME/PEAT/PEAT_SA/Tools";
+		};
+		4CA385E50F861F21006D71D7 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/bash;
+			shellScript = "#!/bin/bash\necho 'Updating interface repos'\nssh johnston@peat.ucd.ie svn update /local/johnston/PEAT_SA\nssh johnston@peat.ucd.ie chmod 777 /local/johnston/PEAT_SA/WebApp/RemoteLaunch.py\necho 'Updating backend repos'\nssh webserver@enzyme.ucd.ie svn update PEAT/PEAT_SA\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		4CA385E70F861F33006D71D7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4C21A3940F84FC7F0010B90C /* Test Core */;
+			targetProxy = 4CA385E60F861F33006D71D7 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		4C083BC50DF6D1D900325A83 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = Debug;
+		};
+		4C083BC60DF6D1D900325A83 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+			};
+			name = Release;
+		};
+		4C21A3950F84FC800010B90C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = Tests;
+			};
+			name = Debug;
+		};
+		4C21A3960F84FC800010B90C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				PRODUCT_NAME = Tests;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		4C75682411CF896D00484D8D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = "Test Tools";
+			};
+			name = Debug;
+		};
+		4C75682511CF896D00484D8D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				PRODUCT_NAME = "Test Tools";
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		4CA385DC0F861EF5006D71D7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = WebApp;
+			};
+			name = Debug;
+		};
+		4CA385DD0F861EF5006D71D7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				PRODUCT_NAME = WebApp;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		4C083BC70DF6D1D900325A83 /* Build configuration list for PBXProject "ProteinDesignTool" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4C083BC50DF6D1D900325A83 /* Debug */,
+				4C083BC60DF6D1D900325A83 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4C21A39B0F84FCAB0010B90C /* Build configuration list for PBXAggregateTarget "Test Core" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4C21A3950F84FC800010B90C /* Debug */,
+				4C21A3960F84FC800010B90C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4C75682A11CF899F00484D8D /* Build configuration list for PBXAggregateTarget "Test Tools" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4C75682411CF896D00484D8D /* Debug */,
+				4C75682511CF896D00484D8D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4CA385E00F861F13006D71D7 /* Build configuration list for PBXAggregateTarget "WebApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4CA385DC0F861EF5006D71D7 /* Debug */,
+				4CA385DD0F861EF5006D71D7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 4C083BC40DF6D1D900325A83 /* Project object */;
+}

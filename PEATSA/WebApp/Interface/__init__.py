@@ -1,0 +1,1 @@
+'''Contains python, html, php and javascript files related to the interface of the WebApp'''

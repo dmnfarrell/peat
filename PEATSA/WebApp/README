@@ -1,0 +1,7 @@
+This Python module is a web application built on top of the PEAT-SA program (in the PEAT_SA.Core module).
+The web app is built according to the MVC pattern.
+
+Interface contains the web related files - php, html and cgi.
+This directory needs to be known about by apache or whatever.
+
+This directory contains the script that runs the jobs, the configuration of the web app and an SQL script for creating the apps MySQL database.
