@@ -1,7 +1,7 @@
 #! /usr/bin/python
 import sys, time, optparse, os
-import PEAT_SA.Core as Core
-import PEAT_SA.WebApp as WebApp
+import PEATSA.Core as Core
+import PEATSA.WebApp as WebApp
 import ConstructJob
 import MySQLdb
 
@@ -9,7 +9,7 @@ usage = "usage: %prog [options]"
 
 parser = optparse.OptionParser(usage=usage, version="% 0.1", description=__doc__)
 parser.add_option("-c", "--configurationFile", dest="configurationFile",
-                  help="A PEAT-SA configuration file.", metavar="CONF")
+                  help="A PEATSA configuration file.", metavar="CONF")
 		  
 (options, args) = parser.parse_args()
 

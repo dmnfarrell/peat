@@ -1,8 +1,8 @@
 #! /usr/bin/python
 '''JobObserver monitors the queue position of jobs that have been queued but are not running.'''
 import sys, time, optparse, os
-import PEAT_SA.Core as Core
-import PEAT_SA.WebApp as WebApp
+import PEATSA.Core as Core
+import PEATSA.WebApp as WebApp
 import subprocess
 
 def getQueueStatisitcs(queue):
