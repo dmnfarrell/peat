@@ -5,13 +5,51 @@ import PEAT_SA.Core as Core
 import PEAT_SA.WebApp as WebApp
 import subprocess
 
-def getQueueStatistics(id):
+def getQueueStatisitcs(queue):
+
+	'''Returns a array of dictionaries. 
+
+	Each dictionary corresponds to a job in queue.
+	The keys in each dictionary are 
+		- JobId
+		- Name
+		- User
+		- Time 
+		- State 
 	
-	'''Returns a dictionary of queue statistics for job with id.
+	Due to restrictions of qstat output the job name is not available.
+	User getJobStatistics - passing the JobId to get detailed stats.
+	Note: The order of jobs in the returned dictionary correpsonds to
+	the order of jobs in the queue'''
 
-	Note id must be a pbs id (not a PDT server id'''
+	command = 'qstat %s' % queue
+	task = subprocess.Popen(args=command, stdout=subprocess.PIPE, shell=True)
+	task.wait()
+	components = task.stdout.readlines()
+	#Discard first two lines - headers and separator
+	components = components[2:]
+	components = [el.split() for el in components]
+	#The components are JobId, Name, User, Time. State and Queue
+	#However only ~10 chars are output for name which isn't enough
+	#Thereore we leave it out
+	keys = ['JobId', 'User', 'Time', 'State']
+	stats = []
+	for data in components:
+		data = [el.strip() for el in data]
+		data.pop(1)
+		data.pop()
+		stats.append(dict(zip(keys, data)))
 
-	command = 'qstat -f1 %d' % id
+	return stats
+
+
+def getJobStatistics(id):
+	
+	'''Returns a dictionary of PBS statistics for job with id.
+
+	Note id must be a pbs job id e.g. 11021.enzyme'''
+
+	command = 'qstat -f1 %s' % id
 	task = subprocess.Popen(args=command, stdout=subprocess.PIPE, shell=True)
 	task.wait()
 	components = task.stdout.readlines()
@@ -26,31 +64,21 @@ def getQueueStatistics(id):
 	return stats
 
 def getJobPositions(queue):
+	
+	'''Returns an FIFO ordered array of the names of jobs waiting in the given queue
 
-	print queue
-	noneString = 'no idle jobs in queue\n'
-	command = 'diagnose -p %s' % queue
-	task = subprocess.Popen(args=command, stdout=subprocess.PIPE, shell=True)
-	task.wait()
-	components = task.stdout.readlines()
+	Note: The name is usually equivalent to the name of the jobs pbs file
+	without the path extension'''
 
-	queuedJobs = []
-	if components[0] == command:
-		pass
-	else:
-		#Strip out non-job lines
-		components = components[5:-5]
-		ids = []
-		for component in components:
-			data = component.split()
-			ids.append(int(data[0].strip()))
-				
-		for id in ids:
-			stat = getQueueStatistics(id)	
-			queuedJobs.append(os.path.splitext(stat['Job_Name'])[0])
+	stats = getQueueStatisitcs(queue)
+	queuedJobsIds = [el['JobId'] for el in stats if el['State'] == 'Q']
 
-	return queuedJobs
+	queuedJobNames = []
+	for id in queuedJobsIds:
+		stat = getJobStatistics(id)	
+		queuedJobNames.append(os.path.splitext(stat['Job_Name'])[0])
 
+	return queuedJobNames
 
 if __name__ == "__main__":
 
@@ -74,41 +102,28 @@ if __name__ == "__main__":
 	jobTable = configuration.get('DATABASE', 'jobTable')
 	queue = configuration.get('PARALLEL', 'queue')
 
-	print 'Starting observer daemon'
-
 	while(1):
 		#Connection might not be valid when we get back here each loop so have to recreate it
 		connection = WebApp.UtilityFunctions.ConnectionFromConfiguration(configuration)
 		jobManager = WebApp.Data.JobManager(connection=connection, jobTable=jobTable)
-		queuedJobs = jobManager.jobsInState('Ready')
-		print 'Queued jobs'
-		print queuedJobs 
-		positions = getJobPositions('servers')
-		print 'Queued jobs positions', positions
-		#Set a status message for jobs in the queue
-		#Jobs that leave the queue will have their status message updated
-		#by WebApp.py
-		for id in queuedJobs:
-			try:
-				position = positions.index(id)
-			except ValueError:	
-				position = -1
 
-			#There are two cases where the job may not be present
-			#The job was started since we retrieved its status
-			#The job hasn't been enqueued yet
-			if position == -1:
-				if runningJobs.count(id) != -1:
-					job.setQueueStatus('Your job is running')
-				else:
-					job.setQueueStatus('Your job is about to be enqueued')
+		#This function returns an array of the ids of jobs in the queue.
+		#The elements in the array are in FIFO order
+		positions = getJobPositions(queue)
+
+		#Set a status message for jobs in the queue
+		#Jobs that leave the queue will have their status message updated by WebApp.py
+		for position in range(len(positions)):
+			id = positions[position]
+			job = WebApp.Data.Job(id, connection)
+
 			if position == 0:
-				job.setQueueStatus('Your job is next to be run')
+				job.setQueueStatusMessage('Your job is next to be run')
 			elif position == 1:
-				job.setQueueStatus('There is one job ahead of you in the queue')
+				job.setQueueStatusMessage('There is one job ahead of you in the queue')
 			else:
-				job.setQueueStatus('There are %d jobs ahead of you in the queue', position)
+				job.setQueueStatusMessage('There are %d jobs ahead of you in the queue' % position)
 
 		connection.close()
-		time.sleep(30)
+		time.sleep(10)
 			
