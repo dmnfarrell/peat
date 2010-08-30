@@ -1,0 +1,23 @@
+#
+# Masses for the 20 naturally occurring amino acids
+#
+Ala	71.0788
+Arg 	156.1875
+Asn	114.1038
+Asp 	115.0886
+Cys 	103.1388
+Glu 	129.1155
+Gln 	128.1307
+Gly 	57.0519
+His 	137.1411
+Ile 	113.1594
+Leu 	113.1594
+Lys 	128.1741
+Met 	131.1926
+Phe 	147.1766
+Pro 	97.1167
+Ser 	87.0782
+Thr 	101.1051
+Trp 	186.2132
+Tyr 	163.1760
+Val 	99.1326

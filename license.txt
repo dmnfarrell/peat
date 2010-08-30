@@ -1,0 +1,11 @@
+Protein Engineering Analysis Tool (PEAT_DB) 
+(C) Copyright Jens Erik Nielsen, University College Dublin 2003- All rights reserved
+
+Authors: Jens Erik Nielsen, Damien Farrell, Nikolaj Georgi, Chresten Sondergaard
+
+The following libraries are used and are distributed as part of the standalone distribution:
+
+pysvn, apache license http://pysvn.tigris.org/
+matplotlib, Python Software Foundation License  http://matplotlib.sourceforge.net/
+numpy, OSI-Approved BSD-type license http://numpy.scipy.org/
+pmw, MIT license http://pmw.sourceforge.net/
