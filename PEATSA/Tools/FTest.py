@@ -3,13 +3,33 @@ same data based on chisquared fit values (which are supplied to this script).
 Note: The fit with least parameters must be passed as the first matrix.
 The chisquared data for each fit must be in separate matrices - 
 this enables calculations of multiple ftests with one call'''
-#!/bin/env python
+#! /bin/env python
 #
-#  FTest.py
-#  ProteinDesignTool
+# Protein Engineering Analysis Tool Structure Analysis (PEATSA)
+# Copyright (C) 2010 Michael Johnston & Jens Erik Nielsen
 #
-#  Created by Michael Johnston on 21/06/2010.
-#  Copyright (c) 2010 UCD. All rights reserved.
+# Author: Michael Johnston
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Contact information:
+# Email: Jens.Nielsen_at_gmail.com
+# Normal mail:
+# Jens Nielsen
+# SBBS, Conway Institute
+# University College Dublin
+# Dublin 4, Ireland
 #
 from PEATSA import Core
 import sys, optparse
