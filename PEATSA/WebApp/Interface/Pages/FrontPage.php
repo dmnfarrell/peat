@@ -32,10 +32,10 @@
 	<div id="container">
 	<?php 
 		include 'PageComponents.php';
-		include_once 'PEAT_SA/Database/InterfaceKit/Session.php';
+		include_once 'PEATSA/Database/InterfaceKit/Session.php';
 		//Start a session for this visitor to thisPEAT_SA server (the domain has to be set on a per-installation basis)
 		//This is required to enable two "web-applications" on the same server use
-		//PEAT_SA/Database/InterfaceKit with different default databases.
+		//PEATSA/Database/InterfaceKit with different default databases.
 		start_peatsa_database_session('/PEAT_SA/');
 		
 		//Set the database configuration file to use with this server
@@ -56,7 +56,7 @@
 	         It is developed by the <a href="http://enzyme.ucd.ie/">Nielsen Group</a> in University College Dublin.
 		</p>
 		<!-- enctype required for file uploads - not well documented anywhere! -->
-		<form enctype="multipart/form-data" action="/PEAT_SA/cgi-bin/ProcessSubmission.py" method="post" name="PDT">
+		<form enctype="multipart/form-data" action="/PEATSA/cgi-bin/ProcessSubmission.py" method="post" name="PDT">
 		
 		<!-- Calculation Section -->
 		<p style="margin-bottom: 1em">
@@ -90,7 +90,7 @@
 			<b>Residue Scan</b> will calculate the effect of a single point mutation of each residue to the amino-acid<br>
 			 chosen from the drop-down list.<br>
 			<b>Mutation List</b> allows you to supply a file defining an arbitrary set of mutations to be tested.<br>
-			The <a href="/PEAT_SA/Pages/MutationList.php">Mutation List Format</a> page explains the files format.
+			The <a href="/PEATSA/Pages/MutationList.php">Mutation List Format</a> page explains the files format.
 		</div>
 		<p style="margin-bottom: 0.7em; margin-top: 1.0em">
 			<input type="radio" name="mutation" value="mutationFile"><label>Mutation List</label>
@@ -129,7 +129,7 @@ If a file is uploaded it will override a list entered here. (Note delete these l
 		<?php
 			$server = $_SERVER['SERVER_NAME'];
 			$port = $_SERVER['SERVER_PORT'];
-			echo "<a href='http://$server:$port/PEAT_SA/Pages/FAQ.php#pKaCode'>What's this?</a>";
+			echo "<a href='http://$server:$port/PEATSA/Pages/FAQ.php#pKaCode'>What's this?</a>";
 		?>	
 		)
 		<input type="text" size=10 id="pdbCode" name="pdbCode">  
