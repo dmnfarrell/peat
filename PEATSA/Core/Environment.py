@@ -510,7 +510,9 @@ class WorkingDirectory:
 			
 		#Never executed if the directory creation fails
 		if creatingDir:
+			self.environment.log('Root finished creation of directory %s - checking if its appeared' % self.directory)
 			while not os.path.isdir(self.directory):
+				self.environment.log('Directory hasnt appeared yet')
 				time.sleep(0.5)			
 
 		#Switch current working directory to the supplied directory
@@ -576,6 +578,7 @@ class WorkingDirectory:
 	
 		#Only the root process does the copying
 		destination = os.path.join(directory, os.path.split(filename)[1])
+		self.environment.log('Copying %s to %s' % (filename, destination))
 		if self.environment.isRoot():
 			filename = self._checkFile(filename)
 			
@@ -1046,7 +1049,7 @@ class Environment:
 		stream = open(filename, 'a+')
 		stream.write(string)	
 		stream.write(' (Logged at line %d of %s at %s)' % (stack()[1][0].f_lineno, 
-				stack()[1][0].f_code.co_filename, datetime.datetime.now().strftime('%H:%M:%S') ))
+				stack()[1][0].f_code.co_filename, datetime.datetime.now().strftime('%H:%M:%S')))
 		stream.write("\n")	
 		stream.close()		
 		
