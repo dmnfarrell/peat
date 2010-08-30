@@ -399,7 +399,7 @@ class UFFBAPS():
 			#Add some comments
 			comments = stabilityCommentStrings[:]
 			date = datetime.datetime.today()
-			comments.insert(1, "Generated  by PEATSA on %s" % date.strftime('%A %d/%m/%Y %H:%M:%S %Z'))	
+			comments.insert(1, "Generated  by PEAT_SA on %s" % date.strftime('%A %d/%m/%Y %H:%M:%S %Z'))	
 
 											
 	def _chopDeltaStabilityResultLine(self, resultLine):
@@ -586,7 +586,7 @@ class UFFBAPS():
 			#Add some comments
 			comments = stabilityCommentStrings[:]
 			date = datetime.datetime.today()
-			comments.insert(1, "Generated  by PEATSA on %s" % date.strftime('%A %d/%m/%Y %H:%M:%S %Z'))
+			comments.insert(1, "Generated  by PEAT_SA on %s" % date.strftime('%A %d/%m/%Y %H:%M:%S %Z'))
 			
 	def _chopLigandResultLine(self, resultLine):
 	
@@ -1067,35 +1067,35 @@ class Scanner:
 			#We wait to check if we have been running longer than the checkInterval
 			#OR if the time to wait now is less than the time we estimate we will have
 			#exceeded the checkInterval if we go ahead.
-			runningTime = datetime.datetime.now() - start
-			seconds = 86400*runningTime.days + runningTime.seconds
-			timePerStep = seconds/float(completedTasks)
-			timeToCheck = checkTime - seconds
-			estimatedNextTime = seconds + timePerStep
-
-			self.environment.output('[SCAN] (%d) Running for %s - %lf to check interval\n' % (self.environment.rank(), runningTime, timeToCheck), 
-				stream=standardOut,
-				rootOnly=False)
-
-			self.environment.output('[SCAN] (%d) Time per step %lf - Estimated next check %lf.\n' % (self.environment.rank(), timePerStep, estimatedNextTime), 
-				stream=standardOut,
-				rootOnly=False)
-
-			self.environment.output('[SCAN] (%d) Estimated next time to check interval %lf.\n' % (self.environment.rank(), checkTime - estimatedNextTime), 
-				stream=standardOut,
-				rootOnly=False)
-				
-			if seconds >= checkTime or (abs(timeToCheck) < abs(checkTime - estimatedNextTime)):
-				startWait = datetime.datime.now()
-				self.environment.output('[SCAN] Checking skew\n', stream=standardOut, rootOnly=False)
-				skew = self.environment.loadSkew(len(taskArray) - completedTasks)
-				self.environment.output('[SCAN] Skew is %lf\n' % skew, stream=standardOut, rootOnly=False)
-				endWait = datetime.datime.now()
-				self.environment.output('[SCAN] Waited for %s\n' % (endWait - startWait), stream=standardOut, rootOnly=False)
-				checkTime += 600
-				if  skew > skewThreshold:
-					break
-
+			#runningTime = datetime.datetime.now() - start
+			#seconds = 86400*runningTime.days + runningTime.seconds
+			#timePerStep = seconds/float(completedTasks)
+			#timeToCheck = checkTime - seconds
+			#estimatedNextTime = seconds + timePerStep
+#
+#			self.environment.output('[SCAN] (%d) Running for %s - %lf to check interval\n' % (self.environment.rank(), runningTime, timeToCheck), 
+#				stream=standardOut,
+#				rootOnly=False)
+#
+#			self.environment.output('[SCAN] (%d) Time per step %lf - Estimated next check %lf.\n' % (self.environment.rank(), timePerStep, estimatedNextTime), 
+#				stream=standardOut,
+#				rootOnly=False)
+#
+#			self.environment.output('[SCAN] (%d) Estimated next time to check interval %lf.\n' % (self.environment.rank(), checkTime - estimatedNextTime), 
+#				stream=standardOut,
+#				rootOnly=False)
+#				
+#			if seconds >= checkTime or (abs(timeToCheck) < abs(checkTime - estimatedNextTime)):
+#				startWait = datetime.datetime.now()
+#				self.environment.output('[SCAN] Checking skew\n', stream=standardOut, rootOnly=False)
+#				skew = self.environment.loadSkew(len(taskArray) - completedTasks)
+#				self.environment.output('[SCAN] Skew is %lf\n' % skew, stream=standardOut, rootOnly=False)
+#				endWait = datetime.datetime.now()
+#				self.environment.output('[SCAN] Waited for %s\n' % (endWait - startWait), stream=standardOut, rootOnly=False)
+#				checkTime += 600
+#				if  skew > skewThreshold:
+#					break
+#
 		return taskArray[completedTasks:]
 
 	def scan(self, mutantCollection, verbose=False, printList=True):
@@ -1162,7 +1162,7 @@ class Scanner:
 			taskArray = self._processTasks(taskArray, results, standardOut, scanLogStream, verbose, checkInterval=5, skewThreshold=1.0)
 			self.environment.output('[SCAN] (%d) Rebalancing load ...' % self.environment.rank())
 			#Re-distributed the remaining tasks across the nodes - this should be asynchronous somehow
-			taskArray = self.environment.balanceArrays(taskArray)
+			#taskArray = self.environment.balanceArrays(taskArray)
 			self.environment.output('[SCAN] (%d) Continuing with %d tasks'% (self.environment.rank(), len(taskArray)))
 
 		#This is required in order to catch if any the processes exited the 
