@@ -109,6 +109,8 @@ class Fitting(object):
             return DSCindependent(variables=vrs,exp_data=expdata,callback=callback,name=model)
         elif model == 'DSC2stateIrreversible':
             return DSC2stateIrreversible(variables=vrs,exp_data=expdata,callback=callback,name=model)    
+        elif model == 'DSC2stateIrreversibleII':
+            return DSC2stateIrreversibleII(variables=vrs,exp_data=expdata,callback=callback,name=model)             
         elif model == 'Residual Activity':
             return residualActivity(variables=vrs,exp_data=expdata,callback=callback,name=model)
         else:
@@ -1221,6 +1223,47 @@ class DSCmultipleindependent(LM_Fitter):
         return value
         
 class DSC2stateIrreversible(LM_Fitter):
+    """Fit to 2 state irreversible model for DSC"""
+
+    def __init__(self, variables, exp_data, callback, name):
+        LM_Fitter.__init__(self,variables,exp_data,callback,name)
+        self.name = name
+        self.names = ['Tm','deltaH','E']
+        self.labels = ['T','e']
+        if variables == None:
+            self.variables = [340, 40,1]
+        else:
+            self.variables = variables
+        self.setChangeVars()
+        return
+
+    def guess_start(self):
+        """Guess start vals for this model"""
+        x=[];y=[]
+        for a in self.exp_data:
+            x.append(float(a[0]))
+            y.append(float(a[1]))            
+        R=8.3144e-3
+        Tm = x[y.index(max(y))]
+        deltaH = 270
+        self.variables = [Tm,deltaH,1]
+        return self.variables
+        
+    def get_value(self, variables, data_point):
+        """DSC"""
+        try:
+            x=data_point[0]
+        except:
+            x=data_point      
+        Tm=variables[0]
+        deltaH=variables[1]       
+        E=variables[2]
+        R=8.3144e-3
+        uT=(E/R) * (1/Tm - 1/x)       
+        value = (deltaH * E / R*math.pow(x,2)) * math.exp(uT) * (math.exp(-math.exp(uT)))
+        return value
+        
+class DSC2stateIrreversibleII(LM_Fitter):
     """Fit to 2 state irreversible extended model for DSC"""
 
     def __init__(self, variables, exp_data, callback, name):
@@ -1229,7 +1272,7 @@ class DSC2stateIrreversible(LM_Fitter):
         self.names = ['Tm','deltaH','deltacp','E']
         self.labels = ['T','e']
         if variables == None:
-            self.variables = [340, 40,50,.1]
+            self.variables = [340, 40,1,1]
         else:
             self.variables = variables
         self.setChangeVars()
@@ -1244,7 +1287,7 @@ class DSC2stateIrreversible(LM_Fitter):
         R=8.3144e-3
         Tm = x[y.index(max(y))]
         deltaH = Tm-80
-        self.variables = [Tm,deltaH,10,100]
+        self.variables = [Tm,deltaH,1,1]
         return self.variables
         
     def get_value(self, variables, data_point):
@@ -1259,9 +1302,9 @@ class DSC2stateIrreversible(LM_Fitter):
         E=variables[3]
         R=8.3144e-3        
         b=2*deltacp/deltaH * (R*math.pow(Tm,2)/E)
-        uT=(E/R) * (1/Tm * 1/x)
+        uT=(E/R) * (1/Tm - 1/x)
         z=-(1+b)*math.exp(uT)
-        value = deltaH * (E/R*math.pow(x,2)) * (1+b) * math.exp(uT) * math.exp(z) + deltacp* (1-math.exp(z))
+        value = deltaH * (E/R*math.pow(x,2)) * (1+b) * math.exp(uT) * math.exp(z) + (deltacp* (1-math.exp(z)))
         return value
         
 class power(LM_Fitter):

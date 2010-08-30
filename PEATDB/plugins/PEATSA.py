@@ -14,13 +14,13 @@ import os, types
 from Tkinter import *
 import tkFileDialog
 import Pmw
-import PEAT_SA.WebApp as WebApp
-import PEAT_SA.Core as Core
+import PEATSA.WebApp as WebApp
+import PEATSA.Core as Core
 
 class PEATSAPlugin(Plugin):
     """Template GUI plugin for PEAT App"""
     capabilities = ['gui']
-    requires = ['PEAT_SA']
+    requires = ['PEATSA']
     menuentry = 'PEAT-SA Plugin'
     gui_methods = {'createJobDialog':'Submit Job',
                    'fetchJob':'Fetch Job',

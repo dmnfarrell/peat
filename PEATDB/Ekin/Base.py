@@ -76,7 +76,7 @@ class EkinProject(object):
                          'Sigmoid', 'Modified Hill'
                          'Denaturation','diffDenaturation','Unfolding',
                          'Residual Activity',
-                         'DSC2state','DSCindependent','DSC2stateIrreversible'],
+                         'DSC2state','DSCindependent','DSC2stateIrreversible','DSC2stateIrreversibleII'],
                      'Simple enzyme kinetic':['Michaelis-Menten','Michaelis-Menten-competitive-inhibition',
                                               'Competitive inhibition','Non-competitive inhibition'],
                      'Enzyme pH-activity':['Bell-shaped pH-act profile (3 pKas)','Bell-shaped pH-act profile (2 pKas)'],
