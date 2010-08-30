@@ -316,6 +316,14 @@ class DSCFitter:
 		res2 = ['NonTwoState', method, self.foldedRange[1], self.unfoldedRange[0], 
 				meltingTemp, vantHoff, calorimetric, fittingParameters['error']/(4.184*4.184), vantHoff/meltingTemp, calorimetric/vantHoff]
 
+		'''fittingParameters,fittingInstance=Fitting.doFit(expdata=zip(dscCurve.temperature,value), model='DSC2stateIrreversible', silent=True)
+
+		E = fittingParameters[2]/4.184
+		calorimetric = fittingParameters[1]*vantHoff
+		meltingTemp = fittingParameters[0]
+		res3 = ['Irreversible', method, self.foldedRange[1], self.unfoldedRange[0], 
+				meltingTemp, vantHoff, calorimetric, fittingParameters['error']/(4.184*4.184), vantHoff/meltingTemp, calorimetric/vantHoff]
+		'''
 		return [res1, res2]
 
 	def fitHeaders(self):
