@@ -28,8 +28,8 @@
 #
 '''Cgi Script for dynamically creating a mutant pdb file used in a PEAT-SA job'''
 import cgi, cgitb, tempfile, os, sys
-import PEAT_SA.WebApp as WebApp
-import PEAT_SA.Core as Core
+import PEATSA.WebApp as WebApp
+import PEATSA.Core as Core
 
 #URL'S have query string jobId=$jobID&mutationCode=$mutationCode	
 if __name__ == "__main__":

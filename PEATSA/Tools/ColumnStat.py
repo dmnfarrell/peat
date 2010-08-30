@@ -6,7 +6,7 @@
 #  Created by Michael Johnston on 18/06/2010.
 #  Copyright (c) 2010 UCD. All rights reserved.
 #
-import PEAT_SA.Core as Core
+import PEATSA.Core as Core
 import optparse
 import numpy, math, sys
 import scipy.stats.stats as stats

@@ -1,11 +1,11 @@
 #! /usr/bin/env python
-'''Calculates Delta Delta G_bind(WT->M) for a set of mutants of a protein-protein complex using PEAT_SA data
+'''Calculates Delta Delta G_bind(WT->M) for a set of mutants of a protein-protein complex using PEATSA data
 
 Result is a csv file containing the Delta Delta G_bind(WT->M) values for each mutant
 
 NOTE: The chain IDs and residue numbering of the proteins in the complex and individual
 results files must be identical.'''
-import PEAT_SA.Core as Core
+import PEATSA.Core as Core
 import optparse, sys, operator
 import Protool
 

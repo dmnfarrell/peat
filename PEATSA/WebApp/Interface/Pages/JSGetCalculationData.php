@@ -32,8 +32,8 @@
 	// that returns the data for each calculation as an array
 	//If the calculation is not run the created function returns nil
 	Header("content-type: application/x-javascript");
-	include_once "PEAT_SA/Database/InterfaceKit/DataRetrieval.php";
-	include_once "PEAT_SA/Database/InterfaceKit/Utilities.php";
+	include_once "PEATSA/Database/InterfaceKit/DataRetrieval.php";
+	include_once "PEATSA/Database/InterfaceKit/Utilities.php";
 	
 	//A php function that creates a javascript function! - for finished jobs
 	//1. Get the data

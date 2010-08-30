@@ -1,5 +1,5 @@
 import os, math
-import PEAT_SA.Core as Core
+import PEATSA.Core as Core
 
 #In KJ per mol kelvin
 GasConstant = 8.314472E-3

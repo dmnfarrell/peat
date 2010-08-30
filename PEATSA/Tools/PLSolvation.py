@@ -5,7 +5,7 @@ The protein and ligand are supplied in separate files.
 Ensure that the ligand has partial charges assigned and is in a bound conformation
 with respect to the protein structure'''
 import os
-import PEAT_SA.Core as Core
+import PEATSA.Core as Core
 import optparse, sys
 
 usage = "usage: %prog [options]"

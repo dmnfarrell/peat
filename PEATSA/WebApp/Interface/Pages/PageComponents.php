@@ -29,7 +29,7 @@
 
 	//Contains functions that include various components on the web-app pages
 	include_once 'UtilityFunctions.php';
-	include_once 'PEAT_SA/Database/InterfaceKit/DataRetrieval.php';
+	include_once 'PEATSA/Database/InterfaceKit/DataRetrieval.php';
 
 	//Adds the navigation pane to a page
 	function add_navigation_pane()

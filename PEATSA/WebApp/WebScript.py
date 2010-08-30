@@ -55,7 +55,7 @@
 import getopt, sys, os, traceback, math
 import Data
 import UtilityFunctions, Exceptions
-import PEAT_SA.Core as Core
+import PEATSA.Core as Core
 
 class CommandLineParser(Core.Utilities.CommandLineParser):
 

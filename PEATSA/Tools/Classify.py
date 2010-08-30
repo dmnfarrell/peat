@@ -1,7 +1,7 @@
 #! /bin/env python
 
-import PEAT_SA.Core as Core
-import PEAT_SA.Core.Classify as Classify
+import PEATSA.Core as Core
+import PEATSA.Core.Classify as Classify
 import sys
 
 if __name__ == '__main__':   

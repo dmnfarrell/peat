@@ -11,7 +11,7 @@ this enables calculations of multiple ftests with one call'''
 #  Created by Michael Johnston on 21/06/2010.
 #  Copyright (c) 2010 UCD. All rights reserved.
 #
-from PEAT_SA import Core
+from PEATSA import Core
 import sys, optparse
 from scipy.stats import distributions
 

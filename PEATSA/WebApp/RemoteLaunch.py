@@ -37,7 +37,7 @@ The REMOTE section must contain the following two options
 import sys, os, subprocess
 import Data
 import WebScript, UtilityFunctions
-import PEAT_SA.Core.PEATSAParallel as PEATSAParallel
+import PEATSA.Core.PEATSAParallel as PEATSAParallel
 
 def Copy(source, destination, identityFile, user, host):
 

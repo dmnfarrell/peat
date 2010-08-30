@@ -8,7 +8,7 @@
 #  Copyright (c) 2009 __MyCompanyName__. All rights reserved.
 #
 '''Calculates the effect of mutations on binding free-energies'''
-import PEAT_SA.Core as Core
+import PEATSA.Core as Core
 import os, operator
 import optparse, sys
 

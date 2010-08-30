@@ -1,5 +1,5 @@
 #
-# Protein Engineering Analysis Tool Structure Analysis (PEAT_SA)
+# Protein Engineering Analysis Tool Structure Analysis (PEATSA)
 # Copyright (C) 2010 Michael Johnston & Jens Erik Nielsen
 #
 # Author: Michael Johnston

@@ -399,7 +399,7 @@ class UFFBAPS():
 			#Add some comments
 			comments = stabilityCommentStrings[:]
 			date = datetime.datetime.today()
-			comments.insert(1, "Generated  by PEAT_SA on %s" % date.strftime('%A %d/%m/%Y %H:%M:%S %Z'))	
+			comments.insert(1, "Generated  by PEATSA on %s" % date.strftime('%A %d/%m/%Y %H:%M:%S %Z'))	
 
 											
 	def _chopDeltaStabilityResultLine(self, resultLine):
@@ -586,7 +586,7 @@ class UFFBAPS():
 			#Add some comments
 			comments = stabilityCommentStrings[:]
 			date = datetime.datetime.today()
-			comments.insert(1, "Generated  by PEAT_SA on %s" % date.strftime('%A %d/%m/%Y %H:%M:%S %Z'))
+			comments.insert(1, "Generated  by PEATSA on %s" % date.strftime('%A %d/%m/%Y %H:%M:%S %Z'))
 			
 	def _chopLigandResultLine(self, resultLine):
 	

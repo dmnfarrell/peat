@@ -30,8 +30,8 @@
 The database information must be given in a configuration-file
 '''
 import optparse, os, sys
-import PEAT_SA.WebApp as WebApp
-import PEAT_SA.Core as Core
+import PEATSA.WebApp as WebApp
+import PEATSA.Core as Core
 
 usage = "usage: %prog [options]"
 

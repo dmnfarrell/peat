@@ -28,11 +28,11 @@
 #
 '''Exports all the data corresponding to a job in PEAT-SA webserver database and creates all files neccessary to run that job
 
-Note: Requires a correct webApplication.conf file to be present in PEAT_SA/WebApp/Resources/'''
+Note: Requires a correct webApplication.conf file to be present in PEATSA/WebApp/Resources/'''
 import math,sys, optparse, os
-import PEAT_SA.WebApp as WebApp
-import PEAT_SA.Core as Core
-import PEAT_SA.Core.PEATSAParallel as Parallel
+import PEATSA.WebApp as WebApp
+import PEATSA.Core as Core
+import PEATSA.Core.PEATSAParallel as Parallel
 
 def ConstructJob(jobId, outputDir, configuration, connection, jobConfigurationFile=None):
 
@@ -50,7 +50,7 @@ def ConstructJob(jobId, outputDir, configuration, connection, jobConfigurationFi
 	# In the following we
 	# 1. retrieve the data from the db
 	# 2. write the data to files (if necessary)
-	# 3. construct the PEAT_SA command line arguments
+	# 3. construct the PEATsSA command line arguments
 	#
 
 	#Get the mutation data

@@ -26,7 +26,7 @@
 # Dublin 4, Ireland
 #
 
-'''Module containing classes representing the PEAT_SA's model data'''
+'''Module containing classes representing the PEATSA's model data'''
 import sys, os, copy, shutil, pickle, tempfile, StringIO
 import Matrix, Exceptions, Environment, Utilities
 
@@ -568,7 +568,7 @@ class DataSet:
 	'''Class representing a collection of csv files stored in a directory.
 
 	Instances of this class can create, read and manipulate these directories and the data in them.
-	This class is used to create the output data of the PEAT_SA command line tool.
+	This class is used to create the output data of the PEATSA command line tool.
 	
 	Attributes:
 		name - The name of the data directory

@@ -1,5 +1,5 @@
 #! /usr/bin/env python
-import PEAT_SA.Core as Core
+import PEATSA.Core as Core
 import sys
 
 def ShortMutationCodeCompare(code1, code2):

@@ -1,2 +1,2 @@
-'''Contains the Core classes of the PEAT_SA command line tool'''
+'''Contains the Core classes of the PEATSA command line tool'''
 import ProteinDesignTool, Data, Exceptions, PEATSAParallel

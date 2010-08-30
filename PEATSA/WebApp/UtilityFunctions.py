@@ -28,7 +28,7 @@
 #
 '''Utility functions used by other WebApp classes'''
 import os, MySQLdb, datetime, md5, time, random
-import PEAT_SA.Core as Core
+import PEATSA.Core as Core
 
 def ResourceDirectory():
 
@@ -115,7 +115,7 @@ def SendNotificationEmail(job):
 	Note: A mail is only sent if no previous mail has been sent.
 
 	Parameters:
-	job - A WebApp.Data.Job instance representing a PEAT_SA job
+	job - A WebApp.Data.Job instance representing a PEATSA job
 
 	'''
 
@@ -132,7 +132,7 @@ def SendNotificationEmail(job):
 	message['To'] = job.email()
 
 	if job.error()[0] == 0:
-		message['Subject'] = 'PEAT_SA Job Finished'
+		message['Subject'] = 'PEATSA Job Finished'
 		text = "Your job has finished.\n\n"
 		text = text + "See http://peat.ucd.ie/PEAT_SA/Pages/Results.php?jobId=%s" % job.identification
 	else:

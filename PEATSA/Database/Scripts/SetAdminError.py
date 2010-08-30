@@ -29,8 +29,8 @@
 '''Sets an error for a PEAT-SA webserver job from the command line.
 
 Requires that a valid webApplication.conf file is present.'''
-import PEAT_SA.WebApp.Data
-import PEAT_SA.WebApp.UtilityFunctions
+import PEATSA.WebApp.Data
+import PEATSA.WebApp.UtilityFunctions
 import optparse, sys
 
 usage = "usage: %prog [options]"
@@ -62,8 +62,8 @@ if options.description is None:
         sys.exit(1)
 
 
-connection = PEAT_SA.WebApp.UtilityFunctions.ConnectionFromDefaultConfiguration()
-job = PEAT_SA.WebApp.Data.Job(options.jobID, connection)
+connection = PEATSA.WebApp.UtilityFunctions.ConnectionFromDefaultConfiguration()
+job = PEATSA.WebApp.Data.Job(options.jobID, connection)
 job.setError(description=options.error, detailedDescription=options.description) 
 
 

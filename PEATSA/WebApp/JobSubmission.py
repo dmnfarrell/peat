@@ -27,7 +27,7 @@
 #
 '''Contains classes and functions for processing a submission from the WebApp's main web page'''
 import subprocess, os, urlparse, urllib2, string, time, StringIO, sys
-import PEAT_SA.Core as Core
+import PEATSA.Core as Core
 import UtilityFunctions, Exceptions, Data
 
 def GetPDB(pdbCode, dict={}):

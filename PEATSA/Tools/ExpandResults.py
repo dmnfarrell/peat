@@ -19,7 +19,7 @@ For example an entry A54AG in the old matrix would be expanded to  A, 54, Ala, G
 Each of these four components would be in separate columns called 'Chain', 'Residue Index', 'Residue Name' and 'Mutation respectively'''
 
 import sys, os
-import PEAT_SA.Core as Core
+import PEATSA.Core as Core
 
 fileName = sys.argv[1]
 

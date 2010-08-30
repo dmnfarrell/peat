@@ -1,6 +1,6 @@
-'''Contains an example function which calculates stability differences between a protein and arbitrary mutants use PEAT_SA.Core classes'''
+'''Contains an example function which calculates stability differences between a protein and arbitrary mutants use PEATSA.Core classes'''
 import os
-import PEAT_SA.Core as Core
+import PEATSA.Core as Core
 
 def DeltaStability(inputFile, mutationList, configurationFile=None, workingDirectory=os.getcwd(), outputDirectory=os.getcwd()):
 

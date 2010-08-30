@@ -31,7 +31,7 @@
 	//This has to be the very first thing in the file for it to work.
 	//The required data is a jobID and an entry in the database for the job.
 	include 'PageComponents.php';
-	include_once 'PEAT_SA/Database/InterfaceKit/Utilities.php';
+	include_once 'PEATSA/Database/InterfaceKit/Utilities.php';
 
 	if(!array_key_exists('jobId', $_GET))
 	{

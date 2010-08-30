@@ -28,7 +28,7 @@
 #
 '''Cgi Script executed when a user submits a job request from the WebApp main page'''
 import cgi, cgitb
-import PEAT_SA.WebApp as WebApp
+import PEATSA.WebApp as WebApp
 
 #This script processes the input data submitted from FrontPage.php
 #The result in every case is an url.
@@ -46,7 +46,7 @@ if __name__ == "__main__":
 	if formData.error() is not None:
 		resultURL = formData.errorURL()
 	else:	
-		#The JobConstructor class sets up everything required to run a PEAT_SA calc 
+		#The JobConstructor class sets up everything required to run a PEATSA calc 
 		#based on the information provided by the FormData instance.
 		#This involves
 		#	- adding an entry for the job to the WebApp db 

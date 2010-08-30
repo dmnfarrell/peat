@@ -26,7 +26,7 @@
 # Dublin 4, Ireland
 #
 '''Contains WebApp specific exceptions'''
-import PEAT_SA.Core as Core
+import PEATSA.Core as Core
 
 class DatabaseRetrievalError(Core.Exceptions.ProteinDesignToolException):
 

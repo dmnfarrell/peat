@@ -7,9 +7,9 @@
 #   Author: Michael Johnston
 #
 '''Creates a histogram from a column of a csv file'''
-import PEAT_SA.Core.Matrix as Matrix
-import PEAT_SA.Core.Utilities as Utilities
-import PEAT_SA.Core.Environment as Environment
+import PEATSA.Core.Matrix as Matrix
+import PEATSA.Core.Utilities as Utilities
+import PEATSA.Core.Environment as Environment
 import optparse, sys
 
 usage = "usage: %prog [options]"

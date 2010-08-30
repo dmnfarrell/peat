@@ -29,8 +29,8 @@
 '''Script for sending PEAT-SA webserver data to the database from the command line.
 The data is a csv file containing the results of a calculation'''
 import math,sys, optparse
-import PEAT_SA.WebApp as WebApp
-import PEAT_SA.Core as Core
+import PEATSA.WebApp as WebApp
+import PEATSA.Core as Core
 
 usage = "usage: %prog [options]"
 

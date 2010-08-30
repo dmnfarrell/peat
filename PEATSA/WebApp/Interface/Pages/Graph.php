@@ -40,7 +40,7 @@
 	//Check required data is present before doing anything
 	//This has to be the very first thing in the file for it to work.
 	include_once 'UtilityFunctions.php';
-	include_once 'PEAT_SA/Database/InterfaceKit/DataRetrieval.php';
+	include_once 'PEATSA/Database/InterfaceKit/DataRetrieval.php';
 
 	//First check that a job id was passed
 	if(!array_key_exists('jobId', $_GET))

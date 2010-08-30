@@ -9,7 +9,7 @@ Exacltly how a record is determined to have matched the criteria is determined b
 '''
 
 import optparse, sys
-import PEAT_SA.Core as Core
+import PEATSA.Core as Core
 
 usage = "usage: %prog [options]"
 

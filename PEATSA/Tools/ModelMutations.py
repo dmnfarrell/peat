@@ -2,7 +2,7 @@
 
 Replace filename with an actual pdb'''
 import sys, Protool
-from PEAT_SA import Core
+from PEATSA import Core
 
 #Read in the pdb
 filename = sys.argv[1]

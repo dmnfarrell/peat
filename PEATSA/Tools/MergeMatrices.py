@@ -6,7 +6,7 @@ Rows with the same key in all supplied csv files are merged into one row.
 The resulting file contains only entries whose key is present in all csv files.
 Note each rows key should be unique within that matrix.'''
 import sys, optparse
-from PEAT_SA import Core
+from PEATSA import Core
 
 usage = "usage: %prog [options]"
 

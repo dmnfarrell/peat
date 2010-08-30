@@ -30,7 +30,7 @@
 
 import MySQLdb, os.path, StringIO, pickle
 import UtilityFunctions, Exceptions
-import PEAT_SA.Core as Core
+import PEATSA.Core as Core
 
 def SerializeDictionary(aDict):
 

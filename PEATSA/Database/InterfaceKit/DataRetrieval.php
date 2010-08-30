@@ -27,7 +27,7 @@
 	  Dublin 4, Ireland
 	**/
 
-	//Contains functions for retrieving job data from a PEAT_SA database
+	//Contains functions for retrieving job data from a PEATSA database
 	//An open connection for the database to access can be provided to each function
 	//In addition parameters for a default connection (session connection) can be set.
 	//If this is present, and no conection is passed to a function, it will use these parameters to

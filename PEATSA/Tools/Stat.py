@@ -7,7 +7,7 @@ For each set the program also tests if the residuals are normally distributed (r
 Under assumption that the residuals should be normally distributed this can identify where the actual outliers are.
 '''
 
-import PEAT_SA.Core as Core
+import PEATSA.Core as Core
 import operator, optparse
 import numpy, math, sys
 import scipy.stats.stats as stats
