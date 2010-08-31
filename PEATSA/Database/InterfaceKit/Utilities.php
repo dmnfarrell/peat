@@ -58,7 +58,7 @@
 	function escape_newlines($string)
 	{
 		//Remove double quoted newlines and replace with single-quoted newlines
-		$array = split("\n", $string);
+		$array = explode("\n", $string);
 		$string = implode('\n', $array);
 		$string = $string.'\n';
 		
@@ -69,8 +69,8 @@
 	//along with a string containing the body of the csv data
 	function extract_csv_headers($string)
 	{
-		$array = split("\n", $string);
-		$headers = split(",", $array[0]);
+		$array = explode("\n", $string);
+		$headers = explode(",", $array[0]);
 		foreach($headers as $index => $value)
 		{
 			$value = trim($value);
