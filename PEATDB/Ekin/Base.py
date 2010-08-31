@@ -744,7 +744,7 @@ class EkinProject(object):
             xd,yd = xdata[name],ydata[name] = ek.getxy()
             adata[name] = ek.active
             xerrors[name], yerrors[name] = ek.getErrors()
-
+       
             #if no error stored for points, try using global error if present
             if xerrors[name] == None and xerror != None:
                 xerrors[name] = []

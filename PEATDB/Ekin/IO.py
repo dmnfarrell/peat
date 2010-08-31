@@ -358,21 +358,16 @@ class Importer:
             showname=tkSimpleDialog.askstring('Tab name',
                                        'Root name for datasets?',
                                        parent=self.ekin_win)
-            #if not showname:
-                #return
-        # Create datasets dict and lists
         datasets = {}
 
         # Data in rows?
         if self.column_row.get()==1:
             #All the work is done in dopreview,
             #here we just really need to create the ekin datasets
-            x = self.inrows_xdata
+            x = [float(i) for i in self.inrows_xdata]
             for name in self.inrows_datasets.keys():
-                y = self.inrows_datasets[name]
-                #datasets[name] = EkinConvert.xy2ekin([x,y])
-		datasets[resname]=EkinDataset(xy=[x,y])
-
+                y = [float(i) for i in self.inrows_datasets[name]]
+		datasets[name]=EkinDataset(xy=[x,y])
 
         else:
            #Data in Cols, do all files in file list
@@ -405,12 +400,12 @@ class Importer:
                if self.multiple_tabs.get() == 1:
                    #we want to put all the cols into new datasets
                    for i in range(1,len(importdata)):
-                       x.append(importdata[i][0])
+                       x.append(float(importdata[i][0]))
                    cols = importdata[0]
                    for j in range(1,len(cols)): #iterate over each col
                        y=[]
                        for i in range(1,len(importdata)):
-                           y.append(importdata[i][j])
+                           y.append(float(importdata[i][j]))
                        name = cols[j]                      
 		       datasets[name] = EkinDataset(xy=[x,y])
 
@@ -708,11 +703,10 @@ class Importer:
             y=[]
             count=0
             for pH in data[peak].keys():
-
                 x.append(pH)
                 y.append(data[peak][pH][self.assigncol])
                 count=count+1
-            #print 'x', x
+            
             #datasets[peak] = EkinConvert.xy2ekin([x,y])
 	    datasets[peak]=EkinDataset(xy=[x,y])
 
@@ -780,7 +774,8 @@ class Importer:
         import tkFileDialog, os
         filelist=tkFileDialog.askopenfilenames(defaultextension=default_extension,
                                                 initialdir=self.path,
-                                                filetypes=[("CSV files","*.csv"),
+                                                filetypes=[("csv files","*.csv"),
+                                                           ("csvx files","*.csvx"),
                                                             ("txt files","*.txt"),
                                                            ("All files","*.*")],
                                                 parent=self.ekin_win)
@@ -883,8 +878,6 @@ class Importer:
             y=[]
             count=0
             for wavlen,mdeg in raw_data[temp]:
-                #self.data[newtab_num][0][count]['var'].set(wavlen)
-                #self.data[newtab_num][1][count]['var'].set(mdeg)
                 x.append(wavlen)
                 y.append(mdeg)
                 count=count+1
