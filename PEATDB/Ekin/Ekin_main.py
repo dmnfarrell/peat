@@ -436,7 +436,9 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
                                indicatoron=1,
                                command=self.updateMode)            
             count=count+1
-        #print self.E.currentmode, self.E.mode
+        print self.E.currentmode, self.E.mode
+        if self.E.currentmode == None:
+            self.E.currentmode = self.E.mode
         self.mode_var.set(self.modes.index(self.E.currentmode))
         return
 

@@ -442,10 +442,8 @@ class HH1pKa2shifts(LM_Fitter):
 
     def guess_start(self):
         """Guess start vals for this model"""
-        x=[];y=[]
-        for a in self.exp_data:
-            x.append(float(a[0]))
-            y.append(float(a[1]))
+        x=[i[0] for i in self.exp_data]
+        y=[i[1] for i in self.exp_data] 
         self.variables[0]=min(x)+(max(x)-min(x))/2.0
         self.variables[1]=max(y)-min(y)
         self.variables[2]=min(y)
@@ -485,10 +483,8 @@ class HH2pKa3shifts(LM_Fitter):
 
     def guess_start(self):
         """Guess start vals for this model"""
-        x=[];y=[]
-        for a in self.exp_data:
-            x.append(float(a[0]))
-            y.append(float(a[1]))
+        x=[i[0] for i in self.exp_data]
+        y=[i[1] for i in self.exp_data]
         if self.variables[0]==0:
             self.variables[0]=min(x)+(max(x)-min(x))*0.25
         if self.variables[0]==0:
@@ -532,10 +528,8 @@ class HH3pKa4shifts(LM_Fitter):
 
     def guess_start(self):
         """Guess start vals for this model"""
-        x=[];y=[]
-        for a in self.exp_data:
-            x.append(float(a[0]))
-            y.append(float(a[1]))
+        x=[i[0] for i in self.exp_data]
+        y=[i[1] for i in self.exp_data]
         a=max(x)-min(x)
         b=max(y)-min(y)
         self.variables[0]=min(x)+(a*0.25)
@@ -581,10 +575,8 @@ class HH3pKa2shifts(LM_Fitter):
 
     def guess_start(self):
         """Guess start vals for this model"""
-        x=[];y=[]
-        for a in self.exp_data:
-            x.append(float(a[0]))
-            y.append(float(a[1]))
+        x=[i[0] for i in self.exp_data]
+        y=[i[1] for i in self.exp_data]
         a=max(x)-min(x)
         b=max(y)-min(y)
         self.variables[0]=min(x)+(a*0.25)
@@ -626,10 +618,8 @@ class singlepKa(LM_Fitter):
 
     def guess_start(self):
         """Guess start vals for this model"""
-        x=[];y=[]
-        for a in self.exp_data:
-            x.append(float(a[0]))
-            y.append(float(a[1]))
+        x=[i[0] for i in self.exp_data]
+        y=[i[1] for i in self.exp_data]
         self.variables[1]=max(y)-min(y)
         self.variables[0]=min(x)+(max(x)-min(x))/2.0
         return self.variables
@@ -666,10 +656,8 @@ class pHActivity2pkas(LM_Fitter):
 
     def guess_start(self):
         """Guess start vals for this model"""
-        x=[];y=[]
-        for a in self.exp_data:
-            x.append(float(a[0]))
-            y.append(float(a[1]))
+        x=[i[0] for i in self.exp_data]
+        y=[i[1] for i in self.exp_data] 
         peakx = x[y.index(max(y))]
         print peakx
         self.variables[0] = peakx - (max(x)-min(x))/4
@@ -711,10 +699,8 @@ class pHActivity3pkas(LM_Fitter):
 
     def guess_start(self):
         """Guess start vals for this model"""
-        x=[];y=[]
-        for a in self.exp_data:
-            x.append(float(a[0]))
-            y.append(float(a[1]))
+        x=[i[0] for i in self.exp_data]
+        y=[i[1] for i in self.exp_data] 
         peakx = x[y.index(max(y))]
         if self.variables[1] <= peakx:
             self.variables[1] = max(x)+(max(x)-min(x))/2
@@ -753,10 +739,8 @@ class linear(LM_Fitter):
 
     def guess_start(self):
         """Guess start vals for this model"""
-        x=[];y=[]
-        for a in self.exp_data:
-            x.append(float(a[0]))
-            y.append(float(a[1]))
+        x=[i[0] for i in self.exp_data]
+        y=[i[1] for i in self.exp_data] 
         if self.variables[0]==0:
             print 'Guesssed 0'
             self.variables[0] = max(y)-min(y)/max(x)-min(x)
@@ -795,10 +779,8 @@ class MichaelisMenten(LM_Fitter):
 
     def guess_start(self):
         """Guess start vals for this model"""
-        x=[];y=[]
-        for a in self.exp_data:
-            x.append(float(a[0]))
-            y.append(float(a[1]))
+        x=[i[0] for i in self.exp_data]
+        y=[i[1] for i in self.exp_data] 
         self.variables[0] = max(x)/2
         self.variables[1] = max(y)
         return
@@ -837,10 +819,8 @@ class sigmoid(LM_Fitter):
 
     def guess_start(self):
         """Guess start vals for this model"""
-        x=[];y=[]
-        for a in self.exp_data:
-            x.append(float(a[0]))
-            y.append(float(a[1]))
+        x=[i[0] for i in self.exp_data]
+        y=[i[1] for i in self.exp_data]
         try:
             self.variables[0]=(max(x)-min(x))/2+min(x)
             self.variables[1]=min(y)
@@ -886,10 +866,8 @@ class modifiedHill(LM_Fitter):
 
     def guess_start(self):
         """Guess start vals for this model"""
-        x=[];y=[]
-        for a in self.exp_data:
-            x.append(float(a[0]))
-            y.append(float(a[1]))
+        x=[i[0] for i in self.exp_data]
+        y=[i[1] for i in self.exp_data] 
         self.variables[0]=min(x)+(max(x)-min(x))/2.0
         self.variables[1]=max(y)-min(y)
         self.variables[2]=min(y)
@@ -930,10 +908,8 @@ class generalUnfolding(LM_Fitter):
 
     def guess_start(self):
         """This guess works best for data normalised to 1"""
-        x=[];y=[]
-        for a in self.exp_data:
-            x.append(float(a[0]))
-            y.append(float(a[1]))
+        x=[i[0] for i in self.exp_data]
+        y=[i[1] for i in self.exp_data] 
         #ad and bd are the slopes of the baselines        
         #an and bn are the intrinsic signals at native & denatured states
         an=min(y); bn=max(y)
@@ -1116,11 +1092,8 @@ class DSCindependent(diffDenaturation):
         
     def guess_start(self):
         """Guess start vals for this model"""
-        x=[];y=[]
-        for a in self.exp_data:
-            x.append(float(a[0]))
-            y.append(float(a[1]))
-            
+        x=[i[0] for i in self.exp_data]
+        y=[i[1] for i in self.exp_data]             
         R=8.3144e-3
         Tm = x[y.index(max(y))]
         deltaH = Tm-80
@@ -1160,10 +1133,8 @@ class DSC2state(LM_Fitter):
 
     def guess_start(self):
         """Guess start vals for this model"""
-        x=[];y=[]
-        for a in self.exp_data:
-            x.append(float(a[0]))
-            y.append(float(a[1]))            
+        x=[i[0] for i in self.exp_data]
+        y=[i[1] for i in self.exp_data]            
         R=8.3144e-3
         Tm = x[y.index(max(y))]
         deltaH = Tm-80    
@@ -1201,10 +1172,8 @@ class DSCmultipleindependent(LM_Fitter):
 
     def guess_start(self):
         """Guess start vals for this model"""
-        x=[];y=[]
-        for a in self.exp_data:
-            x.append(float(a[0]))
-            y.append(float(a[1]))            
+        x=[i[0] for i in self.exp_data]
+        y=[i[1] for i in self.exp_data]            
         R=8.3144e-3
         Tm = x[y.index(max(y))]
         deltaH = Tm-80    
@@ -1271,10 +1240,8 @@ class DSC2stateIrreversibleII(LM_Fitter):
 
     def guess_start(self):
         """Guess start vals for this model"""
-        x=[];y=[]
-        for a in self.exp_data:
-            x.append(float(a[0]))
-            y.append(float(a[1]))            
+        x=[i[0] for i in self.exp_data]
+        y=[i[1] for i in self.exp_data]          
         R=8.3144e-3
         Tm = x[y.index(max(y))]
         deltaH = Tm-80
@@ -1312,14 +1279,6 @@ class power(LM_Fitter):
         self.setChangeVars()
         return
 
-    def guess_start(self):
-        """Guess start vals for this model"""
-        x=[];y=[]
-        for a in self.exp_data:
-            x.append(float(a[0]))
-            y.append(float(a[1]))
-        return
-
     def get_equation(self):
         """Return a text form of the model for printing"""
         eq = '(x **a) + b'
@@ -1354,10 +1313,8 @@ class residualActivity(LM_Fitter):
 
     def guess_start(self):
         """Guess start vals for this model"""
-        x=[];y=[]
-        for a in self.exp_data:
-            x.append(float(a[0]))
-            y.append(float(a[1]))
+        x=[i[0] for i in self.exp_data]
+        y=[i[1] for i in self.exp_data] 
         try:
             self.variables[0]=(max(x)-min(x))/2+min(x)
             self.variables[2]=max(y)
@@ -1386,7 +1343,7 @@ class residualActivity(LM_Fitter):
         return value
 
 class Arrhenius(LM_Fitter):
-    """Fit Ea to derived rate constants from Arrhenius equation"""
+    """Fit Ea to derived rate constants vs T using Arrhenius equation"""
     def __init__(self, variables, exp_data, callback, name):
         LM_Fitter.__init__(self,variables,exp_data, callback,name)
         self.name = name
@@ -1398,14 +1355,25 @@ class Arrhenius(LM_Fitter):
             self.variables = variables
         self.setChangeVars()
         return
-
+        
+    def guess_start(self):
+        """Guess start vals for this model"""
+        x=[i[0] for i in self.exp_data]
+        y=[i[1] for i in self.exp_data]      
+        try:
+            Ea=self.variables[1]
+            self.variables[0] = y[0]/math.exp(-Ea/8.3144e-3*x[0])          
+        except:
+            pass
+        return
+        
     def get_equation(self):
         """Return a text form of the model for printing"""
         eq ='A*exp(-Ea/RT)'
         return eq
 
     def get_value(self, variables, data_point):
-        """Res act: t50, slope, top"""
+        """Arrhenius"""
         try:
             x=data_point[0]
         except:

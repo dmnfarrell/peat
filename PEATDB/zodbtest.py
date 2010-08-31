@@ -22,6 +22,7 @@ from ZODB.PersistentMapping import PersistentMapping
 from ZODB.PersistentList import PersistentList
 from PEATDB.Base import PDatabase, zDatabase
 from PEATDB.Record import PEATRecord, Meta, FileRecord
+from PEATDB.Ekin.Base import EkinProject
 from Actions import DBActions
 from time import time
 
@@ -148,7 +149,7 @@ def createdb(local=None, server=None, project=None, username=None, norecs=1000):
 
     import string
     import DNAtool.mutation as mutation
-    from PEATDB.Ekin.Base import EkinProject
+    
     choices = ['a','b','c','d']
     DB.addField('choice', 'text')
     DB.addField('stab', 'text')
@@ -210,8 +211,7 @@ def importOldProj(datadir,local=None, server=None,
                     project=None, username=None):
     """Import old peat projects"""
     import PEAT_DB.Database as peatDB
-    from PEAT_DB.PEAT_dict import PEAT_dict, sub_dict
-    from PEATDB.Ekin.Base import EkinProject
+    from PEAT_DB.PEAT_dict import PEAT_dict, sub_dict    
     import copy
     if local != None:
         newDB = PDatabase(local=local)
@@ -415,6 +415,32 @@ def convertClass():
     DB.commit(note='convert')
     return
 
+def convertEkinprjs(local=None, server=None,
+                    project=None, username=None):
+    """convert old ekin prjs in a db to new"""
+    if local != None:
+        DB = PDatabase(local=local)
+    elif server != None:
+        DB = PDatabase(server=server, username='farrell', port=8080,
+                          password='123', project=project)
+    
+    for f in DB['userfields']:
+        if DB['userfields'][f]['field_type'] in ekintypes:
+            print f
+            for r in DB.getRecs():
+                rec = DB[r]
+                if rec.has_key(f):
+                    E=rec[f]
+                    E.checkDatasets()
+                    for d in E.datasets:
+                        ek=E.getDataset(d)
+                        #ek.prettyPrint()   
+                    rec[f] = E                
+                  
+    print DB.getChanged()  
+    DB.commit('converted ekin data')   
+    return
+    
 def remodel():
     #DB=PDatabase(local='hewlsample.fs')
     DB=PDatabase(server='localhost',port=8080,
@@ -444,7 +470,7 @@ if __name__ == '__main__':
     #                project='large',norecs=10000)
     #importOldProj(datadir='/local/farrell/peat_projects/.TIT_DB.PEAT',
     #                server='localhost', username='farrell', project='titration_db')
-    checkdb(server='peat.ucd.ie', project='titration_db')
+    #checkdb(server='peat.ucd.ie', project='titration_db')
     #setDisplayFields(server='localhost', username='farrell',
     #                  project='titration_db')
     #testBlob()
@@ -456,5 +482,5 @@ if __name__ == '__main__':
     #testMemory()
     #importTest()
     #remodel()
-    
+    convertEkinprjs(local='tit_db.fs')#server='localhost', username='farrell', project='titration_db')
 

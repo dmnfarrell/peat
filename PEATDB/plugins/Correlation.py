@@ -670,7 +670,7 @@ class CorrelationAnalyser(Plugin):
         p=ax.plot(x,y,lw=2)
         plt.show()
         return
-    
+        
     def analyseMutations(self, sheet, filterby=None,
                             xcol='exp', ycol='Total'):
         """Analyse mutations"""
