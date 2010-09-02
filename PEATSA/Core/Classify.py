@@ -3,7 +3,7 @@ import numpy, operator, os, sys
 import mvpa.datasets
 import mvpa.measures.noiseperturbation
 import mvpa.clfs.lars
-import PEAT_SA.Core as Core
+import PEATSA.Core as Core
 
 class StructureClassifier(object):
     """Classification algorithm for analysis of structural mutations"""
