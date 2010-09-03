@@ -333,14 +333,14 @@ class DSCFitter:
 		#Use area under curve (calculated in progressBaseline) as enthalpy guess
 		#Melting temp guess is the temperature with max cp
 		enthalpyGuess = self.curveArea*4.184
-		meltingGuess = dscCurve.temperature[value.index(max(value)])]
+		meltingGuess = dscCurve.temperature[value.index(max(value))]
 		
 		if model == 'TwoState':
 			#Parameters Tm, VantHoff
 			startValues = [meltingGuess, enthalpyGuess]
 			fittingParameters,fittingInstance=Fitting.doFit(expdata=zip(dscCurve.temperature,value),
 								model='DSC2state', 
-								startValues=startValues,
+								startvalues=startValues,
 								silent=True)
 			#Use fitData since it gives dict entries names - increased readibility
 			fitData = fittingInstance.getResult()
@@ -354,7 +354,7 @@ class DSCFitter:
 			startValues = [meltingGuess, enthalpyGuess, enthalpyGuess]
 			fittingParameters,fittingInstance=Fitting.doFit(expdata=zip(dscCurve.temperature,value), 
 								model='DSCindependent', 
-								startValues=startValues,
+								startvalues=startValues,
 								silent=True)
 			fitData = fittingInstance.getResult()
 
@@ -367,10 +367,9 @@ class DSCFitter:
 		elif model == 'Irreversible':
 			#Parameters Tm, Calorimetirc and Ea
 			startValues = [meltingGuess, enthalpyGuess, 50]
-			print 'GUESS', startValues
 			fittingParameters,fittingInstance=Fitting.doFit(expdata=zip(dscCurve.temperature,value), 
 								model='DSC2stateIrreversible', 
-								startValues=startValues,
+								startvalues=startValues,
 								silent=True)
 			fitData = fittingInstance.getResult()
 	  
