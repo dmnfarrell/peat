@@ -350,8 +350,8 @@ class DSCFitter:
 			res = ['TwoState', method, self.foldedRange[1], self.unfoldedRange[0], 
 				meltingTemp, vantHoff, 'N/A', fittingParameters['error']/(4.184*4.184), vantHoff/meltingTemp, '1.0']
 		elif model == 'NonTwoState':
-			#Parameters Tm, VantHoff and Calorimetric
-			startValues = [meltingGuess, enthalpyGuess, enthalpyGuess]
+			#Parameters A, Tm and Calorimetric
+			startValues = [1, meltingGuess, enthalpyGuess]
 			fittingParameters,fittingInstance=Fitting.doFit(expdata=zip(dscCurve.temperature,value), 
 								model='DSCindependent', 
 								startvalues=startValues,
