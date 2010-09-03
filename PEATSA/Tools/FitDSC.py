@@ -348,7 +348,9 @@ class DSCFitter:
 			vantHoff = fitData['deltaH']/4.184
 			meltingTemp = fitData['Tm']
 			res = ['TwoState', method, self.foldedRange[1], self.unfoldedRange[0], 
-				meltingTemp, vantHoff, 'N/A', fittingParameters['error']/(4.184*4.184), vantHoff/meltingTemp, '1.0']
+				meltingTemp, vantHoff, 'N/A', 
+				fittingParameters['error']/(4.184*4.184), fitData['RMSR'],
+				vantHoff/meltingTemp, '1.0']
 		elif model == 'NonTwoState':
 			#Parameters A, Tm and Calorimetric
 			startValues = [1, meltingGuess, enthalpyGuess]
@@ -362,7 +364,8 @@ class DSCFitter:
 			calorimetric = fitData['A']*vantHoff
 			meltingTemp = fitData['Tm']
 			res = ['NonTwoState', method, self.foldedRange[1], self.unfoldedRange[0], 
-					meltingTemp, vantHoff, calorimetric, fittingParameters['error']/(4.184*4.184), 
+					meltingTemp, vantHoff, calorimetric,
+					fittingParameters['error']/(4.184*4.184), fitData['RMSR'],
 					vantHoff/meltingTemp, calorimetric/vantHoff]
 		elif model == 'Irreversible':
 			#Parameters Tm, Calorimetirc and Ea
@@ -377,7 +380,9 @@ class DSCFitter:
 			calorimetric = fitData['deltaH']/4.184
 			meltingTemp = fitData['Tm']
 			res = ['Irreversible', method, self.foldedRange[1], self.unfoldedRange[0], 
-					meltingTemp, calorimetric, activationEnergy, fitData['error']/(4.184*4.184), calorimetric/meltingTemp]
+					meltingTemp, calorimetric, activationEnergy, 
+					fitData['error']/(4.184*4.184), fitData['RMSR'],
+					calorimetric/meltingTemp]
 		else:
 			raise ValueError, 'Unknown DSC model %s' % model
   		
@@ -386,9 +391,9 @@ class DSCFitter:
 	def fitHeaders(self, model):
 	
 		if model == 'TwoState' or model == 'NonTwoState':
-			return ['Model', 'LinearMethod', 'Tstart', 'Tend', 'MeltingTemp', 'VantHoff', 'Calormetric', 'Error', 'Entropy', 'Cooperativity']
+			return ['Model', 'LinearMethod', 'Tstart', 'Tend', 'MeltingTemp', 'VantHoff', 'Calormetric', 'Error', 'RMSR', 'Entropy', 'Cooperativity']
 		else:
-			return ['Model', 'LinearMethod', 'Tstart', 'Tend', 'MeltingTemp', 'Calormetric', 'ActivationEnergy', 'Error', 'Entropy']
+			return ['Model', 'LinearMethod', 'Tstart', 'Tend', 'MeltingTemp', 'Calormetric', 'ActivationEnergy', 'Error', 'RMSR', 'Entropy']
 		
 
 if __name__ == "__main__":
