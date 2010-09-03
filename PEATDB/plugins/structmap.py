@@ -11,7 +11,6 @@ import pymol
 __main__.pymol = pymol
 import pymol.cmd as cmd
 from pymol import stored
-
 pymol.finish_launching()
 
    

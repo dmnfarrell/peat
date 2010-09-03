@@ -25,7 +25,7 @@
 # Dublin 4, Ireland
 # 
 
-import numpy
+import numpy, math
 
 class LM_Fitter:
 
@@ -132,6 +132,7 @@ class LM_Fitter:
         fd = self.getFitDict()
         fd['error'] = self.getError() 
         fd['model'] = self.name
+        fd['rmse'] = self.getRMSE()
         return fd 
         
     def printResult(self):
@@ -143,7 +144,7 @@ class LM_Fitter:
 
     def get_difference(self,function_variables,return_values=None):
         """Calculate r2 (R-squared)"""
-        import math
+       
         diff=0.0
         fit_values=[]
         for datapoint_num in range(len(self.exp_data)):
@@ -159,6 +160,17 @@ class LM_Fitter:
         else:
             return diff
 
+    def getRMSE(self):
+        """Return root mean squared error"""
+        errs=[]
+        for i in range(len(self.exp_data)):
+            datapoint=self.exp_data[i]
+            exp=datapoint[-1]            
+            fit=self.get_value(self.variables,datapoint)
+            errs.append(math.pow(exp-fit,2))
+        rmse = math.sqrt(numpy.mean(errs))           
+        return rmse
+        
     def get_value(self,function_variables,data_point):
         """To be overridden
         Function should return the value of the function with function_variables at data point

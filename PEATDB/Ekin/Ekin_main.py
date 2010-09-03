@@ -1852,7 +1852,8 @@ class FitterPanel(Frame):
 
         if fitresult == None:
             self.stopFit()
-            return
+            return         
+        
         #send new fit to current ekin dataset
         self.parentapp.updateFittedData(self.fitdata)
         #update fitting frame when finished fit?
