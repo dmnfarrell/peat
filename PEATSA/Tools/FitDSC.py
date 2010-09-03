@@ -88,6 +88,7 @@ class DSCFitter:
 		self.temperatures = [float(el) for el in self.temperatures]
 		self.data = matrix.columnWithHeader(dataColumn)
 		self.data = [float(el) for el in self.data]
+		self.curveArea = None
 
 		self._normaliseData()
 		self.setRanges(foldedRange, unfoldedRange)
@@ -199,6 +200,8 @@ class DSCFitter:
 		lnk = [(math.log(fraction) - math.log(1-fraction)) for fraction in fractions[1:-1]]
 		lnk.insert(0,'NA')
 		lnk.append('NA')
+
+		self.curveArea = integrals[-1]
 
 		#The progress baseline we have the fraction unfolded protein
 		#Kunfold = f/(1-f) 
@@ -324,10 +327,21 @@ class DSCFitter:
 			method = 'Both'
 
 		dscCurve = self.normalisedCurve()
+		#conver to kj - fitting module has R in kj
 		value = [el*4.184 for el in dscCurve.value]
 		
+		#Use area under curve (calculated in progressBaseline) as enthalpy guess
+		#Melting temp guess is the temperature with max cp
+		enthalpyGuess = curveArea*4.184
+		meltingGuess = dscCurve.temperature[value.index[max(value)]]
+		
 		if model == 'TwoState':
-			fittingParameters,fittingInstance=Fitting.doFit(expdata=zip(dscCurve.temperature,value),model='DSC2state', silent=True)
+			#Parameters Tm, VantHoff
+			startValues = [meltingGuess, enthalpyGuess]
+			fittingParameters,fittingInstance=Fitting.doFit(expdata=zip(dscCurve.temperature,value),
+								model='DSC2state', 
+								startValues=startValues,
+								silent=True)
 			#Use fitData since it gives dict entries names - increased readibility
 			fitData = fittingInstance.getResult()
 
@@ -336,7 +350,12 @@ class DSCFitter:
 			res = ['TwoState', method, self.foldedRange[1], self.unfoldedRange[0], 
 				meltingTemp, vantHoff, 'N/A', fittingParameters['error']/(4.184*4.184), vantHoff/meltingTemp, '1.0']
 		elif model == 'NonTwoState':
-			fittingParameters,fittingInstance=Fitting.doFit(expdata=zip(dscCurve.temperature,value), model='DSCindependent', silent=True)
+			#Parameters Tm, VantHoff and Calorimetric
+			startValues = [meltingGuess, enthalpyGuess, enthalpyGuess]
+			fittingParameters,fittingInstance=Fitting.doFit(expdata=zip(dscCurve.temperature,value), 
+								model='DSCindependent', 
+								startValues=startValues,
+								silent=True)
 			fitData = fittingInstance.getResult()
 
 			vantHoff = fitData['deltaH']/4.184
@@ -346,7 +365,13 @@ class DSCFitter:
 					meltingTemp, vantHoff, calorimetric, fittingParameters['error']/(4.184*4.184), 
 					vantHoff/meltingTemp, calorimetric/vantHoff]
 		elif model == 'Irreversible':
-			fittingParameters,fittingInstance=Fitting.doFit(expdata=zip(dscCurve.temperature,value), model='DSC2stateIrreversible', silent=True)
+			#Parameters Tm, Calorimetirc and Ea
+			startValues = [meltingGuess, enthalpyGuess, 50]
+			print 'GUESS', startValues
+			fittingParameters,fittingInstance=Fitting.doFit(expdata=zip(dscCurve.temperature,value), 
+								model='DSC2stateIrreversible', 
+								startValues=startValues,
+								silent=True)
 			fitData = fittingInstance.getResult()
 	  
 			activationEnergy = fitData['E']/4.184
