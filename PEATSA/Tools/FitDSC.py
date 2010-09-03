@@ -333,7 +333,7 @@ class DSCFitter:
 		#Use area under curve (calculated in progressBaseline) as enthalpy guess
 		#Melting temp guess is the temperature with max cp
 		enthalpyGuess = self.curveArea*4.184
-		meltingGuess = dscCurve.temperature[value.index[max(value)]]
+		meltingGuess = dscCurve.temperature[value.index(max(value)])]
 		
 		if model == 'TwoState':
 			#Parameters Tm, VantHoff
