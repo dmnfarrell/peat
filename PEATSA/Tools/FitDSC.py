@@ -349,7 +349,7 @@ class DSCFitter:
 			meltingTemp = fitData['Tm']
 			res = ['TwoState', method, self.foldedRange[1], self.unfoldedRange[0], 
 				meltingTemp, vantHoff, 'N/A', 
-				fittingParameters['error']/(4.184*4.184), fitData['RMSR'],
+				fittingParameters['error']/(4.184*4.184), fitData['RMSR']/4.184,
 				vantHoff/meltingTemp, '1.0']
 		elif model == 'NonTwoState':
 			#Parameters A, Tm and Calorimetric
@@ -365,7 +365,7 @@ class DSCFitter:
 			meltingTemp = fitData['Tm']
 			res = ['NonTwoState', method, self.foldedRange[1], self.unfoldedRange[0], 
 					meltingTemp, vantHoff, calorimetric,
-					fittingParameters['error']/(4.184*4.184), fitData['RMSR'],
+					fittingParameters['error']/(4.184*4.184), fitData['RMSR']/4.184,
 					vantHoff/meltingTemp, calorimetric/vantHoff]
 		elif model == 'Irreversible':
 			#Parameters Tm, Calorimetirc and Ea
@@ -381,7 +381,7 @@ class DSCFitter:
 			meltingTemp = fitData['Tm']
 			res = ['Irreversible', method, self.foldedRange[1], self.unfoldedRange[0], 
 					meltingTemp, calorimetric, activationEnergy, 
-					fitData['error']/(4.184*4.184), fitData['RMSR'],
+					fitData['error']/(4.184*4.184), fitData['RMSR']/4.184,
 					calorimetric/meltingTemp]
 		else:
 			raise ValueError, 'Unknown DSC model %s' % model
