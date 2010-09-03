@@ -133,6 +133,7 @@ class LM_Fitter:
         fd['error'] = self.getError() 
         fd['model'] = self.name
         fd['rmse'] = self.getRMSE()
+        fd['rmsr'] = self.getRMSR()
         return fd 
         
     def printResult(self):
@@ -143,8 +144,7 @@ class LM_Fitter:
         return result
 
     def get_difference(self,function_variables,return_values=None):
-        """Calculate r2 (R-squared)"""
-       
+        """Calculate r2 (R-squared)"""       
         diff=0.0
         fit_values=[]
         for datapoint_num in range(len(self.exp_data)):
@@ -170,6 +170,13 @@ class LM_Fitter:
             errs.append(math.pow(exp-fit,2))
         rmse = math.sqrt(numpy.mean(errs))           
         return rmse
+        
+    def getRMSR(self):
+        """Reduced chi squared for fit"""
+        rmse = self.getRMSE()
+        v = len(self.exp_data) - len(self.variables) - 1
+        x = math.sqrt(rmse/v)
+        return x
         
     def get_value(self,function_variables,data_point):
         """To be overridden
@@ -336,9 +343,6 @@ class LM_Fitter:
         #
         no_data_points = len(self.exp_data)
 
-        #
-        #
-        #
         errors = numpy.resize(numpy.array(0,float),[no_data_points])
         jacobian = numpy.resize(numpy.array(0,float),[no_data_points,len(self.variables)])
         #
