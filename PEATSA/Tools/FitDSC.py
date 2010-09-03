@@ -305,9 +305,18 @@ class DSCFitter:
 
 		return Core.Matrix.Matrix(rows=dscCurveRows, headers=['Temperature', 'Value'])
 
-	def fit(self):
+	def fit(self, model):
 
-		'''Fits the normalised cureve to a two-state and non-two-state dsc model'''
+		'''Fits the normalised curve to the specified dsc model
+
+		Params:
+			model - A string. Valid values are TwoState, NonTwoState and Irreversible.
+			Invalid values cause a ValueError exception to be raised
+
+		Returns: 
+			A tuple. The first element is a list containing the fit data. 
+			Strings decribing each element can be obtained by calling fitHeaders(model).
+			The second element is the fit error'''
 
 		if len(self.unfoldedRegion['temperatures']) < 2 or self.useFolded is True:
 			method = 'FoldedOnly'			
@@ -317,34 +326,38 @@ class DSCFitter:
 		dscCurve = self.normalisedCurve()
 		value = [el*4.184 for el in dscCurve.value]
 		
-		fittingParameters,fittingInstance=Fitting.doFit(expdata=zip(dscCurve.temperature,value),model='DSC2state', silent=True)
-		#Use fitData since it gives dict entries names - increased readibility
-		fitData = fittingInstance.getResult()
+		if model == 'TwoState':
+			fittingParameters,fittingInstance=Fitting.doFit(expdata=zip(dscCurve.temperature,value),model='DSC2state', silent=True)
+			#Use fitData since it gives dict entries names - increased readibility
+			fitData = fittingInstance.getResult()
 
-		vantHoff = fitData['deltaH']/4.184
-		meltingTemp = fitData['Tm']
-		res1 = ['TwoState', method, self.foldedRange[1], self.unfoldedRange[0], 
-			meltingTemp, vantHoff, 'N/A', fittingParameters['error']/(4.184*4.184), vantHoff/meltingTemp, '1.0']
+			vantHoff = fitData['deltaH']/4.184
+			meltingTemp = fitData['Tm']
+			res = ['TwoState', method, self.foldedRange[1], self.unfoldedRange[0], 
+				meltingTemp, vantHoff, 'N/A', fittingParameters['error']/(4.184*4.184), vantHoff/meltingTemp, '1.0']
+		elif model == 'NonTwoState':
+			fittingParameters,fittingInstance=Fitting.doFit(expdata=zip(dscCurve.temperature,value), model='DSCindependent', silent=True)
+			fitData = fittingInstance.getResult()
 
-		fittingParameters,fittingInstance=Fitting.doFit(expdata=zip(dscCurve.temperature,value), model='DSCindependent', silent=True)
-		fitData = fittingInstance.getResult()
-
-		vantHoff = fitData['deltaH']/4.184
-		calorimetric = fitData['A']*vantHoff
-		meltingTemp = fitData['Tm']
-		res2 = ['NonTwoState', method, self.foldedRange[1], self.unfoldedRange[0], 
-				meltingTemp, vantHoff, calorimetric, fittingParameters['error']/(4.184*4.184), vantHoff/meltingTemp, calorimetric/vantHoff]
-
-		fittingParameters,fittingInstance=Fitting.doFit(expdata=zip(dscCurve.temperature,value), model='DSC2stateIrreversible', silent=True)
-		fitData = fittingInstance.getResult()
-  
-  		activationEnergy = fitData['E']/4.184
-  		calorimetric = fitData['deltaH']/4.184
-  		meltingTemp = fitData['Tm']
-  		res3 = ['Irreversible', method, self.foldedRange[1], self.unfoldedRange[0], 
-  				meltingTemp, calorimetric, activationEnergy, fitData['error']/(4.184*4.184), vantHoff/meltingTemp]
+			vantHoff = fitData['deltaH']/4.184
+			calorimetric = fitData['A']*vantHoff
+			meltingTemp = fitData['Tm']
+			res = ['NonTwoState', method, self.foldedRange[1], self.unfoldedRange[0], 
+					meltingTemp, vantHoff, calorimetric, fittingParameters['error']/(4.184*4.184), 
+					vantHoff/meltingTemp, calorimetric/vantHoff]
+		elif model == 'Irreversible':
+			fittingParameters,fittingInstance=Fitting.doFit(expdata=zip(dscCurve.temperature,value), model='DSC2stateIrreversible', silent=True)
+			fitData = fittingInstance.getResult()
+	  
+			activationEnergy = fitData['E']/4.184
+			calorimetric = fitData['deltaH']/4.184
+			meltingTemp = fitData['Tm']
+			res = ['Irreversible', method, self.foldedRange[1], self.unfoldedRange[0], 
+					meltingTemp, calorimetric, activationEnergy, fitData['error']/(4.184*4.184), calorimetric/meltingTemp]
+		else:
+			raise ValueError, 'Unknown DSC model %s' % model
   		
-		return [res1, res2, res3]
+		return [res, fittingParameters['error']/(4.184*4.184)]
 
 	def fitHeaders(self, model):
 	
@@ -356,11 +369,15 @@ class DSCFitter:
 
 if __name__ == "__main__":
 
+	validModels = ['TwoState', 'NonTwoState', 'Irreversible']
+
 	usage = "usage: %prog [options]"
 
 	parser = optparse.OptionParser(usage=usage, version="% 0.1", description=__doc__)
 	parser.add_option("-i", "--input", dest="file",
 			  help="A csv file containing the dsc data", metavar="FILE")
+	parser.add_option("-l", "--model", dest="model", default='TwoState',
+			  help="The model to fit - can be %s. Default TwoState" % (', '.join(validModels)), metavar="MODEL")
 	parser.add_option("-t", "--temperatureColumn", dest="tempCol", default='Temperature',
 			  help="The column containing the temperature data ", metavar="TEMP")
 	parser.add_option("-d", "--dataColumn", dest="dataCol", default='Value',
@@ -386,15 +403,18 @@ if __name__ == "__main__":
 
 	(options, args) = parser.parse_args()
 
+	if options.model not in validModels:
+		print 'Specified model %s not valid. See help' % options.model
+		sys.exit(1)
+
 	m = Core.Matrix.matrixFromCSVFile(options.file)
 	foldedRange = [float(el) for el in options.foldedRange.split(",")]
 	unfoldedRange = [float(el) for el in options.unfoldedRange.split(",")]
 
 	fitter = DSCFitter(m, options.tempCol, options.dataCol, foldedRange, unfoldedRange, options.mol, options.foldedOnly)
 
-	twoState = []
-	nonTwoState = []
-	irreversible = []
+	results = []
+	error = None
 	if options.twiddle is True:
 		end = foldedRange[1]
 		foldedEndRange = numpy.arange(end - options.checkInterval, end + options.checkInterval, options.checkStep)
@@ -410,30 +430,33 @@ if __name__ == "__main__":
 					fitter.setRanges([foldedRange[0], end], [start, unfoldedRange[1]])
 					print '\n'
 					print fitter	
-					results = fitter.fit()
-					twoState.append(results[0])
-					nonTwoState.append(results[1])
-					irreversible.append(results[2])
+					data, newError = fitter.fit(options.model)
+					results.append(data)
+					if newError < error or error is None:
+						print 'Found Better Fit. Error:', newError
+						bestFolded = [temp - 273.15 for temp in fitter.foldedRange]
+						bestUnfolded = [temp - 273.15 for temp in fitter.unfoldedRange]
+						error = newError
+
 				except Exception ,data:
 					print data
 	else:
-		results = fitter.fit()
-		twoState.append(results[0])
-		nonTwoState.append(results[1])
-		irreversible.append(results[2])
+		results.append(fitter.fit(options.model))
 		print fitter
 
-	results = Core.Matrix.Matrix(rows=twoState, headers=fitter.fitHeaders('TwoState'))
+	results = Core.Matrix.Matrix(rows=results, headers=fitter.fitHeaders(options.model))
 	results.sort('Error', descending=False)	
-	print results.csvRepresentation()
+	stream = open('%sFits.csv' % options.model ,'w+')
+	stream.write(results.csvRepresentation())
+	stream.close()
 
-	results = Core.Matrix.Matrix(rows=nonTwoState, headers=fitter.fitHeaders('NonTwoState'))
-	results.sort('Error', descending=False)	
-	print results.csvRepresentation()
-
-	results = Core.Matrix.Matrix(rows=irreversible, headers=fitter.fitHeaders('Irreversible'))
-	results.sort('Error', descending=False)	
-	print results.csvRepresentation()
+	print 'Recalculating best fit and outputing fit data'
+	print bestFolded, bestUnfolded
+	fitter.setRanges(bestFolded, bestUnfolded)
+	print '\n'
+	print fitter	
+	data, newError = fitter.fit(options.model)
+	print newError
 
 	stream = open('IntegrationData.csv' ,'w+')
 	stream.write(fitter.progressBaseline().csvRepresentation())
