@@ -631,7 +631,7 @@ class FormData:
 					#The file element is a stream
 					self.mutationData['Data']=self.formData["mutationFile"].file
 				else:
-					list = self.formData.getvalue('mutationFileBox')
+					list = self.formData.getvalue('mutationListArea')
 					#Create a file-like stream object for the list
 					self.mutationData['Data'] = StringIO.StringIO(list)
 			else:
