@@ -11,7 +11,7 @@
 
 	//Check required data is present before doing anything
 	//This has to be the very first thing in the file for it to work.
-	include 'PEAT_SA/Database/InterfaceKit/DataRetrieval.php';
+	include 'PEATSA/Database/InterfaceKit/DataRetrieval.php';
 
 	//First check that a job id was passed
 	if(!array_key_exists('jobId', $_GET))
