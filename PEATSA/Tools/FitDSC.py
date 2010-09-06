@@ -340,6 +340,7 @@ class DSCFitter:
 			startValues = [meltingGuess, enthalpyGuess]
 			fittingParameters,fittingInstance=Fitting.doFit(expdata=zip(dscCurve.temperature,value),
 								model='DSC2state', 
+								guess=False,
 								startvalues=startValues,
 								silent=True)
 			#Use fitData since it gives dict entries names - increased readibility
@@ -349,13 +350,14 @@ class DSCFitter:
 			meltingTemp = fitData['Tm']
 			res = ['TwoState', method, self.foldedRange[1], self.unfoldedRange[0], 
 				meltingTemp, vantHoff, 'N/A', 
-				fittingParameters['error']/(4.184*4.184), fitData['RMSR']/4.184,
+				fittingParameters['error']/(4.184*4.184), fitData['rmsr']/4.184,
 				vantHoff/meltingTemp, '1.0']
 		elif model == 'NonTwoState':
 			#Parameters A, Tm and Calorimetric
 			startValues = [1, meltingGuess, enthalpyGuess]
 			fittingParameters,fittingInstance=Fitting.doFit(expdata=zip(dscCurve.temperature,value), 
 								model='DSCindependent', 
+								guess=False,
 								startvalues=startValues,
 								silent=True)
 			fitData = fittingInstance.getResult()
@@ -365,13 +367,14 @@ class DSCFitter:
 			meltingTemp = fitData['Tm']
 			res = ['NonTwoState', method, self.foldedRange[1], self.unfoldedRange[0], 
 					meltingTemp, vantHoff, calorimetric,
-					fittingParameters['error']/(4.184*4.184), fitData['RMSR']/4.184,
+					fittingParameters['error']/(4.184*4.184), fitData['rmsr']/4.184,
 					vantHoff/meltingTemp, calorimetric/vantHoff]
 		elif model == 'Irreversible':
 			#Parameters Tm, Calorimetirc and Ea
 			startValues = [meltingGuess, enthalpyGuess, 50]
 			fittingParameters,fittingInstance=Fitting.doFit(expdata=zip(dscCurve.temperature,value), 
 								model='DSC2stateIrreversible', 
+								guess=False,
 								startvalues=startValues,
 								silent=True)
 			fitData = fittingInstance.getResult()
@@ -381,7 +384,7 @@ class DSCFitter:
 			meltingTemp = fitData['Tm']
 			res = ['Irreversible', method, self.foldedRange[1], self.unfoldedRange[0], 
 					meltingTemp, calorimetric, activationEnergy, 
-					fitData['error']/(4.184*4.184), fitData['RMSR']/4.184,
+					fitData['error']/(4.184*4.184), fitData['rmsr']/4.184,
 					calorimetric/meltingTemp]
 		else:
 			raise ValueError, 'Unknown DSC model %s' % model
@@ -470,7 +473,8 @@ if __name__ == "__main__":
 				except Exception ,data:
 					print data
 	else:
-		results.append(fitter.fit(options.model))
+		data, newError = fitter.fit(options.model)
+		results.append(data)
 		print fitter
 
 	results = Core.Matrix.Matrix(rows=results, headers=fitter.fitHeaders(options.model))
@@ -479,13 +483,14 @@ if __name__ == "__main__":
 	stream.write(results.csvRepresentation())
 	stream.close()
 
-	print 'Recalculating best fit and outputing fit data'
-	print bestFolded, bestUnfolded
-	fitter.setRanges(bestFolded, bestUnfolded)
-	print '\n'
-	print fitter	
-	data, newError = fitter.fit(options.model)
-	print newError
+	if options.twiddle is True:
+		print 'Recalculating best fit and outputing fit data'
+		print bestFolded, bestUnfolded
+		fitter.setRanges(bestFolded, bestUnfolded)
+		print '\n'
+		print fitter	
+		data, newError = fitter.fit(options.model)
+		print newError
 
 	stream = open('IntegrationData.csv' ,'w+')
 	stream.write(fitter.progressBaseline().csvRepresentation())
