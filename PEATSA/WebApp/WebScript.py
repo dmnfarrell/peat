@@ -27,7 +27,7 @@
 # Dublin 4, Ireland
 #
 
-'''PDTWebScript - Wrapper around ProteinDesignTool.py containing web related extensions. 
+'''WebScript - Wrapper around ProteinDesignTool.py containing web related extensions. 
 
 	Written by Michael Johnston
 	This programs copyright - Michael Johnston and Jens Nielsen 2008.
