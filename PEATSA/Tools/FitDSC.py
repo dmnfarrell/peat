@@ -218,6 +218,7 @@ class DSCFitter:
 			self.foldedSlope = d[0]
 			self.foldedIntercept = d[1]
 
+			#The value of the heat capacity at the start of the transition
 			self.foldedOffset = self.foldedSlope*self.temperatures[self.foldedIndexes[1]] + self.foldedIntercept
 
 			if self.useFolded is True or (len(self.unfoldedRegion['temperatures']) < 2):
@@ -233,7 +234,7 @@ class DSCFitter:
 				self.unfoldedIntercept = d[1]
 				#print 'Unfolded intercept derived from fit ',self.unfoldedIntercept
 
-			#Calculate the heat capacity difference at the starting of the unfolded region
+			#Calculate the heat capacity difference (DeltaCp) at the start of the unfolded region
 			unfoldedHC = self.data[self.unfoldedIndexes[0]]
 			foldedHC = self.foldedSlope*self.temperatures[self.unfoldedIndexes[0]] + self.foldedIntercept
 			self.deltaHC = unfoldedHC - foldedHC
