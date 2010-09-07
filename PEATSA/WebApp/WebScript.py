@@ -37,7 +37,7 @@
 	This tool should only be run from the JobSubmission.RunJob function or the RemoteLaunch script.
 	It requires access to the PDT web-apps MySQL database
 
-	Usage: PDTWebScript -p [pdbname] -w [directory] -j [jobid] [optional arguments]
+	Usage: WebScript -p [pdbname] -w [directory] -j [jobid] [optional arguments]
 	
 	-p - The name of the pdb the tool is to be run on
 	
