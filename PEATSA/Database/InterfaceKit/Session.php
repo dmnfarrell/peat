@@ -51,6 +51,7 @@
 	
 	//Starts a PEAT_SADB session for visitors to $domain
 	//All vistors to $domain will use the same db session info
+	//Note: $domain is a path from the root of the webserver
 	function start_peatsa_database_session($domain, $time = NULL)
 	{
 		//See if the user already has a session running
