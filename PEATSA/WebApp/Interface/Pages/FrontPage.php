@@ -33,10 +33,12 @@
 	<?php 
 		include 'PageComponents.php';
 		include_once 'PEATSA/Database/InterfaceKit/Session.php';
-		//Start a session for this visitor to thisPEAT_SA server (the domain has to be set on a per-installation basis)
+		//Start a session for this visitor to this PEATSA server (the domain has to be set on a per-installation basis)
 		//This is required to enable two "web-applications" on the same server use
 		//PEATSA/Database/InterfaceKit with different default databases.
-		start_peatsa_database_session('/PEAT_SA/');
+		//Note - The argument is here is the path on the server the session cookie will be associated with
+		//It assumed everything is installed under /PEATSA/ on the server
+		start_peatsa_database_session('/PEATSA/');
 		
 		//Set the database configuration file to use with this server
 		//For all visitors to this site the data retrieval functions will use this file
