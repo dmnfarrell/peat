@@ -204,6 +204,13 @@
 		4CE2CC360F8B3F3000CC0C88 /* FAQ.php */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.php; path = FAQ.php; sourceTree = "<group>"; };
 		4CE2CC370F8B3F3000CC0C88 /* Methods.php */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.php; path = Methods.php; sourceTree = "<group>"; };
 		4CE2CC380F8B3F3000CC0C88 /* Technology.php */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.php; path = Technology.php; sourceTree = "<group>"; };
+		4CEDE356122BCE8E0040576D /* JobMailer.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = JobMailer.py; sourceTree = "<group>"; };
+		4CEDE357122BCE8E0040576D /* JobObserver.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = JobObserver.py; sourceTree = "<group>"; };
+		4CEDE358122BCE8E0040576D /* JobRunner.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = JobRunner.py; sourceTree = "<group>"; };
+		4CEDE384122C06D80040576D /* ApplyWeights.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = ApplyWeights.py; sourceTree = "<group>"; };
+		4CEDE385122C06D80040576D /* ExtractColumns.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = ExtractColumns.py; sourceTree = "<group>"; };
+		4CEDE386122C06D80040576D /* FitDSC.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = FitDSC.py; sourceTree = "<group>"; };
+		4CEDE387122C06D80040576D /* PCA.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = PCA.py; sourceTree = "<group>"; };
 		4CF121E40F20A1180084250C /* CreatePDTUser.sql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CreatePDTUser.sql; sourceTree = "<group>"; };
 		4CF121E50F20A1180084250C /* DatabaseSchema.sql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = DatabaseSchema.sql; sourceTree = "<group>"; };
 		4CF121EB0F20A2FF0084250C /* JobSubmission.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = JobSubmission.py; sourceTree = "<group>"; };
@@ -458,22 +465,26 @@
 		4C873CC30F17B2B400574C99 /* Tools */ = {
 			isa = PBXGroup;
 			children = (
-				4CB9358611A2ACF4009E93B8 /* Classify.py */,
-				4CB52C9E1191C0B8007ED635 /* FilterMatrix.py */,
-				4CC858990FC55F0900734C56 /* SortMatrixByMutation.py */,
+				4CEDE384122C06D80040576D /* ApplyWeights.py */,
 				4C0E4A99100DF12A00D1EB03 /* Binder.py */,
-				4CC8589A0FC55F0900734C56 /* PPInteraction.py */,
-				4CFFAE440F9CCA9F00133444 /* Vitality.py */,
+				4CB9358611A2ACF4009E93B8 /* Classify.py */,
+				4C7CC03411CBA32E008F7E4E /* ColumnStat.py */,
+				4C9F84F90F44324B0032F9D2 /* ExampleFunction.py */,
+				4CF3CAB40F55AB6100C1B600 /* ExpandResults.py */,
+				4CEDE385122C06D80040576D /* ExtractColumns.py */,
+				4CB52C9E1191C0B8007ED635 /* FilterMatrix.py */,
+				4CEDE386122C06D80040576D /* FitDSC.py */,
+				4C75681B11CF78B800484D8D /* FTest.py */,
 				4C06B4450F9E01F8003937EC /* Histogram.py */,
 				4C7CC02F11CBA2D0008F7E4E /* MergeMatrices.py */,
-				4C7CC03011CBA2D0008F7E4E /* PLSolvation.py */,
-				4C7CC03111CBA2D0008F7E4E /* Stat.py */,
-				4C7CC03411CBA32E008F7E4E /* ColumnStat.py */,
-				4C75681B11CF78B800484D8D /* FTest.py */,
-				4CF3CAB40F55AB6100C1B600 /* ExpandResults.py */,
-				4C9F84F90F44324B0032F9D2 /* ExampleFunction.py */,
-				4C873CE30F17B7C700574C99 /* TDCycle.py */,
 				4C80A4690F5FFBA700E36B05 /* ModelMutations.py */,
+				4CEDE387122C06D80040576D /* PCA.py */,
+				4C7CC03011CBA2D0008F7E4E /* PLSolvation.py */,
+				4CC8589A0FC55F0900734C56 /* PPInteraction.py */,
+				4CC858990FC55F0900734C56 /* SortMatrixByMutation.py */,
+				4C7CC03111CBA2D0008F7E4E /* Stat.py */,
+				4C873CE30F17B7C700574C99 /* TDCycle.py */,
+				4CFFAE440F9CCA9F00133444 /* Vitality.py */,
 			);
 			name = Tools;
 			path = ../Tools;
@@ -553,6 +564,9 @@
 		4CBF353910F1F9F4003F8462 /* Scripts */ = {
 			isa = PBXGroup;
 			children = (
+				4CEDE356122BCE8E0040576D /* JobMailer.py */,
+				4CEDE357122BCE8E0040576D /* JobObserver.py */,
+				4CEDE358122BCE8E0040576D /* JobRunner.py */,
 				4CBF353A10F1F9F4003F8462 /* CreateJobEntry.py */,
 				4CBF353C10F1F9F4003F8462 /* ConstructJob.py */,
 				4CBF355210F2020A003F8462 /* ImportDataSet.py */,
