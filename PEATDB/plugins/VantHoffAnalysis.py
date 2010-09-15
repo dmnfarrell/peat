@@ -208,34 +208,38 @@ class VantHoff(Plugin):
         return
 
 
-    def transformCD(self,x,y,transwidth=80,ax=None):
+    def transformCD(self,x,y,transwidth=None,ax=None):
         """Transform raw data into fraction unfolded per temp value, by fitting to
             a general unfolding equation that extracts baseline/slopes"""
         #fit baseline slopes and get intercepts
-        A,X=Fitting.doFit(expdata=zip(x,y),model='Unfolding',conv=1e-7,noiter=40)
+        A,X=Fitting.doFit(expdata=zip(x,y),model='Unfolding',conv=1e-7,noiter=100)
         fity = X.getFitLine(x)        
         fd=X.getFitDict()
         if ax!=None:
             p=ax.plot(x,fity,'r',lw=2)
             self.drawParams(ax,fd)
-        #we then use slopes and intercepts get frac unfolded at each temp
-        #and transform to  lnK vs temp        
+        #we then use slopes and intercepts get frac unfolded at each temp        
         mn = fd['bn']; mu = fd['bd'] #slopes
         if mu<0: mu = 0
         yn = fd['an']; yu = fd['ad'] #intercepts
         d50 = fd['d50']; m = fd['m']
+        
         #try to take useful transition region of data 
-        for i in x:
-            if i>d50: 
-                mid = x.index(i)
-                break
-        L=int(mid-transwidth); U=int(mid+transwidth)        
-        x,y = x[L:U], y[L:U]
+        if transwidth != None:
+            for i in x:
+                if i>d50: 
+                    mid = x.index(i)
+                    break
+            L=int(mid-transwidth); U=int(mid+transwidth)        
+            x,y = x[L:U], y[L:U]
+        
         t=[]; f=[]
+        
         for T,yo in zip(x,y):
             fu = (yo-(yn+mn*T)) / ((yu+mu*T)-(yn+mn*T))
             f.append(fu)
-            t.append(T)            
+            t.append(T)
+            #print T, fu
         return t,f
     
     def fitVantHoff(self, E=None, d=None, xy=None, transwidth=80, invert=False,
@@ -417,7 +421,7 @@ class VantHoff(Plugin):
         #smooth
         if smooth == 0:
             smooth=int(len(x)/15.0)
-        s=self.smoothListGaussian(y,smooth)         
+        s=self.smoothListGaussian(y,smooth)    
         p=ax.plot(x[:len(s)-1],s[:-1],lw=3)
         leg.append(p); lines.append('smoothed')
         ax.set_title("original data")
