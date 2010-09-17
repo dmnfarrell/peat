@@ -113,13 +113,6 @@
 		can be directly loaded by any spreadsheet application.
 		</div>
 		
-		<a name='units' class='faq-question' onclick=ToggleElement("units")>
-		What are the units are the results given in?</a><br>
-		<div id="units" class='faq-answer'>
-		The results for binding and stability calculations are in kj/mol while the &Delta;pKa results are in pKa units.
-		1 pKa unit is equivalent to a free-energy difference of 5.7 kj/mol (at 300K).
-		</div>
-		
 		<a name='weird' class='faq-question' onclick=ToggleElement("weird")>
 		Why do the pages look strange?</a><br>
 		<div id="weird" class='faq-answer'>
@@ -129,6 +122,13 @@
 		</div>
 		
 		<br><b style="font-size: 14px; margin-left:3em;">Results</b><br><br>
+
+		<a name='units' class='faq-question' onclick=ToggleElement("units")>
+		What units are the results given in?</a><br>
+		<div id="units" class='faq-answer'>
+		The results for binding and stability calculations are in kj/mol while the &Delta;pKa results are in pKa units.
+		1 pKa unit is equivalent to a free-energy difference of 5.7 kj/mol (at 300K).
+		</div>
 		
 		<a name='binding' class='faq-question' onclick=ToggleElement("binding")>
 		I get strange binding results, why?</a><br>
