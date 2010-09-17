@@ -62,7 +62,7 @@ Array.prototype.max = function()
 			max = this[i];
 		}
 	} 
-	return max;
+	return Math.round(max*100)/100;
 }
 
 Array.prototype.min = function() 
@@ -76,7 +76,7 @@ Array.prototype.min = function()
 			min = this[i];
 		}
 	}
-	return min;
+	return Math.round(min*100)/100 ;
 }
 
 function jmol_array_from_array(data)
