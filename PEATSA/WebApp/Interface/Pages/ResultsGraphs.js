@@ -101,7 +101,7 @@ function SetGraphData(resultType)
 		data.addColumn('string', 'Mutation');
 		data.addColumn('number', 'Free-Energy Difference');
 
-		for(var i=1; i < calculationData.length; i++)
+		for(var i=0; i < calculationData.length; i++)
 		{
 			calculationData[i][1] = parseFloat(calculationData[i][1]);
 			data.addRow(calculationData[i]);
