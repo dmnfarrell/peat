@@ -34,6 +34,7 @@
 	Header("content-type: application/x-javascript");
 	include_once "PEATSA/Database/InterfaceKit/DataRetrieval.php";
 	include_once "PEATSA/Database/InterfaceKit/Utilities.php";
+	include_once "UtilityFunctions.php";
 	
 	//A php function that creates a javascript function! - for finished jobs
 	//1. Get the data
@@ -82,7 +83,7 @@
 		else
 		{
 			//Construct javascript redirect
-			$errorURL = $retval;
+			$errorURL = create_error_url_from_array($retval);
 			echo "document.location.href = '$errorURL';\n";
 		}
 		
