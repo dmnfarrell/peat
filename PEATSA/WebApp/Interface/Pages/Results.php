@@ -97,16 +97,13 @@
 	<body onload=InitialiseGraph()>
 	<div id="container">
 	<?php
-		add_navigation_pane();
-		if($running == 0)
-		{
-			echo '<div class="jmol-controls">';
-			$jobId = $_GET['jobId'];
 
-			echo '<form align=left enctype="multipart/form-data" name="ColourPDB" title="ColourPDB">';
-			echo '<h3>JMol Controls</h3>';
-			echo '<p class="jmol-controls">';
-			
+		add_navigation_pane();
+		$jobId = $_GET['jobId'];
+	
+		//If at least one calculation has finished create the dynamic javascript
+		if($running < count($states))
+		{
 			//Create the dynamic javascript
 			//First create an URL to pass to JSGetCalculationData.php
 			$temp = array('jobId' => $jobId);
@@ -115,10 +112,20 @@
 			$server = $_SERVER['SERVER_NAME'];
 			$port = $_SERVER['SERVER_PORT'];
 			$javascriptURL =  "http://$server:$port/PEATSA/Pages/JSGetCalculationData.php?$query";
-			
+
 			//Next call JSCalculationData - This will dynamically create the requried JS functions
 			//It also contains the color_calculation function
 			echo "<script  type=\"text/javascript\" src='$javascriptURL'></script>";
+		}
+		
+		//If all calculations have finsihed insert jmol	
+		if($running == 0)
+		{
+			echo '<div class="jmol-controls">';
+
+			echo '<form align=left enctype="multipart/form-data" name="ColourPDB" title="ColourPDB">';
+			echo '<h3>JMol Controls</h3>';
+			echo '<p class="jmol-controls">';
 			echo "<script  type=\"text/javascript\" src='ColourStructure.js'></script>";
 			
 			//Create the buttons
@@ -214,7 +221,7 @@
 				//Temp: This is for compatibility for when there was no modelling data
 				//It just prevents a non-working link being added to the table
 				//Can be removed at end of Oct
-				if(data_exists_for_calculation($calculation))
+				if(data_exists_for_calculation($jobId, $calculation, $error))
 				{
 					//Construct download url for csv results file - just have to pass the data along	
 					$array = array('jobId' => $jobId, 'calculation' => $calculation);
