@@ -203,8 +203,9 @@ class MutationListFile:
 		
 		stream.seek(0)
 		lines = [line.strip('\n') for line in stream.readlines()]
-		lines = [line.split(",") for line in lines]
+		lines = [line.strip('\t') for line in lines]
 		lines = [line for line in lines if line != ""]
+		lines = [line.split(",") for line in lines]
 		for line in lines:
 			code = line[0].strip()
 			try:
@@ -224,7 +225,7 @@ class MutationListFile:
 					self.addMutant(listElement, autoUpdate=False)
 				except Exceptions.MutationCodeFormatError, data: 
 					raise Exceptions.MutationListFileFormatError, "Detected an error with a mutation code in single point mutation list.\n%s" % data
-		
+
 	def _parseStandardMutationList(self, stream):
 	
 		'''Parses a mutation list in standard format'''
