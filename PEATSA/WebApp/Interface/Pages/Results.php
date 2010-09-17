@@ -186,11 +186,8 @@
 		
 		$value = get_mutant_creation_state($states);
 		
-		echo "<tr class='results'>";
-		echo "<td class='results'>Mutant Creation</td>";
-		echo "<td class='results' id='status'`>$value</td>";
-		echo "<td class='results'`>None</td>";
-		echo "</tr>";
+		$arr = array('Modelling' => $value);
+		$states = array_merge($arr, $states);
 		
 		foreach($states as $calculation => $value)
 		{
@@ -215,7 +212,7 @@
 				$query = http_build_query($array, '&amp');
 				$server = $_SERVER['SERVER_NAME'];
 				$port = $_SERVER['SERVER_PORT'];
-				
+			
 				$downloadURL = "http://$server:$port/PEATSA/Pages/DownloadMatrix.php?$query";
 				$graphLink = "(<a title='Click for interactive results graph' href=javascript:ShowResultsGraph('$calculation')>Graph</a>)";
 
