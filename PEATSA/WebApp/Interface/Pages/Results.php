@@ -102,7 +102,8 @@
 		$jobId = $_GET['jobId'];
 	
 		//If at least one calculation has finished create the dynamic javascript
-		if($running < count($states))
+		//Note: Mutant creation is not counted in running, hence the -1
+		if($running < count($states) - 1)
 		{
 			//Create the dynamic javascript
 			//First create an URL to pass to JSGetCalculationData.php
