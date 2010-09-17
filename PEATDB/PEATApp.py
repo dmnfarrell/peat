@@ -2042,7 +2042,7 @@ class App(Frame, GUI_help):
         if not hasattr(self.DB.meta, 'refprotein'):
             return
         ref = self.DB.meta.refprotein
-        for p in self.DB.getRecs():            
+        for p in self.DB.getRecs():
             DBActions.checkMutation(self.DB, p, ref)
         self.updateTable()
         return

@@ -212,7 +212,7 @@ class VantHoff(Plugin):
         """Transform raw data into fraction unfolded per temp value, by fitting to
             a general unfolding equation that extracts baseline/slopes"""
         #fit baseline slopes and get intercepts
-        A,X=Fitting.doFit(expdata=zip(x,y),model='Unfolding',conv=1e-7,noiter=100)
+        A,X=Fitting.doFit(expdata=zip(x,y),model='Unfolding',conv=1e-7,noiter=100,silent=True)
         fity = X.getFitLine(x)        
         fd=X.getFitDict()
         if ax!=None:
@@ -220,7 +220,7 @@ class VantHoff(Plugin):
             self.drawParams(ax,fd)
         #we then use slopes and intercepts get frac unfolded at each temp        
         mn = fd['bn']; mu = fd['bd'] #slopes
-        if mu<0: mu = 0
+        #if mu>0.01: mu = 0.01
         yn = fd['an']; yu = fd['ad'] #intercepts
         d50 = fd['d50']; m = fd['m']
         
@@ -234,12 +234,13 @@ class VantHoff(Plugin):
             x,y = x[L:U], y[L:U]
         
         t=[]; f=[]
-        
-        for T,yo in zip(x,y):
+        print mu
+        for T,yo in zip(x,y):            
             fu = (yo-(yn+mn*T)) / ((yu+mu*T)-(yn+mn*T))
+            #print fu, (yo-(yn+mn*T)), (m), mu, mn
+            #if f>0:
             f.append(fu)
-            t.append(T)
-            #print T, fu
+            t.append(T)            
         return t,f
     
     def fitVantHoff(self, E=None, d=None, xy=None, transwidth=80, invert=False,

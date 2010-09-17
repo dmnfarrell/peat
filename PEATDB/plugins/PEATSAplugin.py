@@ -33,7 +33,8 @@ import os, types
 from Tkinter import *
 import tkFileDialog
 import Pmw
-import PEATSA.WebApp as WebApp
+import PEATSA.WebApp.Data
+import PEATSA.WebApp.UtilityFunctions
 import PEATSA.Core as Core
 
 class PEATSAPlugin(Plugin):
@@ -80,9 +81,10 @@ class PEATSAPlugin(Plugin):
                 tkMessageBox.showwarning("Connection Error",
                          'A new configuration file has been written to %s\n' %self.confpath,
                          'You should edit the paths to make sure they are correct')
-            
-        self.connection = WebApp.UtilityFunctions.ConnectionFromConfiguration(configuration)
-        self.jobManager = WebApp.Data.JobManager(self.connection)  
+        print dir(PEATSA)        
+        print PEATSA.__file__
+        self.connection = PEATSA.WebApp.UtilityFunctions.ConnectionFromConfiguration(configuration)
+        self.jobManager = PEATSA.WebApp.Data.JobManager(self.connection)  
         print 'Connection to server made:', self.connection
         
         return
@@ -172,7 +174,7 @@ class PEATSAPlugin(Plugin):
             name = mpDlg.results[1]
         else:
             return
-        job = WebApp.Data.Job(jobid, self.connection)       
+        job = PEATSA.WebApp.Data.Job(jobid, self.connection)       
         if job != None: 
             print 'adding job id %s to list' %job.identification
             self.storeJob(name, job)
@@ -226,26 +228,41 @@ class PEATSAPlugin(Plugin):
                                        filetypes=[("mol2","*.mol2"),("All files","*.*")])
             
         def submit():
-            print nameentry.getvalue()            
+                  
             if calcmenu.getcurselection() == 'both':
                 calcs = ['stability','binding']
             else:
                 calcs = [calcmenu.getcurselection()]
             mutationlist = mutlist.getvalue().split('\n')
-            mutationlist.remove('')
-            print mutationlist    
-            pdbfile=None; pdb = None 
-            p = pdbentry.getvalue()
-            if os.path.exists(p):
-                pdbfile=p
-            elif len(p) == 4:
-                from Actions import DBActions
-                pdb = DBActions.fetchPDB(p)       
+            mutationlist.remove('')            
+            pdbfile=None; pdb = None           
+            if self.useref.get() == 1:
+                #use ref pdb
+                name = self.DB.meta.refprotein
+                pdblines = self.DB[name].Structure
+                pdbfile = 'refprot.pdb'
+                fd=open(pdbfile,'w')
+                for line in pdblines:
+                    fd.write(line)
+                fd.close()
+               
             else:
-                print 'no valid pdb given'
+                p = pdbentry.getvalue()
+                if os.path.exists(p):
+                    pdbfile=p
+                elif len(p) == 4:
+                    from Actions import DBActions
+                    pdb = DBActions.fetchPDB(p)       
+                else:
+                    print 'no valid pdb given'
+                    return          
+         
+            if len(mutationlist) == 0 or mutationlist==[u'']:
+                print 'mutation list is empty'
                 return
-            print pdbfile
-        
+            if nameentry.getvalue() in self.DB.meta.peatsa_jobs:
+                print 'job name already used'
+                return
             self.submitJob(name=nameentry.getvalue(),
                            pdb=pdb, pdbfile=pdbfile,
                            ligandfile=self.ligandfile,
@@ -275,6 +292,9 @@ class PEATSAPlugin(Plugin):
                 label_text = 'PDB Structure:')
         pdbentry.pack(fill=X,expand=1)
         balloon.bind(pdbentry, 'Enter the PDB ID or load a file')
+       
+        self.useref = IntVar()        
+        Checkbutton(jobdlg,variable=self.useref).pack(fill=X,expand=1)
         Button(jobdlg,text='load PDB from file',command=getstruct).pack(fill=X,expand=1)
         Button(jobdlg,text='load Ligand file',command=getligand).pack(fill=X,expand=1)
         self.ligandfile=None
@@ -336,15 +356,15 @@ class PEATSAPlugin(Plugin):
         if name == None:
             name = self.jobslist.getcurselection()[0]
         jobid = self.DB.meta.peatsa_jobs[name]
-        job = WebApp.Data.Job(jobid, self.connection)        
+        job = PEATSA.WebApp.Data.Job(jobid, self.connection)        
         return job, name
         
     def removeJob(self):
         """Remove a job from the db"""
         name = self.jobslist.getcurselection()[0]
-        jobid = self.DB.meta.peatsa_jobs[name]
-        job = WebApp.Data.Job(jobid, self.connection)  
+        jobid = self.DB.meta.peatsa_jobs[name]        
         try:
+            job = PEATSA.WebApp.Data.Job(jobid, self.connection)
             self.jobManager.deleteJob(job)
         except:
             print 'job not in database, removing from peat'
@@ -393,10 +413,12 @@ class PEATSAPlugin(Plugin):
            table or put results into a labbook sheet.
            Also allow user to merge with an existing table"""
         job, name = self.getJob(name)
-        if job.error() == None and job.state() == 'Finished':                     
-            self.showPEATSAResultsDialog(job, name)            
+        if job.error() != None:
+            print 'job had an error, use view details'
+        elif job.state() == 'Finished':
+            self.showPEATSAResultsDialog(job, name)
         else:
-            print 'Job is not finished or had an error, use view details'
+            print 'Job is not finished yet.'
         return            
         
     def editConfigFile(self):

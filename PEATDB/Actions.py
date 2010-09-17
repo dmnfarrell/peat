@@ -99,12 +99,15 @@ class DBActions(object):
     
     @classmethod
     def checkMutation(self, DB, name, ref=None):
-        """Check mutations based on ref and child sequences"""
+        """Check mutations based on ref sequence and current mutant
+           sequence, should be triggered whenever ref protein is altered so 
+           that the mutation codes are updated.."""
         prot = DB.get(name)
         if prot.aaseq == None:
             return
         if ref == None:
-            ref = self.DB.meta.refprotein            
+            ref = self.DB.meta.refprotein
+            
         refseq = self.AAList2String(DB.get(ref).aaseq)
         
         if prot.aaseq == None:
@@ -113,13 +116,13 @@ class DBActions(object):
         seq = self.AAList2String(prot.aaseq)       
         if seq == refseq:
             return
-        mcode = self.mutationCodeFromSequences(refseq, seq, offset=0)        
+        #assumes chain A..    
+        mcode = self.mutationCodeFromSequences(refseq, seq, offset=0)
         prot.Mutations = mcode
         return
         
     def addProteinSeq(self, DB, name):
         """Add a protein sequence"""
-
         seq_win=Toplevel()
         seq_win.title('Enter amino acid sequence')
         lbl=Label(seq_win,text='Please enter AA sequence below (1-letter code) or click browse to select a file')
@@ -408,7 +411,7 @@ class DBActions(object):
 
         #If a reference protein is selected then try to colour the mutations
         DB = self.DB
-        refprot = DB.meta.refprotein        
+        refprot = DB.meta.refprotein
         rec = DB.get(protein)
         if refprot is None:
             pass

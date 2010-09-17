@@ -1241,8 +1241,7 @@ class DSC2stateIrreversibleII(LM_Fitter):
     def guess_start(self):
         """Guess start vals for this model"""
         x=[i[0] for i in self.exp_data]
-        y=[i[1] for i in self.exp_data]          
-        R=8.3144e-3
+        y=[i[1] for i in self.exp_data]        
         Tm = x[y.index(max(y))]
         deltaH = Tm-80
         self.variables = [Tm,deltaH,1,1]
@@ -1258,7 +1257,8 @@ class DSC2stateIrreversibleII(LM_Fitter):
         deltaH=variables[1]
         deltacp=variables[2]
         E=variables[3]
-        R=8.3144e-3        
+        #R=8.3144e-3
+        R=0.00194
         b=2*deltacp/deltaH * (R*math.pow(Tm,2)/E)
         uT=(E/R) * (1/Tm - 1/x)
         z=-(1+b)*math.exp(uT)
