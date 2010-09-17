@@ -1172,7 +1172,7 @@ class SQLDataSet(Core.Data.DataSet):
 		an Exceptions.DataAlreadyExistsError is raised.
 		Otherwise the data is added to the self.data dictionary.'''
 	
-		if self.data[name] is not None:
+		if self.has_key(name) and self.data[name] is not None:
 			if not self.overwrite:
 				raise Core.Exceptions.DataAlreadyExistsError, 'A matrix called %s already present' % name
 		
