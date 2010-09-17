@@ -1171,13 +1171,13 @@ class SQLDataSet(Core.Data.DataSet):
 		If data for name is already present, and overwriting is disabled,
 		an Exceptions.DataAlreadyExistsError is raised.
 		Otherwise the data is added to the self.data dictionary.'''
-	
-		if self.has_key(name) and self.data[name] is not None:
+
+		if self.data.has_key(name) and self.data[name] is not None:
 			if not self.overwrite:
 				raise Core.Exceptions.DataAlreadyExistsError, 'A matrix called %s already present' % name
 		
 		name = name.capitalize()[0] + name[1:]
-		
+
 		self.__addMatrix__(matrix, name)
 		self.data[name] = matrix
 		
