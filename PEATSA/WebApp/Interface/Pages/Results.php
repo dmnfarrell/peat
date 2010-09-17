@@ -207,28 +207,40 @@
 			}
 			else if($value == 'Finished')
 			{
-				//Construct download url for csv results file - just have to pass the data along	
-				$array = array('jobId' => $jobId, 'calculation' => $calculation);
-				$query = http_build_query($array, '&amp');
-				$server = $_SERVER['SERVER_NAME'];
-				$port = $_SERVER['SERVER_PORT'];
-			
-				$downloadURL = "http://$server:$port/PEATSA/Pages/DownloadMatrix.php?$query";
-				$graphLink = "(<a title='Click for interactive results graph' href=javascript:ShowResultsGraph('$calculation')>Graph</a>)";
-
-				//FIXME: Hack - Replace 'Scan' with deltapKa
-				if($calculation == 'Scan')
-				{
-					$calculation = '&Delta;pKa';
-				}
-				
-				$name = $calculation."Results.csv";
-				$downloadLink = "<a href='$downloadURL' type='text/plain'>$name</a>";
-		
 				echo "<tr class='results'>";
 				echo "<td class='results'>$calculation</td>";
 				echo "<td class='results' id='status'>Finished</td>";
-				echo "<td class='results'>$downloadLink $graphLink</td>";
+			
+				//Temp: This is for compatibility for when there was no modelling data
+				//It just prevents a non-working link being added to the table
+				//Can be removed at end of Oct
+				if(data_exists_for_calculation($calculation))
+				{
+					//Construct download url for csv results file - just have to pass the data along	
+					$array = array('jobId' => $jobId, 'calculation' => $calculation);
+					$query = http_build_query($array, '&amp');
+					$server = $_SERVER['SERVER_NAME'];
+					$port = $_SERVER['SERVER_PORT'];
+					
+					$downloadURL = "http://$server:$port/PEATSA/Pages/DownloadMatrix.php?$query";
+					$graphLink = "(<a title='Click for interactive results graph' href=javascript:ShowResultsGraph('$calculation')>Graph</a>)";
+					
+					//FIXME: Hack - Replace 'Scan' with deltapKa
+					if($calculation == 'Scan')
+					{
+						$calculation = '&Delta;pKa';
+					}
+					
+					$name = $calculation."Results.csv";
+					$downloadLink = "<a href='$downloadURL' type='text/plain'>$name</a>";
+					
+					echo "<td class='results'>$downloadLink $graphLink</td>";
+				}
+				else
+				{
+					echo "<td class='results'>None</td>";
+				}
+		
 				echo "</tr>";
 			}
 		}
