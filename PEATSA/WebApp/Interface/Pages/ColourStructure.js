@@ -45,6 +45,10 @@ function dataForCalculation(calculation)
 	{
 		return create_Binding_data_array();
 	}
+	else if(calculation == "Modelling")
+	{
+		return create_Modelling_data_array();
+	}
 }
 
 Array.prototype.max = function() 
