@@ -122,7 +122,7 @@
 		output_empty_javascript_function("Scan");
 	}
 	
-	//The Scan function
+	//The Binding function
 	if($_GET["Binding"] == "Finished")
 	{
 		output_complete_javascript_function($_GET["jobId"], "Binding");
@@ -130,6 +130,16 @@
 	else
 	{
 		output_empty_javascript_function("Binding");
+	}
+	
+	//The Modelling function
+	if($_GET["Modelling"] == "Finished")
+	{
+		output_complete_javascript_function($_GET["jobId"], "Modelling");
+	}	
+	else
+	{
+		output_empty_javascript_function("Modelling");
 	}
 	
 ?>
