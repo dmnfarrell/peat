@@ -271,6 +271,69 @@
 			return $row;
 		}
 	}	
+	
+	//Returns True if there is data for the specified calculation False if not
+	//If there is a problem $error is set to 1 and this function returns an errorArray
+
+	function data_exists_for_calculation($jobId, $calculation, &$error, $connection = NULL)
+	{
+		$error = 0;
+		
+		//Get calculation information
+		if($calculation != "")
+		{
+			$name = $calculation."Results";
+		}
+		else
+		{
+			$error = 1;
+			$errorData = create_error_array($jobId, 
+							'PDT.NavigationErrorDomain',
+							'Required data is missing.',
+							'No calculation information supplied.',
+							'');
+			
+			return $errorData;
+		}	
+		
+		//Connect to the database
+		if($connection == NULL)
+		{
+			$connection = session_db_connection($error);
+		}
+		
+		if($error == 1)
+			return $connection;
+		
+		//Get the data for the calculation
+		$databaseFields = get_database_info();
+		$query = "SELECT Size, Content FROM Data WHERE JobID = '$jobId' AND MatrixName = '$name'";
+		mysql_select_db($databaseFields["Database"], $connection);
+		$queryId = mysql_query($query, $connection);
+		
+		if(!$queryId) 
+		{ 
+			$error = 1;
+			$errorData = create_error_array($jobId, 
+							'PDT.DatabaseErrorDomain',
+							'Error when accessing the database',
+							mysql_error(),
+							'Possible incorrect database parameters');
+			$retval = $errorData;
+		}
+		else if(mysql_num_rows($queryId) == 0)
+		{
+			$retval = 0;
+		}
+		else
+		{
+			$retval = 1;
+		}
+		
+		//Close the connection to the database
+		mysql_close($connection);
+		return $retval;		
+	}
 		
 	//Returns an array containing a csv formatted string for the data calculation and string size.
 	//The array keys are 'content' and 'size'
