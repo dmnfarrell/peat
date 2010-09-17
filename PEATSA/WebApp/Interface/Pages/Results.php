@@ -61,6 +61,11 @@
 			header("Location: $errorURL \n\n");
 			exit();
 		}
+		
+		//Add the state of the modelling calculation
+		$value = get_mutant_creation_state($states);		
+		$arr = array('Modelling' => $value);
+		$states = array_merge($arr, $states);
 	}
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 TRANSITIONAL//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -183,11 +188,6 @@
 		echo '<div class="table">';
 		echo '<br><table class="results" border=1><tbody><tr class="results"><th class="results">Task</th><th class="results">Status</th>';
 		echo '<th class="results">Results</th></tr>';
-		
-		$value = get_mutant_creation_state($states);
-		
-		$arr = array('Modelling' => $value);
-		$states = array_merge($arr, $states);
 		
 		foreach($states as $calculation => $value)
 		{
