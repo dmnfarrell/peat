@@ -124,6 +124,17 @@ function SetGraphData(resultType)
 			data.addRow(calculationData[i]);
 		}
 	}
+	else if(resultType == "Modelling")
+	{
+		data.addColumn('string', 'Mutation');
+		data.addColumn('number', 'Bump Score');
+		
+		for(var i=0; i < calculationData.length; i++)
+		{
+			calculationData[i][1] = parseFloat(calculationData[i][1]);
+			data.addRow(calculationData[i]);
+		}
+	}	
 }
 
 //This function shows and hides the results graphs on the result page
