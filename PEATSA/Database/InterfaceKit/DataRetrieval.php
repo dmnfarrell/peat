@@ -311,17 +311,7 @@
 		mysql_select_db($databaseFields["Database"], $connection);
 		$queryId = mysql_query($query, $connection);
 		
-		if(!$queryId) 
-		{ 
-			$error = 1;
-			$errorData = create_error_array($jobId, 
-							'PDT.DatabaseErrorDomain',
-							'Error when accessing the database',
-							mysql_error(),
-							'Possible incorrect database parameters');
-			$retval = $errorData;
-		}
-		else if(mysql_num_rows($queryId) == 0)
+		if(mysql_num_rows($queryId) == 0)
 		{
 			$retval = 0;
 		}
