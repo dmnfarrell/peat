@@ -439,8 +439,7 @@ class PEATSAPlugin(Plugin):
     def quit(self):      
         self.mainwin.destroy()
         self.log2Stdout()
-        return
-  
+        return  
 
     def showPEATSAResultsDialog(self, job, name):
         resdlg = Toplevel()
@@ -460,13 +459,16 @@ class PEATSAPlugin(Plugin):
             if self.matrices[m] != None:
                 self.showMatrix(fr,self.matrices[m], m)
         self.labboklist = self.parent.labbookSheetsSelector(body)
-        self.labboklist.insert(0,'main db')
+        #self.labboklist.insert(0,'main db')
         self.labboklist.grid(row=0,column=1,sticky='news')                
         bf=Frame(body)
         bf.grid(row=1,column=1,sticky='ew')
+        b=Button(bf,text='Merge into main table', command=lambda: self.mergeTable(main=True))
+        b.pack(fill=X,expand=1)  
+        balloon.bind(b,'Merge results into main DB table')        
         b=Button(bf,text='Merge into Selected', command=self.mergeTable)
         b.pack(fill=X,expand=1)  
-        balloon.bind(b,'Merge results into an existing table by matching the mutations')
+        balloon.bind(b,'Merge results into an existing labbook table by matching the mutations')
         b=Button(bf,text='Create new table', command=self.send2Labbook)
         b.pack(fill=X,expand=1)
         balloon.bind(b,'Send results to a new sheet in the main labbook')
@@ -487,26 +489,27 @@ class PEATSAPlugin(Plugin):
         mtable.createTableFrame()        
         return
         
-    def mergeTable(self):
+    def mergeTable(self, main=False):
         """Send a matrix to the peat main table or labbook sheet 
            by merging matching mutations.
            Requires that one field in the table stores compatible 
            mutant format supported by PEATSA"""
-        try:
-            name = self.labboklist.getcurselection()[0]
-        except:
-            print 'no name selected'
-            return
+        if main == False:
+            try:
+                name = self.labboklist.getcurselection()[0]
+            except:
+                print 'no name selected'
+                return
         for m in self.matrices:
             matrix = self.matrices[m]
             if matrix == None: continue
-            if name == 'main db':   
+            if main == True:
                 M = self.parent.tablemodel
                 M = self.mergeMatrix(matrix, M)
                 self.parent.updateTable()
             else:
                 M = self.DB.getLabbookSheet(name)
-                M = self.mergeMatrix(matrix, M)                
+                M = self.mergeMatrix(matrix, M)
                 self.DB.createLabbookSheet(name, M)
                 self.parent.startLabbook('ALL')
         return
@@ -523,12 +526,17 @@ class PEATSAPlugin(Plugin):
         return        
         
     def saveCSV(self):
-        """Save matrix to csv""" 
+        """Save matrix to csv"""
+        filename=tkFileDialog.asksaveasfilename(defaultextension='.csv',
+                                       initialdir=os.getcwd(),
+                                       filetypes=[("csv","*.csv"),("All files","*.*")])
+        if not filename:
+            return
         for m in self.matrices:
             matrix = self.matrices[m] 
             if matrix != None: 
                 c=matrix.csvRepresentation()
-                f=open(m+'results.csv','w')
+                f=open(filename,'w')
                 f.write(c)
                 f.close()                  
         return
@@ -544,7 +552,7 @@ class PEATSAPlugin(Plugin):
         i = matrix.indexOfColumnWithHeader('Mutations')    
         for row in matrix:
             mutationSet = Core.Data.MutationSet(row[i])
-            code = '+'.join(mutationSet.mutationCodes(reduced=True))             
+            code = '+'.join(mutationSet.mutationCodes(reduced=True))
             M.addRow(code)
             for f in fields:
                 j = matrix.indexOfColumnWithHeader(f)
@@ -569,15 +577,15 @@ class PEATSAPlugin(Plugin):
                 try:
                     mset2 = Core.Data.MutationSet(M.data[rec][key])
                 except:
-                    continue
-                 
+                    continue                 
                 if mset1 == mset2:
                     #add this data to table                    
                     #print 'found'
                     for f in fields:
                         M.addColumn(f)
                         j = matrix.indexOfColumnWithHeader(f)
-                        M.data[rec][f] = row[j]            
+                        M.data[rec][f] = row[j]
+                        print f,row[j]
         return M
         
     def test(self):
