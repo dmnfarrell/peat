@@ -28,7 +28,7 @@
 	 **/
 
 	//Contains various UtilityFunctions used by the PEAT-SA web-app
-	include('Config.php');
+	include_once('Config.php');
 	include_once 'PEATSA/Database/InterfaceKit/DataRetrieval.php';
 
 	function send_job_completion_mail($jobID)
