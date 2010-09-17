@@ -204,7 +204,12 @@ class WebScript:
 			#This points to the cleaned pdbFile the tool operates on.
 			#Therefore we must use this to generate the mutants.
 			mutantCollection = Core.ProteinDesignTool.CreateMutants(tool.pdbFile, tool.configuration, self.parser, self.environment)			
+			
 										
+		#Check if any mutants were succesfully created
+		if len(mutantCollection.mutantFiles()) == 0:
+			raise Exceptions.MutantCollectionError, 'None of the specified mutants could be modelled due to excessive clashes'															
+		
 		#Do a scan if requested
 		if self.parser.scan() is True:
 			if self.environment.isRoot():
