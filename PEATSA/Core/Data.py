@@ -1150,14 +1150,14 @@ class MutantCollection:
 			stream=standardOut, rootOnly=False)
 		
 		if mutant is False:
-			qualities.append([name, score, 'Failed'])			
+			qualities.append([name, 'Failed', score])			
 			self.environment.output('[MUTATE] Unable to create mutant %s - Could not be modelled.\n' %
 					name,
 					stream=standardOut,
 					rootOnly=False)	
 			failures.append(name)
 		else:
-			qualities.append([name, score, 'Created'])			
+			qualities.append([name, 'Created', score])			
 			mutant = mutant.PI
 			#Remove the ligand
 			mutant.remove_atoms_with_tag('LIGAND')
