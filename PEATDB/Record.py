@@ -62,8 +62,9 @@ class Record(OOBTree):
     def getDisplayAttribute(self, key):
         """Get the text to display for this attribute of the record
            This is used for the table display to cache the values"""
+       
         if not self._display.has_key(key):
-            return ''
+            return ''       
         return self._display[key]
         
     def getFields(self):
@@ -239,7 +240,7 @@ class PEATRecord(Record):
     def setDisplayAttribute(self, key, data):
         """Set the text to display for this attribute of the record
            This is used for the table display to cache the values"""
-        text = ''        
+        text = ''      
         if key == 'Structure':           
             return self.checkStructure(data)
         if data == None:
@@ -247,7 +248,9 @@ class PEATRecord(Record):
         if key == 'ORF_selected':
             return ''
         if type(data) is types.StringType:
-            text = data         
+            text = data
+        elif type(data) is types.FloatType or type(data) is types.IntType:
+            text = str(data)
         elif type(data) is EkinProject:
             #numkeys = data.length
             numkeys = len(data.datasets)

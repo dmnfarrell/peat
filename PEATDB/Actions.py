@@ -734,4 +734,26 @@ class DBActions(object):
             recsbox.insert('end', r)
         for f in fields:
             colsbox.insert('end', f)
-        return recsbox, colsbox            
+        return recsbox, colsbox
+    
+    @classmethod
+    def sendDB2Labbook(self, DB, recs=None, cols=None, name='main'):
+        """Send copy of selected DB cols to a labbook table
+        convenience method to allow quick duplication of main DB data"""
+        from PEATDB.TableModels import TableModel
+        if cols == None:
+            cols = DB.meta.userfields.keys()
+        if recs == None:
+            recs = DB.getRecs()
+        cols.append('name')    
+        M = TableModel()
+        #M.addColumn('name')            
+        for rec in recs:
+            M.addRow(rec)
+            for c in cols:
+                M.addColumn(c)
+                if DB[rec].has_key(c):
+                    M.data[rec][c] = DB[rec][c]
+        DB.createLabbookSheet(name, M)
+        return M
+    

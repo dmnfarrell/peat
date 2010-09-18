@@ -36,6 +36,9 @@ import Pmw
 import PEATSA.WebApp.Data
 import PEATSA.WebApp.UtilityFunctions
 import PEATSA.Core as Core
+from PEATDB.PEATApp import MultipleValDialog
+from Actions import DBActions
+from PEATDB.TableModels import TableModel
 
 class PEATSAPlugin(Plugin):
     """Template GUI plugin for PEAT App"""
@@ -163,7 +166,7 @@ class PEATSAPlugin(Plugin):
 
     def fetchJob(self):
         """Get job from it's db ID and add to list"""
-        from PEATDB.PEATApp import MultipleValDialog
+        
         mpDlg = MultipleValDialog(title='Get Job',
                                     initialvalues=('','my job1'),
                                     labels=('ID','Your label',),
@@ -250,8 +253,7 @@ class PEATSAPlugin(Plugin):
                 p = pdbentry.getvalue()
                 if os.path.exists(p):
                     pdbfile=p
-                elif len(p) == 4:
-                    from Actions import DBActions
+                elif len(p) == 4:                    
                     pdb = DBActions.fetchPDB(p)       
                 else:
                     print 'no valid pdb given'
@@ -510,18 +512,32 @@ class PEATSAPlugin(Plugin):
             else:
                 M = self.DB.getLabbookSheet(name)
                 M = self.mergeMatrix(matrix, M)
-                self.DB.createLabbookSheet(name, M)
-                self.parent.startLabbook('ALL')
+                if M != None:
+                    self.DB.createLabbookSheet(name, M)
+                    self.parent.startLabbook('ALL')
         return
         
     def send2Labbook(self):
-        """Send matrix to selected labbook"""          
+        """Send matrix to selected labbook"""
+        #get name
+        cols = ['']+self.DB.getSimpleFields()
+        DB=self.DB
+        mpDlg = MultipleValDialog(title='Send to Labbook',
+                                    initialvalues=(self.currname, cols),
+                                    labels=('table name','exp data column'),
+                                    types=('string','list'),
+                                    parent=self.mainwin)
+        if mpDlg.result == False:
+            return        
+        name = mpDlg.results[0]
+        expcol = mpDlg.results[1]
+                   
+        M = DBActions.sendDB2Labbook(DB,recs=None,cols=['Mutations',expcol],name=name)        
         for m in self.matrices:
             matrix = self.matrices[m]
-            if matrix != None:                 
-                M = self.matrix2Table(matrix)
-                self.DB.createLabbookSheet(self.currname+' '+m, M)
-                
+            if matrix != None:              
+                M = self.mergeMatrix(matrix, M)
+                self.DB.createLabbookSheet(name, M)
         self.parent.startLabbook('ALL')
         return        
         
@@ -538,18 +554,18 @@ class PEATSAPlugin(Plugin):
                 c=matrix.csvRepresentation()
                 f=open(filename,'w')
                 f.write(c)
-                f.close()                  
+                f.close()
         return
                 
     def matrix2Table(self, matrix):
-        """Creates a table model from a peatsa matrix""" 
-        from PEATDB.TableModels import TableModel
+        """Creates a table model from a peatsa matrix"""         
         M = TableModel()
-        M.addColumn('Mutations')       	
+        M.addColumn('Mutations')
+
         fields = matrix.columnHeaders()
         for f in fields:
             M.addColumn(f)
-        i = matrix.indexOfColumnWithHeader('Mutations')    
+        i = matrix.indexOfColumnWithHeader('Mutations')
         for row in matrix:
             mutationSet = Core.Data.MutationSet(row[i])
             code = '+'.join(mutationSet.mutationCodes(reduced=True))
@@ -559,16 +575,19 @@ class PEATSAPlugin(Plugin):
                 if f == 'Mutations':
                     M.data[code]['Mutations'] = code
                 else:                   
-                    M.data[code][f] = str(row[j])                      
+                    M.data[code][f] = str(row[j])
         return M
 
     def mergeMatrix(self, matrix, tablemodel, key='Mutations'):
         """Merge a peatsa matrix with a table using the mutations as key"""
         M = tablemodel
-        if not key in M.columnNames:
-            return     
+        if not key in M.columnNames:            
+            print 'this table has no mutations column, cannot merge'
+            return
         i = matrix.indexOfColumnWithHeader('Mutations')  
         fields = matrix.columnHeaders()
+        mrows = [r[0] for r in matrix]
+        
         for rec in M.reclist:
             for row in matrix:
                 mset1 = Core.Data.MutationSet(row[i])
@@ -579,27 +598,23 @@ class PEATSAPlugin(Plugin):
                 except:
                     continue                 
                 if mset1 == mset2:
-                    #add this data to table                    
-                    #print 'found'
+                    #add this data to table               
                     for f in fields:
                         M.addColumn(f)
                         j = matrix.indexOfColumnWithHeader(f)
                         M.data[rec][f] = row[j]
-                        print f,row[j]
         return M
         
     def test(self):
         job, name = self.getJob('myjob')
         if job.error() != None or job.state() != 'Finished':
             return                                    
-        stabmatrix = job.data.stabilityResults
-        print stabmatrix
+        stabmatrix = job.data.stabilityResults     
         L = self.DB.getLabbookSheet('exp')
         self.mergeMatrix(stabmatrix, L)
         #self.DB.meta.labbooks['exp'] = L.getData()
         self.DB.commit('test')
-        return
-        
+        return        
         
 def main():
     import os

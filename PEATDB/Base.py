@@ -312,6 +312,14 @@ class zDatabase(object):
         """Get fields"""
         return self.meta.userfields.keys()
 
+    def getSimpleFields(self):
+        """Get fields with only text or number data"""
+        fields = []
+        for f in self.getFields():
+            if self.getFieldType(f) == 'text':
+                fields.append(f)            
+        return fields
+    
     def getFieldType(self, field):
         """Get field type"""
         if self.meta.userfields.has_key(field):

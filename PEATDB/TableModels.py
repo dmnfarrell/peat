@@ -264,7 +264,7 @@ class TableModel(object):
          """Get the attribute of the record at the specified column index.
             This determines what will be displayed in the cell"""
 
-         value = None
+         value = None         
          if columnName != None and recName != None:
              if not self.data[recName].has_key(columnName):
                  return ''
@@ -279,6 +279,7 @@ class TableModel(object):
          if Formula.isFormula(cell) == True:
              value = self.doFormula(cell)
              return value
+           
          if not type(cell) is DictType:
              if coltype == 'text' or coltype == 'Text':
                  value = cell
