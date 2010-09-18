@@ -757,3 +757,15 @@ class DBActions(object):
         DB.createLabbookSheet(name, M)
         return M
     
+    @classmethod
+    def showTkFigure(self, fig):
+        from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
+        fr = Toplevel()
+        canvas = FigureCanvasTkAgg(fig, master=fr)
+        #self.canvas.show()
+        canvas.get_tk_widget().pack(side=TOP, fill=BOTH, expand=1)
+        canvas._tkcanvas.pack(side=TOP, fill=BOTH, expand=1)
+        mtoolbar = NavigationToolbar2TkAgg( canvas, fr )
+        mtoolbar.update()
+        
+        return

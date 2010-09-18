@@ -57,9 +57,9 @@ class CorrelationAnalyser(Plugin):
     menuentry = 'Correlation Analysis'
     #gui_methods = ['plotdeltatmpH', 'analyseTempResults',
     #              'ploterrvsMutations', 'analyseActivityResults']
-    gui_methods = { 'doCorrelation':'show Correlation',
-                    'ploterrvsMutations':'plot err vs mutations (10R)',
-                    'plotdeltatmpH':'plot delta Tms (10R)'}
+    gui_methods = { 'doCorrelation':'show Correlation'}
+                    #'ploterrvsMutations':'plot err vs mutations (10R)',
+                    #'plotdeltatmpH':'plot delta Tms (10R)'
     about = 'This plugin is designed for some correlation analysis and for 10R project'
 
     def __init__(self):
@@ -81,7 +81,7 @@ class CorrelationAnalyser(Plugin):
             self.mainwin = self.parent.createChildFrame()
         else:
             self.mainwin=Toplevel()
-            self.mainwin.title('Corerlation Analysis')
+            self.mainwin.title('Correlation Analysis')
             self.mainwin.geometry('800x600+200+100')
 
         methods = self._getmethods()        
@@ -196,7 +196,6 @@ class CorrelationAnalyser(Plugin):
         """Show exp vs pred. from a Labook in DB - General case,
             filterby is a tuple of colname, value"""
 
-        #plt.rc('text', usetex=True)
         model = self.DB.getLabbookSheet(sheet)
         colors = ['b','g','r','y','m','c']
         
@@ -205,10 +204,15 @@ class CorrelationAnalyser(Plugin):
         ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)        
         legs=[]; legnames=[]
-        bad=[]; good=[]       
+        bad=[]; good=[]
        
-        x=self.tofloats(model.getColumnData(columnName=xcol, filterby=filterby))
-        y=self.tofloats(model.getColumnData(columnName=ycol, filterby=filterby))
+        x=model.getColumnData(columnName=xcol, filterby=filterby)
+        y=model.getColumnData(columnName=ycol, filterby=filterby)
+        if len(x)<1 or len(y)<1:
+            print 'no data to plot'
+            return
+        x,y = zip(*self.tofloats(zip(x,y)))
+       
         if len(x) ==0:
             return
         errs = [a - b for a, b in zip(x, y)]
@@ -234,9 +238,6 @@ class CorrelationAnalyser(Plugin):
                     ax.annotate(labels[i], (x[i]+0.4, y[i]), xytext=None, textcoords='data',
                                             fontsize=8)
 
-        #legs.append(line)
-        #legnames.append(g)
-
         #draw expected correlation line with slope x
         slope=1
         #set range of axes
@@ -250,31 +251,31 @@ class CorrelationAnalyser(Plugin):
         ax.axhline(y=0, color='grey'); ax.axvline(x=0,color='grey')
         #ax.set_xlim(min(x)-2,max(x)+2)
         if limit==None:
-            limit=lims[1]  
+            limit=lims[1]
         ax.set_xlim(lims[0],limit)
         ax.set_ylim(lims[0],limit)           
         ax.set_title('%s points' %len(x))
-        #cc = str(round(pow(stats.pearsonr(x,y)[0],2),2))
-        #ax.text(1,16, r'$r^2= %s$' %cc, fontsize=16)
+        cc = str(round(pow(stats.pearsonr(x,y)[0],2),2))
+        ax.text(1,16, r'$r^2= %s$' %cc, fontsize=16)
         '''finalx=[x[i] for i in range(len(labels)) if labels[i] not in outliers]
         finaly=[y[i] for i in range(len(labels)) if labels[i] not in outliers]
         cc1 = str(round(pow(stats.pearsonr(finalx,finaly)[0],2),2))
         #ax.text(1,14, r'$r^2_{final}= %s$' %cc1, fontsize=16)'''
 
-        #fig.legend(legs, legnames)
         fig.suptitle(plottitle)
-        fig.savefig(filename)
-        
-        #self.showHistogram(x); self.showHistogram(y)
-        plt.show()
+        #fig.savefig(filename)
+
+        from PEATDB.Actions import DBActions
+        DBActions.showTkFigure(fig)
         return ax
                   
     def analyseCorrelation(self, sheet, filterby=None,
                             xcol='exp', ycol='Total', labelcol=None):
         """Analyse correlation"""
         model = self.DB.getLabbookSheet(sheet)
-        x=self.tofloats(model.getColumnData(columnName=xcol, filterby=filterby))
-        y=self.tofloats(model.getColumnData(columnName=ycol, filterby=filterby))
+        x=model.getColumnData(columnName=xcol, filterby=filterby)
+        y=model.getColumnData(columnName=ycol, filterby=filterby)
+        x,y = zip(*self.tofloats(zip(x,y)))
         if len(x) ==0:
             return
         labels = model.getColumnData(columnName=labelcol,filterby=filterby)
@@ -458,11 +459,23 @@ class CorrelationAnalyser(Plugin):
         fig.savefig('qq.png')
         return outliers
 
-    def tofloats(self, l):
-        x=[]
-        for i in l:
-            x.append(float(i))
-        return x
+    def tofloats(self, lsts):
+        """Return floats of a single list or tuple of paired values"""
+
+        def evaluate(l):
+            for i in l:
+                try: float(i)
+                except:
+                    return False
+            return True        
+        vals = [i for i in lsts if evaluate(i) == True]
+        result=[]
+        for l in vals:
+            v=[]
+            for i in l:
+                v.append(float(i))
+                result.append(v)
+        return result
 
     def loadDB(self, local=None):
         from PEATDB.Base import PDatabase
@@ -470,6 +483,11 @@ class CorrelationAnalyser(Plugin):
             self.DB = PDatabase(local=local)
         return                  
 
+    def test(self):
+        x=[5,6,8,9,'t']; y=[6,'',3,7,8]
+        xy = self.tofloats(zip(x,y))
+        print zip(*xy)
+        
 def main():
     """Run some analysis"""
 
@@ -487,31 +505,22 @@ def main():
     if opts.file != None and os.path.exists(opts.file):
         app.loadDB(opts.file)   
 
-    ph='7'
-    if opts.createstability10R == True:
-        app.extract10RStability(ph=ph)
-        
-    if opts.mapstruct == True:
-        app.mapStructure(positions=[123,11])
-      
     if opts.tests == True:
-        #app.testSN()
-        #app.testResActFit()
-        app.fitarrhenius()
+        app.test()
         
     #10R plot/analysis
-    if opts.novo == True:
-        '''ax = app.plotCorrelation(sheet='stability'+ph, filterby=('fit',['ok']), 
-                              xcol='Total', ycol='ddg', labelcol='name',
-                              labeloutliers=True,
-                              plottitle='10R : PEAT-SA Predicted vs Experimental, ph '+ph,
-                              xlabel='ddG Predicted (kJ/mol)',
-                              ylabel='ddG Experimental',
-                              #limit=40,
-                              filename='10Rstability'+ph+'.png')
-        
-        app.analyseCorrelation(sheet='stability'+ph, filterby=('fit',['ok']),
-                                xcol='Total', ycol='ddg', labelcol='Mutations')'''
+  
+    '''ax = app.plotCorrelation(sheet='stability'+ph, filterby=('fit',['ok']), 
+                          xcol='Total', ycol='ddg', labelcol='name',
+                          labeloutliers=True,
+                          plottitle='10R : PEAT-SA Predicted vs Experimental, ph '+ph,
+                          xlabel='ddG Predicted (kJ/mol)',
+                          ylabel='ddG Experimental',
+                          #limit=40,
+                          filename='10Rstability'+ph+'.png')
+    
+    app.analyseCorrelation(sheet='stability'+ph, filterby=('fit',['ok']),
+                            xcol='Total', ycol='ddg', labelcol='Mutations')'''
      
  
 

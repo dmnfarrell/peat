@@ -37,7 +37,7 @@ class PEATTable(TableCanvas):
                             "Save File" : 'save_file'},
                     'Table' : {"Edit Table" : 'startLabbook' },              
                     'Ekintype' : {"Open Ekin" : 'startEkin' },
-                    'Sequence' : {"Show sequence" : 'display_sequence'}
+                    'Sequence' : {"Show sequence" : 'display_sequence'},           
                     }
 
         self.ekin_actions={'NMR titration':'NMR titration',
@@ -224,10 +224,11 @@ class PEATTable(TableCanvas):
 
             def add_defaultcommands():
                 """now add general actions for all cells"""
-                order = ["Set Fill Color","Set Text Color","Copy","Paste","Fill Down","Fill Right", "Clear Data",
+                order = [ "Set Fill Color","Set Text Color","Edit","Copy","Paste","Fill Down","Fill Right", "Clear Data",
                          "View Record", "Select All",
                          "Plot Selected","Plot Options"]
-                defaultactions={"Set Fill Color" : lambda : self.setcellColor(rows,cols,key='bg'),
+                defaultactions={"Edit" : lambda: self.draw_cellentry(row,col),
+                                "Set Fill Color" : lambda : self.setcellColor(rows,cols,key='bg'),
                                 "Set Text Color" : lambda : self.setcellColor(rows,cols,key='fg'),
                                 "Copy" : lambda : self.copyCell(rows, cols),
                                 "Paste" : lambda : self.pasteCell(rows, cols),                                

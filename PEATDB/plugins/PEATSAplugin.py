@@ -44,9 +44,9 @@ class PEATSAPlugin(Plugin):
     """Template GUI plugin for PEAT App"""
     capabilities = ['gui']
     requires = ['PEATSA']
-    menuentry = 'PEAT-SA Plugin'
+    menuentry = 'PEATSA Plugin'
     gui_methods = {'createJobDialog':'Submit Job',
-                   'fetchJob':'Fetch Job',
+                   'fetchJob':'Fetch Job from Server',
                    'checkJobs':'Check All Jobs',
                    'editConfigFile' : 'Create/Edit Conf File',
                    'help':'Help',
@@ -363,6 +363,11 @@ class PEATSAPlugin(Plugin):
         
     def removeJob(self):
         """Remove a job from the db"""
+        import tkMessageBox
+        answer = tkMessageBox.askyesno("Warning",'Remove this job?')
+        if answer == False:
+            return
+
         name = self.jobslist.getcurselection()[0]
         jobid = self.DB.meta.peatsa_jobs[name]        
         try:
