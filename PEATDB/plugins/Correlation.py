@@ -35,7 +35,7 @@ from Tkinter import *
 import Pmw
 import os, sys, math, string, re
 import math, numpy
-from scipy.stats import stats
+#from scipy.stats import stats
 try:
     import matplotlib
     from matplotlib.font_manager import FontProperties
@@ -228,8 +228,8 @@ class CorrelationAnalyser(Plugin):
         ax.set_xlim(lims[0],limit)
         ax.set_ylim(lims[0],limit)           
         ax.set_title('%s points' %len(x))
-        cc = str(round(pow(stats.pearsonr(x,y)[0],2),2))
-        ax.text(1,16, r'$r^2= %s$' %cc, fontsize=16)
+        #cc = str(round(pow(stats.pearsonr(x,y)[0],2),2))
+        #ax.text(1,16, r'$r^2= %s$' %cc, fontsize=16)
         fig.suptitle(plottitle)
         from PEATDB.Actions import DBActions
         DBActions.showTkFigure(fig)        
