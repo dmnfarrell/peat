@@ -37,7 +37,7 @@ import PEATSA.WebApp.Data
 import PEATSA.WebApp.UtilityFunctions
 import PEATSA.Core as Core
 from PEATDB.PEATApp import MultipleValDialog
-from Actions import DBActions
+from PEATDB.Actions import DBActions
 from PEATDB.TableModels import TableModel
 
 class PEATSAPlugin(Plugin):
@@ -613,7 +613,18 @@ class PEATSAPlugin(Plugin):
 
     def plotCorrelation(self):
         """Quick correlation plot directly from selected job"""
-        #get exp column from main table
+        #get a column from main table top use as experimental values
+        cols = self.DB.getSimpleFields()
+        print cols
+        mpDlg = MultipleValDialog(title='Select Experimental Data',
+                                    initialvalues=[cols],
+                                    labels=['exp data column:'],
+                                    types=['list'],
+                                    parent=self.mainwin)
+        if mpDlg.result == True:
+            expcol = mpDlg.results[0]
+        else:
+            return
         
         from PEATDB.plugins.Correlation import CorrelationAnalyser
         C = CorrelationAnalyser()        
@@ -622,14 +633,15 @@ class PEATSAPlugin(Plugin):
         self.matrices = {'binding':dataset.bindingResults,
                          'stability':dataset.stabilityResults}        
         for m in self.matrices:
-             matrix = self.matrices[m]
-             if matrix == None:
-                 continue
-             i = matrix.indexOfColumnWithHeader('Mutations')
-             j = matrix.indexOfColumnWithHeader('Total')
-             
-        #xy = self.tofloats(zip(x,y))
-        #C.plotCorrelation(x,y,labels)
+             matrix = self.matrices[m]             
+             if matrix == None: continue
+             M = self.parent.tablemodel
+             M = self.mergeMatrix(matrix, M)             
+             x=M.getColumnData(columnName='Total')
+             y=M.getColumnData(columnName=expcol)
+             labels = M.getColumnData(columnName='Mutations')
+        x,y = zip(*CorrelationAnalyser.tofloats(zip(x,y)))
+        C.plotCorrelation(x,y,labels)
         
         return
     
@@ -637,10 +649,10 @@ class PEATSAPlugin(Plugin):
         job, name = self.getJob('myjob')
         if job.error() != None or job.state() != 'Finished':
             return                                    
-        stabmatrix = job.data.stabilityResults     
-        L = self.DB.getLabbookSheet('exp')
+        stabmatrix = job.data.stabilityResults
+        L = self.DB.getLabbookSheet('myjob')
         self.mergeMatrix(stabmatrix, L)
-        #self.DB.meta.labbooks['exp'] = L.getData()
+        
         self.DB.commit('test')
         return        
         
@@ -658,7 +670,7 @@ def main():
         DB = PDatabase(local=path)        
         P = PEATSAPlugin()
         P.main(DB=DB)   
-        P.test()
+        #P.test()        
     
          
 if __name__ == '__main__':

@@ -148,7 +148,7 @@ class CorrelationAnalyser(Plugin):
         return
         
     def doCorrelation(self):
-        """From gui"""
+        """Call plot from gui"""
         if self.filterbymenu.getcurselection() != '-':
             filt = (self.filterbymenu.getcurselection(), self.filtervalentry.getvalue())
         else:
@@ -157,6 +157,7 @@ class CorrelationAnalyser(Plugin):
         sheet=self.smenu.getcurselection()
         xcol=self.xcolsmenu.getcurselection()
         ycol=self.ycolsmenu.getcurselection()
+        
         model = self.DB.getLabbookSheet(sheet)
         x=model.getColumnData(columnName=xcol, filterby=filt)
         y=model.getColumnData(columnName=ycol, filterby=filt)
@@ -329,6 +330,7 @@ class CorrelationAnalyser(Plugin):
         fig.savefig('qq.png')
         return outliers
 
+    @classmethod
     def tofloats(self, lsts):
         """Return floats of a single list or tuple of paired values"""
         def evaluate(l):
@@ -350,9 +352,8 @@ class CorrelationAnalyser(Plugin):
         x=[5,6,8,9,'t']; y=[6,'',3,7,8]
         labels=['dsad','sas','fef','xx']
         xy = self.tofloats(zip(x,y))
-        x,y = zip(*xy)
-      
-        self.plotCorrelation(x,y)
+        x,y = zip(*xy)      
+        #self.plotCorrelation(x,y)
 
 class MouseHandler:
     """Class to handle mouse click actions on plots"""

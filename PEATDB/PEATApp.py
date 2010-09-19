@@ -2329,7 +2329,7 @@ class MultipleValDialog(tkSimpleDialog.Dialog):
     def body(self, master):
 
         r=0
-        self.vrs=[];self.entries=[]
+        self.vrs=[];self.entries=[]        
         for i in range(len(self.labels)):
             Label(master, text=self.labels[i]).grid(row=r, column=0)
             if self.types[i] == 'int':
