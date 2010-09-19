@@ -84,8 +84,6 @@ class PEATSAPlugin(Plugin):
                 tkMessageBox.showwarning("Connection Error",
                          'A new configuration file has been written to %s\n' %self.confpath,
                          'You should edit the paths to make sure they are correct')
-        print dir(PEATSA)        
-        print PEATSA.__file__
         self.connection = PEATSA.WebApp.UtilityFunctions.ConnectionFromConfiguration(configuration)
         self.jobManager = PEATSA.WebApp.Data.JobManager(self.connection)  
         print 'Connection to server made:', self.connection
@@ -124,8 +122,11 @@ class PEATSAPlugin(Plugin):
         c='#66CCFF'
         Button(fr,text='Show Details',command=self.viewDetails,bg=c).pack(side=LEFT,fill=BOTH,expand=1)
         Button(fr,text='View Results',command=self.getResults,bg=c).pack(side=LEFT,fill=BOTH,expand=1)
-        Button(fr,text='Remove',command=self.removeJob,bg=c).pack(side=LEFT,fill=BOTH,expand=1)
+        Button(fr,text='Remove',command=self.removeJob,bg=c).pack(side=LEFT,fill=BOTH,expand=1)        
         fr.pack(fill=BOTH)
+        fr1 = Frame(parent)
+        Button(fr1,text='Plot Correlation',command=self.plotCorrelation,bg='#ccFFFF').pack(side=TOP,fill=BOTH,expand=1)
+        fr1.pack(fill=BOTH)
         return 
         
     def createLogWin(self, parent):
@@ -589,7 +590,7 @@ class PEATSAPlugin(Plugin):
         if not key in M.columnNames:            
             print 'this table has no mutations column, cannot merge'
             return
-        i = matrix.indexOfColumnWithHeader('Mutations')  
+        i = matrix.indexOfColumnWithHeader('Mutations')
         fields = matrix.columnHeaders()
         mrows = [r[0] for r in matrix]
         
@@ -609,7 +610,29 @@ class PEATSAPlugin(Plugin):
                         j = matrix.indexOfColumnWithHeader(f)
                         M.data[rec][f] = row[j]
         return M
+
+    def plotCorrelation(self):
+        """Quick correlation plot directly from selected job"""
+        #get exp column from main table
         
+        from PEATDB.plugins.Correlation import CorrelationAnalyser
+        C = CorrelationAnalyser()        
+        job, name = self.getJob()
+        dataset = job.data
+        self.matrices = {'binding':dataset.bindingResults,
+                         'stability':dataset.stabilityResults}        
+        for m in self.matrices:
+             matrix = self.matrices[m]
+             if matrix == None:
+                 continue
+             i = matrix.indexOfColumnWithHeader('Mutations')
+             j = matrix.indexOfColumnWithHeader('Total')
+             
+        #xy = self.tofloats(zip(x,y))
+        #C.plotCorrelation(x,y,labels)
+        
+        return
+    
     def test(self):
         job, name = self.getJob('myjob')
         if job.error() != None or job.state() != 'Finished':

@@ -34,6 +34,12 @@ class Plugin(object):
             self.__class__.__name__,
             self.capabilities)
 
+    def loadDB(self, local=None):
+        from PEATDB.Base import PDatabase
+        if local != None:
+            self.DB = PDatabase(local=local)
+        return
+    
 def load_plugins(plugins):
     failed = []
     for plugin in plugins:        

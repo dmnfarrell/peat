@@ -38,10 +38,9 @@ import math, numpy
 from scipy.stats import stats
 try:
     import matplotlib
-    #matplotlib.use('Agg')
     from matplotlib.font_manager import FontProperties
     import matplotlib.pyplot as plt
-    #plt.rc('text', usetex=True)
+    from matplotlib.patches import Rectangle
 except:
     pass
 from PEATDB.TableModels import TableModel
@@ -55,38 +54,35 @@ class CorrelationAnalyser(Plugin):
     capabilities = ['gui','uses_sidepane']
     requires = ['pylab','scipy']
     menuentry = 'Correlation Analysis'
-    #gui_methods = ['plotdeltatmpH', 'analyseTempResults',
-    #              'ploterrvsMutations', 'analyseActivityResults']
-    gui_methods = { 'doCorrelation':'show Correlation'}
-                    #'ploterrvsMutations':'plot err vs mutations (10R)',
-                    #'plotdeltatmpH':'plot delta Tms (10R)'
+    gui_methods = { 'doCorrelation':'Plot Correlation'}
+           
     about = 'This plugin is designed for some correlation analysis and for 10R project'
 
     def __init__(self):
         self.phlist = ['6','6.5','7','7.5','8','8.5','9','10']
         return
 
-    def main(self, parent):
-        if parent==None:
-            return
+    def main(self, parent=None):
         self.parent = parent
-        self.DB = parent.DB
+        if parent!=None:             
+            self.DB = parent.DB
         if self.DB == None:
+            print 'plugin requires DB'
             return
         self._doFrame()
         return
 
     def _doFrame(self):
-        if 'uses_sidepane' in self.capabilities:
-            self.mainwin = self.parent.createChildFrame()
-        else:
+        if self.parent == None:
             self.mainwin=Toplevel()
             self.mainwin.title('Correlation Analysis')
             self.mainwin.geometry('800x600+200+100')
+        elif 'uses_sidepane' in self.capabilities:
+            self.mainwin = self.parent.createChildFrame()
 
         methods = self._getmethods()        
         methods = [m for m in methods if m[0] in self.gui_methods.keys()]
-        self._createButtons(methods)        
+        self._createButtons(methods)
         self.smenu = Pmw.OptionMenu(self.mainwin,
                 labelpos = 'w',
                 label_text = 'Sheet:',
@@ -157,10 +153,19 @@ class CorrelationAnalyser(Plugin):
             filt = (self.filterbymenu.getcurselection(), self.filtervalentry.getvalue())
         else:
             filt = None
-        self.plotCorrelation(sheet=self.smenu.getcurselection(), 
-                             xcol=self.xcolsmenu.getcurselection(),
-                             ycol=self.ycolsmenu.getcurselection(),
-                             filterby=filt)        
+        #get x-y vals from sheet selected
+        sheet=self.smenu.getcurselection()
+        xcol=self.xcolsmenu.getcurselection()
+        ycol=self.ycolsmenu.getcurselection()
+        model = self.DB.getLabbookSheet(sheet)
+        x=model.getColumnData(columnName=xcol, filterby=filt)
+        y=model.getColumnData(columnName=ycol, filterby=filt)
+        if len(x)<1 or len(y)<1:
+            print 'no data to plot'
+            return
+        x,y = zip(*self.tofloats(zip(x,y)))
+        labels = model.getColumnData(columnName='Mutations', filterby=filt)
+        self.plotCorrelation(x,y,labels)
         return        
      
     @classmethod 
@@ -185,58 +190,26 @@ class CorrelationAnalyser(Plugin):
         ax.set_title('%s points' %len(x))
         return
         
-    def plotCorrelation(self, sheet=None, filterby=None, 
-                          xcol='exp', ycol='Total', labelcol=None,
+    def plotCorrelation(self, x, y, labels=None,                       
                           labeloutliers=False,
                           plottitle='Predicted vs Experimental',
                           xlabel='Predicted',
                           ylabel='Experimental',
-                          limit=None,
-                          filename='correlation.png'):
-        """Show exp vs pred. from a Labook in DB - General case,
-            filterby is a tuple of colname, value"""
-
-        model = self.DB.getLabbookSheet(sheet)
-        colors = ['b','g','r','y','m','c']
+                          limit=None):
+        """Show exp vs pred. for a set of x-y values """
         
+        colors = ['b','g','r','y','m','c']        
         fig = plt.figure(figsize=(8,8))
         ax = fig.add_subplot(111)
         ax.set_xlabel(xlabel)
-        ax.set_ylabel(ylabel)        
+        ax.set_ylabel(ylabel)
         legs=[]; legnames=[]
         bad=[]; good=[]
-       
-        x=model.getColumnData(columnName=xcol, filterby=filterby)
-        y=model.getColumnData(columnName=ycol, filterby=filterby)
-        if len(x)<1 or len(y)<1:
-            print 'no data to plot'
-            return
-        x,y = zip(*self.tofloats(zip(x,y)))
        
         if len(x) ==0:
             return
         errs = [a - b for a, b in zip(x, y)]
-        line = ax.scatter(x, y, color='red', alpha=0.7)
-                                  
-        if labelcol != None:
-            labels = model.getColumnData(columnName=labelcol,filterby=filterby)      
-            #user peat_sa stats tools to get outliers here
-            #outliers = self.findOutliers(x,y,errs)
-            '''for l in labels:
-                i=labels.index(l)
-                #label and list outliers
-                if l in outliers:
-                    #c = plt.Circle((x[i], y[i]), 0.4,fill=False,alpha=0.7)
-                    ax.annotate(l, (x[i]+0.4, y[i]), xytext=None, textcoords='data',
-                                        fontsize=8)
-                    #ax.add_patch(c)'''
-
-            for e in errs:
-                i=errs.index(e)
-                #label bad ones
-                if abs(e)>5:# and y[i]>8:
-                    ax.annotate(labels[i], (x[i]+0.4, y[i]), xytext=None, textcoords='data',
-                                            fontsize=8)
+        line = ax.plot(x, y, 'x', color='red', mew=2, alpha=0.7, picker=3)  
 
         #draw expected correlation line with slope x
         slope=1
@@ -247,7 +220,7 @@ class CorrelationAnalyser(Plugin):
         cy = [slope*i for i in cx]
         ax.plot(cx, cy, 'g', alpha=0.7)
         ax.plot(cx-4, cy, 'g', alpha=0.5,linestyle='--')
-        ax.plot(cx+4, cy, 'g', alpha=0.5,linestyle='--');
+        ax.plot(cx+4, cy, 'g', alpha=0.5,linestyle='--')
         ax.axhline(y=0, color='grey'); ax.axvline(x=0,color='grey')
         #ax.set_xlim(min(x)-2,max(x)+2)
         if limit==None:
@@ -257,18 +230,41 @@ class CorrelationAnalyser(Plugin):
         ax.set_title('%s points' %len(x))
         cc = str(round(pow(stats.pearsonr(x,y)[0],2),2))
         ax.text(1,16, r'$r^2= %s$' %cc, fontsize=16)
+        fig.suptitle(plottitle)
+        from PEATDB.Actions import DBActions
+        DBActions.showTkFigure(fig)        
+        m = MouseHandler(ax, self, labels)
+        m.connect()
+        return ax
+
+    def addMouseHandler(self, ax):
+        """Add mouse event picker to plot so users can
+        get info on each point, such as mutation name"""
+        m = MouseHandler(ax, self)
+        m.connect()    
+        return
+    
+    def getStats(self,x,y):
         '''finalx=[x[i] for i in range(len(labels)) if labels[i] not in outliers]
         finaly=[y[i] for i in range(len(labels)) if labels[i] not in outliers]
         cc1 = str(round(pow(stats.pearsonr(finalx,finaly)[0],2),2))
         #ax.text(1,14, r'$r^2_{final}= %s$' %cc1, fontsize=16)'''
+        return
+        
+    def markOutliers(self,x,y):
+        labels = model.getColumnData(columnName=labelcol,filterby=filterby)      
+        #user peat_sa stats tools to get outliers here
+        #outliers = self.findOutliers(x,y,errs)
+        '''for l in labels:
+            i=labels.index(l)
+            #label and list outliers
+            if l in outliers:
+                #c = plt.Circle((x[i], y[i]), 0.4,fill=False,alpha=0.7)
+                ax.annotate(l, (x[i]+0.4, y[i]), xytext=None, textcoords='data',
+                                    fontsize=8)
+                #ax.add_patch(c)'''        
 
-        fig.suptitle(plottitle)
-        #fig.savefig(filename)
-
-        from PEATDB.Actions import DBActions
-        DBActions.showTkFigure(fig)
-        return ax
-                  
+     
     def analyseCorrelation(self, sheet, filterby=None,
                             xcol='exp', ycol='Total', labelcol=None):
         """Analyse correlation"""
@@ -285,140 +281,14 @@ class CorrelationAnalyser(Plugin):
         for e in errs:
             i=errs.index(e)            
             if abs(e)>5:
-                print names[i],labels[i], e   
-        print '\n'
-        #get outliers
-        
+                print names[i],labels[i], e 
+        print '\n'        
         print 'no. of points:', len(x)
         print 'correlation co-eff:', numpy.corrcoef(x,y)[0][1]
         print 'stdev of errors:', numpy.std(errs)
-
         return   
 
-    def plotdeltatmpH(self):
-        """Plot deltatms vs pH for variants with ok fits"""
-        S = self.DB.meta.labbook['ok']
-        model = TableModel(S)
 
-        grps = ['ok','rt']
-        names = []
-        labels=model.getColumnData(columnName='name')
-        names={}
-        for l in labels: names[l]=[]
-
-        for ph in self.phlist:
-            dtms= self.tofloats(model.getColumnData(columnName='avdeltatm_'+ph))
-            fit= model.getColumnData(columnName='fit_'+ph)
-            for i in range(len(labels)):
-                name = labels[i]
-                if name in names:
-                    if fit[i] not in grps:
-                        del names[name]
-                    else:
-                        names[name].append(dtms[i])
-
-        fig = plt.figure()
-        ax = fig.add_subplot(111)
-        ax.set_xlabel('pH')
-        ax.set_ylabel(r'$\delta$Tm')
-        legs=[]
-        phs = self.tofloats(phlist)
-        for n in names:
-            line = ax.plot(phs, names[n], marker='x',linewidth=3,alpha=0.8)
-            legs.append(line)
-        fig.legend(legs, names)
-        fig.suptitle(r'$\delta$Tm vs pH',fontsize=20)
-        plt.show()
-        fig.savefig('dtmvspH.png')
-
-        #analyse stats of ph vs dtm matrix
-        x=[names[n] for n in names]
-        a = numpy.array(x).transpose()
-        for i in a:
-            print numpy.std(i)
-        return names
-    
-    def ploterrvsMutations(self):
-        """Plot errors vs. no. mutations"""
-
-        S = self.DB.meta.labbook['ok']
-        model = TableModel(S)
-        nummutations = {}
-        for ph in self.phlist:
-            x=self.tofloats(model.getColumnData(columnName='Total',filterby=('fit_'+ph,'ok')))
-            y=self.tofloats(model.getColumnData(columnName='avdeltatm_'+ph,filterby=('fit_'+ph,'ok')))
-            nmuts=model.getColumnData(columnName='numberMutations',filterby=('fit_'+ph,'ok'))
-
-            if len(x) == 0:
-                continue
-            errs = [pow(a - b,2) for a, b in zip(x, y)]
-            for e in errs:
-                i=errs.index(e)
-                n=nmuts[i]
-                if not nummutations.has_key(n):
-                    nummutations[n]=[]
-                nummutations[n].append(e)
-
-        averrs=[]; stds=[]
-        for n in nummutations:
-            averrs.append(numpy.mean(nummutations[n]))
-            stds.append(numpy.std(nummutations[n]))
-            print n, len(nummutations[n])
-        print averrs,stds, nummutations.keys()
-        fig = plt.figure()
-        ax = fig.add_subplot(111)
-        ax.set_xlabel('number of mutations')
-        ax.set_ylabel('error')
-        ind = numpy.array([int(i) for i in nummutations.keys()])
-        ax.bar(ind, averrs, yerr=stds, linewidth=2,alpha=0.8)
-        fig.suptitle('Number of Mutations vs Average Error',fontsize=20)
-        fig.savefig('ploterrvsMutations.png')
-        plt.show()
-        return
-
-    def plotSequenceInfo(self):
-        """Plot some attribute as a func of redisue"""
-        pdb = open('/enc/Novozymes/Parse_mutations/10R.pka.pdb')
-        S = self.DB.meta.labbook['tempvspredicted']
-        model = TableModel(S)
-        mutations = {}
-        x=model.getColumnData(columnName='mut')
-        import re
-        for m in x:
-            vals = m.split('+')
-            res = [int(re.sub("[\D]", "", i)) for i in vals]
-            #print res
-            for r in res:
-                if not r in mutations:
-                    mutations[r]=1
-                else:
-                    mutations[r]+=1
-        ind=[];y=[]
-
-        for m in sorted(mutations.keys()):
-            ind.append(m)
-            y.append(mutations[m])
-
-        fig = plt.figure(figsize=(10,5))
-        ax = fig.add_subplot(111)
-        ax.bar(ind, y, linewidth=0,facecolor='black',alpha=0.8)
-        ax.set_xlabel('Residue')
-        ax.set_ylabel('number of mutations')
-        #ax.set_xticks(numpy.array(ind)+0.5)
-        #ax.set_xticklabels(ind,size=10)
-        fig.autofmt_xdate()
-        fig.suptitle('Number of Mutations vs Residue',fontsize=20)
-        fig.savefig('seqvsNumberMutations.png')
-
-        bfacs = []
-        for i in range(1,189):
-            if mutations.has_key(i): 
-                bfacs.append(mutations[i])
-            else:
-                bfacs.append(0)
-
-        return bfacs
-               
     def QQplot(self, data=None, labels=None, n=3):
         """Do Q-Q plot to determine if sample is normally distributed"""
 
@@ -461,7 +331,6 @@ class CorrelationAnalyser(Plugin):
 
     def tofloats(self, lsts):
         """Return floats of a single list or tuple of paired values"""
-
         def evaluate(l):
             for i in l:
                 try: float(i)
@@ -475,18 +344,106 @@ class CorrelationAnalyser(Plugin):
             for i in l:
                 v.append(float(i))
                 result.append(v)
-        return result
-
-    def loadDB(self, local=None):
-        from PEATDB.Base import PDatabase
-        if local != None:
-            self.DB = PDatabase(local=local)
-        return                  
+        return result             
 
     def test(self):
         x=[5,6,8,9,'t']; y=[6,'',3,7,8]
+        labels=['dsad','sas','fef','xx']
         xy = self.tofloats(zip(x,y))
-        print zip(*xy)
+        x,y = zip(*xy)
+      
+        self.plotCorrelation(x,y)
+
+class MouseHandler:
+    """Class to handle mouse click actions on plots"""
+
+    bbox_props = dict(boxstyle="round", fc="#FFFC17", ec="0.4", alpha=0.8)
+    
+    def __init__(self, ax, parent, labels=None):
+        self.ax = ax
+        self.parent = parent
+        self.press = False
+        self.rect = None
+        self.labels = labels
+        self.event = None
+        self.infolabel = None
+        self.circle = None        
+        return
+
+    def connect(self):
+        self.cidpress = self.ax.figure.canvas.mpl_connect(
+            'button_press_event', self.on_press)
+        self.cidrelease = self.ax.figure.canvas.mpl_connect(
+            'button_release_event', self.on_release)
+        self.cidmotion = self.ax.figure.canvas.mpl_connect(
+            'motion_notify_event', self.on_motion)
+        self.cidpick = self.ax.figure.canvas.mpl_connect('pick_event', self.on_pick)        
+
+    def on_pick(self, event):        
+        obj = event.artist
+        ind = event.ind
+        xd = obj.get_xdata()[ind[0]]
+        yd = obj.get_ydata()[ind[1]]            
+        info = self.labels[ind[0]]
+        print info
+        self.infolabel = self.ax.annotate(info, (xd+0.4, yd), xytext=None, textcoords='data',
+                                    fontsize=12, bbox=self.bbox_props)
+        self.circle = plt.Circle((xd, yd), 0.2,fill=False)
+        self.ax.add_patch(self.circle)
+        return
+    
+    def on_press(self, event):
+        """Handle mouse click"""
+        self.press = True
+        self.x = event.xdata; self.y = event.ydata
+        self.parent.selection = None        
+        if self.rect != None:
+            self.rect.set_visible(False)
+            #self.ax.patches = []
+            if self.rect in self.ax.patches:
+                self.ax.patches.remove(self.rect)
+            self.ax.figure.canvas.draw()
+            self.rect=None        
+        return
+
+    def on_motion(self, event):
+        """Draw a selection rect"""
+        if self.press == False:
+            return
+        x = event.xdata; y = event.ydata
+        if x == None or y==None:
+            return
+        
+        dx = x-self.x; dy=y-self.y
+        if self.rect == None:
+            #print 'new'
+            self.rect = Rectangle((self.x,self.y),dx,dy, fc='lightblue',ec='blue',alpha=0.6)
+            self.ax.add_patch(self.rect)
+        else:
+            self.rect.set_width(dx)
+            self.rect.set_height(dy)
+
+        #draw selection rect
+        self.ax.figure.canvas.draw()
+        self.parent.selection = (self.x, self.y, x, y)
+        if x!=None: self.prevx=x
+        if y!=None: self.prevy=y
+        return
+
+    def on_release(self, event):
+        self.press = False
+        if self.infolabel in self.ax.texts:
+            self.ax.texts.remove(self.infolabel)
+        if self.circle in self.ax.patches:
+            self.ax.patches.remove(self.circle)
+        return
+
+    def disconnect(self):
+        """Disconnect all the stored connection ids"""
+        self.rect.figure.canvas.mpl_disconnect(self.cidpress)
+        self.rect.figure.canvas.mpl_disconnect(self.cidrelease)
+        self.rect.figure.canvas.mpl_disconnect(self.cidmotion)
+        self.rect.figure.canvas.mpl_disconnect(self.cidpick)
         
 def main():
     """Run some analysis"""
@@ -497,33 +454,16 @@ def main():
     parser.add_option("-f", "--file", dest="file",
                         help="Open a local db")
     parser.add_option("-t", "--tests", dest="tests", action='store_true',
-                       help="Misc tests", default=False)  
-   
-    
+                       help="Misc tests", default=False)    
     opts, remainder = parser.parse_args()
-
     if opts.file != None and os.path.exists(opts.file):
         app.loadDB(opts.file)   
 
     if opts.tests == True:
-        app.test()
-        
-    #10R plot/analysis
-  
-    '''ax = app.plotCorrelation(sheet='stability'+ph, filterby=('fit',['ok']), 
-                          xcol='Total', ycol='ddg', labelcol='name',
-                          labeloutliers=True,
-                          plottitle='10R : PEAT-SA Predicted vs Experimental, ph '+ph,
-                          xlabel='ddG Predicted (kJ/mol)',
-                          ylabel='ddG Experimental',
-                          #limit=40,
-                          filename='10Rstability'+ph+'.png')
-    
-    app.analyseCorrelation(sheet='stability'+ph, filterby=('fit',['ok']),
-                            xcol='Total', ycol='ddg', labelcol='Mutations')'''
-     
+        app.main()
+        app.mainwin.mainloop()
+        app.test()    
  
-
 if __name__ == '__main__':
     main()
 

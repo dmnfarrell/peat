@@ -47,14 +47,7 @@ class NMRTitration(Plugin, GUI_help):
         self.createMenuBar()
         self.ekinprojects = {}      
         self.addToolBar()
-
         return
-
-    def loadDB(self, local=None):
-        from PEATDB.Base import PDatabase
-        if local != None:
-            self.DB = PDatabase(local=local)
-        return 
 
     # GUI stuff
 
@@ -62,8 +55,7 @@ class NMRTitration(Plugin, GUI_help):
         """Create the menu bar for the application. """
         self.menu=Menu(self.mainwin)
 
-        self.file_menu={ '01Open Ekin project':{'cmd':self.loadEkinProj},                         
-                         #'02Add Ekin project':{'cmd':self.addEkinProj},   
+        self.file_menu={ '01Open Ekin project':{'cmd':self.loadEkinProj},            
                          '02Open DB':{'cmd':self.openDB},   
                          '03Quit':{'cmd':self.quit}}
         self.file_menu=self.create_pulldown(self.menu,self.file_menu)
