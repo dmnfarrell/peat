@@ -29,7 +29,7 @@ try:
     from Plugins import Plugin
 except:
     from PEATDB.Plugins import Plugin
-import os, types
+import os, types, copy
 from Tkinter import *
 import tkFileDialog
 import Pmw
@@ -47,7 +47,7 @@ class PEATSAPlugin(Plugin):
     menuentry = 'PEATSA Plugin'
     gui_methods = {'createJobDialog':'Submit Job',
                    'fetchJob':'Fetch Job from Server',
-                   'checkJobs':'Check All Jobs',
+                   #'checkJobs':'Check All Jobs',
                    'editConfigFile' : 'Create/Edit Conf File',
                    'help':'Help',
                    'quit':'Quit'}
@@ -118,15 +118,15 @@ class PEATSAPlugin(Plugin):
         return
 
     def manageJobsButtons(self, parent):
+        fr1 = Frame(parent)
+        Button(fr1,text='View Results',command=self.showResults,bg='#ccFFFF').pack(side=TOP,fill=BOTH,expand=1)
+        fr1.pack(fill=BOTH)
         fr = Frame(parent)
-        c='#66CCFF'
+        c='#ADD8E6'
         Button(fr,text='Show Details',command=self.viewDetails,bg=c).pack(side=LEFT,fill=BOTH,expand=1)
-        Button(fr,text='View Results',command=self.getResults,bg=c).pack(side=LEFT,fill=BOTH,expand=1)
+        Button(fr,text='Manage Results',command=self.manageResults,bg=c).pack(side=LEFT,fill=BOTH,expand=1)
         Button(fr,text='Remove',command=self.removeJob,bg=c).pack(side=LEFT,fill=BOTH,expand=1)        
         fr.pack(fill=BOTH)
-        fr1 = Frame(parent)
-        Button(fr1,text='Plot Correlation',command=self.plotCorrelation,bg='#ccFFFF').pack(side=TOP,fill=BOTH,expand=1)
-        fr1.pack(fill=BOTH)
         return 
         
     def createLogWin(self, parent):
@@ -266,11 +266,13 @@ class PEATSAPlugin(Plugin):
             if nameentry.getvalue() in self.DB.meta.peatsa_jobs:
                 print 'job name already used'
                 return
-            self.submitJob(name=nameentry.getvalue(),
+            name=nameentry.getvalue()
+            expcol = expcolmenu.getcurselection()
+            self.submitJob(name=name,
                            pdb=pdb, pdbfile=pdbfile,
                            ligandfile=self.ligandfile,
                            mutations=mutationlist,
-                           calcs=calcs, meta={})         
+                           calcs=calcs, meta={'expcol':expcol})         
             close()
             
         jobdlg = Toplevel()
@@ -283,6 +285,16 @@ class PEATSAPlugin(Plugin):
                 validate = validatename,
                 value = 'myjob')
         nameentry.pack(fill=BOTH,expand=1)
+        balloon.bind(nameentry, 'Job name can be anything, but should be unique')        
+        expcols = ['']+self.DB.getSimpleFields()
+        expcolmenu = Pmw.OptionMenu(jobdlg,
+                labelpos = 'w',
+                label_text = 'Exp. col:',
+                items = expcols,
+                initialitem = '',
+                menubutton_width = 8)        
+        expcolmenu.pack(fill=BOTH,expand=1)
+        balloon.bind(expcolmenu, 'Field with experimental data to compare, optional')          
         calcmenu = Pmw.OptionMenu(jobdlg,
                 labelpos = 'w',
                 label_text = 'Calculation:',
@@ -290,14 +302,16 @@ class PEATSAPlugin(Plugin):
                 initialitem = 'stability',
                 menubutton_width = 8)
         calcmenu.pack(fill=X,expand=1)
+        fr=Frame(jobdlg)
+        fr.pack(fill=X,expand=1)
+        self.useref = IntVar()
+        Label(fr,text='Use reference protein').pack(side=LEFT)
+        Checkbutton(fr,variable=self.useref).pack(side=LEFT)        
         pdbentry = Pmw.EntryField(jobdlg,
                 labelpos = 'w',
                 label_text = 'PDB Structure:')
         pdbentry.pack(fill=X,expand=1)
         balloon.bind(pdbentry, 'Enter the PDB ID or load a file')
-       
-        self.useref = IntVar()        
-        Checkbutton(jobdlg,variable=self.useref).pack(fill=X,expand=1)
         Button(jobdlg,text='load PDB from file',command=getstruct).pack(fill=X,expand=1)
         Button(jobdlg,text='load Ligand file',command=getligand).pack(fill=X,expand=1)
         self.ligandfile=None
@@ -401,22 +415,13 @@ class PEATSAPlugin(Plugin):
             self.DB.meta.peatsa_jobs = PersistentMapping()
         self.DB.meta.peatsa_jobs[name] = job.identification
         return
-        
-    def checkJobs(self):    
-        """Check the jobs"""
-        if not hasattr(self.DB.meta,'peatsa_jobs'):
-            return None  
-        print '-----sent jobs-----'    
-        for name in self.DB.meta.peatsa_jobs:           
-            self.viewDetails(name)           
-        return 
             
     def updateJobs(self):
         if not hasattr(self.DB.meta,'peatsa_jobs'):
             return
         self.jobslist.setlist(self.DB.meta.peatsa_jobs) 
 
-    def getResults(self, name=None):
+    def manageResults(self, name=None):
         """Get the results back - we can send the matrix to the main peat
            table or put results into a labbook sheet.
            Also allow user to merge with an existing table"""
@@ -584,14 +589,18 @@ class PEATSAPlugin(Plugin):
                     M.data[code][f] = str(row[j])
         return M
 
-    def mergeMatrix(self, matrix, tablemodel, key='Mutations'):
-        """Merge a peatsa matrix with a table using the mutations as key"""
+    def mergeMatrix(self, matrix, tablemodel, key='Mutations', fields=None):
+        """Merge a peatsa matrix with a table, returns merged tablemodel
+        tablemodel: input tablemodel
+        key: use given key to match on, usually mutations code
+        fields: which fields should be included in merge, default is all       
+        """
         M = tablemodel
-        if not key in M.columnNames:            
+        if not key in M.columnNames:
             print 'this table has no mutations column, cannot merge'
             return
-        i = matrix.indexOfColumnWithHeader('Mutations')
-        fields = matrix.columnHeaders()
+        i = matrix.indexOfColumnWithHeader(key)
+        mcols = matrix.columnHeaders()
         mrows = [r[0] for r in matrix]
         
         for rec in M.reclist:
@@ -605,55 +614,70 @@ class PEATSAPlugin(Plugin):
                     continue                 
                 if mset1 == mset2:
                     #add this data to table               
-                    for f in fields:
+                    for f in mcols:
+                        if fields!=None and not f in fields:
+                            continue
                         M.addColumn(f)
                         j = matrix.indexOfColumnWithHeader(f)
                         M.data[rec][f] = row[j]
         return M
 
-    def plotCorrelation(self):
-        """Quick correlation plot directly from selected job"""
-        #get a column from main table top use as experimental values
-        cols = self.DB.getSimpleFields()
-        print cols
-        mpDlg = MultipleValDialog(title='Select Experimental Data',
-                                    initialvalues=[cols],
-                                    labels=['exp data column:'],
-                                    types=['list'],
-                                    parent=self.mainwin)
-        if mpDlg.result == True:
-            expcol = mpDlg.results[0]
-        else:
-            return
-        
-        from PEATDB.plugins.Correlation import CorrelationAnalyser
-        C = CorrelationAnalyser()        
+    def showResults(self):
+        """Show results with correlation plot from selected job"""
         job, name = self.getJob()
+        if job.state() != 'Finished':
+            print 'job not finished'
+            return
         dataset = job.data
         self.matrices = {'binding':dataset.bindingResults,
-                         'stability':dataset.stabilityResults}        
+                         'stability':dataset.stabilityResults}
+        jobmeta = job.metadata()
+        if jobmeta.has_key('expcol'):
+            expcol = jobmeta['expcol']
+        else:
+            expcol=''
+        if expcol == '' or expcol==None:
+            #if exp column not known then ask user
+            cols = self.DB.getSimpleFields()            
+            mpDlg = MultipleValDialog(title='Select Experimental Data',
+                                        initialvalues=[cols],
+                                        labels=['exp data column:'],
+                                        types=['list'],
+                                        parent=self.mainwin)
+            if mpDlg.result == True:
+                expcol = mpDlg.results[0]
+            else:
+                return
+        
+        from PEATDB.plugins.Correlation import CorrelationAnalyser        
+        C = CorrelationAnalyser()        
+     
         for m in self.matrices:
-             matrix = self.matrices[m]             
-             if matrix == None: continue
-             M = self.parent.tablemodel
-             M = self.mergeMatrix(matrix, M)             
-             x=M.getColumnData(columnName='Total')
-             y=M.getColumnData(columnName=expcol)
-             labels = M.getColumnData(columnName='Mutations')
-        x,y = zip(*CorrelationAnalyser.tofloats(zip(x,y)))
-        C.plotCorrelation(x,y,labels)
+            matrix = self.matrices[m]          
+            if matrix == None: continue
+            M = self.parent.tablemodel
+            M = self.mergeMatrix(matrix, M, fields=['Total'])           
+            x,y,names,muts = M.getColumns(['Total',expcol,'name','Mutations'],allowempty=False)           
+            labels = zip(names, muts)
+            #print labels           
+            C.plotCorrelation(x,y,labels,title=m,ylabel=expcol)
         
         return
     
     def test(self):
-        job, name = self.getJob('myjob')
+        job, name = self.getJob('myjob2')
         if job.error() != None or job.state() != 'Finished':
             return                                    
         stabmatrix = job.data.stabilityResults
-        L = self.DB.getLabbookSheet('myjob')
-        self.mergeMatrix(stabmatrix, L)
-        
-        self.DB.commit('test')
+        L = self.DB.getLabbookSheet('myjob2')
+        n,m,x,y = L.getColumns(['name','Mutations','Total','deltatm'],allowempty=False)
+        #print x,y,t,d           
+        x=[float(i) for i in x]
+        y=[float(i) for i in y]
+        print x
+        print y
+        #self.mergeMatrix(stabmatrix, L)
+ 
         return        
         
 def main():
@@ -667,10 +691,10 @@ def main():
     if opts.file != None and os.path.exists(opts.file):
         path=os.path.abspath(opts.file)        
         from PEATDB.Base import PDatabase
-        DB = PDatabase(local=path)        
+        DB = PDatabase(local=path) 
         P = PEATSAPlugin()
-        P.main(DB=DB)   
-        #P.test()        
+        P.main(DB=DB)
+        P.test()        
     
          
 if __name__ == '__main__':

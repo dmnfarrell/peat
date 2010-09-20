@@ -540,7 +540,7 @@ class TableModel(object):
                 if self.data[r].has_key(f) and self.data[r][f] in vals:
                     if not self.data[r].has_key(columnName):
                         coldata.append('')
-                    else:    
+                    else:
                         coldata.append(self.data[r][columnName])
         else:
             for r in self.reclist:                                  
@@ -548,7 +548,27 @@ class TableModel(object):
                     coldata.append('')
                 else:
                     coldata.append(self.data[r][columnName])
-
+        return coldata
+        
+    def getColumns(self, colnames, filterby=None, allowempty=True):
+        """Get column data for multiple cols, with given filter options,
+            filterby: a tuple of key value that allows filtering
+            allowempty: boolean if false means rows with empty vals for any
+            required fields are not returned
+            returns: lists of column data"""
+        def evaluate(l):
+            for i in l:
+                if i == '' or i == None:
+                    return False
+            return True        
+          
+        coldata=[]
+        for c in colnames:            
+            vals = self.getColumnData(columnName=c, filterby=filterby)
+            coldata.append(vals)
+        if allowempty == False:  
+            result = [i for i in zip(*coldata) if evaluate(i) == True]               
+            coldata = zip(*result)    
         return coldata
         
     def filterBy(self, filtercol, value, op='contains', userecnames=False,
@@ -564,7 +584,7 @@ class TableModel(object):
         floatops = ['=','>','<']                   
         func = funcs[op]
         data = self.data
-        #coltype = self.columntypes[filtercol]        
+        #coltype = self.columntypes[filtercol]
         names=[]
         for rec in self.reclist:
             if data[rec].has_key(filtercol):  

@@ -33,7 +33,7 @@ except:
     from PEATDB.Plugins import Plugin
 from Tkinter import *
 import Pmw
-import os, sys, math, string, re
+import types, os, sys, math, string, re
 import math, numpy
 #from scipy.stats import stats
 try:
@@ -159,13 +159,12 @@ class CorrelationAnalyser(Plugin):
         ycol=self.ycolsmenu.getcurselection()
         
         model = self.DB.getLabbookSheet(sheet)
-        x=model.getColumnData(columnName=xcol, filterby=filt)
-        y=model.getColumnData(columnName=ycol, filterby=filt)
+        x,y,names,muts = model.getColumns([xcol,ycol,'name','Mutations'],
+                            filterby=filt, allowempty=False) 
         if len(x)<1 or len(y)<1:
             print 'no data to plot'
             return
-        x,y = zip(*self.tofloats(zip(x,y)))
-        labels = model.getColumnData(columnName='Mutations', filterby=filt)
+        labels = zip(names, muts)
         self.plotCorrelation(x,y,labels)
         return        
      
@@ -191,14 +190,18 @@ class CorrelationAnalyser(Plugin):
         ax.set_title('%s points' %len(x))
         return
         
-    def plotCorrelation(self, x, y, labels=None,                       
+    def plotCorrelation(self, x, y, labels=None,
                           labeloutliers=False,
-                          plottitle='Predicted vs Experimental',
+                          title='',
                           xlabel='Predicted',
                           ylabel='Experimental',
                           limit=None):
         """Show exp vs pred. for a set of x-y values """
         
+        #check if x and y are number cols
+        x=[float(i) for i in x]
+        y=[float(i) for i in y]
+   
         colors = ['b','g','r','y','m','c']        
         fig = plt.figure(figsize=(8,8))
         ax = fig.add_subplot(111)
@@ -227,22 +230,22 @@ class CorrelationAnalyser(Plugin):
         if limit==None:
             limit=lims[1]
         ax.set_xlim(lims[0],limit)
-        ax.set_ylim(lims[0],limit)           
-        ax.set_title('%s points' %len(x))
+        ax.set_ylim(lims[0],limit)
+        ax.set_title(title)
         #cc = str(round(pow(stats.pearsonr(x,y)[0],2),2))
         #ax.text(1,16, r'$r^2= %s$' %cc, fontsize=16)
-        fig.suptitle(plottitle)
+        fig.suptitle('Predicted vs Experimental')
         from PEATDB.Actions import DBActions
         DBActions.showTkFigure(fig)        
         m = MouseHandler(ax, self, labels)
         m.connect()
         return ax
 
-    def addMouseHandler(self, ax):
+    def addMouseHandler(self, ax, labels):
         """Add mouse event picker to plot so users can
         get info on each point, such as mutation name"""
-        m = MouseHandler(ax, self)
-        m.connect()    
+        m = MouseHandler(ax, labels, self)
+        m.connect()
         return
     
     def getStats(self,x,y):
@@ -353,7 +356,6 @@ class CorrelationAnalyser(Plugin):
         labels=['dsad','sas','fef','xx']
         xy = self.tofloats(zip(x,y))
         x,y = zip(*xy)      
-        #self.plotCorrelation(x,y)
 
 class MouseHandler:
     """Class to handle mouse click actions on plots"""
@@ -380,17 +382,21 @@ class MouseHandler:
             'motion_notify_event', self.on_motion)
         self.cidpick = self.ax.figure.canvas.mpl_connect('pick_event', self.on_pick)        
 
-    def on_pick(self, event):        
+    def on_pick(self, event): 
+        """Handle pick event, picking on points"""
         obj = event.artist
-        ind = event.ind
+        ind = event.ind       
         xd = obj.get_xdata()[ind[0]]
-        yd = obj.get_ydata()[ind[1]]            
+        yd = obj.get_ydata()[ind[0]]            
         info = self.labels[ind[0]]
         print info
+        if type(info) == types.TupleType and not None in info:
+            info="\n".join(info)
         self.infolabel = self.ax.annotate(info, (xd+0.4, yd), xytext=None, textcoords='data',
                                     fontsize=12, bbox=self.bbox_props)
         self.circle = plt.Circle((xd, yd), 0.2,fill=False)
         self.ax.add_patch(self.circle)
+        self.ax.figure.canvas.draw()
         return
     
     def on_press(self, event):
