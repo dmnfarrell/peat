@@ -41,6 +41,17 @@
 			name = WebApp;
 			productName = WebApp;
 		};
+		4CF01630124774D4004BE90A /* Test WebApp */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 4CF01632124774D4004BE90A /* Build configuration list for PBXAggregateTarget "Test WebApp" */;
+			buildPhases = (
+				4CF01631124774D4004BE90A /* ShellScript */,
+			);
+			dependencies = (
+			);
+			name = "Test WebApp";
+			productName = "Test Tools";
+		};
 /* End PBXAggregateTarget section */
 
 /* Begin PBXContainerItemProxy section */
@@ -611,6 +622,7 @@
 			targets = (
 				4C21A3940F84FC7F0010B90C /* Test Core */,
 				4C75682311CF896C00484D8D /* Test Tools */,
+				4CF01630124774D4004BE90A /* Test WebApp */,
 				4CA385DB0F861EF5006D71D7 /* WebApp */,
 			);
 		};
@@ -628,7 +640,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/bash;
-			shellScript = "#!/bin/bash\n/usr/local/bin/pyflakes $HOME/PEAT/PEAT_SA/Core\ncd $HOME/PEAT/PEAT_SA/Core/Tests/UnitTests/\npython TestMutants.py\n";
+			shellScript = "#!/bin/bash\n/usr/local/bin/pyflakes $HOME/PEAT/PEATSA/Core\ncd $HOME/PEAT/PEATSA/Core/Tests/UnitTests/\npython TestMutants.py\n";
 		};
 		4C75682211CF896C00484D8D /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -641,7 +653,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "#!/bin/bash\n/usr/local/bin/pyflakes $HOME/PEAT/PEAT_SA/Tools";
+			shellScript = "#!/bin/bash\n/usr/local/bin/pyflakes $HOME/PEAT/PEATSA/Tools";
 		};
 		4CA385E50F861F21006D71D7 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -655,6 +667,19 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/bash;
 			shellScript = "#!/bin/bash\necho 'Updating interface repos'\nssh johnston@peat.ucd.ie svn update /local/johnston/PEAT_SA\nssh johnston@peat.ucd.ie chmod 777 /local/johnston/PEAT_SA/WebApp/RemoteLaunch.py\necho 'Updating backend repos'\nssh webserver@enzyme.ucd.ie svn update PEAT/PEAT_SA\n";
+		};
+		4CF01631124774D4004BE90A /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "#!/bin/bash\n/usr/local/bin/pyflakes $HOME/PEAT/PEATSA/WebApp";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -744,6 +769,27 @@
 			};
 			name = Release;
 		};
+		4CF01633124774D4004BE90A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = "Test Tools";
+			};
+			name = Debug;
+		};
+		4CF01634124774D4004BE90A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				PRODUCT_NAME = "Test Tools";
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -779,6 +825,15 @@
 			buildConfigurations = (
 				4CA385DC0F861EF5006D71D7 /* Debug */,
 				4CA385DD0F861EF5006D71D7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4CF01632124774D4004BE90A /* Build configuration list for PBXAggregateTarget "Test WebApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4CF01633124774D4004BE90A /* Debug */,
+				4CF01634124774D4004BE90A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
