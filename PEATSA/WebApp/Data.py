@@ -44,6 +44,16 @@ def SerializeDictionary(aDict):
 	stream.close()
 
 	return data
+	
+def UnserializeDictionary(string):
+
+	'''Unserializes a dictionary stored as a string'''
+
+	stream = StringIO.StringIO(string)
+	dict = pickle.load(stream)
+	stream.close()
+
+	return dict
 
 def DataIDsInTable(dataTable, connection):
 
@@ -268,7 +278,7 @@ class Run:
 		id = self.allJobIds()[index]
 		job = Job(id, self.connection, self.jobTable, self.jobDataTable)
 		
-		return run							
+		return job							
 														
 	def exists(self):
 		
@@ -1052,6 +1062,25 @@ class Job:
 		rows = self.cursor.fetchall()
 		
 		return bool(rows[0][0])
+		
+	def metadata(self):
+	
+		'''Returns the metadata associated with the job.
+		
+		If no metadata was associated with the job this method returns None'''
+		
+		if not self.exists():
+			raise Exceptions.DatabaseRetrievalError, "Job Id %s does not exist in the database" % self.identification
+		
+		self.connection.commit()
+		selectQuery = """SELECT Metadata FROM %s WHERE JobID='%s'""" % (self.jobTable, self.identification)
+		self.cursor.execute(selectQuery)		
+		rows = self.cursor.fetchall()
+		
+		data = rows[0][0]
+		dict = UnserializeDictionary(data)
+		
+		return dict
 		
 
 class SQLDataSet(Core.Data.DataSet):
