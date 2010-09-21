@@ -203,7 +203,7 @@ class CorrelationAnalyser(Plugin):
         y=[float(i) for i in y]
    
         colors = ['b','g','r','y','m','c']        
-        fig = plt.figure(figsize=(8,8))
+        fig = plt.figure(figsize=(6,6))
         ax = fig.add_subplot(111)
         ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)
@@ -232,7 +232,7 @@ class CorrelationAnalyser(Plugin):
         cc = math.pow(numpy.corrcoef(x,y)[0][1],2)      
         fig.suptitle(r'Predicted vs Experimental $r^2= %s$' %round(cc,3))
         from PEATDB.Actions import DBActions
-        frame = DBActions.showTkFigure(fig, side=TOP)
+        frame = DBActions.showTkFigure(fig, side=LEFT)
         mh = MouseHandler(ax, self, labels, key)
         mh.connect()         
         return ax, frame, mh

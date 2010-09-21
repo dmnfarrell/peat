@@ -749,19 +749,20 @@ class TableModel(object):
            we only add nrecords from the new model where the key is present
            in both models"""
         if fields == None: fields = model.columnNames
-        for rec in self.reclist:            
+        for rec in self.reclist:
+            if not self.data[rec].has_key(key):
+                continue
             for new in model.reclist:
-                if new == rec:
-                    print rec                    
+                if not model.data[new].has_key(key):
+                    continue
+                if self.data[rec][key] == model.data[new][key]:
+                #if new == rec:                                   
                     for f in fields:
                         if not model.data[rec].has_key(f):
                             continue
                         if not f in self.columnNames:
                             self.addColumn(f)                        
-                        self.data[rec][f] = model.data[rec][f]
-                        
-        print self.columnNames
-       
+                        self.data[rec][f] = model.data[rec][f]       
         return
         
     def addRecord(self, name, **kwargs):

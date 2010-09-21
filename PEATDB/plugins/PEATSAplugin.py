@@ -501,9 +501,8 @@ class PEATSAPlugin(Plugin):
         from PEATDB.Tables import TableCanvas
         tf=LabelFrame(frame,text=label)
         tf.pack(fill=BOTH,expand=1)        
-        mtable = TableCanvas(tf, model=model, width=300, height=150,cellwidth=70, 
-                                  thefont="Arial 10",rowheight=14,
-                                  editable=False)
+        mtable = TableCanvas(tf, model=model, cellwidth=70,                                  
+                                 editable=False)
         mtable.createTableFrame()        
         return mtable
         
@@ -594,37 +593,35 @@ class PEATSAPlugin(Plugin):
                     M.data[code][f] = str(row[j])
         return M
 
-    def mergeMatrix(self, matrix, tablemodel, key='Mutations', fields=None):
+    def mergeMatrix(self, matrix, model, fields=None):
         """Merge a peatsa matrix with a table, returns merged tablemodel
         tablemodel: input tablemodel
         key: use given key to match on, usually mutations code
-        fields: which fields should be included in merge, default is all       
+        fields: which fields from model should be included in merge, default is all
         """
-        M = tablemodel
-        if not key in M.columnNames:
-            print 'this table has no mutations column, cannot merge'
+        if fields==None:
+            fields = model.columnNames
+        key = 'Mutations'
+        M = self.matrix2Table(matrix)      
+        if not key in model.columnNames:
+            print 'this table has no mutations column, we cannot merge'
             return
         i = matrix.indexOfColumnWithHeader(key)
-        mcols = matrix.columnHeaders()
-        mrows = [r[0] for r in matrix]
-        
-        for rec in M.reclist:
-            for row in matrix:
-                mset1 = Core.Data.MutationSet(row[i])
-                if not M.data[rec].has_key(key):
-                    continue
+      
+        for row in M.reclist:           
+            mset1 = Core.Data.MutationSet(M.data[row][key])
+            for rec in model.reclist:
                 try:
-                    mset2 = Core.Data.MutationSet(M.data[rec][key])
+                    mset2 = Core.Data.MutationSet(model.data[rec][key])
                 except:
                     continue                 
                 if mset1 == mset2:
-                    #add this data to table               
-                    for f in mcols:
-                        if fields!=None and not f in fields:
-                            continue
-                        M.addColumn(f)
-                        j = matrix.indexOfColumnWithHeader(f)
-                        M.data[rec][f] = row[j]
+                    #add this data to table
+                    for f in fields:
+                        if not model.data[rec].has_key(f): continue
+                        #print f, model.data[rec][f]
+                        M.addColumn(f)                      
+                        M.data[row][f] = model.data[rec][f]
         return M        
         
     def showResults(self):
@@ -663,25 +660,27 @@ class PEATSAPlugin(Plugin):
             M = self.parent.tablemodel
             #M = self.matrix2Table(matrix)
             #M.merge(M1, key='Mutations', fields=['name'])            
-            M = self.mergeMatrix(matrix, M)
+            M = self.mergeMatrix(matrix, M, fields=['name',expcol])
+            print M, M.columnNames
             x,y,names,muts = M.getColumns(['Total',expcol,'name','Mutations'],allowempty=False)          
-            labels = zip(names, muts)           
+            labels = zip(names, muts)
             ax,frame,mh = C.plotCorrelation(x,y,labels,title=m,ylabel=expcol)
             table = self.showTable(frame, M)
             mh.table = table
         return
     
     def test(self):
-        job, name = self.getJob('myjob2')
+        job, name = self.getJob('myjob')
         if job.error() != None or job.state() != 'Finished':
             return                                    
-        #stabmatrix = job.data.stabilityResults
-        L = self.DB.getLabbookSheet('myjob2')
+        stabmatrix = job.data.stabilityResults
+        L = self.DB.getLabbookSheet('myjob')
         #n,m,x,y = L.getColumns(['name','Mutations','Total','deltatm'],allowempty=False)
         #print x,y,t,d        
-        #self.mergeMatrix(stabmatrix, L)
-        L1 = self.DB.getLabbookSheet('myjob3')
-        L.merge(L1)
+        L = self.mergeMatrix(stabmatrix, L, fields=['name'])
+        print L.columnNames
+        #L1 = self.DB.getLabbookSheet('myjob3')
+        #L.merge(L1)
  
         return        
         

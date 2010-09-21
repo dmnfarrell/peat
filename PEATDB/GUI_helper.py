@@ -211,6 +211,19 @@ class GUI_help:
         yoffset=int((h-sh)/2)
         widget.geometry('+%d+%d' %(x+xoffset,y+yoffset))
         return
+
+    def get_geometry(self, widget):
+        """Get the geometry of a widget
+        Return width,height,xorg,yorg"""
+        widget.update_idletasks()
+        txt=widget.winfo_geometry()
+        width=int(txt.split('x')[0])
+        rest=txt.split('x')[1]
+        height=int(rest.split('+')[0])
+        xorg=int(rest.split('+')[1])
+        yorg=int(rest.split('+')[2])
+        return width,height,xorg,yorg
+
     #
     # -----
     #

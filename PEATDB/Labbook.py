@@ -417,12 +417,20 @@ class LabbookApp(Frame, GUI_help):
         """Merge 2 sheets"""
         if len(self.sheets)<2:
             return
+        def domerge():
+            name = shs.getvalue()[0]
+            newmodel = self.sheets[name].model
+            curr.model.merge(newmodel)
+            self.currenttable.redrawTable()
+            return
+        
         s = self.notebook.getcurselection()
         curr = self.sheets[s]
         fr=Toplevel()
-        #self.set_geometry(self.labbook_win,fr)
-        sh = self.sheetsSelector(fr)
-        
+        fr.title('Select sheet to merge')
+        self.set_centered_geometry(self.labbook_win,fr)
+        shs = self.sheetsSelector(fr)
+        Button(fr,text='Merge',command=domerge).pack(side=TOP)
         return
         
     def setcurrenttable(self, event=None):
@@ -552,9 +560,9 @@ class LabbookApp(Frame, GUI_help):
                 labelpos='nw',
                 label_text='Sheets',
                 listbox_height = 8)
-        labbooklist.pack(fill=Y,expand=1)
+        labbooklist.pack(fill=BOTH,expand=1)
         labbooklist.setlist(names)
-        return labbooklist     
+        return labbooklist
         
     def about_Labbook(self):
         self.ab_win=Toplevel()
