@@ -191,7 +191,7 @@ class CorrelationAnalyser(Plugin):
         return
         
     def plotCorrelation(self, x, y, labels=None,
-                          labeloutliers=False,
+                          key='Mutations',
                           title='',
                           xlabel='Predicted',
                           ylabel='Experimental',
@@ -232,14 +232,14 @@ class CorrelationAnalyser(Plugin):
         ax.set_xlim(lims[0],limit)
         ax.set_ylim(lims[0],limit)
         ax.set_title(title)
-        #cc = str(round(pow(stats.pearsonr(x,y)[0],2),2))
+
         #ax.text(1,16, r'$r^2= %s$' %cc, fontsize=16)
         fig.suptitle('Predicted vs Experimental')
         from PEATDB.Actions import DBActions
-        DBActions.showTkFigure(fig)        
-        m = MouseHandler(ax, self, labels)
-        m.connect()
-        return ax
+        frame = DBActions.showTkFigure(fig, side=TOP)
+        mh = MouseHandler(ax, self, labels, key)
+        mh.connect()         
+        return ax, frame, mh
 
     def addMouseHandler(self, ax, labels):
         """Add mouse event picker to plot so users can
@@ -362,15 +362,16 @@ class MouseHandler:
 
     bbox_props = dict(boxstyle="round", fc="#FFFC17", ec="0.4", alpha=0.8)
     
-    def __init__(self, ax, parent, labels=None):
+    def __init__(self, ax, parent, labels=None, key=None):
         self.ax = ax
         self.parent = parent
         self.press = False
         self.rect = None
         self.labels = labels
+        self.key = key
         self.event = None
         self.infolabel = None
-        self.circle = None        
+        self.circle = None
         return
 
     def connect(self):
@@ -389,14 +390,22 @@ class MouseHandler:
         xd = obj.get_xdata()[ind[0]]
         yd = obj.get_ydata()[ind[0]]            
         info = self.labels[ind[0]]
-        print info
-        if type(info) == types.TupleType and not None in info:
-            info="\n".join(info)
-        self.infolabel = self.ax.annotate(info, (xd+0.4, yd), xytext=None, textcoords='data',
+        if type(info) is types.TupleType and not None in info:
+            labels = '\n'.join(info)
+        elif type(info) is types.DictType:
+            pass
+        labels = labels+'\n'+'pred:'+str(xd)+' exp:'+str(yd)+'\n'+'err='+str(xd-yd)
+        self.infolabel = self.ax.annotate(labels, (xd+0.4, yd), xytext=None, textcoords='data',
                                     fontsize=12, bbox=self.bbox_props)
         self.circle = plt.Circle((xd, yd), 0.2,fill=False)
         self.ax.add_patch(self.circle)
         self.ax.figure.canvas.draw()
+        if hasattr(self,'table'):
+            ml=self.table.model
+            if self.key != None:
+                name = info[0]
+                print name
+                self.table.movetoSelectedRow(recname=name)
         return
     
     def on_press(self, event):

@@ -758,14 +758,16 @@ class DBActions(object):
         return M
     
     @classmethod
-    def showTkFigure(self, fig):
+    def showTkFigure(self, fig, parent=False, side=TOP):
         from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
-        fr = Toplevel()
+        if parent == True:
+            fr=Frame(parent)
+        else:    
+            fr = Toplevel()        
         canvas = FigureCanvasTkAgg(fig, master=fr)
         #self.canvas.show()
-        canvas.get_tk_widget().pack(side=TOP, fill=BOTH, expand=1)
-        canvas._tkcanvas.pack(side=TOP, fill=BOTH, expand=1)
+        canvas.get_tk_widget().pack(side=side, fill=BOTH, expand=1)
+        canvas._tkcanvas.pack(side=side, fill=BOTH, expand=1)
         mtoolbar = NavigationToolbar2TkAgg( canvas, fr )
-        mtoolbar.update()
-        
-        return
+        mtoolbar.update()       
+        return fr

@@ -491,16 +491,21 @@ class PEATSAPlugin(Plugin):
         return 
         
     def showMatrix(self, frame, matrix, label=''):
-        """Show matrix in table"""
+        """Show matrix in table"""    
+        M = self.matrix2Table(matrix)
+        mtable = self.showTable(frame, M, label)
+        return mtable
+        
+    def showTable(self, frame, model, label=''):
+        """Show model in table"""
         from PEATDB.Tables import TableCanvas
         tf=LabelFrame(frame,text=label)
-        tf.pack(side=TOP,fill=BOTH, expand=1)        
-        M = self.matrix2Table(matrix)
-        mtable = TableCanvas(tf, model=M, width=300, height=150,cellwidth=70, 
+        tf.pack(fill=BOTH,expand=1)        
+        mtable = TableCanvas(tf, model=model, width=300, height=150,cellwidth=70, 
                                   thefont="Arial 10",rowheight=14,
                                   editable=False)
         mtable.createTableFrame()        
-        return
+        return mtable
         
     def mergeTable(self, main=False):
         """Send a matrix to the peat main table or labbook sheet 
@@ -651,17 +656,18 @@ class PEATSAPlugin(Plugin):
         
         from PEATDB.plugins.Correlation import CorrelationAnalyser        
         C = CorrelationAnalyser()        
-     
+        
         for m in self.matrices:
             matrix = self.matrices[m]          
             if matrix == None: continue
             M = self.parent.tablemodel
-            M = self.mergeMatrix(matrix, M, fields=['Total'])           
-            x,y,names,muts = M.getColumns(['Total',expcol,'name','Mutations'],allowempty=False)           
-            labels = zip(names, muts)
-            #print labels           
-            C.plotCorrelation(x,y,labels,title=m,ylabel=expcol)
-        
+            #M = self.matrix2Table(matrix)
+            M = self.mergeMatrix(matrix, M)
+            x,y,names,muts = M.getColumns(['Total',expcol,'name','Mutations'],allowempty=False)          
+            labels = zip(names, muts)           
+            ax,frame,mh = C.plotCorrelation(x,y,labels,title=m,ylabel=expcol)
+            table = self.showTable(frame, M)
+            mh.table = table
         return
     
     def test(self):

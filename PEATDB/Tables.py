@@ -1085,10 +1085,19 @@ class TableCanvas(Canvas):
         self.draw_selected_rect(self.currentrow, self.currentcol)
         return
 
+    def movetoSelectedRow(self, row=None, recname=None):
+        """Move to selected row, updating table"""
+        row=self.model.getRecordIndex(recname)        
+        self.setSelectedRow(row)                
+        self.drawSelectedRow()  
+        x,y = self.getCanvasPos(row, 0)     
+        self.yview('moveto', y-0.01)
+        self.tablecolheader.yview('moveto', y)        
+        return        
+    
     def handleFormulaClick(self, row, col):
         """Do a dialog for cell formula entry"""
-        print row, col
-
+    
         model = self.getModel()
         cell = list(model.getRecColNames(row, col))
         absrow = self.get_AbsoluteRow(row)
