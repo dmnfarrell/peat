@@ -1368,7 +1368,29 @@ class MutantCollection:
 		be in this list.'''
 	
 		return copy.deepcopy(self.mutationList)	
+	
+	def mutationDiffs(self):
+	
+		'''Returns a dictionary of diffs between the wild-type pdb and each mutant'''
+	
+		import difflib
 		
+		differ = difflib.Differ()
+		stream = open(self.pdbFile, 'r')
+		wildType = stream.readlines()
+		stream.close()
+	
+		diffs = {}
+		for mutant in self.mutants():
+			file = self.fileForMutant(mutant)
+			if file is not None:
+				stream = open(file, 'r')
+				mutant = stream.readlines()
+				stream.close()
+				diffs["+".join(mutant.mutationCodes())] = differ(wildType, mutant)
+			
+		return diffs	
+				
 	def mutationListFile(self, filename):
 	
 		'''Returns a MutationListFile instance detailing the mutants in the receiver
