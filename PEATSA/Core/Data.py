@@ -1364,12 +1364,12 @@ class MutantCollection:
 		
 		Each element in the list is a Data.MutationSet instance.
 		
-		Note that any mutatants that the receiver failed to model will not'
+		Note that any mutants that the receiver failed to model will not'
 		be in this list.'''
 	
 		return copy.deepcopy(self.mutationList)	
 	
-	def mutationDiffs(self):
+	def mutantDiffs(self):
 	
 		'''Returns a dictionary of diffs between the wild-type pdb and each mutant'''
 	
@@ -1381,7 +1381,7 @@ class MutantCollection:
 		stream.close()
 	
 		diffs = {}
-		for mutant in self.mutants():
+		for mutant in self.mutations():
 			file = self.fileForMutant(mutant)
 			if file is not None:
 				stream = open(file, 'r')
