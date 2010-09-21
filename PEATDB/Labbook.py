@@ -151,6 +151,7 @@ class LabbookApp(Frame, GUI_help):
                          '02Remove Sheet':{'cmd':self.delete_Sheet},
                          '03Copy Sheet':{'cmd':self.copy_Sheet},
                          '04Rename Sheet':{'cmd':self.rename_Sheet},
+                         '05Merge Sheet':{'cmd':self.merge_Sheet},
                          }
         self.sheet_menu=self.create_pulldown(self.menu,self.sheet_menu)
         self.menu.add_cascade(label='Sheet',menu=self.sheet_menu['var'])
@@ -412,6 +413,18 @@ class LabbookApp(Frame, GUI_help):
         self.delete_Sheet()
         return
 
+    def merge_Sheet(self):
+        """Merge 2 sheets"""
+        if len(self.sheets)<2:
+            return
+        s = self.notebook.getcurselection()
+        curr = self.sheets[s]
+        fr=Toplevel()
+        #self.set_geometry(self.labbook_win,fr)
+        sh = self.sheetsSelector(fr)
+        
+        return
+        
     def setcurrenttable(self, event=None):
         """Set the currenttable so that menu items work with visible sheet"""
         try:
@@ -532,6 +545,17 @@ class LabbookApp(Frame, GUI_help):
         self.quit()
         return
 
+    def sheetsSelector(self, frame):
+        """Show list of sheets"""        
+        names = self.sheets.keys()            
+        labbooklist = Pmw.ScrolledListBox(frame,              
+                labelpos='nw',
+                label_text='Sheets',
+                listbox_height = 8)
+        labbooklist.pack(fill=Y,expand=1)
+        labbooklist.setlist(names)
+        return labbooklist     
+        
     def about_Labbook(self):
         self.ab_win=Toplevel()
         self.ab_win.geometry('+100+350')
@@ -1018,8 +1042,7 @@ class LabbookTableModel(TableModel):
                     if self.data[recname].has_key(colname):
                         if self.data[recname][colname].has_key('location'):
                             loc = self.data[recname][colname]['location']
-                            if loc != None and loc != '':
-                            #self.data[recname][colname]['filename']
+                            if loc != None and loc != '':                           
                                 extfilenames.append(self.data[recname][colname]['location'])
 
         return extfilenames

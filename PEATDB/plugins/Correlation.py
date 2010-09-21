@@ -223,18 +223,14 @@ class CorrelationAnalyser(Plugin):
         cx = numpy.arange(lims[0],lims[1])
         cy = [slope*i for i in cx]
         ax.plot(cx, cy, 'g', alpha=0.7)
-        ax.plot(cx-4, cy, 'g', alpha=0.5,linestyle='--')
-        ax.plot(cx+4, cy, 'g', alpha=0.5,linestyle='--')
-        ax.axhline(y=0, color='grey'); ax.axvline(x=0,color='grey')
-        #ax.set_xlim(min(x)-2,max(x)+2)
+        #ax.plot(cx-4, cy, 'g', alpha=0.5,linestyle='--')
+        #ax.plot(cx+4, cy, 'g', alpha=0.5,linestyle='--')
+        ax.axhline(y=0, color='grey'); ax.axvline(x=0,color='grey')       
         if limit==None:
-            limit=lims[1]
-        ax.set_xlim(lims[0],limit)
-        ax.set_ylim(lims[0],limit)
+            limit=lims[1]       
         ax.set_title(title)
-
-        #ax.text(1,16, r'$r^2= %s$' %cc, fontsize=16)
-        fig.suptitle('Predicted vs Experimental')
+        cc = math.pow(numpy.corrcoef(x,y)[0][1],2)      
+        fig.suptitle(r'Predicted vs Experimental $r^2= %s$' %round(cc,3))
         from PEATDB.Actions import DBActions
         frame = DBActions.showTkFigure(fig, side=TOP)
         mh = MouseHandler(ax, self, labels, key)

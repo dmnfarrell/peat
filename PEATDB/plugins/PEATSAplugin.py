@@ -625,8 +625,8 @@ class PEATSAPlugin(Plugin):
                         M.addColumn(f)
                         j = matrix.indexOfColumnWithHeader(f)
                         M.data[rec][f] = row[j]
-        return M
-
+        return M        
+        
     def showResults(self):
         """Show results with correlation plot from selected job"""
         job, name = self.getJob()
@@ -662,6 +662,7 @@ class PEATSAPlugin(Plugin):
             if matrix == None: continue
             M = self.parent.tablemodel
             #M = self.matrix2Table(matrix)
+            #M.merge(M1, key='Mutations', fields=['name'])            
             M = self.mergeMatrix(matrix, M)
             x,y,names,muts = M.getColumns(['Total',expcol,'name','Mutations'],allowempty=False)          
             labels = zip(names, muts)           
@@ -674,15 +675,13 @@ class PEATSAPlugin(Plugin):
         job, name = self.getJob('myjob2')
         if job.error() != None or job.state() != 'Finished':
             return                                    
-        stabmatrix = job.data.stabilityResults
+        #stabmatrix = job.data.stabilityResults
         L = self.DB.getLabbookSheet('myjob2')
-        n,m,x,y = L.getColumns(['name','Mutations','Total','deltatm'],allowempty=False)
-        #print x,y,t,d           
-        x=[float(i) for i in x]
-        y=[float(i) for i in y]
-        print x
-        print y
+        #n,m,x,y = L.getColumns(['name','Mutations','Total','deltatm'],allowempty=False)
+        #print x,y,t,d        
         #self.mergeMatrix(stabmatrix, L)
+        L1 = self.DB.getLabbookSheet('myjob3')
+        L.merge(L1)
  
         return        
         

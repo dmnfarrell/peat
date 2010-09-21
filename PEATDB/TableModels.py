@@ -744,9 +744,24 @@ class TableModel(object):
         newformula = Formula.doExpression(newcells, ops, getvalues=False)
         return newformula
 
-    def mergeData(self, model, key='name'):
-        """merge another table model with this one based on a key field"""
-        
+    def merge(self, model, key='name', fields=None):
+        """Merge another table model with this one based on a key field, 
+           we only add nrecords from the new model where the key is present
+           in both models"""
+        if fields == None: fields = model.columnNames
+        for rec in self.reclist:            
+            for new in model.reclist:
+                if new == rec:
+                    print rec                    
+                    for f in fields:
+                        if not model.data[rec].has_key(f):
+                            continue
+                        if not f in self.columnNames:
+                            self.addColumn(f)                        
+                        self.data[rec][f] = model.data[rec][f]
+                        
+        print self.columnNames
+       
         return
         
     def addRecord(self, name, **kwargs):
