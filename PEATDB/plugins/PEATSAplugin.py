@@ -360,7 +360,7 @@ class PEATSAPlugin(Plugin):
         job.setState('Ready')       
         #add job to peat database
         self.storeJob(name, job)
-        self.DB.commit(note='peatsa job')  
+        self.DB.commit(note='peatsa job',user=self.parent.username)  
         self.updateJobs()
         print 'job submitted successfully'
         return

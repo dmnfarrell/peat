@@ -2271,17 +2271,38 @@ class App(Frame, GUI_help):
 
     def createServerProject(self):
         """Allow users with admin passwd to create a project
-        on the remote MySql DB. Relstorage only."""
-        
-        import MySQLdb as mysql
-        db = mysql.connect(user="root", host="localhost", passwd="")
-        c = db.cursor()
-        dbName = 'temporary'
-        cmd = "create database " + dbName + ";"
-        c.execute(cmd)
-        
-        return
-        
+           on the remote MySql DB. Relstorage only."""        
+        import MySQLdb as mysql      
+        mpDlg = MultipleValDialog(title='Create DB on Server',
+                                    initialvalues=(self.server, self.port,
+                                                   self.project,'root','',''),
+                                    labels=('server','port','project',
+                                            'user','password','access list'),
+                                    types=('string','int','string',
+                                           'string','password','string'),
+                                    parent=self.main)
+        if not mpDlg.result:
+            return
+        server = mpDlg.results[0]
+        port = mpDlg.results[1]
+        dbname = mpDlg.results[2]
+        user = mpDlg.results[3]
+        passwd = mpDlg.results[4]
+        access = mpDlg.results[5]
+        try:
+            db = mysql.connect(user=user, host=server,
+                               passwd=passwd, port=port)
+            c = db.cursor()    
+            cmd = "create database " + dbname + ";"
+            c.execute(cmd)
+            cmd = "grant all privileges on " + dbname + ".* to" + access + "@%;"
+            c.execute(cmd)
+        except mysql.OperationalError, e:
+            tkMessageBox.showinfo('Error',e)
+            return
+        self.connect(self, server=self.server, port=self.port,
+                project=dbname, backend=relstorage)
+        return        
     
     def set_geometry(self,pwidget,widget):
         """Set the position of widget in the middle of pwidget"""
