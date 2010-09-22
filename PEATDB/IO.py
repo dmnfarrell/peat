@@ -147,8 +147,7 @@ class Importer:
             #keep ref to these 2 for import
             self.inrows_datasets = datasets
             self.inrows_xdata = xdata
-        print data      
-
+        #print data
         self.data = data
         return 1
         

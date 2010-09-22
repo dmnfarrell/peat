@@ -397,21 +397,20 @@ class zDatabase(object):
     def importDict(self, importdata, namefield='name', overwrite=True):
         """Import list of dicts, each one is a record"""
         if len(importdata) == 0:
-            return
-        
-        fields = importdata[0].keys()
-        if not namefield in fields or not 'name' in fields:
+            return        
+        fields = importdata[0].keys()       
+        if not namefield in fields:
             print 'no such field for keyname field'
             namefield = fields[0]
             #return
-        fields.remove(namefield)
+        if namefield == 'name': fields.remove(namefield)
         for f in fields:
             if f not in self.meta.staticfields:
                 self.addField(f, 'text')
         for d in importdata:
             name = d[namefield]
             self.add(name)
-            for f in fields:
+            for f in fields:               
                 self.data[name][f] = d[f]        
         #print self
         return

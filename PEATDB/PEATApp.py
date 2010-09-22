@@ -317,9 +317,10 @@ class App(Frame, GUI_help):
                          '05Close DB':{'cmd':self.closeDB},
                          '06Save Changes':{'cmd':self.saveDB},
                          '07Save a Copy As':{'cmd':self.saveAs},
-                         '08Undo Current Changes':{'cmd':self.undo},
-                         '09Undo Previous Commits':{'cmd':self.showUndoLog},
-                         '10Quit':{'cmd':self.quit}}
+                         '08Create DB on Server':{'cmd':self.createServerProject},
+                         '09Undo Current Changes':{'cmd':self.undo},
+                         '10Undo Previous Commits':{'cmd':self.showUndoLog},
+                         '11Quit':{'cmd':self.quit}}
         self.file_menu=self.create_pulldown(self.menu,self.file_menu)
         self.menu.add_cascade(label='Database',menu=self.file_menu['var'])
         self.addPrevProjects(self.file_menu['var'])
@@ -339,9 +340,10 @@ class App(Frame, GUI_help):
         self.menu.add_cascade(label='Records',menu=self.rec_menu['var'])
 
         self.IO_menu={'01Import from Text/CSV':{'cmd':self.importCSV},
+                      '02Import Mutants':{'cmd':self.importMutants},
                       #'02Export to csv file':{'cmd':self.exportCSV},
-                      '02Import External/Binary files':{'cmd':self.importFileset},
-                      '03Export Binary Files':{'cmd':self.exportExtFiles}}
+                      '03Import External/Binary files':{'cmd':self.importFileset},
+                      '04Export Binary Files':{'cmd':self.exportExtFiles}}
         self.IO_menu=self.create_pulldown(self.menu,self.IO_menu)
         self.menu.add_cascade(label='Import/Export',menu=self.IO_menu['var'])
 
@@ -1420,7 +1422,6 @@ class App(Frame, GUI_help):
             self.table.showtablePrefs()
         return
 
-    
 #
 #move these to an actions class..?
 #calls to updateTable could be replaced with an updateCell function
@@ -1428,17 +1429,59 @@ class App(Frame, GUI_help):
 
     def importCSV(self):
         """Import CSV files dialog"""
+        if self.DB == None:
+            return
         from PEATDB.IO import Importer
         IM = Importer()
         IM.getLines()
         IM.showimportDialog()
         self.wait_window(IM.ask_csv)
-        self.DB.importDict(importdata=IM.data, namefield='name')
+        #also get field for unique key
+        vals = IM.data[0].keys()
+        mpDlg = MultipleValDialog(title='Provide a Key Field',
+                                    initialvalues=([vals]),
+                                    labels=(['key field:']),
+                                    types=(['list']),
+                                    parent=self.main)
+        if mpDlg.result == True:
+            key = mpDlg.results[0]
+        else:
+            key = 'name'    
+        self.DB.importDict(importdata=IM.data, namefield=key)
         self.updateTable()
         return
 
+    def importMutants(self):
+        """Specialised import method for adding mutant data from a csv
+        file. Requires a wt structure to create mutant AA sequences"""
+        
+        def getpdb():
+            return
+        def doimport():
+            #self.DB.importDict(importdata=IM.data, namefield='name')
+            #use mutations field to derive aa seq..
+            return
+                
+        fr=Frame()
+        win=Toplevel()
+        Label(win, text='This dialog allows you to import a set of mutant data\n'                                
+                        'along with some associated experimental values. You will\n'
+                        'need to provide the the structure for creating an AA\n'
+                        'sequence for each mutant. Mutation codes should be of\n' 
+                        'the form chain:residuenumber:code',bg='#ccFFFF').pack(fill=BOTH,expand=1)
+        Button(win,text='Set a wt PDB',command=getpdb).pack(fill=BOTH,expand=1)
+        fr=Frame(win); fr.pack(fill=X,expand=1)
+        self.useref = IntVar()
+        Label(fr,text='Use current reference protein').pack(side=LEFT)
+        Checkbutton(fr,variable=self.useref).pack(side=LEFT)       
+        self.set_centered_geometry(self.main,win)
+        Button(win,text='Continue',command=doimport).pack(fill=BOTH,expand=1)
+        return        
+    
     def importFileset(self):
         """Use filehandler class to import a set of external files"""
+        if self.DB == None:
+            return
         fh = FileHandler(parent=self)
         if self.showDialogsinSidePane == True and self.DB!=None:
             self.resetSidePane(width=300)
@@ -2033,6 +2076,7 @@ class App(Frame, GUI_help):
         if self.DB == None:
             return
         cframe = self.createChildFrame(200)
+        Label(cframe,text='Ref Prot:').pack()
         o = self.createRecsOptsMenu(cframe)
         o.pack()
         return
@@ -2050,16 +2094,31 @@ class App(Frame, GUI_help):
     def createRecsOptsMenu(self, parent, callback=None):
         """Get an option menu with a list of the records"""
         def setref(evt=None):
-            self.DB.meta.refprotein = o.getcurselection()
+            self.DB.meta.refprotein = var.get()
+            print self.DB.meta.refprotein
         if not hasattr(self.DB.meta, 'refprotein'):
             self.DB.meta.refprotein = None
-        o = Pmw.OptionMenu(parent,
-                labelpos = 'w',
-                label_text = 'Ref Protein:',
-                items = self.DB.getRecs(),
-                initialitem = self.DB.meta.refprotein,
-                command=setref,
-                menubutton_width = 12)
+
+        var=StringVar()
+        var.set(self.DB.meta.refprotein)
+        o = Menubutton(parent, textvariable=var,
+                            borderwidth=2,relief=GROOVE,
+                            bg='#ccFFFF',
+                            width=12)
+        m=Menu(o,tearoff=0)
+        o['menu']=m
+        p=0
+        for name in self.DB.getRecs():
+            if p%30==0 and p!=0:
+                colbrk=1
+            else:
+                colbrk=0
+            m.add_radiobutton(label=name,                                                 
+                              value=name,
+                              variable=var,
+                              columnbreak=colbrk,
+                              command=setref)
+            p+=1
         return o
     
     def remodelPEATModels(self):
@@ -2206,12 +2265,24 @@ class App(Frame, GUI_help):
             return
         
         from Search import  searchDialog
-        S = searchDialog(self.sidepane, self.DB)
-        
-        S.pack()
-        
+        S = searchDialog(self.sidepane, self.DB)        
+        S.pack()        
         return
 
+    def createServerProject(self):
+        """Allow users with admin passwd to create a project
+        on the remote MySql DB. Relstorage only."""
+        
+        import MySQLdb as mysql
+        db = mysql.connect(user="root", host="localhost", passwd="")
+        c = db.cursor()
+        dbName = 'temporary'
+        cmd = "create database " + dbName + ";"
+        c.execute(cmd)
+        
+        return
+        
+    
     def set_geometry(self,pwidget,widget):
         """Set the position of widget in the middle of pwidget"""
         w,h,x,y=get_geometry(pwidget)

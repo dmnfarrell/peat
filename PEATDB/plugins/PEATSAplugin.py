@@ -206,11 +206,8 @@ class PEATSAPlugin(Plugin):
                 mutlist.importfile(filename)
             return
         def loadmutsfromDB():
-            for p in self.DB.getRecs():
-                if self.DB.meta.usedisplaycache == True:
-                    mut = self.DB.cellcache['Mutations'][p]                   
-                else:    
-                    mut = self.DB.get(p).Mutations
+            for p in self.DB.getRecs():               
+                mut = self.DB.get(p).Mutations
                 if mut == None or mut=='':
                     continue
                 if type(mut) is types.StringType:
@@ -263,7 +260,7 @@ class PEATSAPlugin(Plugin):
             if len(mutationlist) == 0 or mutationlist==[u'']:
                 print 'mutation list is empty'
                 return
-            if nameentry.getvalue() in self.DB.meta.peatsa_jobs:
+            if hasattr(self.DB.meta,'peatsa_jobs') and nameentry.getvalue() in self.DB.meta.peatsa_jobs:
                 print 'job name already used'
                 return
             name=nameentry.getvalue()
@@ -657,11 +654,8 @@ class PEATSAPlugin(Plugin):
         for m in self.matrices:
             matrix = self.matrices[m]          
             if matrix == None: continue
-            M = self.parent.tablemodel
-            #M = self.matrix2Table(matrix)
-            #M.merge(M1, key='Mutations', fields=['name'])            
-            M = self.mergeMatrix(matrix, M, fields=['name',expcol])
-            print M, M.columnNames
+            M = self.parent.tablemodel           
+            M = self.mergeMatrix(matrix, M, fields=['name',expcol])           
             x,y,names,muts = M.getColumns(['Total',expcol,'name','Mutations'],allowempty=False)          
             labels = zip(names, muts)
             ax,frame,mh = C.plotCorrelation(x,y,labels,title=m,ylabel=expcol)

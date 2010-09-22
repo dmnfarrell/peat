@@ -399,9 +399,9 @@ class MouseHandler:
         if hasattr(self,'table'):
             ml=self.table.model
             if self.key != None:
-                name = info[0]
-                print name
-                self.table.movetoSelectedRow(recname=name)
+                name = info[0]                           
+                recname = ml.filterBy('name', name, op='=')[0]                
+                self.table.movetoSelectedRow(recname=recname)
         return
     
     def on_press(self, event):
