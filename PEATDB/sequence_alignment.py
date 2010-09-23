@@ -36,9 +36,10 @@ class NW:
     # Can be rewritten as Waterman-Smith relatively easily...
     """
 
-    def __init__(self,seq1,seq2):
+    def __init__(self,seq1,seq2,gap=0.25):
         self.s1=seq1
         self.s2=seq2
+        self.gap=gap
         return
 
     # 
@@ -84,7 +85,7 @@ class NW:
             return 1
         else:
             # Gap extension
-            return 0.25
+            return self.gap
 
     #
     # -----

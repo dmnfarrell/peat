@@ -77,6 +77,7 @@ class Record(OOBTree):
     def delete(self, key):
         del self[key]
         self._p_changed = 1
+        del self._display[key]
         return
 
     def getField(self, key):
@@ -149,7 +150,7 @@ class PEATRecord(Record):
     def hasStructure(self):
         """Determine if this record has a structure"""
         import types
-        if self.Structure == None:
+        if not hasattr(self,'Structure') or self.Structure == None:
             return 'not available'
         if self.has_key('structuretype'):
             return self.structuretype
@@ -192,7 +193,7 @@ class PEATRecord(Record):
     
     def getAncestry(self, parent, immediate=None):
         """Find out if a record is parent of another record using
-           sequence information """
+           sequence information and get operations"""
         import sequence_alignment
         from Sequence import SequenceOperations as SQ
         full_record_sequence = self.aaseq       

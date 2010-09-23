@@ -340,7 +340,7 @@ class App(Frame, GUI_help):
         self.menu.add_cascade(label='Records',menu=self.rec_menu['var'])
 
         self.IO_menu={'01Import from Text/CSV':{'cmd':self.importCSV},
-                      '02Import Mutants':{'cmd':self.importMutants},
+                      #'02Import Mutants':{'cmd':self.importMutants},
                       #'02Export to csv file':{'cmd':self.exportCSV},
                       '03Import External/Binary files':{'cmd':self.importFileset},
                       '04Export Binary Files':{'cmd':self.exportExtFiles}}
@@ -370,7 +370,8 @@ class App(Frame, GUI_help):
                      '02Set Reference Protein':{'cmd':self.setRefProtein},
                      '03Remodel PEAT Models':{'cmd':self.remodelPEATModels},
                      '04Fetch PDB':{'cmd':self.fetchPDB},
-                     '05Check Mutations':{'cmd':self.checkMutations}}                     
+                     '05Update Mutation Codes':{'cmd':self.updateMutations}}
+                     #'06Update Mutant Sequences':{'cmd':self.updateAASequences}}                     
         self.tools_menu=self.create_pulldown(self.menu,self.tools_menu)
         self.menu.add_cascade(label='Tools',menu=self.tools_menu['var'])        
         
@@ -1704,6 +1705,16 @@ class App(Frame, GUI_help):
             fd.close()
         return
 
+    def viewStructureText(self, protein, field_name):
+        """Show PDB text"""
+        pdblines,X=self.DB.getStructure(protein,field_name)
+        if not pdblines:
+            return
+        import textFrame
+        tf = textFrame.textFrame(parent=self.main,title=protein+' Structure')
+        tf.load_text(pdblines)
+        return        
+    
     def displayStructure(self, protein, field_name):
         """Display a structure"""
         app = self.preferences.get('molgraphApplication')
@@ -2081,7 +2092,7 @@ class App(Frame, GUI_help):
         o.pack()
         return
 
-    def checkMutations(self):
+    def updateMutations(self):
         """Check sequences and create mutation names"""
         if not hasattr(self.DB.meta, 'refprotein'):
             return
@@ -2091,6 +2102,18 @@ class App(Frame, GUI_help):
         self.updateTable()
         return
     
+    def updateAASequences(self):
+        """Update the AA sequences for mutants, usually applied to 
+        those mutants that don't have a DNA sequence, so at any time we
+        can change their AA seq if the ref prot is altered
+        requires: reference protein to be set"""
+        if not hasattr(self.DB.meta, 'refprotein') or self.DB.meta.refprotein == None:
+            tkMessageBox.showinfo('No ref protein',
+                                  'Set a reference (wt) protein first')
+            return 
+            
+        return
+        
     def createRecsOptsMenu(self, parent, callback=None):
         """Get an option menu with a list of the records"""
         def setref(evt=None):

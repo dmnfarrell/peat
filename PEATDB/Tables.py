@@ -546,7 +546,6 @@ class TableCanvas(Canvas):
 
     def delete_Cells(self, rows, cols):
         """Clear the cell contents"""
-
         n =  tkMessageBox.askyesno("Clear Confirm",
                                    "Clear this data?",
                                    parent=self.parentframe)
@@ -555,8 +554,7 @@ class TableCanvas(Canvas):
         for col in cols:
             for row in rows:
                 absrow = self.get_AbsoluteRow(row)
-                self.model.deleteCellRecord(row, col)
-        #self.redrawTable()
+                self.model.deleteCellRecord(row, col)       
         self.redrawCell(row,col)
         return
 

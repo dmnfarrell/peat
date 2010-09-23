@@ -30,7 +30,8 @@ class PEATTable(TableCanvas):
         self.rowselectedcolor = '#f6fcd1'
 
         self.peatactions = {'PDB' : {"Save PDB file":'save_structure',
-                                    "View Structure":  'displayStructure' },
+                                    "View Structure": 'displayStructure',
+                                    "View PDB Text": 'viewStructureText'},
                     'Notes' : {"Edit notes": 'edit_notes' },
                     'Link' : {"Edit Link" : 'edit_link', "Open link" : 'open_link'},
                     'File' : {"View File" : 'display_file', "Add File" : 'add_file',
@@ -499,9 +500,9 @@ class PEATTableModel(TableModel):
         """Remove the cell data at this row/column"""
         colname = self.getColumnName(columnIndex)
         coltype = self.columntypes[colname]
-        name = self.reclist[rowIndex]
-        if self.data[name].has_key(colname):
-            self.data[name].delete(colname)
+        name = self.reclist[rowIndex]       
+        if self.data[name].has_key(colname):           
+            self.data[name].delete(colname)            
         return
 
     def getRecordAttributeAtColumn(self, rowIndex=None, columnIndex=None,

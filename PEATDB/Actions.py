@@ -64,63 +64,12 @@ class DBActions(object):
     @classmethod       
     def string2AAseq(self, seq, chain='A'):
         """Convert string to amino acid aaseq as stored in PEAT"""
-        from PEAT_SA.Core import Utilities
+        from PEATSA.Core import Utilities
         codemap  = Utilities.InvertedCodeDictionary()
         codes = [codemap[el] for el in list(seq)]
         indexes = [Utilities.CreateResidueCode(chain=chain, number=index) for index in range(1, len(seq) + 1)]        
         return zip(indexes, codes)
-        
-    @classmethod
-    def mutationCodeFromSequences(self, initialSequence, targetSequence, offset=0, chain='A'):
-        '''Returns a MutationSet representing the mutations necessary to change initialSequence to targetSequence            
-        Parameters:
-                initialSequence - "WildType"
-                targetSequence - "Mutant"
-                offset - The difference between the index of the first aa in the initial sequence and 1
-                        e.g. if the first amino-acid in initialSequence string is actually the 5th
-                        in the real sequence then the offset is 4.               
-        Note: If this requires insertions or deletions this method returns None'''
-        code=''
-        muts=[]
-        if len(initialSequence) != len(targetSequence):
-            print 'Sequences are not the same length'
-            return None
-        if initialSequence.find('-') != -1:
-            return None
-        elif targetSequence.find('-') != -1:
-            return None	
-        for count in range(len(initialSequence)):
-            initialAA=initialSequence[count]
-            targetAA=targetSequence[count]
-            if initialAA != targetAA:              
-                muts.append(chain + str(count+1 + offset) + str(targetAA)) 
-        code += '+'.join(muts)
-        return code
-    
-    @classmethod
-    def checkMutation(self, DB, name, ref=None):
-        """Check mutations based on ref sequence and current mutant
-           sequence, should be triggered whenever ref protein is altered so 
-           that the mutation codes are updated.."""
-        prot = DB.get(name)
-        if prot.aaseq == None:
-            return
-        if ref == None:
-            ref = self.DB.meta.refprotein
-            
-        refseq = self.AAList2String(DB.get(ref).aaseq)
-        
-        if prot.aaseq == None:
-            return
-        #get mutations from sequence
-        seq = self.AAList2String(prot.aaseq)       
-        if seq == refseq:
-            return
-        #assumes chain A..    
-        mcode = self.mutationCodeFromSequences(refseq, seq, offset=0)
-        prot.Mutations = mcode
-        return
-        
+                  
     def addProteinSeq(self, DB, name):
         """Add a protein sequence"""
         seq_win=Toplevel()
@@ -198,10 +147,36 @@ class DBActions(object):
                                                three_lt_seq,
                                                int(self.seq_start.get()))
         if not ok:
-            raise 'Something went wrong when addding the protein sequence'
+            raise 'Something went wrong when adding the protein sequence'
         return
 
-
+    @classmethod
+    def checkMutation(self, DB, name, ref=None):
+        """Check mutations based on ref sequence and current mutant
+           sequence, should be triggered whenever ref protein is altered so 
+           that the mutation codes are updated.."""
+        prot = DB.get(name)
+        if prot.aaseq == None:
+            return
+        if ref == None:
+            ref = self.DB.meta.refprotein
+            
+        refseq = self.AAList2String(DB.get(ref).aaseq)
+        
+        if prot.aaseq == None:
+            return
+        #get mutations from sequence
+        seq = self.AAList2String(prot.aaseq)       
+        if seq == refseq:
+            return
+        #get alignment for pdb seq and AA from DNA seq
+       
+        #assumes chain A..
+        import PEATSA.Core as Core
+        mset = Core.Data.mutationSetFromSequences(refseq, seq, offset=0)
+        prot.Mutations = '+'.join(mset.mutationCodes(reduced=True))
+        return
+        
     @classmethod
     def addPDBFile(self, DB=None, name=None, pdbfile=None, pdbdata=None):
         """Add a PDB file to the record given as argument"""
@@ -214,8 +189,7 @@ class DBActions(object):
                                          filetypes=[("PDB file","*.pdb"),
                                                     ("PDB file","*.brk"),
                                                     ("All files","*.*")])
-        #if not pdbfile or not pdbdata:
-        #    return
+
         import Protool
         self.X=Protool.structureIO()
         # Extracting PDB_code from pdbfile
@@ -261,8 +235,8 @@ class DBActions(object):
             DB.data[name]['aaseq'] = copy.deepcopy(self.X.sequence)
 
         # Align the two sequences
-        NW_align=sequence_alignment.NW(pdb_1,record_AA1)
-        al_pdb,al_record,map_pdb,map_record=NW_align.Align()
+        NW_align = sequence_alignment.NW(pdb_1,record_AA1)
+        al_pdb,al_record,map_pdb,map_record = NW_align.Align()
         self.al_pdb = al_pdb
         self.al_record = al_record
 
@@ -279,9 +253,17 @@ class DBActions(object):
         self.AlignmentMap['OrigAa']=al_record
         self.AlignmentMap['AlignedAa']=al_pdb
 
-        def store_PDB():
+        def storePDB():
             DB.storePDB(name, self.X, self.AlignmentMap)
             AlignWindow.destroy()
+            ref = DB.meta.refprotein
+            print name, ref
+            #if this is the reference protein remodel mutations and rewrite mut codes   
+            if name == ref:
+                print 'rechecking mutation codes, ref prot structure has changed'
+                self.checkModels(DB)                
+                for p in DB.getRecs():
+                    self.checkMutation(DB, p, ref)           
 
         #Make alignment window
         AlignWindow=Toplevel()
@@ -290,7 +272,7 @@ class DBActions(object):
         AlignWindow.title('Please check alignment')
         AlignWindow.button = Button(AlignWindow,
                                     {"text": "Alignment OK", "fg": "black",
-                                     "command":store_PDB})
+                                     "command":storePDB})
         AlignWindow.button.grid(row=3,column=0)
         AlignWindow.button = Button(AlignWindow,
                                     {"text": "Alignment not OK", "fg": "black",
@@ -307,7 +289,8 @@ class DBActions(object):
         AlignWindow.Slider.config(command=listbox.xview)
 
         if accept_alignment_automatically:
-            store_PDB()
+            storePDB()
+            
         return
 
     @classmethod    
@@ -570,7 +553,7 @@ class DBActions(object):
             if rec.aaseq == None and rec.Mutations != None:
                 #print refaa
                 print 'no sequence, using mutation code and ref protein seq'                 
-                import PEAT_SA.Core as Core
+                import PEATSA.Core as Core
                 print 'Record has mutation code %s' %rec.Mutations
                 mutationSet = Core.Data.MutationSet(rec.Mutations)
                 mutseq = mutationSet.applyToSequence(refaa, id='A', pdb=Xref)                 
@@ -627,16 +610,16 @@ class DBActions(object):
                     continue
                 
                 # This is a normal mutation                    
-                # Get the residue number, old residue and new residue
-                
+                # Get the residue number, old residue and new residue               
                 import pKa.pKD_tools as pKD_tools
                 new_res = pKD_tools.get_newrestyp_from_mut(operation)
                 old_res = pKD_tools.get_oldrestyp_from_mut(operation)
                 resid = pKD_tools.get_resid_from_mut(operation)
                 
-                #import string
+                #print operation, resid                
                 if not X.residues.has_key(resid):
                     print 'No structural info for mutation %8s. Not modelling this mutation\n' %operation
+                    skip_protein=True
                     continue
                 
                 # Actually make the mutation                
@@ -680,7 +663,7 @@ class DBActions(object):
     @classmethod
     def modelFromMutationCode(self):
         """Model directly from mutation code"""
-        import PEAT_SA.Core as Core
+        import PEATSA.Core as Core
         print 'Record has mutation code %s' %rec.Mutations
         mutationSet = Core.Data.MutationSet(rec.Mutations)
         mutationCodes = mutationSet.mutationCodes(Xref, reduced=False)
