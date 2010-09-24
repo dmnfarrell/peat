@@ -1597,7 +1597,8 @@ def mutationSetFromSequencesAndStructure(initialSequence, targetSequence, struct
 		if verbose:
 			print 'Checking for mutations in chain %s' % chain
 		data = align[chain]
-		offset = Utilities.ParseResidueCode(chainResidues[chain][0])
+		#Get the residue numbering offset
+		offset = Utilities.ParseResidueCode(chainResidues[chain][0])[1]
 		initialToChain = data[3]
 		for mutation in mutations:
 			print mutation
