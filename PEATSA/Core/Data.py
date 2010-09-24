@@ -139,6 +139,21 @@ def CreateCompleteScanList(pdbFile):
 			mutationList.append(listElement)
 	
 	return mutationList
+	
+def GetChainSequences(structure):	
+
+	chainSeqs = {}
+	for chain in structure.chains.keys():
+		sequence = ""
+		data = structure.chains[chain]
+		data = [el for el in data if el.find('ALT') is -1]
+		data = sorted(data, 
+			cmp=lambda x,y: cmp(Utilities.ParseResidueCode(x)[1], Utilities.ParseResidueCode(y)[1]))
+		for res in data:
+			sequence = sequence + Utilities.aminoAcidCodes[structure.resname(res)]
+		chainSeqs[chain] = sequence	
+
+	return chainSeqs
 
 def mutationListFileFromStream(stream):
 
@@ -1460,6 +1475,134 @@ def mutationSetFromSequences(initialSequence, targetSequence, offset=0, chain='A
 			set.addMutation(chain, count + offset + 1, targetAA) 
 	
 	return set
+	
+def mutationSetFromSequencesAndStructure(initialSequence, targetSequence, structure, name='Test', verbose=True):
+
+	import PEATDB.sequence_alignment as SequenceAlignment
+
+	if len(initialSequence) != len(targetSequence):
+		raise Exceptions.ProteinDesignToolException, 'Sequences are not the same length'
+
+	if initialSequence.find('-') != -1:
+		return None
+	elif targetSequence.find('-') != -1:
+		return None	
+
+	#Find the mutations in targetSequence relative to initial
+	mutations = []
+	for count in range(len(initialSequence)):
+		initialAA=initialSequence[count]
+		targetAA=targetSequence[count]
+		if initialAA != targetAA:
+			mutations.append([count, initialAA, targetAA])
+	
+	#Align the initial sequence with each chain in the pdb
+	structure.Remove_All_NonAminoAcids()	
+	chainSeqs = GetChainSequences(structure)
+	chains = chainSeqs.keys()
+	chains.sort()
+
+	align = {}
+	for chain in chains:
+		
+		aligner = SequenceAlignment.NW(chainSeqs[chain],initialSequence, gap=2.0)
+		data=aligner.Align(verbose=False)
+		
+		chainToInitial = data[2]
+		initialToChain = data[3]
+		
+		length = len(data[0])
+		identical = aligner.sequence_identity*length/100
+		percentIdentical = identical/len(chainSeqs[chain])
+		
+		notFound = True
+		i = 0
+		while notFound:
+			if chainToInitial[i] != '-':
+				notFound = False
+				firstAlignedResidue = i
+			else:
+				i += 1
+		
+		notFound = True
+		i = len(chainToInitial) - 1				
+		while notFound:
+			if chainToInitial[i] != '-':
+				notFound = False
+				lastAlignedResidue = i
+			else:
+				i -= 1		
+		
+		if verbose:
+			print '%lf percent of residues in chain %s were matched to wild-type' % (percentIdentical, chain)
+		
+		wtAlign = [chainToInitial[firstAlignedResidue], chainToInitial[lastAlignedResidue]]
+		chainAlign = [firstAlignedResidue, lastAlignedResidue]
+		align[chain] = [percentIdentical, chainAlign, wtAlign, initialToChain]
+		
+	
+	#Find overlapping chains
+	i = 0
+	overlap = {}		
+	for chain in chains:
+		j=i+1
+		end = align[chain][2][1]
+		overlap[chain] = []
+		for chain2 in chains[j:]:
+			start = align[chain2][2][0]
+			if start < end:
+				overlap[chain].append(chain2)
+				if verbose:
+					print 'Chain %s and %s overlap' % (chain, chain2)
+			j += 1
+		i+= 1		
+
+	#For overlapping chains only keep the one that has the highest alignment	
+	discard = set()
+	for chain in chains:
+		best = chain
+		for id in overlap[chain]:
+			if align[id][0] > align[chain][0]:
+				discard.add(best)
+				best = id
+			else:
+				discard.add(id)
+	
+		if verbose:
+			print 'Best out of %s is %s - discard others' % (overlap[chain], best)
+		
+	if verbose:	
+		print 'Discarding ', discard	
+	
+	keep = [chain for chain in chains if not chain in discard]			
+		
+	mutationSet = MutationSet(name=name)
+	unidmuts = []
+	originalMutations = []
+	originalMutations.extend(mutations)
+	for chain in keep:
+		if verbose:
+			print 'Checking for mutations in chain %s' % chain
+		data = align[chain]
+		initialToChain = data[3]
+		for mutation in mutations:
+			print mutation
+			chainRes = initialToChain[mutation[0]]
+			if chainRes != '-':
+				mutationSet.addMutation(chain, chainRes, mutation[2]) 
+			else:
+				if verbose:
+					print '%s not found in chain %s' % (mutation, chain)
+				unidmuts.append(mutation)
+		mutations = unidmuts
+		unidmuts = []
+		
+	if len(mutationSet.mutationCodes()) != len(originalMutations):	
+		print 'Could not find residues corresponding to some sequence mutations in pdb structure'	
+		mutationSet = None
+		
+	return mutationSet					
+					
 	
 class MutationSet:
 
