@@ -1494,7 +1494,7 @@ def mutationSetFromSequencesAndStructure(initialSequence, targetSequence, struct
 		initialAA=initialSequence[count]
 		targetAA=targetSequence[count]
 		if initialAA != targetAA:
-			mutations.append([count, initialAA, targetAA])
+			mutations.append([count+1, initialAA, targetAA])
 	
 	#Align the initial sequence with each chain in the pdb
 	structure.Remove_All_NonAminoAcids()	
