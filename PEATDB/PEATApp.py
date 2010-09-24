@@ -1680,7 +1680,7 @@ class App(Frame, GUI_help):
 
     def addPDBFile(self):
         sel_prot = self.table.get_selectedRecordNames()[0]
-        DBActions.addPDBFile(self.DB, sel_prot)       
+        DBActions.addPDBFile(self.DB, sel_prot)
         self.updateTable()
         return
 

@@ -151,29 +151,32 @@ class DBActions(object):
         return
 
     @classmethod
-    def checkMutation(self, DB, name, ref=None):
+    def checkMutation(self, DB, name, ref=None, X=None):
         """Check mutations based on ref sequence and current mutant
            sequence, should be triggered whenever ref protein is altered so 
-           that the mutation codes are updated.."""
+           that the mutation codes are updated."""
         prot = DB.get(name)
         if prot.aaseq == None:
             return
         if ref == None:
-            ref = self.DB.meta.refprotein
-            
-        refseq = self.AAList2String(DB.get(ref).aaseq)
-        
+            ref = self.DB.meta.refprotein            
+        refseq = self.AAList2String(DB.get(ref).aaseq)        
         if prot.aaseq == None:
             return
         #get mutations from sequence
         seq = self.AAList2String(prot.aaseq)       
         if seq == refseq:
             return
-        #get alignment for pdb seq and AA from DNA seq
-       
-        #assumes chain A..
+            
+        #get alignment for pdb seq and AA from DNA seq    
         import PEATSA.Core as Core
-        mset = Core.Data.mutationSetFromSequences(refseq, seq, offset=0)
+        if X == None:
+            #we need to also provide the ref structure
+            import Protool
+            X=Protool.structureIO()
+            X.parsepdb(DB.get(ref).Structure)
+           
+        mset = Core.Data.mutationSetFromSequencesAndStructure(refseq, seq, X)
         prot.Mutations = '+'.join(mset.mutationCodes(reduced=True))
         return
         
@@ -260,10 +263,12 @@ class DBActions(object):
             print name, ref
             #if this is the reference protein remodel mutations and rewrite mut codes   
             if name == ref:
-                print 'rechecking mutation codes, ref prot structure has changed'
-                self.checkModels(DB)                
+                print 'rechecking mutation codes, ref prot structure has changed'                
+                #get new mutation codes
+                import PEATSA.Core as Core
                 for p in DB.getRecs():
-                    self.checkMutation(DB, p, ref)           
+                    self.checkMutation(DB, p, ref, self.X)
+                #self.checkModels(DB)                   
 
         #Make alignment window
         AlignWindow=Toplevel()

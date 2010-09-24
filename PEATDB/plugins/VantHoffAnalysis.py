@@ -234,7 +234,7 @@ class VantHoff(Plugin):
             x,y = x[L:U], y[L:U]
         
         t=[]; f=[]
-        print mu
+        #print mu, mn
         for T,yo in zip(x,y):            
             fu = (yo-(yn+mn*T)) / ((yu+mu*T)-(yn+mn*T))
             #print fu, (yo-(yn+mn*T)), (m), mu, mn

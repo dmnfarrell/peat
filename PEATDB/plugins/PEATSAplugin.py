@@ -125,7 +125,8 @@ class PEATSAPlugin(Plugin):
         c='#ADD8E6'
         Button(fr,text='Show Details',command=self.viewDetails,bg=c).pack(side=LEFT,fill=BOTH,expand=1)
         Button(fr,text='Manage Results',command=self.manageResults,bg=c).pack(side=LEFT,fill=BOTH,expand=1)
-        Button(fr,text='Remove',command=self.removeJob,bg=c).pack(side=LEFT,fill=BOTH,expand=1)        
+        Button(fr,text='Remove',command=self.removeJob,bg=c).pack(side=LEFT,fill=BOTH,expand=1)
+        Button(fr,text='Resubmit',command=self.resubmitJob,bg=c).pack(side=LEFT,fill=BOTH,expand=1)
         fr.pack(fill=BOTH)
         return 
         
@@ -365,6 +366,11 @@ class PEATSAPlugin(Plugin):
         print 'job submitted successfully'
         return
 
+    def resubmitJob(self):
+        """Resend a job based on new mutations in DB that are not in job already"""
+        
+        return
+        
     def getJob(self, name=None):
         """Get job from name"""
         if name == None:
