@@ -154,6 +154,18 @@ def GetChainSequences(structure):
 		chainSeqs[chain] = sequence	
 
 	return chainSeqs
+	
+def GetChainResidues(structure):	
+
+	chainResidues = {}
+	for chain in structure.chains.keys():
+		data = structure.chains[chain]
+		data = [el for el in data if el.find('ALT') is -1]
+		data = sorted(data, 
+			cmp=lambda x,y: cmp(Utilities.ParseResidueCode(x)[1], Utilities.ParseResidueCode(y)[1]))
+		chainResidues[chain] = data	
+
+	return chainResidues	
 
 def mutationListFileFromStream(stream):
 
@@ -1499,6 +1511,7 @@ def mutationSetFromSequencesAndStructure(initialSequence, targetSequence, struct
 	#Align the initial sequence with each chain in the pdb
 	structure.Remove_All_NonAminoAcids()	
 	chainSeqs = GetChainSequences(structure)
+	chainResidues = GetChainResidues(structure)
 	chains = chainSeqs.keys()
 	chains.sort()
 
@@ -1584,12 +1597,13 @@ def mutationSetFromSequencesAndStructure(initialSequence, targetSequence, struct
 		if verbose:
 			print 'Checking for mutations in chain %s' % chain
 		data = align[chain]
+		offset = Utilities.ParseResidueCode(chainResidues[chain][0])
 		initialToChain = data[3]
 		for mutation in mutations:
 			print mutation
 			chainRes = initialToChain[mutation[0]]
 			if chainRes != '-':
-				mutationSet.addMutation(chain, chainRes, mutation[2]) 
+				mutationSet.addMutation(chain, chainRes+offset, mutation[2]) 
 			else:
 				if verbose:
 					print '%s not found in chain %s' % (mutation, chain)
