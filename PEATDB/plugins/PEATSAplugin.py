@@ -368,28 +368,45 @@ class PEATSAPlugin(Plugin):
 
     def resubmitJob(self):
         """Resend a job based on new mutations in DB that are not in job already"""
-        
+        job, name = self.getJob()
+        if job == None:
+            return
+        DB=self.DB
+        dataset = job.data
+        matrices = {'binding':dataset.bindingResults,
+                    'stability':dataset.stabilityResults}
+        for m in matrices:
+            matrix=matrices[m]
+            if matrix==None: return
+            muts = matrix.mutationCodes()
+            dbmuts = [DB.get(p).Mutations for p in DB.getRecs()]       
+            newmuts = list(set(dbmuts) - set(muts))
+            print 'the following mutations have been added since the job was submitted: %s' %newmuts
+            
         return
         
     def getJob(self, name=None):
         """Get job from name"""
         if name == None:
-            name = self.jobslist.getcurselection()[0]
+            try:
+                name = self.jobslist.getcurselection()[0]
+            except:
+                return None, None         
         jobid = self.DB.meta.peatsa_jobs[name]
-        job = PEATSA.WebApp.Data.Job(jobid, self.connection)        
+        job = PEATSA.WebApp.Data.Job(jobid, self.connection)
         return job, name
         
     def removeJob(self):
         """Remove a job from the db"""
+        job, name = self.getJob()
+        if job == None:
+            return
         import tkMessageBox
         answer = tkMessageBox.askyesno("Warning",'Remove this job?')
         if answer == False:
-            return
-
-        name = self.jobslist.getcurselection()[0]
-        jobid = self.DB.meta.peatsa_jobs[name]        
+            return        
         try:
-            job = PEATSA.WebApp.Data.Job(jobid, self.connection)
+            #job = PEATSA.WebApp.Data.Job(jobid, self.connection)
             self.jobManager.deleteJob(job)
         except:
             print 'job not in database, removing from peat'
@@ -400,6 +417,8 @@ class PEATSAPlugin(Plugin):
         
     def viewDetails(self, name=None):
         job, name = self.getJob()
+        if job==None:
+            return
         print
         print 'job %s has id %s' %(name,job.identification) 
         print 'status:',job.state()
