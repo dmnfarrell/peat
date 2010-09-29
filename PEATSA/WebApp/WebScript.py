@@ -337,6 +337,7 @@ if __name__ == "__main__":
 		print "Please contact the developers with the following traceback information",
 		print "along with details on the calculation being run (arguments, configuration file etc.)\n"
 		print "%s" % data
+		print "%s" % trace
 		environment.wait(error=True)
 		environment.exit(1)
 			
