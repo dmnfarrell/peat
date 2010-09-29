@@ -437,21 +437,32 @@ class WorkingDirectory:
 		#Create environment instance
 		self.environment = Environment()
 
-		#set default behaviour is working directory already exists
+		#set default behaviour if working directory already exists
 		copyIfExists = False
+		ignoreCopyError = False
 		overwriteExistingCopies = False
 		useUniqueID = False
 		copyLocation = os.getcwd()
 
 		#override defaults with configuration values if available
 		if configuration is not None:
+			#Note: Casting a string directly to a bool always gives True
 			copyIfExists = int(configuration.get('WORKING DIRECTORY', 'copyIfExists'))
-			#Casting a string directly to a bool always gives True
 			copyIfExists = bool(copyIfExists)
+			useUniqueID = int(configuration.get('WORKING DIRECTORY', 'useUniqueID'))
+			useUniqueID = bool(useUniqueID)
 			overwriteExistingCopies = bool(configuration.get('WORKING DIRECTORY', 'overwriteExistingCopies'))
 			copyLocation = configuration.get('WORKING DIRECTORY', 'copyLocation')
-			useUniqueID = bool(configuration.get('WORKING DIRECTORY', 'useUniqueID'))
 			copyLocation = os.path.abspath(copyLocation)
+
+			try:
+				ignoreCopyErrors = int(configuration.get('WORKING DIRECTORY', 'ignoreCopyErrors'))
+				ignoreCopyErrors = bool(ignoreCopyErrors)
+			except ConfigParser.NoOptionError, data:
+				self.environment.output(
+					'[PEAT-SA] Configuration file does not contain ignoreCopyErrors option - defaulting to false',
+					rootOnly=True)
+				ignoreCopyErrors = False
 		
 		self.directory = os.path.abspath(location)
 			
@@ -498,8 +509,23 @@ class WorkingDirectory:
 							onerror=self._removeErrorHandler)
 				
 				#Copy the directory to the new destination
-				shutil.copytree(originalLocation, self.directory , symlinks=True)
+				try:
+					shutil.copytree(originalLocation, self.directory , symlinks=True)
+				except shutil.Error, data:
+					self.environment.output(
+						'[PEAT-SA] Encountered error while copying',
+						rootOnly=True)
+					if ignoreCopyErrors is True:
+						self.environment.output( '[PEAT-SA] Errors were:', rootOnly=True)
+						for copyError in data:
+							self.environment.output( '\t%s' % data, rootOnly=True)
 	
+						self.environment.output(
+							'[PEAT-SA] Ignoring errors and trying to continue',
+							rootOnly=True)
+					else:
+						raise
+						 
 		else:
 			self.environment.output(
 				'[PEAT-SA] Specified working directory exists - using it',
@@ -875,7 +901,7 @@ class Environment:
 	isInitialised = False
 	isParallel = False
 	
-	def __init__(self, verbose=False):
+	def __init__(self, verbose=True):
 	
 		'''Initialises new Environment objects'''
 	
