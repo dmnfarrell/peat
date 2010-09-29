@@ -757,6 +757,7 @@ class WorkingDirectory:
 			#Link the mutants to the required scan directory
 			if mutantCollection is not None:
 				mutantPath = os.path.join(self.directory, "%s.pdbs" % pdbName)
+				self.environment.output('Linking created mutants to %s' % mutantPath)
 					
 				#Check if a link exists - if it does delete it
 				#Move previous scan dirs to a new path
@@ -764,30 +765,37 @@ class WorkingDirectory:
 					os.remove(mutantPath)
 				elif os.path.isdir(mutantPath):
 					renamedPath = os.path.join(self.directory, "%s.pdbs_old" % pdbName)
-					os.rename(mutantPath, renamedPath)	
-					print 'Moved existing mutants to %s' % renamedPath
+					if not os.path.isdir(renamedPath):
+						os.rename(mutantPath, renamedPath)	
+						self.environment.output('Moved existing mutants at %s to %s' % (mutantPath, renamedPath))
+					else:
+						self.environment.output('Leaving  mutants present at %s' % renamedPath)
+						self.environment.output('Deleting mutants present at %s' % mutantPath)
+						shutil.rmtree(mutantPath, ignore_errors=1, onerror=self._removeErrorHandler)
 				
 				#Create a link to the mutant collection dir
 				os.symlink(os.path.join(mutantCollection.location, "Mutants"), mutantPath)
+				self.environment.output('Link created')
 		
 		self.environment.wait()		
 		
 		#If we are in parallel every process copies the necessary files
 		#to its own subdir of this directory and changes to work in it
 		if self.environment.isParallel:
-			print 'Process %d. Current path %s. Current dir %s' % (self.environment.rank(), self.path(), os.getcwd())
+			self.environment.output('Current path %s. Current dir %s' % (self.path(), os.getcwd()), rootOnly=True)
+
 			destination = os.path.join(self.path(), "Process%d" % self.environment.rank())
 			#Check is this already exists - could have been a problem with a previous clean
-			print 'Creating process specific directory at %s' % destination
+			self.environment.log('Creating process specific directory at %s' % destination)
 			if os.path.exists(destination):
-				print 'Deleting previous process specific directory at %s' % destination
+				self.environment.output('Deleting previous process specific directory at %s' % destination, rootOnly=True)
 				shutil.rmtree(destination, ignore_errors=1, onerror=self._removeErrorHandler)
 
 			template = os.path.join(self.path(), "template")
 				
 			if self.environment.isRoot():
 				if os.path.exists(template):
-					print 'Deleting previous template directory at %s' % template
+					self.environment.output('Deleting previous template directory at %s' % template, rootOnly=True)
 					shutil.rmtree(template, ignore_errors=1, onerror=self._removeErrorHandler)
 					
 				#Create process temp copy without the sim links
@@ -801,7 +809,7 @@ class WorkingDirectory:
 				shutil.rmtree(template, ignore_errors=1, onerror=self._removeErrorHandler)
 
 			os.chdir(destination)
-			print 'Process %d After move: Current path %s. Current dir %s' % (self.environment.rank(), self.path(), os.getcwd())
+			self.environment.output('After move: Current path %s. Current dir %s' % (self.path(), os.getcwd()), rootOnly=True)
 	
 	def cleanUpScan(self):
 	
