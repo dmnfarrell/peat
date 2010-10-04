@@ -1929,7 +1929,7 @@ class MutationSet:
 						raise Exceptions.MutationCodeApplicationError(mutationCode=code, message=message)
 				else:
 					chain, index, mut = components
-					seq[index - 1] = Utilities.aminoAcidDict[mut]
+					seq[index - 1] = Utilities.aminoAcidCodes[mut]
 				
 		return "".join(seq)		
 			
