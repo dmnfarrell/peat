@@ -319,7 +319,7 @@ class EkinProject(object):
                 
     def checkDatasets(self):
         """Check corrupt datasets and remove"""
-        print 'checking for old or bad datasets'        
+        #print 'checking for old or bad datasets'        
         for d in self.datasets[:]:
             ek = self.checkDataset(self.data[d])            
             if ek == False:

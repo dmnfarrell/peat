@@ -128,10 +128,10 @@ class App(Frame, GUI_help):
     def discoverPlugins(self):
         """Discover plugins"""
         from Plugins import init_plugin_system, find_plugins, get_plugins_by_capability
-        peatpath = os.path.dirname(sys.modules['PEATDB'].__file__)       
-        pluginpaths = [os.path.join(peatpath, 'plugins'),
-                       os.path.join(os.getcwd(), 'plugins')]
-                       #os.path.join(os.getcwd(),'test.zip')]
+        peatpath = os.path.dirname(sys.modules['PEATDB'].__file__)
+        homedir = os.path.expanduser("~")
+        paths = [peatpath, os.getcwd(), homedir]                       
+        pluginpaths = [os.path.join(p, 'plugins') for p in paths]
         print pluginpaths
         try:
             failed = init_plugin_system(pluginpaths)
@@ -507,20 +507,22 @@ class App(Frame, GUI_help):
 
     def connectDialog(self, event=None):
         """Get a server/port, storage and open DB"""
-        backends = PDatabase.backends
+        backends = PDatabase.backends        
         mpDlg = MultipleValDialog(title='Connect to DB',
-                                    initialvalues=(self.server,
+                                    initialvalues=(self.username, self.password, self.server,
                                                    self.port, self.project,
                                                    backends),
-                                    labels=('server','port','project','backend'),
-                                    types=('string','int','string','list'),
+                                    labels=('username','password','server','port','project','backend'),
+                                    types=('string','password','string','int','string','list'),
                                     parent=self.main)
 
         if mpDlg.result == True:
-            self.server = mpDlg.results[0]
-            self.port = mpDlg.results[1]
-            self.project = mpDlg.results[2]
-            self.backend = mpDlg.results[3]
+            self.username = mpDlg.results[0]
+            self.password = mpDlg.results[1]
+            self.server = mpDlg.results[2]
+            self.port = mpDlg.results[3]
+            self.project = mpDlg.results[4]
+            self.backend = mpDlg.results[5]
         else:
             return
         if self.server != None:

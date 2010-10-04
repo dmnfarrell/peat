@@ -274,7 +274,7 @@ class PEATSAPlugin(Plugin):
             close()
             
         jobdlg = Toplevel()
-        jobdlg.geometry('+220+220') 
+        jobdlg.geometry('+220+220')
         jobdlg.title('Submit job')
         balloon = Pmw.Balloon(jobdlg)
         nameentry = Pmw.EntryField(jobdlg,
@@ -393,20 +393,21 @@ class PEATSAPlugin(Plugin):
             except:
                 return None, None         
         jobid = self.DB.meta.peatsa_jobs[name]
-        job = PEATSA.WebApp.Data.Job(jobid, self.connection)
+        try:
+            job = PEATSA.WebApp.Data.Job(jobid, self.connection)
+        except:
+            print 'job not in database or connection down'
+            return None,None
         return job, name
         
     def removeJob(self):
         """Remove a job from the db"""
-        job, name = self.getJob()
-        if job == None:
-            return
+        job, name = self.getJob() 
         import tkMessageBox
         answer = tkMessageBox.askyesno("Warning",'Remove this job?')
         if answer == False:
             return        
-        try:
-            #job = PEATSA.WebApp.Data.Job(jobid, self.connection)
+        try:            
             self.jobManager.deleteJob(job)
         except:
             print 'job not in database, removing from peat'
@@ -417,7 +418,7 @@ class PEATSAPlugin(Plugin):
         
     def viewDetails(self, name=None):
         job, name = self.getJob()
-        if job==None:
+        if job==None:            
             return
         print
         print 'job %s has id %s' %(name,job.identification) 
@@ -425,7 +426,7 @@ class PEATSAPlugin(Plugin):
         print 'submitted',job.date
         print 'mutations:',job.mutationListFile()
         if job.error() != None:
-            print 'there was an error..'            
+            print 'The job had an error..'            
             print job.error()['ErrorDescription']
             print job.error()['DetailedDescription']
         return

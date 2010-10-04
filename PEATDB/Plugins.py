@@ -66,22 +66,20 @@ def find_plugins():
 def parsefolder(folder):
     """Parse for all .py files in plugins folder or zip archive"""
     filenms=[]
-    
-    '''if os.path.isfile(folder):        
-        #if zip file we extract the plugins folder...       
-        import zipfile        
+    homedir = os.path.expanduser("~")
+    if os.path.isfile(folder):        
+        #if in zip file, we need to handle that (installer distr)   
+        import zipfile
         zf = zipfile.ZipFile(folder,'r')
-        dirlist = zf.namelist()
-        if 'plugins/' in dirlist: 
-            zf.extract('plugins/')
+        dirlist = zf.namelist()       
         for x in dirlist:          
-            if 'plugins' in x and x.endswith('.py'):  
-                print x
+            if 'plugins' in x and x.endswith('.py'):                
                 zf.extract(x)
         zf.close()
-        folder = 'plugins'
-    '''
-    if os.path.isdir(folder):        
+        #copy plugins to home dir where they will be found
+        shutil.copytree('plugins', os.path.join(homedir,'plugins'))
+   
+    elif os.path.isdir(folder):
         dirlist=os.listdir(folder)        
         filenm=""
         for x in dirlist:
