@@ -39,6 +39,7 @@ import PEATSA.Core as Core
 from PEATDB.PEATApp import MultipleValDialog
 from PEATDB.Actions import DBActions
 from PEATDB.TableModels import TableModel
+import tkMessageBox
 
 class PEATSAPlugin(Plugin):
     """Template GUI plugin for PEAT App"""
@@ -48,7 +49,7 @@ class PEATSAPlugin(Plugin):
     gui_methods = {'createJobDialog':'Submit Job',
                    'fetchJob':'Fetch Job from Server',
                    #'checkJobs':'Check All Jobs',
-                   'editConfigFile' : 'Create/Edit Conf File',
+                   'editConfigFile' : 'Configure Server',
                    'help':'Help',
                    'quit':'Quit'}
     about = 'This plugin allows you to call PEATSA'    
@@ -70,7 +71,7 @@ class PEATSAPlugin(Plugin):
         homepath = os.path.expanduser("~") 
         self.confpath = os.path.join(homepath, 'peatsa.conf')
         if os.path.exists(self.confpath):    
-            configuration = Core.Environment.Configuration(filename=self.confpath)                              
+            configuration = Core.Environment.Configuration(filename=self.confpath)
         else:          
             configuration = Core.Environment.Configuration(searchDefaultLocations=False)
             configuration.add_section('DATABASE')
@@ -79,17 +80,13 @@ class PEATSAPlugin(Plugin):
             configuration.set('DATABASE', 'user', 'peatdb')
             configuration.set('DATABASE', 'password', '123')
             configuration.writeToFile(self.confpath)
-            if parent != None:
-                import tkMessageBox
+            if parent != None:               
                 tkMessageBox.showwarning("Connection Error",
-                         'A new configuration file has been written to %s\n' %self.confpath,
-                         'You should edit the paths to make sure they are correct')
-        self.connection = PEATSA.WebApp.UtilityFunctions.ConnectionFromConfiguration(configuration)
-        self.jobManager = PEATSA.WebApp.Data.JobManager(self.connection)  
-        print 'Connection to server made:', self.connection
-        
+                         'No PEATSA server configured, press configure server'
+                         ' to set a server, username and password.')
+        self.connect(configuration)
         return
-
+    
     def _doFrame(self):
         self.mainwin = self.parent.createChildFrame(title='PEATSA Plugin')        
         methods = self._getmethods()
@@ -160,6 +157,13 @@ class PEATSAPlugin(Plugin):
         return
 
     def flush(self):
+        return
+ 
+    def connect(self, configuration):
+        """Create connection"""
+        self.connection = PEATSA.WebApp.UtilityFunctions.ConnectionFromConfiguration(configuration)
+        self.jobManager = PEATSA.WebApp.Data.JobManager(self.connection)
+        print '\nConnection to server made sucessfully.\n'     
         return
         
     def createMutationList(self, filename=None):        
@@ -236,19 +240,24 @@ class PEATSAPlugin(Plugin):
             else:
                 calcs = [calcmenu.getcurselection()]
             mutationlist = mutlist.getvalue().split('\n')
-            mutationlist.remove('')            
-            pdbfile=None; pdb = None           
-            if self.useref.get() == 1:
-                #use ref pdb
-                name = self.DB.meta.refprotein
-                pdblines = self.DB[name].Structure
-                pdbfile = 'refprot.pdb'
-                fd=open(pdbfile,'w')
-                for line in pdblines:
-                    fd.write(line)
-                fd.close()
+            mutationlist.remove('')
+            pdbfile=None; pdb = None
+            
+            if not hasattr(self.DB.meta, 'refprotein') or self.DB.meta.refprotein == None:
+                tkMessageBox.showinfo('No ref protein',
+                                      'Set a reference (wt) protein first')
+                return             
+            #if self.useref.get() == 1:
+            #we use ref pdb by default now
+            name = self.DB.meta.refprotein
+            pdblines = self.DB[name].Structure
+            pdbfile = 'refprot.pdb'
+            fd=open(pdbfile,'w')
+            for line in pdblines:
+                fd.write(line)
+            fd.close()
                
-            else:
+            '''else:
                 p = pdbentry.getvalue()
                 if os.path.exists(p):
                     pdbfile=p
@@ -256,7 +265,7 @@ class PEATSAPlugin(Plugin):
                     pdb = DBActions.fetchPDB(p)       
                 else:
                     print 'no valid pdb given'
-                    return          
+                    return  '''        
          
             if len(mutationlist) == 0 or mutationlist==[u'']:
                 print 'mutation list is empty'
@@ -302,7 +311,7 @@ class PEATSAPlugin(Plugin):
         calcmenu.pack(fill=X,expand=1)
         fr=Frame(jobdlg)
         fr.pack(fill=X,expand=1)
-        self.useref = IntVar()
+        '''self.useref = IntVar()
         Label(fr,text='Use reference protein').pack(side=LEFT)
         Checkbutton(fr,variable=self.useref).pack(side=LEFT)        
         pdbentry = Pmw.EntryField(jobdlg,
@@ -311,7 +320,7 @@ class PEATSAPlugin(Plugin):
         pdbentry.pack(fill=X,expand=1)
         balloon.bind(pdbentry, 'Enter the PDB ID or load a file')
         Button(jobdlg,text='load PDB from file',command=getstruct).pack(fill=X,expand=1)
-        Button(jobdlg,text='load Ligand file',command=getligand).pack(fill=X,expand=1)
+        Button(jobdlg,text='load Ligand file',command=getligand).pack(fill=X,expand=1)'''
         self.ligandfile=None
         mutlist = Pmw.ScrolledText(jobdlg,
                 labelpos = 'n',
@@ -321,9 +330,9 @@ class PEATSAPlugin(Plugin):
                 hull_height = 250,
                 text_wrap='word') 
         mutlist.pack(fill=BOTH,expand=1)
-        Button(jobdlg,text='Load Mutations File',command=loadmuts).pack(fill=X,expand=1)
+        Button(jobdlg,text='Load Mutations from Project',command=loadmutsfromDB).pack(fill=X,expand=1)        
+        Button(jobdlg,text='Load Mutations from File',command=loadmuts).pack(fill=X,expand=1)
         balloon.bind(mutlist, 'Enter one mutation per line in the form\n A:0003:ALA or A3A')
-        Button(jobdlg,text='Use Mutants from DB',command=loadmutsfromDB).pack(fill=X,expand=1)
         f=Frame(jobdlg); f.pack(fill=X,expand=1)
         Button(f,text='Submit',command=submit).pack(side=LEFT,fill=X,expand=1,pady=2)
         Button(f,text='Cancel',command=close).pack(fill=X,expand=1,pady=2)        
@@ -402,8 +411,7 @@ class PEATSAPlugin(Plugin):
         
     def removeJob(self):
         """Remove a job from the db"""
-        job, name = self.getJob() 
-        import tkMessageBox
+        job, name = self.getJob()        
         answer = tkMessageBox.askyesno("Warning",'Remove this job?')
         if answer == False:
             return        
@@ -463,7 +471,10 @@ class PEATSAPlugin(Plugin):
         tf = textFrame(parent=self.mainwin,
                          title='PEATSA Conf file')
         tf.load_from_file(self.confpath)
-        self.parent.wait_window(tf.frame)        
+        self.parent.wait_window(tf.frame)
+        #reconnect
+        configuration = Core.Environment.Configuration(filename=self.confpath)
+        self.connect(configuration)
         return
     
     def help(self):
@@ -650,6 +661,9 @@ class PEATSAPlugin(Plugin):
     def showResults(self):
         """Show results with correlation plot from selected job"""
         job, name = self.getJob()
+        if job == None:
+            print 'job not in DB'
+            return
         if job.state() != 'Finished':
             print 'job not finished'
             return

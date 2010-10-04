@@ -73,7 +73,8 @@ def parsefolder(folder):
         zf = zipfile.ZipFile(folder,'r')
         dirlist = zf.namelist()       
         for x in dirlist:          
-            if 'plugins' in x and x.endswith('.py'):                
+            if 'plugins' in x and x.endswith('.py'):
+                print x
                 zf.extract(x)
         zf.close()
         #copy plugins to home dir where they will be found
