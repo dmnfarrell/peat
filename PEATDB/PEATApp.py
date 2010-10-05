@@ -131,7 +131,7 @@ class App(Frame, GUI_help):
         #peatpath = os.path.dirname(sys.modules['PEATDB'].__file__)
         peatpath = os.path.split(__file__)[0]
         homedir = os.path.expanduser("~")
-        paths = [peatpath, os.getcwd(), homedir]                       
+        paths = [peatpath, os.getcwd(), homedir]
         pluginpaths = [os.path.join(p, 'plugins') for p in paths]
         print pluginpaths
         try:
@@ -148,7 +148,7 @@ class App(Frame, GUI_help):
                                 command=func(plugin, parent=self))
         if len(failed)>0:
             for f in failed:
-                self.recordEvent('failed to load plugin %s' %f)
+                self.recordEvent('failed to load plugin %s, error: %s' %(f[0],f[1]))
         return
 
     def updatePlugins(self):

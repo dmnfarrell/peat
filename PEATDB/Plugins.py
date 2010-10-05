@@ -45,9 +45,9 @@ def load_plugins(plugins):
     for plugin in plugins:        
         try:
             __import__(plugin, None, None, [''])           
-        except:
+        except Exception,e:
             #print 'failed to load %s plugin' %plugin
-            failed.append(plugin)
+            failed.append((plugin,e))
     return failed
 
 def init_plugin_system(folders):
