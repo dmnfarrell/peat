@@ -174,6 +174,8 @@ class LM_Fitter:
     def getRMSR(self):
         """Reduced chi squared for fit"""        
         v = len(self.exp_data) - len(self.variables) - 1
+        if v<1:
+            v=len(self.variables)
         x = math.sqrt(self.get_difference(self.variables)/v)      
         return x
         

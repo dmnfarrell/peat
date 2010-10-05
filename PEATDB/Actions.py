@@ -177,7 +177,8 @@ class DBActions(object):
             X.parsepdb(DB.get(ref).Structure)
            
         mset = Core.Data.mutationSetFromSequencesAndStructure(refseq, seq, X)
-        prot.Mutations = '+'.join(mset.mutationCodes())
+        #prot.Mutations = '+'.join(mset.mutationCodes())
+        prot.Mutations = mset.codeString(X)
         return
         
     @classmethod

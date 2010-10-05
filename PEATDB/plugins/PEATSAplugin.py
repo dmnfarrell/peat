@@ -46,9 +46,8 @@ class PEATSAPlugin(Plugin):
     capabilities = ['gui']
     requires = ['PEATSA']
     menuentry = 'PEATSA Plugin'
-    gui_methods = {'createJobDialog':'Submit Job',
-                   'fetchJob':'Fetch Job from Server',
-                   #'checkJobs':'Check All Jobs',
+    gui_methods = {'createJobDialog':'Create New Job',
+                   'fetchJob':'Fetch Job from Server',                  
                    'editConfigFile' : 'Configure Server',
                    'help':'Help',
                    'quit':'Quit'}
@@ -284,7 +283,7 @@ class PEATSAPlugin(Plugin):
             
         jobdlg = Toplevel()
         jobdlg.geometry('+220+220')
-        jobdlg.title('Submit job')
+        jobdlg.title('Create new job')
         balloon = Pmw.Balloon(jobdlg)
         nameentry = Pmw.EntryField(jobdlg,
                 labelpos = 'w',
