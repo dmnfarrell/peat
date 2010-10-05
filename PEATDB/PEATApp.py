@@ -129,7 +129,7 @@ class App(Frame, GUI_help):
         """Discover plugins"""
         from Plugins import init_plugin_system, find_plugins, get_plugins_by_capability
         #peatpath = os.path.dirname(sys.modules['PEATDB'].__file__)
-        peatpath = os.path.split(__file__)[1]
+        peatpath = os.path.split(__file__)[0]
         homedir = os.path.expanduser("~")
         paths = [peatpath, os.getcwd(), homedir]                       
         pluginpaths = [os.path.join(p, 'plugins') for p in paths]
