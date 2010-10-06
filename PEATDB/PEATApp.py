@@ -331,7 +331,7 @@ class App(Frame, GUI_help):
                         '03Add Field':{'cmd':self.addFieldDialog},
                         '04Delete Field':{'cmd':self.deleteField},
                         '05Show/Hide Fields':{'cmd':self.hideFieldsDialog},
-                        '06Add PDB File':{'cmd':self.addPDBFile},
+                        '06Add/Change PDB File':{'cmd':self.addPDBFile},
                         '07Add Mutant':{'cmd':self.addMutantDialog},
                         '08sep':'',
                         '09Find in table':{'cmd':self.createSearchBar},
@@ -1682,6 +1682,7 @@ class App(Frame, GUI_help):
         return
 
     def addPDBFile(self):
+        """Add pdb file"""
         sel_prot = self.table.get_selectedRecordNames()[0]
         DBActions.addPDBFile(self.DB, sel_prot)
         self.updateTable()
@@ -2120,8 +2121,12 @@ class App(Frame, GUI_help):
     def createRecsOptsMenu(self, parent, callback=None):
         """Get an option menu with a list of the records"""
         def setref(evt=None):
-            self.DB.meta.refprotein = var.get()
-            print self.DB.meta.refprotein
+            prot = var.get()
+            if self.DB[prot].Structure == None:              
+                tkMessageBox.showinfo("Warning",
+                                     'There is no structure for this record! '
+                                      'You should add one.')                
+            self.DB.meta.refprotein = prot            
         if not hasattr(self.DB.meta, 'refprotein'):
             self.DB.meta.refprotein = None
 

@@ -193,13 +193,13 @@ class DBActions(object):
                                          filetypes=[("PDB file","*.pdb"),
                                                     ("PDB file","*.brk"),
                                                     ("All files","*.*")])
-
+            if not pdbfile:
+                return
         import Protool
         self.X=Protool.structureIO()
         # Extracting PDB_code from pdbfile
         if pdbdata != None: 
             self.X.readpdb(data=pdbdata)
-
         elif os.path.isfile(pdbfile):
             PDB_code=pdbfile.split('/').pop().split('.')[0]
             # Try to read it using Protool    
