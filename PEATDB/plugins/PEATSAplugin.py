@@ -50,7 +50,7 @@ class PEATSAPlugin(Plugin):
                    'fetchJob':'Fetch Job from Server',                  
                    'editConfigFile' : 'Configure Server',
                    'help':'Help',
-                   'quit':'Quit'}
+                   'quit':'Close'}
     about = 'This plugin allows you to call PEATSA'    
 
     calctypes = ['stability','binding','both']
@@ -428,14 +428,19 @@ class PEATSAPlugin(Plugin):
         if job==None:            
             return
         print
-        print 'job %s has id %s' %(name,job.identification) 
-        print 'status:',job.state()
-        print 'submitted',job.date
-        print 'mutations:',job.mutationListFile()
+        print 'details for job %s' %name
+        print 'job status:',job.state()
+        print 'submitted on ',job.date
+        print 'mutations:', len(job.mutationListFile().mutantList())
+        print '(this job has id %s)' %job.identification
+        self.log.tag_add('bold', '4.1', '4.8')                       
+        self.log.tag_config('bold', font=('arial',14,'bold')) 
         if job.error() != None:
             print 'The job had an error..'            
             print job.error()['ErrorDescription']
             print job.error()['DetailedDescription']
+        print
+        self.log.yview('moveto', 1)
         return
     
     def storeJob(self, name, job):
@@ -687,7 +692,8 @@ class PEATSAPlugin(Plugin):
             else:
                 return
         
-        from PEATDB.plugins.Correlation import CorrelationAnalyser        
+        #from PEATDB.plugins.Correlation import CorrelationAnalyser  
+        from Correlation import CorrelationAnalyser  
         C = CorrelationAnalyser()        
         
         for m in self.matrices:
