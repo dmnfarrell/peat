@@ -1403,18 +1403,21 @@ class MutantCollection:
 		import difflib
 		
 		differ = difflib.Differ()
-		stream = open(self.pdbFile, 'r')
+		reference = self.mutantFiles()[0]
+		stream = open(reference, 'r')
 		wildType = stream.readlines()
 		stream.close()
 	
 		diffs = {}
-		for mutant in self.mutations():
-			file = self.fileForMutant(mutant)
+		for mutationSet in self.mutations():
+			file = self.fileForMutant(mutationSet)
 			if file is not None:
 				stream = open(file, 'r')
 				mutant = stream.readlines()
 				stream.close()
-				diffs["+".join(mutant.mutationCodes())] = differ(wildType, mutant)
+				diff = list(differ.compare(wildType, mutant))
+				diffs["+".join(mutationSet.mutationCodes())] = diff
+				print 'Done', mutationSet
 			
 		return diffs	
 				
@@ -1892,7 +1895,7 @@ class MutationSet:
 		return self.filename(reduced=self.reducedDefault, pdb=pdb)
 		
 		
-	def applyToSequence(self, wildTypeSequence, id='A', pdb=None):
+	def applyToSequence(self, wildTypeSequence, id='A', pdb=None, offset=None):
 
 		'''Applies the mutations defined by the receiver to wildTypeSequence
 		
@@ -1905,14 +1908,23 @@ class MutationSet:
 			
 			chain: The chain the sequence corresponds to.
 				Defauts to A.
-			
+
 			pdb: Optional. A protool instance of a pdb containing the chain
 			corresponding to wild-type sequence. If this is not None the wild-type
 			residue from the pdb is compared to that in the supplied sequence
 			and an exception is raised if the two are not the same.
+
+			offset := Number such that (seqResidue + offset = pdbResidue)
+			If None it is equal to the number of the first residue in the pdb if supplied
+			If the pdb is None it defaults to 1
 			
 		Returns: 
 			The mutant sequence'''
+
+		if pdb is not None and offset is None:
+			res = GetChainResidues(pdb)[id][0]
+			chain, index = Utilities.ParseResidueCode(res)
+			offset = index
 			
 		seq = list(wildTypeSequence)	
 		for code in self.mutationCodes(pdb=pdb):
@@ -1922,14 +1934,14 @@ class MutationSet:
 					chain, index, wt, mut = components
 					#Check the wt res defined by the sequence is the
 					#same as that defined by the pdb
-					if seq[index - 1] == Utilities.aminoAcidCodes[wt]:
-						seq[index - 1] =  Utilities.aminoAcidCodes[mut]
+					if seq[index - offset] == Utilities.aminoAcidCodes[wt]:
+						seq[index - offset] =  Utilities.aminoAcidCodes[mut]
 					else:
-						message = 'Residue in pdb does not correspond to reside in sequence (%s)' % seq[index - 1]
+						message = 'Residue in pdb does not correspond to reside in sequence (%s %s)' % (Utilities.aminoAcidCodes[wt], seq[index - offset])
 						raise Exceptions.MutationCodeApplicationError(mutationCode=code, message=message)
 				else:
 					chain, index, mut = components
-					seq[index - 1] = Utilities.aminoAcidCodes[mut]
+					seq[index - offset] = Utilities.aminoAcidCodes[mut]
 				
 		return "".join(seq)		
 			
