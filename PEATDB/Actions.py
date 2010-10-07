@@ -175,7 +175,7 @@ class DBActions(object):
             import Protool
             X=Protool.structureIO()
             X.parsepdb(DB.get(ref).Structure)
-           
+          
         mset = Core.Data.mutationSetFromSequencesAndStructure(refseq, seq, X)
         #prot.Mutations = '+'.join(mset.mutationCodes())
         prot.Mutations = mset.codeString(X)
@@ -227,16 +227,16 @@ class DBActions(object):
         record_AA = DB.get_AA_sequence(name)
         if record_AA:
             record_AA1,ignored_res=sequence_alignment.Protool2pir(record_AA)
-        else:
-            # If we do not have an amino acid sequence for the record, then
-            # we simply use the one from the PDB file and accept the alignment
-            # straight away
-            accept_alignment_automatically=1
-            import copy
-            record_AA1=copy.deepcopy(pdb_1)
+        
+        # If we do not have an amino acid sequence for the record, then
+        # we simply use the one from the PDB file and accept the alignment
+        # straight away
+        accept_alignment_automatically=1
+        import copy
+        record_AA1=copy.deepcopy(pdb_1)
 
-            # Also deposit the amino acid sequence in the protein record
-            DB.data[name]['aaseq'] = copy.deepcopy(self.X.sequence)
+        # Also deposit the amino acid sequence in the protein record
+        DB.data[name]['aaseq'] = copy.deepcopy(self.X.sequence)
 
         # Align the two sequences
         NW_align = sequence_alignment.NW(pdb_1,record_AA1)
@@ -665,7 +665,42 @@ class DBActions(object):
             print 'Failed to model the following proteins:'
             for f in failed: print f
         return
+        
+    @classmethod
+    def setSequencesfromMutationCodes(self, DB=None, callback=None, selected=None):
+        """Set the aa sequence using wt ref aa and mutation code
+           Assumes mutation code is consistent with ref aa seq"""
 
+        if DB == None:
+            return
+        proteins = DB.getRecs()
+        refprot = DB.meta.refprotein
+        refseq = DB[refprot].aaseq
+        refaa = self.AAList2String(refseq)
+        refpdb = DB[refprot].Structure
+        #Create protool oinstance for ref pdb
+        import Protool
+        Xref = Protool.structureIO()
+        Xref.parsepdb(refpdb)        
+        for protein in selected:
+            rec = DB.get(protein)
+            if rec.hasStructure() == 'available':
+                continue                
+            print 'Protein:', protein            
+            #if no sequence try create one from mutation code
+            if rec.aaseq == None and rec.Mutations != None:               
+                print 'no sequence, using mutation code and ref protein seq'                 
+                import PEATSA.Core as Core
+                print 'Record has mutation code %s' %rec.Mutations
+                mutationSet = Core.Data.MutationSet(rec.Mutations)
+                Xref.Remove_All_NonAminoAcids()
+                refaa = Core.Data.GetChainSequences(Xref)['A']
+                #print refaa
+                mutseq = mutationSet.applyToSequence(refaa, id='A', offset=None, pdb=Xref)                 
+                rec.aaseq = self.string2AAseq(mutseq)                
+        
+        return
+        
     @classmethod
     def modelFromMutationCode(self):
         """Model directly from mutation code"""

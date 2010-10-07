@@ -369,10 +369,10 @@ class App(Frame, GUI_help):
 
         self.tools_menu={'01Compare Records':{'cmd':self.startComparator},
                      '02Set Reference Protein':{'cmd':self.setRefProtein},
-                     '03Remodel PEAT Models':{'cmd':self.remodelPEATModels},
+                     '03Remodel Mutant Structures':{'cmd':self.remodelPEATModels},
                      '04Fetch PDB':{'cmd':self.fetchPDB},
-                     '05Update Mutation Codes':{'cmd':self.updateMutations}}
-                     #'06Update Mutant Sequences':{'cmd':self.updateAASequences}}                     
+                     '05Update Mutation Codes':{'cmd':self.updateMutations},
+                     '06Update Mutant Sequences':{'cmd':self.updateAASequences}}                     
         self.tools_menu=self.create_pulldown(self.menu,self.tools_menu)
         self.menu.add_cascade(label='Tools',menu=self.tools_menu['var'])        
         
@@ -2115,7 +2115,8 @@ class App(Frame, GUI_help):
             tkMessageBox.showinfo('No ref protein',
                                   'Set a reference (wt) protein first')
             return 
-            
+        sel = self.table.get_selectedRecordNames()    
+        DBActions.setSequencesfromMutationCodes(self.DB, selected=sel)    
         return
         
     def createRecsOptsMenu(self, parent, callback=None):
