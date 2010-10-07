@@ -36,7 +36,7 @@ import Pmw
 import PEATSA.WebApp.Data
 import PEATSA.WebApp.UtilityFunctions
 import PEATSA.Core as Core
-from PEATDB.PEATApp import MultipleValDialog
+from PEATDB.Dialogs import MultipleValDialog
 from PEATDB.Actions import DBActions
 from PEATDB.TableModels import TableModel
 import tkMessageBox

@@ -41,6 +41,7 @@ class Plugin(object):
         return
     
 def load_plugins(plugins):
+    #import traceback
     failed = []
     for plugin in plugins:        
         try:
@@ -48,6 +49,9 @@ def load_plugins(plugins):
         except Exception,e:
             #print 'failed to load %s plugin' %plugin
             failed.append((plugin,e))
+            '''trace = traceback.format_list(traceback.extract_tb(sys.exc_info()[2]))
+            trace = reduce(lambda x, y: x + y, trace)
+            print trace'''
     return failed
 
 def init_plugin_system(folders):

@@ -26,6 +26,7 @@
 # 
 
 from Tkinter import *
+import tkSimpleDialog, tkFileDialog, tkMessageBox
 
 class myDialogs:
 
@@ -331,3 +332,55 @@ class TopLevelModalDialog(Toplevel):
         self.parent.focus_set()
         self.destroy()      
         return
+        
+class MultipleValDialog(tkSimpleDialog.Dialog):
+    """Simple dialog to get multiple values"""
+
+    def __init__(self, parent, title=None, initialvalues=None, labels=None, types=None):
+        if labels != None and types != NoneType:
+            self.initialvalues = initialvalues
+            self.labels = labels
+            self.types = types
+        tkSimpleDialog.Dialog.__init__(self, parent, title)
+
+    def body(self, master):
+
+        r=0
+        self.vrs=[];self.entries=[]        
+        for i in range(len(self.labels)):
+            Label(master, text=self.labels[i]).grid(row=r, column=0)
+            if self.types[i] == 'int':
+                self.vrs.append(IntVar())
+            else:
+                self.vrs.append(StringVar())
+            if self.types[i] == 'password':
+                s='*'
+            else:
+                s=None
+
+            if self.types[i] == 'list':
+                button=Menubutton(master, textvariable=self.vrs[i],relief=RAISED)
+                menu=Menu(button,tearoff=0)
+                button['menu']=menu
+                choices=self.initialvalues[i]
+                for c in choices:
+                    menu.add_radiobutton(label=c,
+                                        variable=self.vrs[i],
+                                        value=c,
+                                        indicatoron=1)
+                self.entries.append(button)
+                self.vrs[i].set(self.initialvalues[i][0])
+            else:
+                self.vrs[i].set(self.initialvalues[i])
+                self.entries.append(Entry(master, textvariable=self.vrs[i], show=s, bg='white'))
+            self.entries[i].grid(row=r, column=1,padx=2,pady=2,sticky='news')
+            r+=1
+
+        return self.entries[0] # initial focus
+
+    def apply(self):
+        self.result = True
+        self.results = []
+        for i in range(len(self.labels)):
+            self.results.append(self.vrs[i].get())
+        return        
