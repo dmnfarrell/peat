@@ -26,8 +26,8 @@
 
 acidbase={'ARG':1,'HIS':1,'LYS':1,'TYR':-1,'ASP':-1,'GLU':-1,
           'CYS':-1,'CTERM':-1,'NTERM':1,'SER':-1,'THR':-1,
-          'TPO':-1,'SEP':-1,'ACID':-1,'BASE':1,'ATPPG':-1}
+          'TPO':-1,'SEP':-1,'ACID':-1,'BASE':1,'ATP':-1}
 modelpKas={'NTERM':8.00,'LYS':10.40,'GLU':4.40,'HIS':6.30,
            'ASP':4.00,'TYR':9.6,'ARG':13.0,'CTERM':3.80,
            'CYS':8.7,'SER':15.0,'THR':15.0,
-           'TPO':7.0,'SEP':7.0,'ATPPG':6.8}
+           'TPO':7.0,'SEP':7.0,'ATP':6.8}

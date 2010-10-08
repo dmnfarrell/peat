@@ -161,6 +161,8 @@ class pKaIO:
                         titgroup=residue.split(':')[2]
                         if MEADtranslate.has_key(titgroup):
                             titgroup=MEADtranslate[titgroup]
+                        if not acidbase.has_key(titgroup):
+                            raise Exception('Unknown titratable group: %s\nPlease add this titratable group to pKaTool/pKaData.py' %titgroup)
                         this_tc[float(pH)]=float(acidbase[titgroup])*float(charge)
                     self.titdata[residue]=this_tc.copy()
                 return self.titdata
