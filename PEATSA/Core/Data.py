@@ -1395,7 +1395,7 @@ class MutantCollection:
 		
 		#Get the wild-type sequences
 		wildTypeSequences = GetChainSequences(self.pdb)
-		chaindIds = wildTypeSequences.keys()
+		chainIds = wildTypeSequences.keys()
 		chainIds.sort()
 		
 		#Get the mutant sequences
