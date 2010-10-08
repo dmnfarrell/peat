@@ -42,29 +42,6 @@ def scanCollection(pdbFile, mutation, skipResidueTypes=['ALA', 'GLY'],
 	return MutantCollection(pdbFile, mutationList=mutationList, ligandFiles=ligandFiles, location=location, 
 				name=name, clean=clean, temporary=temporary, overwrite=overwrite)						
 
-def ParseMutationList(filename):
-	
-	'''Parses the mutation lists in filename.
-	
-	Note: Currently no checking is performed to see if the format or content is valid'''
-	
-	stream = open(filename)
-	#Simple parse
-	lines = [line.strip('\n') for line in stream.readlines()]
-	stream.close()
-	lines = [line.split(",") for line in lines]
-	mutationList = []
-	for line in lines:
-		code = line[0].strip()
-		chain, residueIndex = Utilities.ParseResidueCode(code)
-		mutations = [element.strip() for element in line[1:]]
-		for mutation in mutations:
-			listElement = MutationSet()
-			listElement.addMutation(chain, residueIndex, mutation)
-			mutationList.append(listElement)
-		
-	return mutationList
-		
 def CreateScanList(pdbFile, mutation='ALA', skipResidueTypes=['ALA', 'GLY']):
 
 	'''Creates a list representing the mutation of each residue to the specified residue
@@ -166,6 +143,79 @@ def GetChainResidues(structure):
 		chainResidues[chain] = data	
 
 	return chainResidues	
+
+def ParseMutationList(filename):
+	
+	'''Parses the mutation lists in filename.
+	
+	Note: Currently no checking is performed to see if the format or content is valid'''
+	
+	stream = open(filename)
+	#Simple parse
+	lines = [line.strip('\n') for line in stream.readlines()]
+	stream.close()
+	lines = [line.split(",") for line in lines]
+	mutationList = []
+	for line in lines:
+		code = line[0].strip()
+		chain, residueIndex = Utilities.ParseResidueCode(code)
+		mutations = [element.strip() for element in line[1:]]
+		for mutation in mutations:
+			listElement = MutationSet()
+			listElement.addMutation(chain, residueIndex, mutation)
+			mutationList.append(listElement)
+		
+	return mutationList
+		
+	
+def MutantFromRotamerOperations(structure, operations):
+
+	'''Convert a protool structure into a mutant using the information in operations
+	
+	structure: A protool instance representing a structure to be mutated
+	
+	operations: A list containing information on how to create a mutant relative to structure
+	It is assumed this list was obtained by calling 'rotamerOperationsForMutant:() on a MutantCollection
+	instance whose pdb attributed is equal to structure
+		
+	Exceptions: 
+		Raises an Exceptions.MutantModellingError if an error occurs during mutant creation'''
+ 
+ 
+ 	mutant = copy.deepcopy(stucture)
+	mutationSet = mutationSetFromOperations(operations)
+ 
+	for operation, atomCode, atomData in operations:
+		if operation == 'delete':
+			mutant.remove_atom(atomCode)
+			
+	for operation, atomCode, atomData in operations:
+		if operation == 'add':
+			#ParseResidueCode can also parse atom codes
+			chainId, residueNumber, atomName = Utilities.ParseResidueCode(atomCode) 
+			
+			result = mutant.add_atom(uniqueid=atomCode,
+					     atomname=atomName,
+					     residuenumber=residueNumber,
+					     chainid=chainID,
+					     residuename=atomData['RESNAME'],
+					     xcoord=atomData['X'],
+					     ycoord=atomData['Y'],
+					     zcoord=atomData['Z'])
+				     
+			if not result:
+				Exceptions.MutantModellingError, mutationSet
+
+			mutant.Update()
+			# Rename the rest of the atoms
+			residueCode = Utilities.CreateResidueCode(chain=chainId, number=residueNumber)
+			for atom in mutant.residues[residueCode]:
+				mutant.atoms[atom]['RESNAME'] = atomData['RESNAME']
+			
+			mutant.Update()
+
+	return mutant
+
 
 def mutationListFileFromStream(stream):
 
@@ -1357,69 +1407,8 @@ class MutantCollection:
 		This is the contents of the Ligand subdirectory'''
 	
 		return copy.copy(self.ligands)
-		
-	def protoolInstanceForMutant(self, mutationSet):
 	
-		'''Returns a Protool instance for the given mutation'''
-		
-		import Protool
-		filename = self.fileForMutant(mutationSet)
-		pdb = Protool.structureIO()
-		pdb.readpdb(filename)
-		
-		return pdb
-		
-	def fileForMutant(self, mutationSet):
-	
-		'''Returns the path to the pdb file for mutationSet.
-		
-		If no pdb corresponding to muationSet exists this method returns None'''
-	
-		try:
-			self.mutationList.index(mutationSet)
-			filename = mutationSet.filename(reduced=self.useReducedNaming, pdb=self.pdb)
-			mutantDirectory = os.path.join(self.location, 'Mutants')
-			filename = os.path.join(mutantDirectory, filename)
-		except ValueError:
-			filename = None
-		
-		return filename		
-		
-	def operationsForMutant(self, mutationSet):
-	
-		'''Returns the Protool operations related to a mutant
-		
-		Can be used to quickly convert the wild-type Protool instance into a mutant instance'''
-
-		from PEATDB.Sequence import SequenceOperations
-		
-		#Get the wild-type sequences
-		wildTypeSequences = GetChainSequences(self.pdb)
-		chainIds = wildTypeSequences.keys()
-		chainIds.sort()
-		
-		#Get the mutant sequences
-		mutantInstance = self.protoolInstanceForMutant(mutationSet)
-		mutantSequences = GetChainSequences(mutantInstance)
-		
-		#Create full sequence of each
-		mutantSequence = ""
-		wildTypeSequence = ""
-		for id in chainIds:
-			mutantSequence = mutantSequence + mutantSequences[id]
-			wildTypeSequence = wildTypeSequence + wildTypeSequences[id]
-	
-		#The last two keyword args don't seem to be used
-		operations = SequenceOperations.findSequenceDifferences(record_sequence=mutantSequence, 
-						       parent_sequence=wildTypeSequence,
-						       full_parent_sequence=wildTypeSequence,
-						       PDBaln=None,
-						       recordALN=None)
-
-		return operations
-			       
-		
-	def mutations(self):
+	def mutations(self):	
 	
 		'''Returns a list of the mutations in the collection.
 		
@@ -1447,7 +1436,44 @@ class MutantCollection:
 		for set in mutations:
 			list.addMutant(set, autoUpdate=False)
 		
-		return list
+		return list		
+		
+	def mutantForMutationSet(self, mutationSet):
+	
+		'''Returns a Protool instance for the given mutation'''
+		
+		import Protool
+		filename = self.fileForMutationSet(mutationSet)
+		pdb = Protool.structureIO()
+		pdb.readpdb(filename)
+		
+		return pdb
+		
+	def fileForMutationSet(self, mutationSet):
+	
+		'''Returns the path to the pdb file for mutationSet.
+		
+		If no pdb corresponding to muationSet exists this method returns None'''
+	
+		try:
+			self.mutationList.index(mutationSet)
+			filename = mutationSet.filename(reduced=self.useReducedNaming, pdb=self.pdb)
+			mutantDirectory = os.path.join(self.location, 'Mutants')
+			filename = os.path.join(mutantDirectory, filename)
+		except ValueError:
+			filename = None
+		
+		return filename		
+		
+	def rotamerOperationsForMutationSet(self, mutationSet):
+	
+		'''Returns the Protool operations related to a mutant
+		
+		Can be used to quickly convert the wild-type Protool instance into a mutant instance'''
+		
+		mutantInstance = self.mutantForMutationSet(mutationSet)
+		return mutantInstance.mutate_operations			       
+		
 		
 def mutationSetFromFilename(filename):
 
@@ -1630,6 +1656,29 @@ def mutationSetFromSequencesAndStructure(initialSequence, targetSequence, struct
 		
 	return mutationSet					
 					
+def mutationSetFromRotamerOperations(operations):
+
+	'''Returns the MutationSet instance corresponding to operations.
+	
+	operations: 
+		A list returned by MutantCollection::rotamerOperationsForMutant()
+		
+	Note: operations can't contain any whole residue deletions or insertions'''
+		
+	mutationSet = MutationSet()	
+	codes = set()
+	for operation, atomCode, atomData in operations:
+		if atomData != {}:
+			chainId = atomData['CHAINID']
+			residueIndex = atomData['RESNUM']
+			mutation = atomData['RESNAME']
+			residueCode = Utilities.CreateResidueCode(chain=chainId, number=residueIndex)
+			if not residueCode in codes:
+				mutationSet.addMutation(chain=chainId, residueIndex=residueIndex, mutation=mutation)
+				codes.add(residueCode)
+			
+	return mutationSet		
+	
 	
 class MutationSet:
 
