@@ -165,7 +165,7 @@ class CorrelationAnalyser(Plugin):
             print 'no data to plot'
             return
         labels = zip(names, muts)
-        self.plotCorrelation(x,y,labels)
+        self.plotCorrelation(x,y,labels,side=TOP)
         return        
      
     @classmethod 
@@ -195,7 +195,7 @@ class CorrelationAnalyser(Plugin):
                           title='',
                           xlabel='Predicted',
                           ylabel='Experimental',
-                          limit=None):
+                          limit=None, side=LEFT):
         """Show exp vs pred. for a set of x-y values """
         
         #check if x and y are number cols
@@ -232,7 +232,7 @@ class CorrelationAnalyser(Plugin):
         cc = math.pow(numpy.corrcoef(x,y)[0][1],2)      
         fig.suptitle(r'Predicted vs Experimental $r^2= %s$' %round(cc,3))
         from PEATDB.Actions import DBActions
-        frame = DBActions.showTkFigure(fig, side=LEFT)
+        frame = DBActions.showTkFigure(fig, side=side)
         mh = MouseHandler(ax, self, labels, key)
         mh.connect()         
         return ax, frame, mh

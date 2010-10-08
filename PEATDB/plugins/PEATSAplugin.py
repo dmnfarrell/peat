@@ -39,6 +39,7 @@ import PEATSA.Core as Core
 from PEATDB.Dialogs import MultipleValDialog
 from PEATDB.Actions import DBActions
 from PEATDB.TableModels import TableModel
+from PEATDB.Tables import TableCanvas
 import tkMessageBox
 
 class PEATSAPlugin(Plugin):
@@ -97,6 +98,7 @@ class PEATSAPlugin(Plugin):
                 label_text='Jobs in DB',
                 listbox_height = 6 )
         self.jobslist.pack(side=TOP,fill=BOTH,expand=1)
+        #self.createJobsTable(self.mainwin)
         self.updateJobs()
         self.manageJobsButtons(self.mainwin)    
         self._createButtons(methods)
@@ -111,6 +113,19 @@ class PEATSAPlugin(Plugin):
         for m in methods:           
             b=Button(self.mainwin,text=self.gui_methods[m[0]],command=m[1])
             b.pack(side=BOTTOM,fill=BOTH)
+        return
+
+    def createJobsTable(self, frame):
+        """Use a table for jobs list"""
+        self.checkJobsDict()
+        joblist = self.DB.meta.peatsa_jobs
+        M = TableModel()       
+        for j in joblist:            
+            M.addRecord(j)        
+        tf=LabelFrame(frame,text='Jobs in this project')
+        tf.pack(side=TOP,fill=BOTH,expand=1)
+        self.jobstable = TableCanvas(tf, model=M, cellwidth=70, editable=False)
+        self.jobstable.createTableFrame()             
         return
 
     def manageJobsButtons(self, parent):
@@ -357,9 +372,10 @@ class PEATSAPlugin(Plugin):
         self.mutationList = Core.Data.MutationListFile(filename='tempmutlist', create=True)
         sets=[]
         for code in mutations:
+            if code == '': continue
             try:
                 sets.append(Core.Data.MutationSet(code))
-            except:               
+            except:                
                 print 'mutation code %s incorrect' %code
                     
         for s in sets:            
@@ -389,8 +405,9 @@ class PEATSAPlugin(Plugin):
             muts = matrix.mutationCodes()
             dbmuts = [DB.get(p).Mutations for p in DB.getRecs()]       
             newmuts = list(set(dbmuts) - set(muts))
-            print 'the following mutations have been added since the job was submitted: %s' %newmuts
-            
+            print 'the following mutations in the project are not in the job: %s' %newmuts
+        self.log.yview('moveto', 1)
+        
         return
         
     def getJob(self, name=None):
@@ -430,11 +447,10 @@ class PEATSAPlugin(Plugin):
         print
         print 'details for job %s' %name
         print 'job status:',job.state()
+        #self.addColoredText(self.log,'blu', 'job status: '+job.state() , fg='blue')
         print 'submitted on ',job.date
         print 'mutations:', len(job.mutationListFile().mutantList())
-        print '(this job has id %s)' %job.identification
-        self.log.tag_add('bold', '4.1', '4.8')                       
-        self.log.tag_config('bold', font=('arial',14,'bold')) 
+        print '(this job has id %s)' %job.identification        
         if job.error() != None:
             print 'The job had an error..'            
             print job.error()['ErrorDescription']
@@ -442,12 +458,26 @@ class PEATSAPlugin(Plugin):
         print
         self.log.yview('moveto', 1)
         return
-    
-    def storeJob(self, name, job):
-        """Store job to DB"""
+
+    def addColoredText(self, st, tag, word, fg='black', bg='white'):
+        """add a space to the end of the word"""
+        word = word + " "
+        st.insert('end', word)
+        end_index = st.index('end')
+        begin_index = "%s-%sc" % (end_index, len(word) + 1)
+        st.tag_add(tag, begin_index, end_index)
+        st.tag_config(tag, foreground=fg, background=bg)
+        return        
+
+    def checkJobsDict(self):
+        """Check jobs data structure exists"""
         if not hasattr(self.DB.meta,'peatsa_jobs'):
             from ZODB.PersistentMapping import PersistentMapping
             self.DB.meta.peatsa_jobs = PersistentMapping()
+            
+    def storeJob(self, name, job):
+        """Store job to DB"""
+        self.checkJobsDict()
         self.DB.meta.peatsa_jobs[name] = job.identification
         return
             
@@ -536,7 +566,6 @@ class PEATSAPlugin(Plugin):
         
     def showTable(self, frame, model, label=''):
         """Show model in table"""
-        from PEATDB.Tables import TableCanvas
         tf=LabelFrame(frame,text=label)
         tf.pack(fill=BOTH,expand=1)        
         mtable = TableCanvas(tf, model=model, cellwidth=70,                                  
