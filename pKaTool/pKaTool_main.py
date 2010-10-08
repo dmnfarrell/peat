@@ -544,7 +544,8 @@ class Main(Frame,pKaTool_stability.pKaTool_stability,pKaTool_utility.pKaTool_uti
     def select_irregular_titcurvs(self):
         """Select irregular titration curves based on a fit to the Henderson-Hasselbalch equation"""
         self.selected_groups=[]
-        X=pKanalyse()
+        import pKarun.pKa_general
+        X=pKarun.pKa_general.pKanalyse()
         for group in self.groups:
             #
             # Include only groups with a pKa value
@@ -638,7 +639,8 @@ class Main(Frame,pKaTool_stability.pKaTool_stability,pKaTool_utility.pKaTool_uti
     def show_details_table(self,event=None):
         """Open a new window with all details for the groups selected"""
         details_win=Toplevel()
-        X=pKanalyse()
+        import pKarun.pKa_general
+        X=pKarun.pKa_general.pKanalyse()
         row=0
         order=['Group','modelpK','desolv','backgr','intpKa','delec','dpKa','pKa','HH fit','HH fit pKa']
         #
