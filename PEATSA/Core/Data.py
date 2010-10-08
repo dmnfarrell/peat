@@ -1358,12 +1358,12 @@ class MutantCollection:
 	
 		return copy.copy(self.ligands)
 		
-	def mutant(self, mutationSet):
+	def protoolInstanceForMutant(self, mutationSet):
 	
 		'''Returns a Protool instance for the given mutation'''
 		
 		import Protool
-		filename = self.fileForMutation(mutationSet)
+		filename = self.fileForMutant(mutationSet)
 		pdb = Protool.structureIO()
 		pdb.readpdb(filename)
 		
@@ -1399,8 +1399,8 @@ class MutantCollection:
 		chainIds.sort()
 		
 		#Get the mutant sequences
-		mutantPDB = self.mutant(mutationSet)
-		mutantSequences = GetChainSequences(mutantPDB)
+		mutantInstance = self.protoolInstanceForMutant(mutationSet)
+		mutantSequences = GetChainSequences(mutantInstance)
 		
 		#Create full sequence of each
 		mutantSequence = ""
