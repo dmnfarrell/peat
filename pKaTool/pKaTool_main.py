@@ -184,7 +184,8 @@ class Main(Frame,pKaTool_stability.pKaTool_stability,pKaTool_utility.pKaTool_uti
         # Analyse menu
         #
         self.analyse_menu=Menu(self.menu,tearoff=0)
-        self.analyse_menu.add_command(label='Show table with group info',command=self.show_details_table)
+        self.analyse_menu.add_command(label='Show table of selected groups',command=self.show_details_table)
+        self.analyse_menu.add_command(label='Show matrix for selected groups',command=self.show_matrix_table)
         self.analyse_menu.add_command(label='Multiple calculation analysis',command=self.mult_calc_anal)
         self.analyse_menu.add_command(label='Calculate pI',command=self.calc_pI)
         self.menu.add_cascade(label='Analyse',menu=self.analyse_menu)
@@ -636,6 +637,50 @@ class Main(Frame,pKaTool_stability.pKaTool_stability,pKaTool_utility.pKaTool_uti
     # -----
     #
 
+    def show_matrix_table(self,event=None):
+        """Open a new window with the matrix for all selected groups"""
+        details_win=Toplevel()
+        import pKarun.pKa_general
+        X=pKarun.pKa_general.pKanalyse()
+        row=0
+        order=sorted(self.matrix.keys())
+        #
+        # Insert table headings
+        #
+        column=0
+        for key in ['dpKa units']+order:
+            tl=Label(details_win,text=key,anchor='e',borderwidth=2,width=10,relief='ridge')
+            tl.grid(row=row,column=column)
+            column=column+1
+        row=row+1
+        #
+        # Insert the data
+        #
+        for group in self.selected_groups:
+            tl=Label(details_win,text=group,anchor='e',borderwidth=2,relief='ridge',width=10)
+            tl.grid(row=row,column=0)
+            column=1
+            import math
+            for key in order:
+                if not self.matrix[group][key] is None:
+                    text='%5.1f' %(self.matrix[group][key][0]/math.log(10))
+                else:
+                    text='%5s' %('Unknown')
+                #
+                # Fill the cell
+                #
+                tl=Label(details_win,text=text,anchor='e',borderwidth=2,width=10,relief='ridge')
+                tl.grid(row=row,column=column)
+                column=column+1
+            #
+            row=row+1
+        
+        return
+
+    #
+    # ----
+    #
+
     def show_details_table(self,event=None):
         """Open a new window with all details for the groups selected"""
         details_win=Toplevel()
@@ -1054,8 +1099,9 @@ class Main(Frame,pKaTool_stability.pKaTool_stability,pKaTool_utility.pKaTool_uti
                             if charge is None:
                                 import tkMessageBox
                                 tkMessageBox.showwarning("Could not find charge",
-                                                         "Could not find charge for %s at pH %5.2f\nDid you calculate charges for a wide enough pH range?" %(group2_name,real_pH),
+                                                         "Could not find charge for %s at pH %5.2f\nDid you calculate charges for a wide enough pH range?\nIgnoring all other groups for now..." %(group2_name,real_pH),
                                                          parent=self.master)
+                                return None
                             sum_interaction=sum_interaction+intene*abs(charge) # The intene has the right sign already
                     #
                     # Store the info

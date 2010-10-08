@@ -257,7 +257,7 @@ class pKa_system(Frame,pKa_base.pKa_base,pKa_system_help.system_help,
         self.file_menu.add_command(label='Print population table',command=self.print_table)
         self.file_menu.add_command(label='Add group',command=self.add_group)
         self.file_menu.add_command(label='Remove exp. titration curve',command=self.remove_exp_curve)
-        self.file_menu.add_command(label='Exit',command=self.quit)
+        self.file_menu.add_command(label='Exit',command=self.quit_application)
         self.menu.add_cascade(label='File',menu=self.file_menu)
         #
         # Command menu
@@ -375,7 +375,7 @@ class pKa_system(Frame,pKa_base.pKa_base,pKa_system_help.system_help,
         #
         # Exit button
         #
-        self.exit_bt=Button(self.win,text='Quit',command=self.quit)
+        self.exit_bt=Button(self.win,text='Quit',command=self.quit_application)
         self.exit_bt.grid(row=0,column=2,sticky='wens')
         #
         # Snapshot button

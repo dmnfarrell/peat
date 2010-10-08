@@ -225,7 +225,7 @@ def getDistanceAngle(coord1, coord2, titCoord):
 
 def fieldCoulomb(distCharge, cosAngle, charge):
 	'''
-	Calculate electric field using Coulomb's law
+	Calculate electric field using Coulombs law
 	'''
 	import math
 	E = 1.0/(4*math.pi*e0)*qe/(distCharge*1E-10)**2 *charge*cosAngle / au_field

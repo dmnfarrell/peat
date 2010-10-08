@@ -147,6 +147,8 @@ class pKaIO:
             elif line.strip()=='<****SITE_INFOS>' and mode=='titcurv':
                 self.titdata={}
                 count=count+1
+                #print lines[count].strip()
+                #stop
                 titcurvs=eval(lines[count])
                 for item in titcurvs:
                     residue=item['site'][0].split('-')
