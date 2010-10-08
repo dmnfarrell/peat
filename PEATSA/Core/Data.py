@@ -1385,6 +1385,40 @@ class MutantCollection:
 		
 		return filename		
 		
+	def operationsForMutant(self, mutationSet):
+	
+		'''Returns the Protool operations related to a mutant
+		
+		Can be used to quickly convert the wild-type Protool instance into a mutant instance'''
+
+		from PEATDB.Sequence import SequenceOperations
+		
+		#Get the wild-type sequences
+		wildTypeSequences = GetChainSequences(self.pdb)
+		chaindIds = wildTypeSequences.keys()
+		chainIds.sort()
+		
+		#Get the mutant sequences
+		mutantPDB = self.mutant(mutationSet)
+		mutantSequences = GetChainSequences(mutantPDB)
+		
+		#Create full sequence of each
+		mutantSequence = ""
+		wildTypeSequence = ""
+		for id in chainIds:
+			mutantSequence = mutantSequence + mutantSequences[id]
+			wildTypeSequence = wildTypeSequence + wildTypeSequences[id]
+	
+		#The last two keyword args don't seem to be used
+		operations = SequenceOperations.findSequenceDifferences(record_sequence=mutantSequence, 
+						       parent_sequence=wildTypeSequence,
+						       full_parent_sequence=wildTypeSequence,
+						       PDBaln=None,
+						       recordALN=None)
+
+		return operations
+			       
+		
 	def mutations(self):
 	
 		'''Returns a list of the mutations in the collection.
@@ -1395,31 +1429,6 @@ class MutantCollection:
 		be in this list.'''
 	
 		return copy.deepcopy(self.mutationList)	
-	
-	def mutantDiffs(self):
-	
-		'''Returns a dictionary of diffs between the wild-type pdb and each mutant'''
-	
-		import difflib
-		
-		differ = difflib.Differ()
-		reference = self.mutantFiles()[0]
-		stream = open(reference, 'r')
-		wildType = stream.readlines()
-		stream.close()
-	
-		diffs = {}
-		for mutationSet in self.mutations():
-			file = self.fileForMutant(mutationSet)
-			if file is not None:
-				stream = open(file, 'r')
-				mutant = stream.readlines()
-				stream.close()
-				diff = list(differ.compare(wildType, mutant))
-				diffs["+".join(mutationSet.mutationCodes())] = diff
-				print 'Done', mutationSet
-			
-		return diffs	
 				
 	def mutationListFile(self, filename):
 	
@@ -1899,7 +1908,7 @@ class MutationSet:
 
 		'''Applies the mutations defined by the receiver to wildTypeSequence
 		
-		Note: wildTypeSequence must correspond to a single chain
+		Note: wildTypeSequence must correspond to a single chain which is specified by id
 		Also sequence are assumed to have a 1 offset.
 		Thus the mutation A1A is applied to element 0 of wildTypeSequence
 		
@@ -1914,7 +1923,7 @@ class MutationSet:
 			residue from the pdb is compared to that in the supplied sequence
 			and an exception is raised if the two are not the same.
 
-			offset := Number such that (seqResidue + offset = pdbResidue)
+			offset: Number such that (seqResidue + offset = pdbResidue)
 			If None it is equal to the number of the first residue in the pdb if supplied
 			If the pdb is None it defaults to 1
 			
