@@ -704,13 +704,13 @@ class PEATSAPlugin(Plugin):
         self.matrices = {'binding':dataset.bindingResults,
                          'stability':dataset.stabilityResults}
         jobmeta = job.metadata()
+        cols = self.DB.getSimpleFields()
         if jobmeta.has_key('expcol'):
             expcol = jobmeta['expcol']
         else:
             expcol=''
-        if expcol == '' or expcol==None:
-            #if exp column not known then ask user
-            cols = self.DB.getSimpleFields()            
+        if expcol == '' or expcol==None or not expcol in cols:
+            #if exp column not known or not available then ask user                       
             mpDlg = MultipleValDialog(title='Select Experimental Data',
                                         initialvalues=[cols],
                                         labels=['exp data column:'],
