@@ -79,7 +79,7 @@ if __name__ == "__main__":
 			raise Exception, "Modelling Failure - %s" % temp.name
 	
 		#Get PDB
-		filename = collection.fileForMutant(mutationSet)
+		filename = collection.fileForMutationSet(mutationSet)
 		stream = open(filename)
 		string = stream.read()
 		stream.close()
