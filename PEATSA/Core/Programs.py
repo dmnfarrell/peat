@@ -966,7 +966,7 @@ class Scanner:
 			self.designer.params=params.copy()
 			self.designer.parse_parameters()
  
-		filename = mutantCollection.fileForMutant(mutationSet)
+		filename = mutantCollection.fileForMutationSet(mutationSet)
 		self.designer.name = pKa.Design_pKa.print_setup(params)
 		self.designer.mutfile_names={mutationSet.codeString(self.pdb, reduced=False):filename}
 		self.environment.output('Mutation File %s' % self.designer.mutfile_names, rootOnly=False)
@@ -1435,7 +1435,7 @@ class PBSolver:
 		mutations = mutantCollection.mutations()
 		mutations = self.environment.splitArray(mutations) 
 		for set in mutations:
-			mutant = mutantCollection.fileForMutant(set)
+			mutant = mutantCollection.fileForMutationSet(set)
 			result = self.solvationEnergy(mutant, ligandFile, protonationStates)
 			result.insert(0, "+".join(set.reducedMutationCodes(pdb=mutantCollection.pdb)))
 			rows.append(result)
