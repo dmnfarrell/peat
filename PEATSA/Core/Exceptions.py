@@ -87,6 +87,12 @@ class MutantCollectionError(ProteinDesignToolException):
 	
 	errorString = "Encountered an error when creating a MutantCollection"
 	
+class MutantModellingError(ProteinDesignToolException):
+
+	'''Raised when there is a problem modelling a mutant'''
+	
+	errorString = "Encountered an error when modelling a mutant"	
+	
 class DataAlreadyExistsError(ProteinDesignToolException):
 
 	'''Raised when an attempt is made to add already existing data to a PEAT-SA output directory'''
