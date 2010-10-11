@@ -1249,13 +1249,13 @@ class App(Frame, GUI_help):
                                                   fill='black',
                                                   tag='logo')
         text=['Welcome to Protein Engineering and Analysis Tool  (PEAT)',
-              'Authors: Jens Erik Nielsen, Damien Farrell and Chresten Soendergaard',
+              'Authors: Jens Erik Nielsen, Damien Farrell and Michael Johnston',
               'Copyright Jens Erik Nielsen, University College Dublin 2003-, All rights reserved']
-        self.y=240
+        self.y=20
         self.x=380
-        ifont=tkFont.Font(family='Arial',size=12, weight='bold')
+        ifont=tkFont.Font(family='Arial',size=12)
         for line in text:
-            self.cv.create_text(self.x,self.y,text=line,fill='black',font=ifont, tag='logo')
+            self.cv.create_text(self.x,self.y,text=line,fill='white',font=ifont, tag='logo')
             self.y=self.y+15
 
         # Remove the logo after some time
