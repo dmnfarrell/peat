@@ -52,6 +52,7 @@ class PEATSAPlugin(Plugin):
                    'editConfigFile' : 'Configure Server',
                    'help':'Help',
                    'quit':'Close'}
+    buttonorder = ['createJobDialog','fetchJob','editConfigFile','help','quit']
     about = 'This plugin allows you to call PEATSA'    
 
     calctypes = ['stability','binding','both']
@@ -65,9 +66,14 @@ class PEATSAPlugin(Plugin):
         else:
             self.parent = parent
             self.DB = parent.DB
-            self.parentframe = None
+            self.parentframe = None            
             self._doFrame()
-    
+            self.setupConnection()
+            print 'Updating jobs table..'
+            self.updateJobs()            
+        return
+
+    def setupConnection(self):
         homepath = os.path.expanduser("~") 
         self.confpath = os.path.join(homepath, 'peatsa.conf')
         if os.path.exists(self.confpath):    
@@ -90,16 +96,11 @@ class PEATSAPlugin(Plugin):
     def _doFrame(self):
         self.mainwin = self.parent.createChildFrame(title='PEATSA Plugin')        
         methods = self._getmethods()
-        methods = [m for m in methods if m[0] in self.gui_methods.keys()]  
+        methods = [m for m in methods if m[0] in self.gui_methods.keys()]        
         l=Label(self.mainwin, text='Run PEAT-SA Calculations')
-        l.pack(side=TOP,fill=BOTH)       
-        self.jobslist = Pmw.ScrolledListBox(self.mainwin,                
-                labelpos='nw',
-                label_text='Jobs in DB',
-                listbox_height = 6 )
-        self.jobslist.pack(side=TOP,fill=BOTH,expand=1)
-        #self.createJobsTable(self.mainwin)
-        self.updateJobs()
+        l.pack(side=TOP,fill=BOTH)
+        self.tf=LabelFrame(self.mainwin,text='Jobs in this project')
+        self.tf.pack(side=TOP,fill=BOTH,expand=1)       
         self.manageJobsButtons(self.mainwin)    
         self._createButtons(methods)
         self.log = self.createLogWin(self.mainwin)
@@ -110,22 +111,25 @@ class PEATSAPlugin(Plugin):
     def _createButtons(self, methods):
         """Dynamically create buttons for supplied methods, which is a tuple
             of (method name, label)"""     
-        for m in methods:           
+        for m in methods:
             b=Button(self.mainwin,text=self.gui_methods[m[0]],command=m[1])
             b.pack(side=BOTTOM,fill=BOTH)
         return
 
-    def createJobsTable(self, frame):
-        """Use a table for jobs list"""
+    def updateJobsTable(self):
+        """Show table for current jobs list"""        
         self.checkJobsDict()
         joblist = self.DB.meta.peatsa_jobs
         M = TableModel()       
-        for j in joblist:            
-            M.addRecord(j)        
-        tf=LabelFrame(frame,text='Jobs in this project')
-        tf.pack(side=TOP,fill=BOTH,expand=1)
-        self.jobstable = TableCanvas(tf, model=M, cellwidth=70, editable=False)
-        self.jobstable.createTableFrame()             
+        for j in joblist:
+            job,name = self.getJob(j)
+            try:                
+                M.addRecord(j,state=job.state(),date=job.date)
+            except:
+                M.addRecord(j,state='Not in DB')
+        self.jobstable = TableCanvas(self.tf, model=M, height=100, editable=False)
+        self.jobstable.createTableFrame()       
+        self.log.yview('moveto', 1)        
         return
 
     def manageJobsButtons(self, parent):
@@ -406,23 +410,21 @@ class PEATSAPlugin(Plugin):
             dbmuts = [DB.get(p).Mutations for p in DB.getRecs()]       
             newmuts = list(set(dbmuts) - set(muts))
             print 'the following mutations in the project are not in the job: %s' %newmuts
-        self.log.yview('moveto', 1)
-        
+        self.log.yview('moveto', 1)        
         return
         
     def getJob(self, name=None):
         """Get job from name"""
-        if name == None:
-            try:
-                name = self.jobslist.getcurselection()[0]
-            except:
-                return None, None         
+        if name == None:                         
+            name = self.jobstable.get_selectedRecordNames()[0]
+            if name == None:
+                return None, name
         jobid = self.DB.meta.peatsa_jobs[name]
         try:
             job = PEATSA.WebApp.Data.Job(jobid, self.connection)
         except:
-            print 'job not in database or connection down'
-            return None,None
+            #print 'job not in database'
+            return None,name
         return job, name
         
     def removeJob(self):
@@ -483,8 +485,10 @@ class PEATSAPlugin(Plugin):
             
     def updateJobs(self):
         if not hasattr(self.DB.meta,'peatsa_jobs'):
-            return
-        self.jobslist.setlist(self.DB.meta.peatsa_jobs) 
+            return         
+        self.updateJobsTable()
+        self.wait=self.mainwin.after(60000, self.updateJobs)
+        return
 
     def manageResults(self, name=None):
         """Get the results back - we can send the matrix to the main peat
