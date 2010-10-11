@@ -94,7 +94,7 @@ class PEATSAPlugin(Plugin):
         return
     
     def _doFrame(self):
-        self.mainwin = self.parent.createChildFrame(title='PEATSA Plugin')        
+        self.mainwin = self.parent.createChildFrame(width=450,title='PEATSA Plugin')        
         methods = self._getmethods()
         methods = [m for m in methods if m[0] in self.gui_methods.keys()]        
         l=Label(self.mainwin, text='Run PEAT-SA Calculations')
@@ -207,7 +207,18 @@ class PEATSAPlugin(Plugin):
             self.storeJob(name, job)
             self.updateJobs()
         return
-    
+
+    def writetempPDB(self,name=None,pdbfile='refprot.pdb'):
+        if name==None:
+            name = self.DB.meta.refprotein
+        pdblines = self.DB[name].Structure
+        #pdbfile = 'refprot.pdb'
+        fd=open(pdbfile,'w')
+        for line in pdblines:
+            fd.write(line)
+        fd.close()
+        return pdbfile
+            
     def createJobDialog(self):
         """Get details from user using dialog
            required: structure, mutations, type of calc and a tag (optional)"""
@@ -264,16 +275,10 @@ class PEATSAPlugin(Plugin):
             if not hasattr(self.DB.meta, 'refprotein') or self.DB.meta.refprotein == None:
                 tkMessageBox.showinfo('No ref protein',
                                       'Set a reference (wt) protein first')
-                return             
+                return     
             #if self.useref.get() == 1:
             #we use ref pdb by default now
-            name = self.DB.meta.refprotein
-            pdblines = self.DB[name].Structure
-            pdbfile = 'refprot.pdb'
-            fd=open(pdbfile,'w')
-            for line in pdblines:
-                fd.write(line)
-            fd.close()
+            pdbfile = self.writetempPDB()
                
             '''else:
                 p = pdbentry.getvalue()
@@ -407,9 +412,15 @@ class PEATSAPlugin(Plugin):
             matrix=matrices[m]
             if matrix==None: return
             muts = matrix.mutationCodes()
-            dbmuts = [DB.get(p).Mutations for p in DB.getRecs()]       
+            dbmuts = [DB.get(p).Mutations for p in DB.getRecs()]
             newmuts = list(set(dbmuts) - set(muts))
             print 'the following mutations in the project are not in the job: %s' %newmuts
+            
+        '''self.submitJob(name=name,
+                         pdb=pdb, pdbfile=pdbfile,
+                         ligandfile=self.ligandfile,
+                         mutations=newmuts,
+                         calcs=calcs, meta={'expcol':expcol}) '''
         self.log.yview('moveto', 1)        
         return
         
@@ -708,13 +719,13 @@ class PEATSAPlugin(Plugin):
         self.matrices = {'binding':dataset.bindingResults,
                          'stability':dataset.stabilityResults}
         jobmeta = job.metadata()
-        cols = self.DB.getSimpleFields()
         if jobmeta.has_key('expcol'):
             expcol = jobmeta['expcol']
         else:
             expcol=''
-        if expcol == '' or expcol==None or not expcol in cols:
-            #if exp column not known or not available then ask user                       
+        if expcol == '' or expcol==None:
+            #if exp column not known then ask user
+            cols = self.DB.getSimpleFields()            
             mpDlg = MultipleValDialog(title='Select Experimental Data',
                                         initialvalues=[cols],
                                         labels=['exp data column:'],
