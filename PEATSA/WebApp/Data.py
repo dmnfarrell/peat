@@ -564,7 +564,7 @@ class JobManager:
 		self.logging = True
 		self.logFile = file
 		self.logInterval = interval
-		self.logThread = threading.Timer(interval, JobManager.logJobState, [self, file])
+		self.logThread = threading.Timer(interval, JobManager.logJobStates, [self, file])
 		self.logThread.start()
 			
 	def logFile(self):
