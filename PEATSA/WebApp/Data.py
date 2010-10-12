@@ -28,7 +28,7 @@
 
 '''Contains classes representing the WebApp's data and for creating and managing it'''
 
-import MySQLdb, os.path, StringIO, pickle
+import MySQLdb, os.path, StringIO, pickle, threading
 import UtilityFunctions, Exceptions
 import PEATSA.Core as Core
 
@@ -392,6 +392,12 @@ class JobManager:
 		self.cursor = connection.cursor();
 		self.jobTable = jobTable
 		
+		#Logging ivars
+		self.logging = False
+		self.logFile = None
+		self.logInterval = None
+		self.logThread = None
+		
 	def __del__(self):
 		
 		'''Close database connection'''
@@ -481,6 +487,22 @@ class JobManager:
 		
 		return JobIDsInTable(self.jobTable, self.connection)
 		
+	def jobStates(self):
+	
+		'''Returns a dict whose keys are job ids and whose values are the jobs state'''
+		
+		self.connection.commit()
+		selectQuery = """SELECT JobID, State FROM %s""" % (self.jobTable)
+		self.cursor.execute(selectQuery)		
+		rows = self.cursor.fetchall()
+		
+		stateDict = {}
+		for row in rows:
+			stateDict[row[0]] = row[1]
+				
+		return stateDict
+		
+		
 	def jobsWithCalculationsInState(self, state):
 	
 		'''Returns any job which has a calculation in \e state
@@ -522,7 +544,54 @@ class JobManager:
 			if state in row:
 				ids.append(row[0])
 				
-		return ids			
+		return ids
+		
+	def logJobStates(self, file):
+	
+		'''Writes the state of all jobs to file as a pickled dictionary'''
+	
+		stateDict = self.jobStates()
+		stream = open(file, 'w+')
+		pickler = pickle.Pickler(stream)
+		pickler.dump(stateDict)
+		stream.flush()
+		stream.close()
+		
+	def setJobStateLogging(self, file, interval=60):	
+	
+		'''Sets the receiver to write the state of jobs to file every interval secs'''
+	
+		self.logging = True
+		self.logFile = file
+		self.logInterval = interval
+		self.logThread = threading.Timer(interval, JobManager.logJobStatus, [self, file])
+		self.logThread.start()
+			
+	def logFile(self):
+	
+		'''Returns the file the receiver is logging to
+		
+		If isLogging() returns False this method returns None'''
+	
+		return self.logFile
+	
+	def stopLogging(self):
+	
+		'''Stops automatic logging'''
+	
+		if self.logging():
+			self.logThread.cancel()
+			self.logThread = None
+			self.logFile = None
+			self.logInterval = None
+			self.logging = False		
+										
+	def isLogging(self):
+	
+		'''Returns True if automatic logging is turned on'''
+
+		return self.logging																			
+																			
 	
 class Job:
 
@@ -952,7 +1021,6 @@ class Job:
 		
 		structureData = self.structure()
 		temp = tempfile.NamedTemporaryFile()
-		name = temp.name
 		temp.write(structureData)
 		temp.flush()
 
