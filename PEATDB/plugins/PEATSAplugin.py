@@ -29,7 +29,7 @@ try:
     from Plugins import Plugin
 except:
     from PEATDB.Plugins import Plugin
-import os, types, copy
+import os, types, copy, pickle
 from Tkinter import *
 import tkFileDialog
 import Pmw
@@ -119,12 +119,14 @@ class PEATSAPlugin(Plugin):
     def updateJobsTable(self):
         """Show table for current jobs list"""        
         self.checkJobsDict()
-        joblist = self.DB.meta.peatsa_jobs
-        M = TableModel()       
-        for j in joblist:
-            job,name = self.getJob(j)
+        jobdict = self.DB.meta.peatsa_jobs
+        M = TableModel()
+        #open job log from file
+        jl = pickle.load(open('jobstates.log','r'))
+        for j in jobdict: 
+            jobid =jobdict[j]           
             try:                
-                M.addRecord(j,state=job.state(),date=job.date)
+                M.addRecord(j,state=jl[jobid]['State'],date=jl[jobid]['Date'])
             except:
                 M.addRecord(j,state='Not in DB')
         self.jobstable = TableCanvas(self.tf, model=M, height=100, editable=False)
@@ -181,6 +183,7 @@ class PEATSAPlugin(Plugin):
         """Create connection"""
         self.connection = PEATSA.WebApp.UtilityFunctions.ConnectionFromConfiguration(configuration)
         self.jobManager = PEATSA.WebApp.Data.JobManager(self.connection)
+        self.jobManager.setJobStateLogging('jobstates.log',interval=60)
         print '\nConnection to server made sucessfully.\n'     
         return
         
@@ -391,7 +394,8 @@ class PEATSAPlugin(Plugin):
             self.mutationList.addMutant(s, autoUpdate=False, ignoreDuplicates=True)
         self.mutationList.removeDuplicates(autoUpdate=False)
         job.setMutationListFile(self.mutationList)
-        job.setState('Ready')       
+        job.setState('Ready')
+        self.jobManager.logJobStates('jobstates.log')
         #add job to peat database
         self.storeJob(name, job)
         self.DB.commit(note='peatsa job',user=self.parent.username)  
@@ -534,6 +538,7 @@ class PEATSAPlugin(Plugin):
     
     def quit(self):      
         self.mainwin.destroy()
+        self.jobManager.stopLogging()
         self.log2Stdout()
         return  
 
