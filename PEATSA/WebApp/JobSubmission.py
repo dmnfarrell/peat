@@ -374,6 +374,9 @@ class JobConstructor:
 					"description":"Error in submitted pdb structure.",
 					"detailedDescription":"The supplied structure is missing main-chain heavy atoms",
 					"recoverySuggestion": suggestion}
+				self.job.setError(description=self.errorData['description'], 
+						detailedDescription=self.errorData['detailedDescription'])
+				self.job.setState('Finished')
 				return
 			elif structure.hasChainBreak():
 				suggestion = "PEAT-SA requires that all chains in submitted structures are complete.<br>"
@@ -382,12 +385,12 @@ class JobConstructor:
 					"description":"Error in submitted pdb structure.",
 					"detailedDescription":"The supplied structure contains at least one chain-break.",
 					"recoverySuggestion": suggestion}
+				self.job.setError(description=self.errorData['description'], 
+						detailedDescription=self.errorData['detailedDescription'])
+				self.job.setState('Finished')
 				return
 		else:
 			pdbFilename = os.path.join(workingDir, self.formData.pdbFilename())	
-	
-	 
-	
 	
 		if self.formData.isLigandPresent():
 			filename = os.path.join(webStorageDir, '%s' % self.formData.ligandFilename())
