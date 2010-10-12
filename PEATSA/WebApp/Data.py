@@ -489,16 +489,18 @@ class JobManager:
 		
 	def jobStates(self):
 	
-		'''Returns a dict whose keys are job ids and whose values are the jobs state'''
+		'''Returns a dict describing the state of each job
+		
+		The dicts keys are job ids. Each values is a dict containing the the jobs state and date'''
 		
 		self.connection.commit()
-		selectQuery = """SELECT JobID, State FROM %s""" % (self.jobTable)
+		selectQuery = """SELECT JobID, State, Date FROM %s""" % (self.jobTable)
 		self.cursor.execute(selectQuery)		
 		rows = self.cursor.fetchall()
 		
 		stateDict = {}
 		for row in rows:
-			stateDict[row[0]] = row[1]
+			stateDict[row[0]] = {'State':row[1], 'Date':row[2]}
 				
 		return stateDict
 		
