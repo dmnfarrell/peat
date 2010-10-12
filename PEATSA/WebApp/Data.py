@@ -566,20 +566,12 @@ class JobManager:
 		self.logInterval = interval
 		self.logThread = threading.Timer(interval, JobManager.logJobStates, [self, file])
 		self.logThread.start()
-			
-	def logFile(self):
-	
-		'''Returns the file the receiver is logging to
-		
-		If isLogging() returns False this method returns None'''
-	
-		return self.logFile
 	
 	def stopLogging(self):
 	
 		'''Stops automatic logging'''
 	
-		if self.logging():
+		if self.isLogging():
 			self.logThread.cancel()
 			self.logThread = None
 			self.logFile = None
