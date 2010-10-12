@@ -238,8 +238,8 @@
 				4C9750490E0293E50055AF54 /* INSTALL */,
 				4C083C1C0DF6D30F00325A83 /* README */,
 				4C083BD00DF6D30F00325A83 /* Core */,
-				4C873CC30F17B2B400574C99 /* Tools */,
 				4C82FA9510D7D14C00523FCC /* Database */,
+				4C873CC30F17B2B400574C99 /* Tools */,
 				4C083C1D0DF6D30F00325A83 /* WebApp */,
 			);
 			sourceTree = "<group>";
@@ -452,35 +452,19 @@
 				4C82FB0110D7E40600523FCC /* JobBrowser.php */,
 				4C82FB0010D7E40600523FCC /* StructureViewer.php */,
 				4C82FAFD10D7E3F300523FCC /* Formatting.php */,
-				4C82FAE610D7E14900523FCC /* Javascript */,
 				4C82FAE710D7E14900523FCC /* README */,
-				4C82FAE810D7E14900523FCC /* Styles */,
 			);
 			path = InterfaceKit;
-			sourceTree = "<group>";
-		};
-		4C82FAE610D7E14900523FCC /* Javascript */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Javascript;
-			sourceTree = "<group>";
-		};
-		4C82FAE810D7E14900523FCC /* Styles */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Styles;
 			sourceTree = "<group>";
 		};
 		4C873CC30F17B2B400574C99 /* Tools */ = {
 			isa = PBXGroup;
 			children = (
+				4CF016D612497356004BE90A /* Examples */,
 				4CEDE384122C06D80040576D /* ApplyWeights.py */,
 				4C0E4A99100DF12A00D1EB03 /* Binder.py */,
 				4CB9358611A2ACF4009E93B8 /* Classify.py */,
 				4C7CC03411CBA32E008F7E4E /* ColumnStat.py */,
-				4C9F84F90F44324B0032F9D2 /* ExampleFunction.py */,
 				4CF3CAB40F55AB6100C1B600 /* ExpandResults.py */,
 				4CEDE385122C06D80040576D /* ExtractColumns.py */,
 				4CB52C9E1191C0B8007ED635 /* FilterMatrix.py */,
@@ -488,13 +472,11 @@
 				4C75681B11CF78B800484D8D /* FTest.py */,
 				4C06B4450F9E01F8003937EC /* Histogram.py */,
 				4C7CC02F11CBA2D0008F7E4E /* MergeMatrices.py */,
-				4C80A4690F5FFBA700E36B05 /* ModelMutations.py */,
 				4CEDE387122C06D80040576D /* PCA.py */,
 				4C7CC03011CBA2D0008F7E4E /* PLSolvation.py */,
 				4CC8589A0FC55F0900734C56 /* PPInteraction.py */,
 				4CC858990FC55F0900734C56 /* SortMatrixByMutation.py */,
 				4C7CC03111CBA2D0008F7E4E /* Stat.py */,
-				4C873CE30F17B7C700574C99 /* TDCycle.py */,
 				4CFFAE440F9CCA9F00133444 /* Vitality.py */,
 			);
 			name = Tools;
@@ -586,6 +568,16 @@
 				4CBF353D10F1F9F4003F8462 /* SetJobData.py */,
 			);
 			path = Scripts;
+			sourceTree = "<group>";
+		};
+		4CF016D612497356004BE90A /* Examples */ = {
+			isa = PBXGroup;
+			children = (
+				4C9F84F90F44324B0032F9D2 /* ExampleFunction.py */,
+				4C873CE30F17B7C700574C99 /* TDCycle.py */,
+				4C80A4690F5FFBA700E36B05 /* ModelMutations.py */,
+			);
+			name = Examples;
 			sourceTree = "<group>";
 		};
 		4CF121E80F20A1330084250C /* Tests */ = {
