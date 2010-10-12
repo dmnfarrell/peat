@@ -50,7 +50,7 @@
 			else
 			{
 				//Send an email saying its finished
-				//If the user did give an email this won't do anything
+				//If the user didn't give an email this won't do anything
 				send_job_completion_mail($_GET['jobId']);
 			}
 		}
