@@ -470,6 +470,12 @@ class MutationListFile:
 		
 		return copy.copy(self.mutants)
 		
+	def numberOfMutants(self):
+			
+		'''Returns the number of mutants in the list'''
+		
+		return len(self.mutants)								
+		
 	def stringRepresentation(self):
 	
 		'''Returns the string that would be written if writeToFile() was called'''
