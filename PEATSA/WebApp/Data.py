@@ -397,6 +397,7 @@ class JobManager:
 		self.logFile = None
 		self.logInterval = None
 		self.logThread = None
+		self.threadLock = threading.Lock()
 		
 	def __del__(self):
 		
@@ -550,14 +551,19 @@ class JobManager:
 		
 	def logJobStates(self, file):
 	
-		'''Writes the state of all jobs to file as a pickled dictionary'''
+		'''Writes the state of all jobs to file as a pickled dictionary.
+		
+		This method is thread-safe. As a result it will block if another thread
+		is already executing this method'''
 	
+		self.threadLock.acquire()
 		stateDict = self.jobStates()
 		stream = open(file, 'w+')
 		pickler = pickle.Pickler(stream)
 		pickler.dump(stateDict)
 		stream.flush()
 		stream.close()
+		self.threadLock.release()
 		
 	def setJobStateLogging(self, file, interval=60):	
 	
