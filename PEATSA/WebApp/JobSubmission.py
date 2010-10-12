@@ -405,6 +405,20 @@ class JobConstructor:
 		#Create the mutation string.
 		#This also writes out the mutation file if neccessary
 		mutationString = CreateMutationString(self.formData.mutationData, webStorageDir, inputDir, self.job)
+		#if the mutationData is a mutation-list check their are actually some mutations in it
+		if self.job.isMutationList():
+			mutationListFile = self.job.mutationListFile()
+			if mutationListFile.numberOfMutants() == 0:
+				suggestion = "Return to the submission page and enter some mutation codes in the text-box or upload a file"
+				self.errorData = {"domain":"PDT.SubmissionDomain",
+					"description":"Error in submitted mutation list.",
+					"detailedDescription":"The supplied mutation list contains no mutation codes.",
+					"recoverySuggestion": suggestion}
+				self.job.setError(description=self.errorData['description'], 
+						detailedDescription=self.errorData['detailedDescription'])
+				self.job.setState('Finished')
+				return
+				
 		calculationString = CreateCalculationString(self.formData.calculations(), self.formData.ligandFilename())
 		
 		#Create the run string	
