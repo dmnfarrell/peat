@@ -359,8 +359,9 @@ class PEATTable(TableCanvas):
 class PEATTableModel(TableModel):
     """A model for managing the data in a the PEAT Table.
        Subclassed from TableModel.
-       The actual data will always be passed from PEAT, so there will
-       always be a DB instance passed to this constructor."""
+       The actual data will always be passed from PEAT, so there must
+       always be a DB instance passed to this constructor.
+       The data structure is an OOBTree instance"""
 
     def __init__(self, DB=None, parentapp=None):
         """Constructor overridden"""
@@ -639,3 +640,17 @@ class PEATTableModel(TableModel):
         self.meta._p_changed = 1
         return
 
+    def simpleCopy(self, include=None):
+        """Return a simple copy of the PEAT table model, with only
+           text and int fields and not using the OOBTree structure"""
+        M=TableModel()
+        fields = self.DB.getSimpleFields()
+        if include!=None:
+            fields.extend(include)
+        for rec in self.reclist:
+            data={}
+            for f in fields:
+                if self.data[rec].has_key(f):
+                   data[f] = self.data[rec][f]
+            M.addRecord(rec,**data)        
+        return M

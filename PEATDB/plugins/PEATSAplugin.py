@@ -139,7 +139,7 @@ class PEATSAPlugin(Plugin):
                 M.addRecord(j,state='Not in DB')
         self.jobstable = TableCanvas(self.tf, model=M, height=100, editable=False)
         self.jobstable.createTableFrame()       
-        self.log.yview('moveto', 1)        
+        self.log.yview('moveto', 1)
         return
 
     def manageJobsButtons(self, parent):
@@ -727,13 +727,16 @@ class PEATSAPlugin(Plugin):
             return
         i = matrix.indexOfColumnWithHeader(key)
       
-        for row in model.reclist:            
-            mset1 = Core.Data.MutationSet(model.data[row][key])
+        for row in model.reclist:
+            try:
+                mset1 = Core.Data.MutationSet(model.data[row][key])
+            except:
+                continue
             for rec in M.reclist:
-                #try:
-                mset2 = Core.Data.MutationSet(M.data[rec][key])
-                #except:
-                #    continue                 
+                try:
+                    mset2 = Core.Data.MutationSet(M.data[rec][key])
+                except:
+                    continue                 
                 if mset1 == mset2:
                     #add this data to table
                     for f in fields:                       
@@ -744,7 +747,7 @@ class PEATSAPlugin(Plugin):
                         if not M.data[rec].has_key(f): continue                        
                         model.addColumn(col)                      
                         model.data[row][col] = M.data[rec][f]
-        return model   
+        return model
         
     def showResults(self):
         """Show results with correlation plot from selected job"""
@@ -774,18 +777,17 @@ class PEATSAPlugin(Plugin):
             if mpDlg.result == True:
                 expcol = mpDlg.results[0]
             else:
-                return
-        
-        #from PEATDB.plugins.Correlation import CorrelationAnalyser  
+                return        
+     
         from Correlation import CorrelationAnalyser  
         C = CorrelationAnalyser()        
         
         for m in self.matrices:
             matrix = self.matrices[m]          
             if matrix == None: continue
-            M = self.parent.tablemodel           
-            M = self.mergeMatrix(matrix, M, fields=['name',expcol])           
-            x,y,names,muts = M.getColumns(['Total',expcol,'name','Mutations'],allowempty=False)          
+            M = self.parent.tablemodel.simpleCopy(include=['Mutations'])           
+            M = self.mergeMatrix(matrix, M)
+            x,y,names,muts = M.getColumns(['Total',expcol,'name','Mutations'],allowempty=False)
             labels = zip(names, muts)
             ax,frame,mh = C.plotCorrelation(x,y,labels,title=m,ylabel=expcol)
             table = self.showTable(frame, M)
@@ -797,9 +799,7 @@ class PEATSAPlugin(Plugin):
         if job.error() != None or job.state() != 'Finished':
             return                                    
         stabmatrix = job.data.stabilityResults
-        L = self.DB.getLabbookSheet('myjob')
-        #n,m,x,y = L.getColumns(['name','Mutations','Total','deltatm'],allowempty=False)
-        #print x,y,t,d        
+        L = self.DB.getLabbookSheet('myjob')  
         L = self.mergeMatrix(stabmatrix, L, fields=['name'])
         print L.columnNames
         #L1 = self.DB.getLabbookSheet('myjob3')

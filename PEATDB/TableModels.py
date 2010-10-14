@@ -789,9 +789,15 @@ class TableModel(object):
         return
 
     def load(self):
-        """Load model from pickle file"""
-        
+        """Load model from pickle file"""        
         return
 
+    def copy(self):
+        """Return a copy of this model"""
+        M=TableModel()
+        data = self.getData()
+        M.setupModel(data)
+        return M
+    
     def __repr__(self):
         return 'Table Model with %s rows' %len(self.reclist)
