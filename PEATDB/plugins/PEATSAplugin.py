@@ -40,18 +40,17 @@ from PEATDB.Dialogs import MultipleValDialog
 from PEATDB.Actions import DBActions
 from PEATDB.TableModels import TableModel
 from PEATDB.Tables import TableCanvas
-import tkMessageBox
+import tkMessageBox, tkSimpleDialog
 
 class PEATSAPlugin(Plugin):
     """Template GUI plugin for PEAT App"""
     capabilities = ['gui']
     requires = ['PEATSA']
     menuentry = 'PEATSA Plugin'
-    gui_methods = {'createJobDialog':'Create Calculation',
-                   'fetchJob':'Fetch Job from Server',                  
+    gui_methods = {'fetchJob':'Fetch Job from Server',                  
                    'editConfigFile' : 'Configure Server',
                    'help':'Help',
-                   'quit':'Close'}
+                   'quit':'Close Window'}
     buttonorder = ['createJobDialog','fetchJob','editConfigFile','help','quit']
     about = 'This plugin allows you to call PEATSA'    
 
@@ -94,14 +93,14 @@ class PEATSAPlugin(Plugin):
         return
     
     def _doFrame(self):
-        self.mainwin = self.parent.createChildFrame(width=450,title='PEATSA Plugin')        
+        self.mainwin = self.parent.createChildFrame(width=460,title='PEATSA Plugin')        
         methods = self._getmethods()
         methods = [m for m in methods if m[0] in self.gui_methods.keys()]        
         l=Label(self.mainwin, text='PEATSA Interface')
         l.pack(side=TOP,fill=BOTH)
         self.tf=LabelFrame(self.mainwin,text='Calculations in this Project')
-        self.tf.pack(side=TOP,fill=BOTH,expand=1)       
-        self.manageJobsButtons(self.mainwin)    
+        self.tf.pack(side=TOP,fill=BOTH,expand=1)
+        self.manageJobsButtons(self.mainwin)
         self._createButtons(methods)
         self.log = self.createLogWin(self.mainwin)
         self.log.pack(side=TOP,fill=BOTH,expand=1)         
@@ -110,10 +109,19 @@ class PEATSAPlugin(Plugin):
 
     def _createButtons(self, methods):
         """Dynamically create buttons for supplied methods, which is a tuple
-            of (method name, label)"""     
+            of (method name, label)"""
+        mbutton=Menubutton(self.mainwin, text='Options', width=12,
+                                         borderwidth=2, relief=RIDGE,
+                                         activeforeground='red')
+        menu=Menu(mbutton,tearoff=0)
+        mbutton['menu']=menu
+        mbutton.pack(side=BOTTOM,fill=BOTH)
         for m in methods:
-            b=Button(self.mainwin,text=self.gui_methods[m[0]],command=m[1])
-            b.pack(side=BOTTOM,fill=BOTH)
+            menu.add_radiobutton(label=self.gui_methods[m[0]], 
+                                        indicatoron=0,                                       
+                                        command=m[1])
+        b=Button(self.mainwin,text='Create Calculation',command=self.createJobDialog)
+        b.pack(side=BOTTOM,fill=BOTH)            
         return
 
     def updateJobsTable(self):
@@ -138,6 +146,8 @@ class PEATSAPlugin(Plugin):
         fr1 = Frame(parent)
         Button(fr1,text='View Results',command=self.showResults,bg='#ccFFFF').pack(side=TOP,fill=BOTH,expand=1)
         fr1.pack(fill=BOTH)
+        Button(fr1,text='Merge Results',command=self.mergeResults).pack(side=TOP,fill=BOTH,expand=1)
+        fr1.pack(fill=BOTH)        
         fr = Frame(parent)
         c='#ADD8E6'
         Button(fr,text='Show Details',command=self.viewDetails,bg=c).pack(side=LEFT,fill=BOTH,expand=1)
@@ -314,11 +324,11 @@ class PEATSAPlugin(Plugin):
         balloon = Pmw.Balloon(jobdlg)
         nameentry = Pmw.EntryField(jobdlg,
                 labelpos = 'w',
-                label_text = 'Job name:',
+                label_text = 'Name:',
                 validate = validatename,
-                value = 'myjob')
+                value = 'mycalc')
         nameentry.pack(fill=BOTH,expand=1)
-        balloon.bind(nameentry, 'Job name can be anything, but should be unique')        
+        balloon.bind(nameentry, 'Calculation name can be anything, but should be unique')        
         expcols = ['']+self.DB.getSimpleFields()
         expcolmenu = Pmw.OptionMenu(jobdlg,
                 labelpos = 'w',
@@ -330,7 +340,7 @@ class PEATSAPlugin(Plugin):
         balloon.bind(expcolmenu, 'Field with experimental data to compare, optional')          
         calcmenu = Pmw.OptionMenu(jobdlg,
                 labelpos = 'w',
-                label_text = 'Calculation:',
+                label_text = 'Calculation Type:',
                 items = self.calctypes,
                 initialitem = 'stability',
                 menubutton_width = 8)
@@ -505,6 +515,29 @@ class PEATSAPlugin(Plugin):
         self.wait=self.mainwin.after(60000, self.updateJobs)
         return
 
+    def mergeResults(self):
+        """Auto merge selected job results to main table"""
+        job, name = self.getJob()
+        dataset = job.data
+        self.matrices = {'binding':dataset.bindingResults,
+                         'stability':dataset.stabilityResults}
+        #get field name to use
+        name = tkSimpleDialog.askstring("Column name?",
+                                   "Name for column:",
+                                    initialvalue=name+'_Predictions',
+                                    parent=self.mainwin)
+        if name:
+            nf={'Total':name}
+        else:
+            nf=None
+        for m in self.matrices:
+            matrix = self.matrices[m]
+            if matrix == None: continue           
+            M = self.parent.tablemodel
+            M = self.mergeMatrix(matrix, M, fields=['Total'], newfields=nf)
+            self.parent.updateTable()
+        return
+    
     def manageResults(self, name=None):
         """Get the results back - we can send the matrix to the main peat
            table or put results into a labbook sheet.
@@ -559,8 +592,7 @@ class PEATSAPlugin(Plugin):
         for m in self.matrices:
             if self.matrices[m] != None:
                 self.showMatrix(fr,self.matrices[m], m)
-        self.labboklist = self.parent.labbookSheetsSelector(body)
-        #self.labboklist.insert(0,'main db')
+        self.labboklist = self.parent.labbookSheetsSelector(body)  
         self.labboklist.grid(row=0,column=1,sticky='news')                
         bf=Frame(body)
         bf.grid(row=1,column=1,sticky='ew')
@@ -680,36 +712,40 @@ class PEATSAPlugin(Plugin):
                     M.data[code][f] = str(row[j])
         return M
 
-    def mergeMatrix(self, matrix, model, fields=None):
+    def mergeMatrix(self, matrix, model, fields=None, newfields=None):
         """Merge a peatsa matrix with a table, returns merged tablemodel
-        tablemodel: input tablemodel
-        key: use given key to match on, usually mutations code
-        fields: which fields from model should be included in merge, default is all
+        tablemodel: input tablemodel       
+        fields: which fields from matrix should be included in merge, default all
+        newfields: a dict that can map matrix names to new col names
         """
+        M = self.matrix2Table(matrix)
         if fields==None:
-            fields = model.columnNames
-        key = 'Mutations'
-        M = self.matrix2Table(matrix)      
+            fields = M.columnNames
+        key = 'Mutations'        
         if not key in model.columnNames:
             print 'this table has no mutations column, we cannot merge'
             return
         i = matrix.indexOfColumnWithHeader(key)
       
-        for row in M.reclist:           
-            mset1 = Core.Data.MutationSet(M.data[row][key])
-            for rec in model.reclist:
-                try:
-                    mset2 = Core.Data.MutationSet(model.data[rec][key])
-                except:
-                    continue                 
+        for row in model.reclist:            
+            mset1 = Core.Data.MutationSet(model.data[row][key])
+            for rec in M.reclist:
+                #try:
+                mset2 = Core.Data.MutationSet(M.data[rec][key])
+                #except:
+                #    continue                 
                 if mset1 == mset2:
                     #add this data to table
                     for f in fields:
-                        if not model.data[rec].has_key(f): continue
-                        #print f, model.data[rec][f]
-                        M.addColumn(f)                      
-                        M.data[row][f] = model.data[rec][f]
-        return M        
+                        print row, rec, f
+                        if newfields!=None and newfields.has_key(f):
+                            col = newfields[f]
+                        else:
+                            col = f
+                        if not M.data[rec].has_key(f): continue                        
+                        model.addColumn(col)                      
+                        model.data[row][col] = M.data[rec][f]
+        return model   
         
     def showResults(self):
         """Show results with correlation plot from selected job"""
