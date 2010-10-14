@@ -736,8 +736,7 @@ class PEATSAPlugin(Plugin):
                 #    continue                 
                 if mset1 == mset2:
                     #add this data to table
-                    for f in fields:
-                        print row, rec, f
+                    for f in fields:                       
                         if newfields!=None and newfields.has_key(f):
                             col = newfields[f]
                         else:
