@@ -398,14 +398,20 @@ class Importer:
                     importdata.append(temp)
                
                if self.multiple_tabs.get() == 1:
-                   #we want to put all the cols into new datasets
+                   #we want to put all the cols into new datasets                   
                    for i in range(1,len(importdata)):
-                       x.append(float(importdata[i][0]))
+                       try:
+                           x.append(float(importdata[i][0]))
+                       except:
+                           x.append(None)
                    cols = importdata[0]
                    for j in range(1,len(cols)): #iterate over each col
                        y=[]
                        for i in range(1,len(importdata)):
-                           y.append(float(importdata[i][j]))
+                           try:
+                               y.append(float(importdata[i][j]))
+                           except:
+                               y.append(None)
                        name = cols[j]                      
 		       datasets[name] = EkinDataset(xy=[x,y])
 

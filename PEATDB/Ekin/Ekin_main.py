@@ -583,7 +583,7 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
             flbl.grid(row=0,column=7,sticky='news',padx=4,pady=2)
         elif self.filename!=None:
             filenamelbl=Label(parent,text=self.filename,fg='Blue')
-            filenamelbl.grid(row=0,column=8,columnspan=1,sticky='news',padx=4,pady=2)
+            filenamelbl.grid(row=0,column=8,columnspan=1,sticky='news',padx=4,pady=2)             
         return
 
     def sort_by_Num(self, p):

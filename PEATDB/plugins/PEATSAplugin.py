@@ -47,7 +47,7 @@ class PEATSAPlugin(Plugin):
     capabilities = ['gui']
     requires = ['PEATSA']
     menuentry = 'PEATSA Plugin'
-    gui_methods = {'createJobDialog':'Create New Job',
+    gui_methods = {'createJobDialog':'Create Calculation',
                    'fetchJob':'Fetch Job from Server',                  
                    'editConfigFile' : 'Configure Server',
                    'help':'Help',
@@ -97,9 +97,9 @@ class PEATSAPlugin(Plugin):
         self.mainwin = self.parent.createChildFrame(width=450,title='PEATSA Plugin')        
         methods = self._getmethods()
         methods = [m for m in methods if m[0] in self.gui_methods.keys()]        
-        l=Label(self.mainwin, text='Run PEAT-SA Calculations')
+        l=Label(self.mainwin, text='PEATSA Interface')
         l.pack(side=TOP,fill=BOTH)
-        self.tf=LabelFrame(self.mainwin,text='Jobs in this project')
+        self.tf=LabelFrame(self.mainwin,text='Calculations in this Project')
         self.tf.pack(side=TOP,fill=BOTH,expand=1)       
         self.manageJobsButtons(self.mainwin)    
         self._createButtons(methods)
@@ -310,7 +310,7 @@ class PEATSAPlugin(Plugin):
             
         jobdlg = Toplevel()
         jobdlg.geometry('+220+220')
-        jobdlg.title('Create new job')
+        jobdlg.title('Create Calculation')
         balloon = Pmw.Balloon(jobdlg)
         nameentry = Pmw.EntryField(jobdlg,
                 labelpos = 'w',
