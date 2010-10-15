@@ -348,7 +348,7 @@ class MultipleValDialog(tkSimpleDialog.Dialog):
         r=0
         self.vrs=[];self.entries=[]        
         for i in range(len(self.labels)):
-            Label(master, text=self.labels[i]).grid(row=r, column=0)
+            Label(master, text=self.labels[i]).grid(row=r, column=0,sticky='news')
             if self.types[i] == 'int':
                 self.vrs.append(IntVar())
             else:

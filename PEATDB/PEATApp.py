@@ -1531,6 +1531,32 @@ class App(Frame, GUI_help):
         self.main.wait_window(self.mwin)
         return
 
+    def editDictField(self, protein, field_name):
+        """Edit a field that's a dict structure"""
+        D = self.DB.data
+        if D[protein].has_key(field_name):
+            data=D[protein][field_name]
+        else:
+            return  
+        import types
+        if not type(data) is types.DictType:
+            return
+        vals = data.values()
+        labels = data.keys()
+        types= ['string' for i in labels]        
+        mpDlg = MultipleValDialog(title='Edit Field Data',
+                                    initialvalues=vals,
+                                    labels=labels,
+                                    types=types,
+                                    parent=self.main)        
+        if mpDlg.result == True:
+            for i in range(len(mpDlg.results)):
+                key = labels[i]
+                data[key] = mpDlg.results[i]              
+            self.DB.data[protein][field_name] = data            
+            self.table.redrawCell(recname=protein, colname=field_name)
+        return
+    
     def open_link(self, protein, field_name):
         """Open a hyperlink"""
         D = self.DB.data
@@ -1545,56 +1571,7 @@ class App(Frame, GUI_help):
 
     def edit_link(self, protein, field_name):
         """Edit a hyperlink"""
-        D = self.DB.data
-        if D[protein].has_key(field_name):
-            data=D[protein][field_name]
-        else:
-            data=None
-
-        self.editlinkframe=Toplevel()
-        # set the position of the window
-        top=self.winfo_toplevel()
-        rootx=top.winfo_rootx()
-        rooty=top.winfo_rooty()
-        self.editlinkframe.geometry('+%d+%d' %(rootx+200,rooty+200))
-
-        self.editlinkframe.title('Edit hyperlink')
-        try:
-            currtext = data['text']
-            currlink = data['link']
-        except:
-            currtext = ''
-            currlink = ''
-        self.newtextvar=StringVar()
-        self.newtextvar.set(currtext)
-        self.newlinkvar=StringVar()
-        self.newlinkvar.set(currlink)
-        def getdata():
-            self.linkdata={}
-            self.linkdata['text'] = self.newtextvar.get()
-            self.linkdata['link'] = self.newlinkvar.get()
-            self.editlinkframe.destroy()
-            return
-        def close():
-            self.editlinkframe.destroy()
-            return
-        Label(self.editlinkframe,text='Text:').grid(row=0,column=0,padx=2,pady=2)
-        Entry(self.editlinkframe,textvariable=self.newtextvar,width=40).grid(row=0,column=1,padx=2,pady=2)
-        Label(self.editlinkframe,text='Link:').grid(row=1,column=0,padx=2,pady=2)
-        Entry(self.editlinkframe,textvariable=self.newlinkvar,width=40).grid(row=1,column=1,padx=2,pady=2)
-        Button(self.editlinkframe,text='OK',command=getdata).grid(row=2,column=0,padx=2,pady=2,sticky='NEWS')
-        Button(self.editlinkframe,text='Cancel',command=close).grid(row=2,column=1,padx=2,pady=2,sticky='NEWS')
-        self.editlinkframe.columnconfigure(1,weight=1)
-        self.editlinkframe.focus_set()
-        self.master.wait_window(self.editlinkframe)
-        if not getattr(self,'linkdata',None):
-            self.linkdata=None
-        if self.linkdata:
-           # Got the record and column - add the data
-            self.DB.data[protein][field_name] = self.linkdata
-            delattr(self,'linkdata')
-            #self.updateTable(protein, field_name)
-            self.table.redrawCell(recname=protein, colname=field_name)
+        self.editDictField(protein, field_name)
         return
 
     def edit_notes(self, protein, field_name):
@@ -1617,19 +1594,16 @@ class App(Frame, GUI_help):
         # did we get any data back?
         if not getattr(self,'notesdata',None):
             self.notesdata=None
-        if self.notesdata:
-            print self.notesdata
+        if self.notesdata:           
             if self.notesdata.has_key('parent_info'):
                 notes_info=self.notesdata['parent_info']
                 protein=notes_info['record']
                 column=notes_info['column']
                 newnotes=self.notesdata['text']
-                del self.notesdata['parent_info']
+                del self.notesdata['parent_info']                
             # Got the record and column - add the data
-
             self.DB.data[protein][field_name]  = self.notesdata
-            delattr(self,'notesdata')
-            #self.updateTable(protein, field_name)
+            delattr(self,'notesdata')     
             self.table.redrawCell(recname=protein, colname=field_name)
         return
 

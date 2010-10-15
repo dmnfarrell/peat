@@ -96,7 +96,7 @@ def setpmidInfo():
             #print DB[p]['PMID_link']
         except:
             print 'no dict'
-    PT.write_flatfiles()
+   
     return
 
 def refitandAnalyse(refit=True, usepickle=False, savedb=False):

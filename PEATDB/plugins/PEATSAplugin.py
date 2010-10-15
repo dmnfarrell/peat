@@ -98,7 +98,7 @@ class PEATSAPlugin(Plugin):
         methods = [m for m in methods if m[0] in self.gui_methods.keys()]        
         l=Label(self.mainwin, text='PEATSA Interface')
         l.pack(side=TOP,fill=BOTH)
-        self.tf=LabelFrame(self.mainwin,text='Calculations in this Project')
+        self.tf=LabelFrame(self.mainwin,text='Project Calculations')
         self.tf.pack(side=TOP,fill=BOTH,expand=1)
         self.manageJobsButtons(self.mainwin)
         self._createButtons(methods)
@@ -518,6 +518,8 @@ class PEATSAPlugin(Plugin):
     def mergeResults(self):
         """Auto merge selected job results to main table"""
         job, name = self.getJob()
+        if job==None:            
+            return
         dataset = job.data
         self.matrices = {'binding':dataset.bindingResults,
                          'stability':dataset.stabilityResults}
@@ -526,10 +528,9 @@ class PEATSAPlugin(Plugin):
                                    "Name for column:",
                                     initialvalue=name+'_Predictions',
                                     parent=self.mainwin)
-        if name:
-            nf={'Total':name}
-        else:
-            nf=None
+        if not name:
+            return            
+        nf={'Total':name}
         for m in self.matrices:
             matrix = self.matrices[m]
             if matrix == None: continue           
@@ -792,6 +793,7 @@ class PEATSAPlugin(Plugin):
             ax,frame,mh = C.plotCorrelation(x,y,labels,title=m,ylabel=expcol)
             table = self.showTable(frame, M)
             mh.table = table
+            
         return
     
     def test(self):
