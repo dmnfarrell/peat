@@ -666,7 +666,7 @@ class EkinProject(object):
                            normalise=None, logx=False, logy=False,
                            grid=True, legend=False, showfitvars=False,
                            xerror=None, yerror=None, showerrorbars=False,
-                           figure=None, dpi=80,otheroptions=None):
+                           figure=None, dpi=80, otheroptions=None):
         """Plot a dataset or list of datasets, if none given all are  plotted.
            plotoptions:
            1 - each dataset in one plot, different figures/images
@@ -697,7 +697,8 @@ class EkinProject(object):
         prms.xlabel = ''
         prms.ylabel = ''
         prms.varyshapes = False
-
+        prms.grayscale = False
+        
         if otheroptions != None:
             for o in otheroptions:
                 prms.__dict__[o] = otheroptions[o]
@@ -772,7 +773,7 @@ class EkinProject(object):
                 cc=0
             if prms.varyshapes == True:
                 prms.marker = shapes[cc]
-            if plotoption == 2:               
+            if plotoption == 2:
                 ax = fig.add_subplot(int(dim),int(cols),n)
                 ax.set_title(name, fontsize=prms.fontsize, fontweight='bold')
                 if cols<4:
@@ -806,27 +807,21 @@ class EkinProject(object):
                                         alpha=prms.alpha, ms=prms.markersize)
                 else:
                     ptcolors=[]
-                    for i in range(len(x)):
-                        #if prms.varyshapes == True:
-                        #    ptcolors = '0.8'
+                    if prms.grayscale==True:
+                        actclr = '0.5'
+                    else:
+                        actclr = prms.colors[cc]
+                    for i in range(len(x)):              
                         if act[i]==0:
-                            ptcolors.append('#CCCCCC')
+                            ptcolors.append('0.8')
                         else:
-                            ptcolors.append(prms.colors[cc])
+                            ptcolors.append(actclr)
                           
                     line = ax.scatter(x, y, marker=prms.marker, c=ptcolors,
                                       s=prms.markersize, lw=prms.linewidth, alpha=prms.alpha)
                     cc+=1
-                lineclr = '#cccccc'
-                try:
-                    lineclr = line.get_color()
-                except:
-                    i=0
-                    while lineclr == '#cccccc':
-                        lineclr = tuple(line.get_facecolor()[i][:3])
-                        lineclr = matplotlib.colors.rgb2hex(lineclr)
-                        i+=1
 
+                lineclr = self._getlineColor(line)
                 if prms.showerrorbars == True and (yerr != None or xerr != None):
                     print xerr,yerr
                     errline = ax.errorbar(x, y, xerr=xerr, yerr=yerr, fmt=None,
@@ -855,6 +850,8 @@ class EkinProject(object):
                 fitclr = lineclr
                 if plotoption != 3:
                     fitclr='r'
+                if prms.grayscale==True:
+                    fitclr='0.4'
                 xx, fity = self.updateFit(X, ax, xdata[name], clr=fitclr,
                                             normalise=prms.normalise, plotoption=plotoption)
                
@@ -903,11 +900,24 @@ class EkinProject(object):
         if clr==None:
             clr=line.get_color()
         if self.fitline == None or plotoption != 1:
-            self.fitline, = ax.plot(xx, fity, clr, linewidth=2.5, alpha=0.7)
+            self.fitline, = ax.plot(xx, fity, clr, linewidth=2.5, alpha=0.8)
         else:
             self.fitline.set_data(xx, fity)
         return xx, fity
 
+    def _getlineColor(self, line):
+        """Private method - get a lines' color"""
+        clr = '#cccccc'
+        try:
+            clr = line.get_color()
+        except:
+            i=0
+            while clr == '#cccccc':
+                clr = tuple(line.get_facecolor()[i][:3])
+                clr = matplotlib.colors.rgb2hex(clr)
+                i+=1        
+        return clr
+    
     def showfitResults(self, X, ax):
         """Show fit vars in a plot"""
 

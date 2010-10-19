@@ -49,8 +49,7 @@ class Options(object):
 
     def __init__(self, redraw=None, opts={}):
         """Setup variables"""      
-        self.redraw = redraw
-       
+        self.redraw = redraw       
         self.datacolors = self.colors
         self.dpi = 300
         self.opts = {'shape':'o', 'markersize':20, 'grid':0,
@@ -58,7 +57,8 @@ class Options(object):
                      'legendloc':'best', 'graphtype':'XY',
                      'linewidth':1.0, 'font':'monospace', 'fontsize':12,
                      'normalise':False, 'alpha':0.7, 'showerrorbars':False,
-                     'usetex':False, 'title':'', 'xlabel':'','ylabel':''}        
+                     'usetex':False, 'title':'', 'xlabel':'','ylabel':'',
+                     'grayscale':False}        
         self.setOptions(**opts)        
         self.currdata = None
         self.format = None  #data format   
@@ -150,7 +150,9 @@ class Options(object):
         self.plotylabelvar = StringVar()
         self.plotylabelvar.set(self.ylabel)
         self.varyshapesvar = IntVar()
-        self.varyshapesvar.set(0)        
+        self.varyshapesvar.set(0)
+        self.grayscalevar = IntVar()
+        self.grayscalevar.set(0)        
         self.dataseriesvars=[]
         return
 
@@ -189,7 +191,8 @@ class Options(object):
                 'alpha':self.alphavar.get(),
                 'usetex':self.usetexvar.get(),     
                 'showerrorbars':self.showerrorbarsvar.get(),
-                'varyshapes':self.varyshapesvar.get() }
+                'varyshapes':self.varyshapesvar.get(),
+                'grayscale':self.grayscalevar.get()}
         if self.redraw != None:
             self.redraw(options=self.opts)            
         return
@@ -293,7 +296,8 @@ class Options(object):
 
         Checkbutton(frame2, text="vary shapes", variable=self.varyshapesvar,
                     onvalue=1, offvalue=0).grid(row=5,column=0,columnspan=2,sticky='news')
-                    
+        Checkbutton(frame2, text="grayscale", variable=self.grayscalevar,
+                    onvalue=1, offvalue=0).grid(row=6,column=0,columnspan=2,sticky='news')                    
                     
         scalesframe = LabelFrame(self.plotprefswin, text="Axes Scales")
         scales={0:'norm',1:'log'}
