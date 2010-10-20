@@ -117,6 +117,7 @@ class Options(object):
         self.pltgrid.set(self.grid)
         self.pltlegend = IntVar()
         self.pltsymbol = StringVar()
+        print self.shape
         self.pltsymbol.set(self.shape)
         self.markersizevar = IntVar()
         self.markersizevar.set(self.markersize)
@@ -222,7 +223,6 @@ class Options(object):
             if colour != None:
                 self.datacolors[d] = str(colour_string)
                 cbuttons[d].configure(bg=colour_string)
-
             return
 
         Checkbutton(frame1, text="Grid lines", variable=self.pltgrid,

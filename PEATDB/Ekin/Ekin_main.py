@@ -2242,12 +2242,12 @@ class PlotPanel(Frame):
         self.fig.clear()
         if type(datasets) is types.ListType and len(datasets) > 1:    
             self.ax = self.E.plotDatasets(datasets, figure=self.fig, plotoption=plotoption, cols=cols,
-                                legend=self.show_legend.get(),
-                                otheroptions=options)
+                                #legend=self.show_legend.get(),
+                                **options)
         else:
             self.ax = self.E.plotDatasets(datasets, figure=self.fig,
-                                legend=self.show_legend.get(),
-                                otheroptions=options)
+                                #legend=self.show_legend.get(),
+                                **options)
             self.addSelectionHandler()
         self.canvas.draw()
         return

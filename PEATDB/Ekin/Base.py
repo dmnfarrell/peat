@@ -642,17 +642,13 @@ class EkinProject(object):
     def doPlot(self, ek, fitdata, options):
         """Need a bare bones plotter that can plot any given ekin data
            Should then call this one in plotDatasets below and simplify"""
-
-        #x,y,a,xerr,yerr = EkinConvert.ekin2xy(data, geterrors=True) 	
         x,y,a, xerr,yerr = ek.getAll()
         line = ax.scatter(x, y, marker='o')
-
         #plotting fit should also be seperate?
         f = fitdata
         d=[]
         X = Fitting.makeFitter(f, zip(x,y))
         if X==None: return
-
         #we now use this model to draw the fit line
         fitclr = lineclr
         if plotoption != 3:
@@ -662,11 +658,8 @@ class EkinProject(object):
 
     def plotDatasets(self, datasets='ALL', data=None, fitdata=None,
                            filename=None, plotoption=1, cols=0,
-                           size=(6,4), linecolor=None,
-                           normalise=None, logx=False, logy=False,
-                           grid=True, legend=False, showfitvars=False,
-                           xerror=None, yerror=None, showerrorbars=False,
-                           figure=None, dpi=80, otheroptions=None):
+                           size=(6,4), linecolor=None, figure=None,
+                           showfitvars=False, **kwargs):
         """Plot a dataset or list of datasets, if none given all are  plotted.
            plotoptions:
            1 - each dataset in one plot, different figures/images
@@ -674,34 +667,9 @@ class EkinProject(object):
            3 - all datasets in one plot, single figure
            Note: errorbars are drawn +/- value supplied"""
         status = self.setPylab(size)
-        self.current = datasets
-        prms = Params()
+        prms = Params(**kwargs)
+        self.current = datasets        
         shapes = Options.shapes
-        prms.colors = Options.colors
-        prms.marker = 'o'
-        prms.linewidth = 1
-        prms.legend = legend
-        prms.legendloc = 'best'
-        prms.font = 'sans-serif'
-        prms.fontsize = 12
-        prms.graphtype = 'XY'
-        prms.grid = grid
-        prms.alpha = 0.8
-        prms.usetex = False
-        prms.markersize = 25
-        prms.normalise = normalise
-        prms.showerrorbars = showerrorbars 
-        prms.logx = logx
-        prms.logy = logy
-        prms.title = None
-        prms.xlabel = ''
-        prms.ylabel = ''
-        prms.varyshapes = False
-        prms.grayscale = False
-        
-        if otheroptions != None:
-            for o in otheroptions:
-                prms.__dict__[o] = otheroptions[o]
 
         plt.rc('font', family=prms.font)
         plt.rc('font', size=prms.fontsize)        
@@ -757,8 +725,7 @@ class EkinProject(object):
             if prms.xlabel != '':
                 xlabel = prms.xlabel 
             else:
-                xlabel = ek.labels[0]              
-            
+                xlabel = ek.labels[0]            
             if prms.ylabel != '':
                 ylabel = prms.ylabel 
             else:
@@ -1007,198 +974,30 @@ class EkinProject(object):
             return None
 
 class Params(object):
-    def __init__(self):
-        return
-    
-'''class EkinDataset(object):
-    """Class to do operations with individual ekin datasets"""
-    def __init__(self, data):
-        self.data = data
-        return
-
-    def __repr__(self):
-        return 'Dataset with %s dps' %(len(self.data[0].keys())-1)
-
-    def prettyPrint(self):
-        """prints the entire dict"""
-        import pprint
-        pp = pprint.PrettyPrinter(indent=4)
-        x=pp.pformat(self.data)
-        print x
-        return
-
-    def DPkeys(self):
-        """Get datapoints keys"""
-        dpkeys=self.data[0].keys()
-        if 'label' in dpkeys:
-            dpkeys.remove('label')
-        return dpkeys
-
-    def addDP(self, dp):
-        """add a datapoint"""
-        self.data[0][dp]={'active':1,'var':'','error':0}
-        self.data[1][dp]={'active':1,'var':'','error':0}
-        return
-
-    def delDP(self, dp):
-        del self.data[0][dp]
-        del self.data[1][dp]
-        return
-
-    def getDP(self, dp, i):
-        return self.data[i][dp]
-
-    def getVal(self, dp, i):
-        """Get value at this dp and index"""
-        try:
-            return float(self.data[i][dp]['var'])
-        except:
-            return self.data[i][dp]['var']
-
-    def getXVal(self, dp):
-        return float(self.data[0][dp]['var'])
-
-    def getYVal(self, dp):
-        return float(self.data[1][dp]['var'])
-
-    def getXError(self, dp):
-        return self.getError(dp,0)
-
-    def getYError(self, dp):
-        return self.getError(dp,1)
-
-    def getError(self, dp, i):
-        """Get error val for dp"""
-        if self.data[i][dp].has_key('error'):
-            e = float(self.data[i][dp]['error'])
-        else:
-            e = 0
-        return e
-
-    def getX(self):
-        """Get x vals"""
-        return self.getXYData()[0]
-
-    def getY(self):
-        """Get y vals"""
-        return self.getXYData()[1]
-
-    def getXYActive(self):
-        """get active points"""
-        xd,yd,a,xerr,yerr = EkinConvert.ekin2xy(self.data, geterrors=True)
-        x=[];y=[]
-        for i in zip(xd,yd,a):
-            if i[2] == 1:
-                x.append(i[0])
-                y.append(i[1])
-        return x, y
-        
-    def getXYData(self):
-        """Get x, y vals in tuple"""
-        xd,yd,a,xerr,yerr = EkinConvert.ekin2xy(self.data, geterrors=True)
-        return xd, yd
-
-    def getXRange(self):
-        xd,yd = self.getXYData()
-        xr = max(xd)-min(xd)
-        return xr
-
-    def getYRange(self):
-        xd,yd = self.getXYData()
-        yr = max(yd)-min(yd)
-        return yr
-
-    def getlenDps(self, getall=False):
-        """Get no. of datapoints"""
-        if getall==True:
-            xd,yd,a,xerr,yerr = EkinConvert.ekin2xy(self.data, getall=True, geterrors=True)
-        else:
-            xd,yd,a,xerr,yerr = EkinConvert.ekin2xy(self.data, geterrors=True)
-        return len(xd)
-
-    def getminX(self):
-        """Get average of x datapoints"""
-        xd,yd = self.getXYData()
-        return min(xd)
-
-    def getmaxX(self):
-        """Get average of x datapoints"""
-        xd,yd = self.getXYData()
-        return max(xd)
-
-    def getmaxY(self):
-        """Get average of x datapoints"""
-        xd,yd = self.getXYData()
-        return max(yd)
-
-    def getavgX(self):
-        """Get average of x datapoints"""
-        xd,yd = self.getXYData()
-        return numpy.mean(xd)
-
-    def getavgY(self):
-        """Get average of y datapoints"""
-        xd,yd = self.getXYData()
-        return numpy.mean(yd)
-
-    def setXErrors(self, val):
-        for dp in self.data[0]:
-            if dp =='label' or dp=='label_widget':
-                continue
-            elif self.data[0][dp]['var'] != '':
-                self.data[0][dp]['error'] = val
-        return
-
-    def setDPActive(self, dp, a=1):
-        """Set whether point is active"""
-        if self.data[0][dp]['var'] != '':
-            self.data[0][dp]['active'] = a
-            self.data[1][dp]['active'] = a
-        return
-
-    def setActive(self, activelist):
-        """Set whether points are active using a list of 1's and 0's"""
-        for dp in self.data[0]:
-            if dp =='label' or dp=='label_widget':
-                continue
-            else:
-                if self.data[0][dp]['var'] != '':
-                    self.data[0][dp]['active'] = activelist[dp]
-                    self.data[1][dp]['active'] = activelist[dp]
-        return
-
-    def setActivefromRange(self, bounds=None, status=1):
-        """Set (in)active from range, a tuple x1,y1,x2,y2"""
-        if bounds==None or len(bounds)!=4:
-            return
-        x1,y1,x2,y2 = bounds
-        if x1>x2 :
-            temp=x1;x1=x2;x2=temp;
-        if y1>y2:
-            temp=y1;y1=y2;y2=temp;
-
-        for dp in self.data[0]:
-            if dp =='label' or dp=='label_widget':
-                continue
-            else:
-                if self.data[0][dp]['var'] != '':
-                    x = float(self.data[0][dp]['var'])
-                    y = float(self.data[1][dp]['var'])
-                    if (x>x1 and x<x2) and (y>y1 and y<y2):
-                        self.data[0][dp]['active'] = status
-                        self.data[1][dp]['active'] = status
-
-        return
-
-    def adjust(self, column=0, op='+', val=0):
-        """Perform some arithmetic op on all pts"""
-        for dp in self.data[0]:
-            if dp =='label' or dp=='label_widget':
-                continue
-            elif self.data[column][dp]['var']!='':
-                p=eval(str(self.data[column][dp]['var']) + op + str(val))
-                self.data[column][dp]['var'] = str(p)
-
-        return'''
-
+    """Class to store options passed to plotter"""
+    def __init__(self, **kwargs):        
+        self.colors = Options.colors
+        self.marker = 'o'
+        self.linewidth = 1
+        self.legend = False
+        self.legendloc = 'best'
+        self.font = 'sans-serif'
+        self.fontsize = 12
+        self.graphtype = 'XY'
+        self.grid = False
+        self.alpha = 0.8
+        self.usetex = False
+        self.markersize = 25
+        self.normalise = False
+        self.showerrorbars = False
+        self.logx = False
+        self.logy = False
+        self.title = None
+        self.xlabel = ''
+        self.ylabel = ''
+        self.varyshapes = False
+        self.grayscale = False        
+        for k in kwargs:
+            self.__dict__[k] = kwargs[k]
+        return   
 
