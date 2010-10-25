@@ -318,7 +318,7 @@ class Fitting(object):
         return fitstats
 
     @classmethod
-    def findBestModel(cls, ekindata, models, checkfunc=None,
+    def findBestModel(cls, ek, models, checkfunc=None,
                         conv=None, grad=None, alpha=0.05, silent=False):
         """Finds the best fit model using f-testing.
            We do an f-test here between each successive model
@@ -344,7 +344,7 @@ class Fitting(object):
         print 'Estimating best model..'
 
         for m in models[:]:
-            tempfit, X = cls.doFit(ekindata, model=m, silent=True, noiter=100, conv=conv, grad=grad)
+            tempfit, X = cls.doFit(ek, model=m, silent=True, noiter=100, conv=conv, grad=grad)
 
             if tempfit != None:
                 modelfits[m] = copy.deepcopy(tempfit)
@@ -354,7 +354,7 @@ class Fitting(object):
             return None, None
 
         best=modelstocompare[0]
-        numdps = len(ekindata[0].keys())-1
+        numdps = ek.length()
         modelstocompare.remove(best)
         for n in modelstocompare:
             if silent == False: print best,'vs.',n
@@ -369,7 +369,7 @@ class Fitting(object):
 
             if checkfunc != None and result == 1:
                 #use some other checking function, define externally
-                result = checkfunc(ekindata, modelfits[n])
+                result = checkfunc(ek.x, modelfits[n])
             if result == 1:
                 if silent == False: print 'Better'
                 best=n

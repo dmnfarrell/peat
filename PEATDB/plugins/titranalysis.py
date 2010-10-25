@@ -232,9 +232,9 @@ class NMRTitration(Plugin, GUI_help):
         nuclnames = {'1H NMR':'H','15N NMR':'N'}
         t = TitrationAnalyser()        
         #extract reliable pkas from selected proteins     
-        p=t.extractpKas(DB, col, names=names, titratable=False, reliable=False, minspan=0.06)
+        #p=t.extractpKas(DB, col, names=names, titratable=False, reliable=False, minspan=0.06)
         #t.analysepKas(p)
-        #t.compareNuclei(DB, '15N NMR', '1H NMR', titratable=True, names=names)
+        t.compareNuclei(DB, '15N NMR', '1H NMR', titratable=True, names=names)
         
         #ghost mapping..
         #t.mappKas(DB,col,p,names=['Protein G B1'],nucleus=nuclnames[col],calculatespans=False)       
@@ -257,14 +257,15 @@ class NMRTitration(Plugin, GUI_help):
         """Add some meta and refit all for an ekin prj or a rec/field in db"""
         if E==None and DB != None:
             E = DB[prot][col]
+            E.checkDatasets()
         t = TitrationAnalyser() 
         if refit == True:
             models = ['Linear', '1 pKa 2 Chemical shifts', 
                         '2 pKas, 3 Chemical shifts',
                         '3 pKas, 4 Chemical shifts']        
             E = t.findBest(E, models, geterrs=False)
-        if addmeta == True:    
-            E=t.setMetaInfo(E, atom=a)
+        if addmeta == True:
+            E = t.setMetaInfo(E, atom=a)
         if getexperrs == True:
             if yuncert == None:
                 print 'No value for Y uncertainty!, please supply it'
@@ -272,7 +273,7 @@ class NMRTitration(Plugin, GUI_help):
             print 'Using %s for y uncertainty.' %yuncert
             print
             E = t.getExpErrs(E, xuncert=0.1, yuncert=yuncert)
-        self.save(DB, col, prot, E)            
+        self.save(DB, col, prot, E)
         #DB.commit('refit/added meta info')
         return E 
         

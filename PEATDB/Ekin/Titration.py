@@ -409,7 +409,7 @@ class TitrationAnalyser():
     def findBest(self, E, models, geterrs=False, xuncert=0.1, yuncert=0.03):
         """Find best model for all datasets in an ekin project"""
         for d in E.datasets:
-            fdata, p = E.findBestModel(d, models=models, checkfunc=self.dostrictchecking)
+            fdata, p = E.findBestModel(d, models=models)#, checkfunc=self.dostrictchecking)
             if geterrs==True:
                 ferrs = E.estimateExpUncertainty(d, runs=20, xuncert=xuncert, yuncert=yuncert)
                 if ferrs == None:
@@ -444,13 +444,10 @@ class TitrationAnalyser():
     def dostrictchecking(cls, datapoints, fitdata):
         """Do some checking of pKa models as per McIntosh suggestions
            1. check pKa values are not too close to the end of the data points"""
-        ph=[]
-        for dp in datapoints[0]:
-            if dp != 'label' and datapoints[0][dp]['var'] !='':
-                ph.append(float(datapoints[0][dp]['var']))
+        
+        ph = datapoints
         phmin = min(ph)
-        phmax = max(ph)
-        print phmin, phmax
+        phmax = max(ph)        
         model = fitdata['model']
         vrs = Fitting.getFitVars(fitdata)
         X = Fitting.getFitter(model, vrs=vrs)
@@ -518,12 +515,15 @@ class TitrationAnalyser():
             #edata = E.getDataset(d)
             #resdata = cls.getResidueFields(edata)            
             resdata = E.getMetaData(d)
-            
+            print resdata
             if not resdata.has_key('residue'): continue
             res = resdata['residue']
-            atom = resdata['atom']
+            try:
+                atom = resdata['atom']
+            except:
+                atom = resdata['atom_type']
             resnum = resdata['res_num']
-            chain = resdata['chain_id']
+            #chain = resdata['chain_id']
             fitdata = E.getFitData(d)
             
             if titratable == True and not res in cls.titratable:
@@ -546,7 +546,7 @@ class TitrationAnalyser():
                 pkasdict[d]['res']=res
                 pkasdict[d]['resnum']=resnum
                 pkasdict[d]['atom']=atom
-                pkasdict[d]['chain_id']=chain
+                #pkasdict[d]['chain_id']=chain
                 pkasdict[d]['model']=fitdata['model']
                 for plst in pkas:
                     (p, pval, sp) = plst
@@ -1475,18 +1475,19 @@ class TitrationAnalyser():
         """Try to set residue names based on dataset labels"""
         import string 
         for d in E.datasets:
-            edata = E.getDataset(d)
-            name = string.upper(d[0:3])
-            #print 'name', name
+            #edata = E.getDataset(d)
+            name = string.upper(d[0:3])            
             found = 0
             if name in cls.residue_list:
-                edata['residue'] = name
-                found = 1               
+                #edata['residue'] = name
+                E.addMeta(d, 'residue', name)
+                found = 1
             #if not found from 1st three letters try one-letter code
             if found == 0:
                 if name[0] in cls.residue_letters.keys():
                     res = cls.residue_letters[name[0]]
-                    edata['residue'] = res          
+                    #edata['residue'] = res
+                    E.addMeta(d, 'residue', res)
         return E
 
     @classmethod
@@ -1495,11 +1496,12 @@ class TitrationAnalyser():
         import re
         r=re.compile('\d+')  
         for d in E.datasets:
-            edata = E.getDataset(d)
+            #edata = E.getDataset(d)
             nums = r.findall(d)
             #print nums
             if len(nums)>0:
-                edata['res_num'] = nums[0]
+                #edata['res_num'] = nums[0]
+                E.addMeta(d, 'res_num', nums[0])
         return E
         
     @classmethod
@@ -1509,14 +1511,9 @@ class TitrationAnalyser():
             'ASP':'CG',
             'GLN':'CD',
             }     
-        for d in E.datasets:
-            edata = E.getDataset(d)
-            if atom!=None:
-                edata['atom_type'] = atom
-            else:                
-                edata = E.getDataset(d)
-                fdata = E.getFitData(d)
-                model = fdata['model']                
+        for d in E.datasets:    
+            if atom!=None:              
+                E.addMeta(d, 'atom_type', atom)                       
         return E
 
     @classmethod
