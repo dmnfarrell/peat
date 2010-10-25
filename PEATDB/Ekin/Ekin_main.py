@@ -136,8 +136,7 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
         self.createFitFrame()
         #a small toolbar
         self.apptoolBar = ToolBar(plotpane, self)
-        self.apptoolBar.pack(side=TOP,fill=X)
-
+        self.apptoolBar.pack(side=TOP,fill=X)       
         if self.parent and self.allowreturntoDB == 1:
             self.apptoolBar.add_button('Return Data to DB', self.return_data,
                                         help='Return current data in table to DB',
