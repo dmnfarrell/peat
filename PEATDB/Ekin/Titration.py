@@ -516,8 +516,10 @@ class TitrationAnalyser():
         pkasdict = {}
         for d in E.datasets:           
             #edata = E.getDataset(d)
-            #resdata = cls.getResidueFields(edata)
-            resdata = E.getMetadata(d)
+            #resdata = cls.getResidueFields(edata)            
+            resdata = E.getMetaData(d)
+            
+            if not resdata.has_key('residue'): continue
             res = resdata['residue']
             atom = resdata['atom']
             resnum = resdata['res_num']
@@ -537,7 +539,7 @@ class TitrationAnalyser():
                 pnames, pvals, spans = cls.getallpKas(fitdata, minspan=minspan)
                 if pnames == None:
                     continue                    
-                pkas = zip(pnames, pvals, spans)                
+                pkas = zip(pnames, pvals, spans)
 
             if len(pkas)>0 and pkas!=None:
                 pkasdict[d]={}
@@ -1562,16 +1564,16 @@ class TitrationAnalyser():
             return None, None, None
         if len(fitdata) < 2:
             return None, None, None
-        params = FITTER.get_parameter_names(model)
+        params = cls.get_parameter_names(model)
         pkas={}
         spans={}
         for p in params:
             if 'pK' in p:
-                i = FITTER.get_param_index(p,model)
+                i = cls.get_param_index(p,model)
                 pkas[p] = fitdata[i]
                 #get span val for that pka in the fitdata
                 num=p.strip('pKa')
-                j = FITTER.get_param_index('span'+num,model)
+                j = cls.get_param_index('span'+num,model)
                 spans[p] = abs(float(fitdata[j]))
 
         #print 'pkas',pkas
@@ -1633,7 +1635,7 @@ class TitrationAnalyser():
             model = fitdata['model']
         except:
             return None, None, None
-        params = FITTER.get_parameter_names(model)
+        params = cls.get_parameter_names(model)
         pnames=[]
         pkas=[]
         spans=[]
@@ -1641,10 +1643,10 @@ class TitrationAnalyser():
             return None, None, None
         for p in params:
             if 'pK' in p:
-                i = FITTER.get_param_index(p,model)
+                i = cls.get_param_index(p,model)
                 #get span val for that pka in the fitdata
                 num=p.strip('pKa')
-                j = FITTER.get_param_index('span'+num,model)
+                j = cls.get_param_index('span'+num,model)
                 sp = abs(float(fitdata[j]))
                 if sp < minspan:
                     continue
@@ -1911,3 +1913,21 @@ class TitrationAnalyser():
             errline = ax.errorbar(x, y, xerr=xerrs, yerr=yerrs, fmt=None,
                                         elinewidth=.5, ecolor=clr, alpha=0.7)
         return cc[0][1]
+
+    @classmethod
+    def get_param_index(self, paramname, model):
+        """Returns an integer, the index of the input variable in dict for a given model"""
+        index=None
+        index_list = self.get_parameter_names(model)
+        i=0
+        for p in index_list:
+            if p == paramname:
+                index = i
+            i=i+1
+        return index
+    
+    @classmethod
+    def get_parameter_names(self, model):
+        X= Fitting.getFitter(model)
+        names = X.getVarNames()
+        return names

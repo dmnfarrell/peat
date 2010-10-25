@@ -54,7 +54,8 @@ class EkinDataset(object):
             if xerrs!=None and len(xerrs)==0:
                 xerrs=[0 for i in self.x]
             if yerrs!=None and len(yerrs)==0:
-                yerrs=[0 for i in self.y]                
+                yerrs=[0 for i in self.y]
+            self.checkLists() #convert to floats    
             self.errors=[xerrs,yerrs]
             self.labels=[xlabel,ylabel]
             self.fits={}
@@ -62,6 +63,20 @@ class EkinDataset(object):
             self.__dict__ = data        
         return
 
+    def checkLists(self):
+        self.x = self.checkList(self.x)
+        self.y = self.checkList(self.y)
+        return
+    
+    def checkList(self, lst):
+        n=[]
+        for i in lst:
+            try:
+                n.append(float(i))
+            except:
+                n.append(None)        
+        return n
+    
     def add(self, dp=(None,None), a=1, e=(None,None)):
         """Add a new datapoint, dp is a tuple"""        
         self.x.append(dp[0])

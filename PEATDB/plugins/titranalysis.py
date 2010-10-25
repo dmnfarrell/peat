@@ -238,7 +238,7 @@ class NMRTitration(Plugin, GUI_help):
         
         #ghost mapping..
         #t.mappKas(DB,col,p,names=['Protein G B1'],nucleus=nuclnames[col],calculatespans=False)       
-        t.mappKas(DB,col,p,names=['Xylanase (Bacillus subtilus)'],nucleus=nuclnames[col],calculatespans=False)
+        #t.mappKas(DB,col,p,names=['Xylanase (Bacillus subtilus)'],nucleus=nuclnames[col],calculatespans=False)
         
         return
         
@@ -362,7 +362,7 @@ def main():
         E = EkinProject()
         E.openProject(opts.ekinprj)
     
-    if opts.analyse == True:
+    if opts.analyse == True:        
         app.analyseTitDB(DB, opts.col, complete)
     elif opts.benchmark == True:
         app.benchmarkExpErr(DB)

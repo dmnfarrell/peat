@@ -364,15 +364,13 @@ class Importer:
         if self.column_row.get()==1:
             #All the work is done in dopreview,
             #here we just really need to create the ekin datasets
-            x = [float(i) for i in self.inrows_xdata]
+            x = [i for i in self.inrows_xdata]            
             for name in self.inrows_datasets.keys():
-                y = [float(i) for i in self.inrows_datasets[name]]
+                y = [i for i in self.inrows_datasets[name]]
 		datasets[name]=EkinDataset(xy=[x,y])
-
         else:
            #Data in Cols, do all files in file list
-           for filename in self.file_list:
-               print filename
+           for filename in self.file_list:               
                showname=os.path.split(filename)[1]
                showname=showname.replace('_','-')               
                showname=os.path.splitext(showname)[0]

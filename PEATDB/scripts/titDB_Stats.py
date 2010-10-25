@@ -49,9 +49,7 @@ def doSummary(DB):
         t.makepKasTable(p, outfile='pkastab_'+e+'.html')#, primary=True)
 
 def miscanalysis(DB):
-    ekindicts = t.getEkinDicts(DB)
-    print t.keys()
-    e = ekindicts[C]
+    
     p=t.extractpKas(e,names='HEWL',titratable=True)
 
     #t.compareProteinpKas(p, prot1='Plastocyanin (Phormidium)',  prot2='Plastocyanin (Anabaena variabilis)')
