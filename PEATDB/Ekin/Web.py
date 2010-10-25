@@ -133,6 +133,7 @@ class EkinWeb():
 
         csvpath = os.path.join( os.path.split(imgpath)[0], 'csv')
 
+	print project
         if ekindata != None: #convert from ekindata
             E = EkinProject(data=ekindata, mode='NMR titration')
         elif project != None: #just passed object
@@ -142,6 +143,7 @@ class EkinWeb():
             E.openProject(project)
         else:
             return
+	E.checkDatasets()
         #if outfile is given, we override imgpath
         if outfile != None and imgpath==None:
             imgpath = os.path.dirname(outfile)

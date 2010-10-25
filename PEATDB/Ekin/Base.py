@@ -659,7 +659,7 @@ class EkinProject(object):
     def plotDatasets(self, datasets='ALL', data=None, fitdata=None,
                            filename=None, plotoption=1, cols=0,
                            size=(6,4), linecolor=None, figure=None,
-                           showfitvars=False, **kwargs):
+                           showfitvars=False, dpi=80, **kwargs):
         """Plot a dataset or list of datasets, if none given all are  plotted.
            plotoptions:
            1 - each dataset in one plot, different figures/images
@@ -707,13 +707,12 @@ class EkinProject(object):
         #get ekin data into plot values
         xdata={};ydata={};adata={};xerrors={};yerrors={}
 
-        for name in datasets:            
+        for name in datasets: 
             self.fitline = None
             ek = self.data[name]            
             xd,yd = xdata[name],ydata[name] = ek.getxy()
             adata[name] = ek.active
             xerrors[name], yerrors[name] = ek.getErrors()
-       
             #if no error stored for points, try using global error if present
             if xerrors[name] == None and xerror != None:
                 xerrors[name] = []
