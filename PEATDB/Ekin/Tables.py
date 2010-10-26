@@ -62,11 +62,12 @@ class EkinDataModel(TableModel):
             i+=1
         for colname in modeldata['columnnames']:
             modeldata['columnlabels'][colname]=colname
-        for i in range(ek.length()):            
+        
+        for i in range(ek.length()): 
             x=ek.x[i]; y=ek.y[i]
             modeldata[i] = {label0:x,label1:y}
             modeldata[i][label2] = ek.xerr(i)
-            modeldata[i][label3] = ek.yerr(i) 
+            modeldata[i][label3] = ek.yerr(i)
         
         return modeldata
         

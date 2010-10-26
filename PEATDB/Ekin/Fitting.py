@@ -1097,7 +1097,7 @@ class DSCindependent(diffDenaturation):
         R=8.3144e-3
         Tm = x[y.index(max(y))]
         deltaH = Tm-80
-        A=1e3
+        A=1
         self.variables = [A,Tm,deltaH]
         return self.variables
         
@@ -1110,14 +1110,14 @@ class DSCindependent(diffDenaturation):
         A=variables[0]
         Tm=variables[1]
         deltaH=variables[2]
-        R=8.3144e-3
+        R=8.3144e-3/4.184
         K = math.exp((deltaH/R) * (1/Tm - 1/x))
         f = K / (K+1)
         value = A* (math.pow(deltaH,2) / (R*math.pow(x,2)) ) *f * (1-f)     
         return value
         
 class DSC2state(LM_Fitter):
-    """Fit to a 4 parameter DSC curve"""
+    """Fit to a 2 parameter DSC curve"""
 
     def __init__(self, variables, exp_data, callback, name):
         LM_Fitter.__init__(self,variables,exp_data,callback,name)

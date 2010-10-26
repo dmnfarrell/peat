@@ -957,7 +957,11 @@ class TitrationAnalyser():
             for dataset in E1.datasets:
                 if dataset in cls.excluded or not dataset in E2.datasets:
                     continue
-                res1 = cls.getResidue(E1.getDataset(dataset))
+                try:    
+                    res1 = E1.getMetaData(dataset)['residue']
+                except:
+                    res1 = cls.getResidue(E1.getDataset(dataset))             
+                
                 if titratable == True and not res1 in cls.titratable:
                     continue
                 fitdata1 = E1.getFitData(dataset)
@@ -1880,8 +1884,8 @@ class TitrationAnalyser():
         else:
             symb = symbol
         #ax=fig.add_subplot(111)
-        pylab.rc("font", family="serif")
-        pylab.rc("font", size=16)
+        #pylab.rc("font", family="serif")
+        pylab.rc("font", size=14)
         #pylab.rc('text', usetex=True)
 
         cc = numpy.corrcoef(numpy.array([x,y]))
@@ -1891,7 +1895,7 @@ class TitrationAnalyser():
         ax.scatter(x, y, facecolor=clr, marker=symb, s=markersize, linewidth=0.8,
                             picker=4, alpha=0.6)
 
-        if annotate!=None:           
+        if annotate!=None:
             for an in annotate:
                 x,y=an[0]
                 txt=an[1]

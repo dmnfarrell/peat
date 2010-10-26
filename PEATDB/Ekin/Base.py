@@ -310,7 +310,7 @@ class EkinProject(object):
         """Check for old format or bad dataset"""           
         if type(dataset) is types.DictType:
             #old format
-            x,y,a,xerr,yerr = EkinConvert.ekin2xy(dataset, getall=1, geterrors=True)
+            x,y,a,xerr,yerr = EkinConvert.ekin2xy(dataset, getall=1, geterrors=True)           
             return EkinDataset(x=x,y=y,active=a,xerrs=xerr,yerrs=yerr)           
         elif not type(dataset) is EkinDataset:
             return False

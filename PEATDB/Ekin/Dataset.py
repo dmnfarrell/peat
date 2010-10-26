@@ -55,15 +55,16 @@ class EkinDataset(object):
                 xerrs=[0 for i in self.x]
             if yerrs!=None and len(yerrs)==0:
                 yerrs=[0 for i in self.y]
-            self.checkLists() #convert to floats    
+            self.checkLists() #convert to floats if needed
             self.errors=[xerrs,yerrs]
             self.labels=[xlabel,ylabel]
-            self.fits={}
+            self.fits={}            
         else:
             self.__dict__ = data        
         return
 
     def checkLists(self):
+        """Check that our lists are floats or None, if empty"""
         self.x = self.checkList(self.x)
         self.y = self.checkList(self.y)
         return

@@ -88,15 +88,15 @@ class EkinConvert(object):
                             continue
 
                     if geterrors == True:
-                        if ekindataset[0][datapoint]['var'] != '' and ekindataset[1][datapoint]['var'] != '':
-                            if ekindataset[0][datapoint].has_key('error'):
-                                xerrors.append(float(ekindataset[0][datapoint]['error']))
-                            else:
-                                xerrors.append(float(0))
-                            if ekindataset[1][datapoint].has_key('error'):
-                                yerrors.append(float(ekindataset[1][datapoint]['error']))
-                            else:
-                                yerrors.append(float(0))
+                        #if ekindataset[0][datapoint]['var'] != '' and ekindataset[1][datapoint]['var'] != '':
+                        if ekindataset[0][datapoint].has_key('error'):
+                            xerrors.append(float(ekindataset[0][datapoint]['error']))
+                        else:
+                            xerrors.append(float(0))
+                        if ekindataset[1][datapoint].has_key('error'):
+                            yerrors.append(float(ekindataset[1][datapoint]['error']))
+                        else:
+                            yerrors.append(float(0))
 
         if len(xerrors) == 0:
             xerrors=None

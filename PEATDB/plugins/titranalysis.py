@@ -234,7 +234,7 @@ class NMRTitration(Plugin, GUI_help):
         #extract reliable pkas from selected proteins     
         #p=t.extractpKas(DB, col, names=names, titratable=False, reliable=False, minspan=0.06)
         #t.analysepKas(p)
-        t.compareNuclei(DB, '15N NMR', '1H NMR', titratable=True, names=names)
+        t.compareNuclei(DB, '15N NMR', '1H NMR', titratable=False, names=names)
         
         #ghost mapping..
         #t.mappKas(DB,col,p,names=['Protein G B1'],nucleus=nuclnames[col],calculatespans=False)       
