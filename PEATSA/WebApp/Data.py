@@ -597,14 +597,17 @@ class JobManager:
 	
 class Job:
 
-	'''Instances of this class represent a PDT web-server job . 
+	'''Instances of this class represent a web-server job . 
 	The actual Job data, for example the calculations being run, is stored in a SQL database. 
 	The methods of this class allow this data to be retrived and set, hiding all access and query details.
 	
-	The main attributes of a Job object are a unique id and the pdb code of the protein the job is working on.
-	Job objects must be initialy created using the createJob() method of a JobManager class
+	The main attributes of a Job object are a 
+		- job.identification - the jobs unique id
+		- job.pdbID - the id of the structure the job is working on
+		- job.data - An Data.SQLDataSet instance containing the jobs data
 	
-	Note: JobData must be set through this class'''
+	Job objects must be initialy created using the createJob() method of a JobManager class.
+	Only instantiate a Job object directly if it already exists.'''
 
 	def __init__(self, jobID, connection, jobTable="Jobs", dataTable="Data"):
 		
@@ -648,10 +651,48 @@ class Job:
 		'''Close database connection'''
 
 		self.cursor.close()
-			
+	
+	def email(self):
+	
+		'''Returns the email related to the job (if any)'''
+		
+		if not self.exists():
+			raise Exceptions.DatabaseRetrievalError, "Job Id %s does not exist in the database" % self.identification
+		
+		self.connection.commit()
+		selectQuery = """SELECT Email FROM %s WHERE JobID='%s'""" % (self.jobTable, self.identification)
+		self.cursor.execute(selectQuery)		
+		rows = self.cursor.fetchall()
+		
+		return rows[0][0]
+	
+	
+	def error(self):
+	
+		'''If there was an error during the job returns a dictionary detailing the error, otherwise returns None
+		
+		The dictionary has two keys:
+			ErrorDescription - A short description of the type of error
+			DetailedDescription - A longer description of what went wrong'''
+	
+		if self.exists():
+			self.connection.commit()
+			statement = """SELECT Error, ErrorDescription, DetailedDescription FROM %s WHERE JobID='%s' """ % (self.jobTable, self.identification)
+			self.cursor.execute(statement)
+			rows = self.cursor.fetchall()
+			if bool(rows[0][0]) == False:
+				return None
+			else:
+				return dict(zip(['ErrorDescription', 'DetailedDescription'], rows[0][1:]))
+		else:
+			raise Exceptions.DatabaseRetrievalError, "Job Id %s does not exist in the database" % self.identification		
+							
+	
 	def exists(self):
 		
 		'''Returns True if data corresponding to the receiver exists in the database'''
+		
+		retval = True
 		
 		#Check the job entry exists in the database
 		self.connection.commit()
@@ -660,9 +701,107 @@ class Job:
 		rows = self.cursor.fetchall()
 
 		if len(rows) == 0:
-			return False
+			retval = False
+		
+		return retval											
+		
+	
+	def isEmailSent(self):
+	
+		'''Returns True if an email has been sent in relation to this job already'''
+		
+		if not self.exists():
+			raise Exceptions.DatabaseRetrievalError, "Job Id %s does not exist in the database" % self.identification
+		
+		self.connection.commit()
+		selectQuery = """SELECT SentMail FROM %s WHERE JobID='%s'""" % (self.jobTable, self.identification)
+		self.cursor.execute(selectQuery)		
+		rows = self.cursor.fetchall()
+		
+		return bool(rows[0][0])
+	
+	
+	def metadata(self):
+	
+		'''Returns the metadata associated with the job.
+		
+		If no metadata was associated with the job this method returns None'''
+		
+		if not self.exists():
+			raise Exceptions.DatabaseRetrievalError, "Job Id %s does not exist in the database" % self.identification
+		
+		self.connection.commit()
+		selectQuery = """SELECT Metadata FROM %s WHERE JobID='%s'""" % (self.jobTable, self.identification)
+		self.cursor.execute(selectQuery)		
+		rows = self.cursor.fetchall()
+		
+		data = rows[0][0]
+		dict = UnserializeDictionary(data)
+		
+		return dict
+				
+	
+	def state(self):
+	
+		'''Returns the jobs state
+		
+		See setState() for more information.
+		Use calculationState() to get more detailed information
+		on  the status of the component calculations'''
+		
+		if not self.exists():
+			raise Exceptions.DatabaseRetrievalError, "Job Id %s does not exist in the database" % self.identification
+		
+		self.connection.commit()
+		selectQuery = """SELECT State FROM %s WHERE JobID='%s'""" % (self.jobTable, self.identification)
+		self.cursor.execute(selectQuery)		
+		rows = self.cursor.fetchall()
+		
+		return rows[0][0]
+				
+	
+	def queueStatusMessage(self):
+	
+		'''Returns the jobs queue status message (a string)
+		
+		The message has no predefined format. It is used to provide some informative
+		details about the current position of a job in a queue to users'''
+		
+		if not self.exists():
+			raise Exceptions.DatabaseRetrievalError, "Job Id %s does not exist in the database" % self.identification
+		
+		self.connection.commit()
+		selectQuery = """SELECT QueueStatusMessage FROM %s WHERE JobID='%s'""" % (self.jobTable, self.identification)
+		self.cursor.execute(selectQuery)		
+		rows = self.cursor.fetchall()
+		
+		return rows[0][0]	
+		
+	
+	def setError(self, description, detailedDescription):
+
+		if self.exists():
+			description = MySQLdb.escape_string(description)
+			detailedDescription = MySQLdb.escape_string(detailedDescription)
+			values =  (self.jobTable, description, detailedDescription, self.identification)
+			statement = """UPDATE %s SET Error='1', ErrorDescription='%s', DetailedDescription='%s' WHERE JobID='%s' """ % values
+			self.cursor.execute(statement)
+			self.connection.commit()
 		else:
-			return True											
+			raise Exceptions.DatabaseRetrievalError, "Job Id %s does not exist in the database" % self.identification
+			
+	
+	def setEmail(self, email):
+	
+		'''Adds an email to job'''
+		
+		if not self.exists():
+			raise Exceptions.DatabaseRetrievalError, "Job Id %s does not exist in the database" % self.identification
+
+		statement = """UPDATE %s SET Email='%s' WHERE JobID='%s' """ % (self.jobTable, email, self.identification)
+		self.cursor.execute(statement)
+		self.connection.commit()
+	
 	
 	def setState(self, aState):
 	
@@ -684,26 +823,9 @@ class Job:
 			else:
 				raise Core.Exceptions.ArgumentError, 'Provided state %s not valid' % aState	
 		else:
-			raise Exceptions.DatabaseRetrievalError, "Job Id %s does not exist in the database" % self.identification								
-		
-	def state(self):
-	
-		'''Returns the jobs state
-		
-		See setState() for more information.
-		Use calculationState() to get more detailed information
-		on  the status of the component calculations'''
-		
-		if not self.exists():
-			raise Exceptions.DatabaseRetrievalError, "Job Id %s does not exist in the database" % self.identification
-		
-		self.connection.commit()
-		selectQuery = """SELECT State FROM %s WHERE JobID='%s'""" % (self.jobTable, self.identification)
-		self.cursor.execute(selectQuery)		
-		rows = self.cursor.fetchall()
-		
-		return rows[0][0]
+			raise Exceptions.DatabaseRetrievalError, "Job Id %s does not exist in the database" % self.identification	
 
+	
 	def setQueueStatusMessage(self, message):
 
 		'''Sets the jobs queue status message.
@@ -715,50 +837,42 @@ class Job:
 			self.cursor.execute(statement)
 			self.connection.commit()
 		else:
-			raise Exceptions.DatabaseRetrievalError, "Job Id %s does not exist in the database" % self.identification								
+			raise Exceptions.DatabaseRetrievalError, "Job Id %s does not exist in the database" % self.identification
+							
 
-	def queueStatusMessage(self):
+	def setEmailSent(self):
 	
-		'''Returns the jobs queue status message (a string)
-		
-		The message has no predefined format. It is used to provide some informative
-		details about the current position of a job in a queue to users'''
+		'''Updates the stored Job data to indicate an email has already been sent about this job'''	
 		
 		if not self.exists():
 			raise Exceptions.DatabaseRetrievalError, "Job Id %s does not exist in the database" % self.identification
-		
-		self.connection.commit()
-		selectQuery = """SELECT QueueStatusMessage FROM %s WHERE JobID='%s'""" % (self.jobTable, self.identification)
-		self.cursor.execute(selectQuery)		
-		rows = self.cursor.fetchall()
-		
-		return rows[0][0]
-	
-	def addStabilityResults(self, matrix):
-	
-		if not self.exists():
-			raise Exceptions.DatabaseRetrievalError, "Job Id %s does not exist in the database" % self.identification
+
+		statement = """UPDATE %s SET SentMail='1' WHERE JobID='%s' """ % (self.jobTable, self.identification)
+		self.cursor.execute(statement)
+		self.connection.commit()	
 			
-		#Add the data to the SQL database
-		self.data.addMatrix(matrix, 'StabilityResults')
-	
-	def addScanResults(self, matrix):
-	
-		if not self.exists():
-			raise Exceptions.DatabaseRetrievalError, "Job Id %s does not exist in the database" % self.identification
-			
-		#Add the data to the SQL database
-		self.data.addMatrix(matrix, 'ScanResults')
 	
 	def addResults(self, matrix, name):
 	
+		'''Adds matrix to the jobs dataset
+		
+		Params:
+			matrix: A Core.Matrix.Matrix instance
+			name: The name to be associated with the matrix'''
+	
 		if not self.exists():
 			raise Exceptions.DatabaseRetrievalError, "Job Id %s does not exist in the database" % self.identification
 			
 		#Add the data to the SQL database
-		self.data.addMatrix(matrix, name)	
+		self.data.addMatrix(matrix, name)
+		
 
 	def addDataSet(self, dataSet):
+	
+		'''Adds all the matrices in dataSet to the receiver
+		
+		Params:
+			dataSet: A Core.Data.DataSet instance'''
 	
 		if not self.exists():
 			raise Exceptions.DatabaseRetrievalError, "Job Id %s does not exist in the database" % self.identification
@@ -778,25 +892,60 @@ class Job:
 		self.cursor.execute(statement)
 		self.connection.commit()
 	
-	def setCalculationState(self, calculation, state):
 	
-		'''Sets the state of a calculation in the job.
+	def ligand(self):
+	
+		'''Returns a string containing the structure of the ligand in mol2 format.
 		
-		Parameters:
-			calculation - One of Scan, Binding or Stability.
-			state - Queued, Waiting, Running or Finished.
-			Only applicable if initial state is selected'''
-	
-		if self.exists():
-			if self.calculationStates()[calculation] != 'NotSelected':
-				statement = """UPDATE %s SET %s='%s' WHERE JobID='%s'""" % (self.jobTable, calculation, state, self.identification)
-				self.cursor.execute(statement)
-				self.connection.commit()
-			else:
-				raise Core.Exceptions.ArgumentError, 'Specified calculation, %s, not selected. Cannot set state' % calculation	
-		else:
+		If no ligand is present the method returns None'''
+
+		if not self.exists():
 			raise Exceptions.DatabaseRetrievalError, "Job Id %s does not exist in the database" % self.identification
+
+		self.connection.commit()
+		statement = """SELECT Ligand FROM %s WHERE JobID='%s' """ % (self.jobTable, self.identification)
+		self.cursor.execute(statement)
+		rows = self.cursor.fetchall()
+		
+		return rows[0][0]	
+				
+	
+	def structure(self):
+	
+		'''Returns a string containing the structure of the protein in PDB format'''
+
+		if not self.exists():
+			raise Exceptions.DatabaseRetrievalError, "Job Id %s does not exist in the database" % self.identification
+
+		self.connection.commit()	
+		statement = """SELECT Structure FROM %s WHERE JobID='%s' """ % (self.jobTable, self.identification)
+		self.cursor.execute(statement)
+		rows = self.cursor.fetchall()
+		return rows[0][0]
+		
+	
+	def protoolStructure(self):
+	
+		'''Returns a protool structure instance initialised using the structure data stored in the database'''
+		
+		import tempfile, Protool
+		
+		structureData = self.structure()
+		temp = tempfile.NamedTemporaryFile()
+		temp.write(structureData)
+		temp.flush()
+
+		try:
+			object = Protool.structureIO()
+			object.readpdb(temp.name)
+		except Exception, data:	
+			raise Exceptions.FileFormatError, 'Format of stored PDB file for job %s not valid.\nUnderlying error - %s' % (self.identification, data)
+		finally:
+			temp.close()
 			
+		return object				 	
+	
+	
 	def calculationStates(self):
 	
 		'''Returns the state of the calculations.
@@ -819,42 +968,72 @@ class Job:
 			return dict(zip(['Stability', 'Scan', 'Binding'], rows[0]))
 		else:
 			raise Exceptions.DatabaseRetrievalError, "Job Id %s does not exist in the database" % self.identification
-	
-			
-	
-	def setError(self, description, detailedDescription):
-
-		if self.exists():
-			description = MySQLdb.escape_string(description)
-			detailedDescription = MySQLdb.escape_string(detailedDescription)
-			values =  (self.jobTable, description, detailedDescription, self.identification)
-			statement = """UPDATE %s SET Error='1', ErrorDescription='%s', DetailedDescription='%s' WHERE JobID='%s' """ % values
-			self.cursor.execute(statement)
-			self.connection.commit()
-		else:
-			raise Exceptions.DatabaseRetrievalError, "Job Id %s does not exist in the database" % self.identification
-			
-	def error(self):
-	
-		'''If there was an error during the job returns a dictionary detailing the error, otherwise returns None
 		
-		The dictionary has two keys:
-			ErrorDescription - A short description of the type of error
-			DetailedDescription - A longer description of what went wrong'''
+		
+	def mutation(self):
 	
-		if self.exists():
+		'''Retrieves the scan mutation the job should perform.
+		
+		If no mutation has been set, or a mutation list has been set instead, this method return None'''
+		
+		if not self.exists():
+			raise Exceptions.DatabaseRetrievalError, "Job Id %s does not exist in the database" % self.identification
+	
+		mutationData = None
+		if not self.isMutationList():
 			self.connection.commit()
-			statement = """SELECT Error, ErrorDescription, DetailedDescription FROM %s WHERE JobID='%s' """ % (self.jobTable, self.identification)
+			statement = """SELECT MutationData FROM %s WHERE JobID='%s' """ % (self.jobTable, self.identification)
 			self.cursor.execute(statement)
 			rows = self.cursor.fetchall()
-			if bool(rows[0][0]) == False:
-				return None
-			else:
-				return dict(zip(['ErrorDescription', 'DetailedDescription'], rows[0][1:]))
-		else:
-			raise Exceptions.DatabaseRetrievalError, "Job Id %s does not exist in the database" % self.identification		
+			mutationData  = rows[0][0]
+
+		return mutationData
+
 	
+	def mutationListFile(self):
+	
+		'''Returns a Core.Data.MutationListFile instance containing the mutations the job is to run on
 		
+		If the no mutationListFile has been set for the Job this method returns None'''
+	
+		if not self.exists():
+			raise Exceptions.DatabaseRetrievalError, "Job Id %s does not exist in the database" % self.identification
+	
+		mutationList = None
+		if self.isMutationList():
+			self.connection.commit()
+			statement = """SELECT MutationData FROM %s WHERE JobID='%s' """ % (self.jobTable, self.identification)
+			self.cursor.execute(statement)
+			rows = self.cursor.fetchall()
+			mutationData = rows[0][0]
+			mutationDataStream = StringIO.StringIO(mutationData)
+			mutationList = Core.Data.mutationListFileFromStream(stream=mutationDataStream)
+
+		return mutationList
+				
+	
+	def isMutationList(self):
+	
+		'''Returns True if the jobs mutations are specified by a mutation list'''
+	
+		if not self.exists():
+			raise Exceptions.DatabaseRetrievalError, "Job Id %s does not exist in the database" % self.identification
+			
+		#FIXME: Catch index errors if nothing is returned - (if there are any)
+		#It may be that always [[]] is returned if nothing is found	
+		self.connection.commit()
+		statement = """SELECT MutationCommand FROM %s WHERE JobID='%s' """ % (self.jobTable, self.identification)
+		self.cursor.execute(statement)
+		rows = self.cursor.fetchall()
+		mutationCommand = rows[0][0]
+		
+		isMutationList = False
+		if mutationCommand == '--mutationList':
+			isMutationList = True
+			
+		return isMutationList	
+	
+	
 	def setMutation(self, mutationCode):
 	
 		'''Sets the job to do a scan by mutating each residue in structure to mutation.
@@ -878,26 +1057,7 @@ class Job:
 		self.cursor.execute(statement)
 		self.connection.commit()
 		
-	def mutation(self):
 	
-		'''Retrieves the scan mutation the job should perform.
-		
-		If no mutation has been set, or a mutation list has been set instead, this method return None'''
-		
-		if not self.exists():
-			raise Exceptions.DatabaseRetrievalError, "Job Id %s does not exist in the database" % self.identification
-	
-		mutationData = None
-		if not self.isMutationList():
-			self.connection.commit()
-			statement = """SELECT MutationData FROM %s WHERE JobID='%s' """ % (self.jobTable, self.identification)
-			self.cursor.execute(statement)
-			rows = self.cursor.fetchall()
-			mutationData  = rows[0][0]
-
-		return mutationData
-
-		
 	def setMutationListFile(self, mutationList):
 	
 		'''Adds a mutation list data to the job.
@@ -928,48 +1088,7 @@ class Job:
 		statement = """UPDATE %s SET MutationData='%s' WHERE JobID='%s' """ % (self.jobTable, MySQLdb.escape_string(data), self.identification)
 		self.cursor.execute(statement)
 		self.connection.commit()	
-	
-	def mutationListFile(self):
-	
-		'''Returns a Core.Data.MutationListFile instance containing the mutations the job is to run on
-		
-		If the no mutationListFile has been set for the Job this method returns None'''
-	
-		if not self.exists():
-			raise Exceptions.DatabaseRetrievalError, "Job Id %s does not exist in the database" % self.identification
-	
-		mutationList = None
-		if self.isMutationList():
-			self.connection.commit()
-			statement = """SELECT MutationData FROM %s WHERE JobID='%s' """ % (self.jobTable, self.identification)
-			self.cursor.execute(statement)
-			rows = self.cursor.fetchall()
-			mutationData = rows[0][0]
-			mutationDataStream = StringIO.StringIO(mutationData)
-			mutationList = Core.Data.mutationListFileFromStream(stream=mutationDataStream)
-
-		return mutationList
-		
-	def isMutationList(self):
-	
-		'''Returns True if the jobs mutations are specified by a mutation list'''
-	
-		if not self.exists():
-			raise Exceptions.DatabaseRetrievalError, "Job Id %s does not exist in the database" % self.identification
-			
-		#FIXME: Catch index errors if nothing is returned - (if there are any)
-		#It may be that always [[]] is returned if nothing is found	
-		self.connection.commit()
-		statement = """SELECT MutationCommand FROM %s WHERE JobID='%s' """ % (self.jobTable, self.identification)
-		self.cursor.execute(statement)
-		rows = self.cursor.fetchall()
-		mutationCommand = rows[0][0]
-		
-		isMutationList = False
-		if mutationCommand == '--mutationList':
-			isMutationList = True
-			
-		return isMutationList					
+					
 				
 	def setStructure(self, structure):
 	
@@ -1002,40 +1121,7 @@ class Job:
 		stream.close()
 		self.setStructure(data)			
 		
-	def structure(self):
-	
-		'''Returns a string containing the structure of the protein in PDB format'''
-
-		if not self.exists():
-			raise Exceptions.DatabaseRetrievalError, "Job Id %s does not exist in the database" % self.identification
-
-		self.connection.commit()	
-		statement = """SELECT Structure FROM %s WHERE JobID='%s' """ % (self.jobTable, self.identification)
-		self.cursor.execute(statement)
-		rows = self.cursor.fetchall()
-		return rows[0][0]
-		
-	def protoolStructure(self):
-	
-		'''Returns a protool structure instance initialised using the structure data stored in the database'''
-		
-		import tempfile, Protool
-		
-		structureData = self.structure()
-		temp = tempfile.NamedTemporaryFile()
-		temp.write(structureData)
-		temp.flush()
-
-		try:
-			object = Protool.structureIO()
-			object.readpdb(temp.name)
-		except Exception, data:	
-			raise Exceptions.FileFormatError, 'Format of stored PDB file for job %s not valid.\nUnderlying error - %s' % (self.identification, data)
-		finally:
-			temp.close()
-			
-		return object				 	
-		
+					
 	def setLigand(self, ligand):
 	
 		'''Adds the structure of a protein to the job data.
@@ -1067,97 +1153,34 @@ class Job:
 		stream.close()
 		self.setLigand(data)			
 		
-	def ligand(self):
 	
-		'''Returns a string containing the structure of the ligand in mol2 format.
+	def setCalculationState(self, calculation, state):
+	
+		'''Sets the state of a calculation in the job.
 		
-		If no ligand is present the method returns None'''
+		Parameters:
+			calculation - One of Scan, Binding or Stability.
+			state - Queued, Waiting, Running or Finished.
+			Only applicable if initial state is selected'''
+	
+		if self.exists():
+			if self.calculationStates()[calculation] != 'NotSelected':
+				statement = """UPDATE %s SET %s='%s' WHERE JobID='%s'""" % (self.jobTable, calculation, state, self.identification)
+				self.cursor.execute(statement)
+				self.connection.commit()
+			else:
+				raise Core.Exceptions.ArgumentError, 'Specified calculation, %s, not selected. Cannot set state' % calculation	
+		else:
+			raise Exceptions.DatabaseRetrievalError, "Job Id %s does not exist in the database" % self.identification
+			
 
-		if not self.exists():
-			raise Exceptions.DatabaseRetrievalError, "Job Id %s does not exist in the database" % self.identification
 
-		self.connection.commit()
-		statement = """SELECT Ligand FROM %s WHERE JobID='%s' """ % (self.jobTable, self.identification)
-		self.cursor.execute(statement)
-		rows = self.cursor.fetchall()
-		
-		return rows[0][0]
-
-	def setEmail(self, email):
-	
-		'''Adds an email to job'''
-		
-		if not self.exists():
-			raise Exceptions.DatabaseRetrievalError, "Job Id %s does not exist in the database" % self.identification
-
-		statement = """UPDATE %s SET Email='%s' WHERE JobID='%s' """ % (self.jobTable, email, self.identification)
-		self.cursor.execute(statement)
-		self.connection.commit()
-		
-	def email(self):
-	
-		'''Returns the email related to the job (if any)'''
-		
-		if not self.exists():
-			raise Exceptions.DatabaseRetrievalError, "Job Id %s does not exist in the database" % self.identification
-		
-		self.connection.commit()
-		selectQuery = """SELECT Email FROM %s WHERE JobID='%s'""" % (self.jobTable, self.identification)
-		self.cursor.execute(selectQuery)		
-		rows = self.cursor.fetchall()
-		
-		return rows[0][0]
-		
-	def setEmailSent(self):
-	
-		'''Updates the stored Job data to indicate an email has already been sent about this job'''	
-		
-		if not self.exists():
-			raise Exceptions.DatabaseRetrievalError, "Job Id %s does not exist in the database" % self.identification
-
-		statement = """UPDATE %s SET SentMail='1' WHERE JobID='%s' """ % (self.jobTable, self.identification)
-		self.cursor.execute(statement)
-		self.connection.commit()	
-		
-	def isEmailSent(self):
-	
-		'''Returns True if an email has been sent in relation to this job already'''
-		
-		if not self.exists():
-			raise Exceptions.DatabaseRetrievalError, "Job Id %s does not exist in the database" % self.identification
-		
-		self.connection.commit()
-		selectQuery = """SELECT SentMail FROM %s WHERE JobID='%s'""" % (self.jobTable, self.identification)
-		self.cursor.execute(selectQuery)		
-		rows = self.cursor.fetchall()
-		
-		return bool(rows[0][0])
-		
-	def metadata(self):
-	
-		'''Returns the metadata associated with the job.
-		
-		If no metadata was associated with the job this method returns None'''
-		
-		if not self.exists():
-			raise Exceptions.DatabaseRetrievalError, "Job Id %s does not exist in the database" % self.identification
-		
-		self.connection.commit()
-		selectQuery = """SELECT Metadata FROM %s WHERE JobID='%s'""" % (self.jobTable, self.identification)
-		self.cursor.execute(selectQuery)		
-		rows = self.cursor.fetchall()
-		
-		data = rows[0][0]
-		dict = UnserializeDictionary(data)
-		
-		return dict
-		
 
 class SQLDataSet(Core.Data.DataSet):
 
-	'''Class representing the output of a PEATSA run stored in a SQL database.
+	'''Subclass of Core.Data.DataSet which stores the matrices in a SQL database.
 	
-	The Database must have a table called Data with the correct format.
+	Note: The Database must have a table called Data with the correct format.
 	
 	Attributes:
 		name - The name of the results
