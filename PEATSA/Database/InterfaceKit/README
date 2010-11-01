@@ -10,10 +10,10 @@ Note: This code does not provide a full interface on its own
 
 *** Modules ***
 
-The provide php modules can be broken into two types. 
+The provided php modules can be broken into two types. 
 The first provide functionality related to accessing data. 
 The second for displaying that data ("views").
-In addition some of the php modules provide functions for use in creating a php scripts while others are complete
+In addition some of the php modules provide functions for use in creating php scripts while others are complete
 php scripts themselves.
 
 * Data Access 
