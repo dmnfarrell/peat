@@ -195,6 +195,7 @@ class DBActions(object):
                                                     ("All files","*.*")])
             if not pdbfile:
                 return
+        pdbname = os.path.basename(pdbfile)
         import Protool
         self.X=Protool.structureIO()
         # Extracting PDB_code from pdbfile
@@ -295,8 +296,9 @@ class DBActions(object):
         AlignWindow.Slider.config(command=listbox.xview)
 
         if accept_alignment_automatically:
-            storePDB()
-            
+            storePDB()            
+        #add the original name
+        DB.data[name]['pdbname'] = pdbname
         return
 
     @classmethod    

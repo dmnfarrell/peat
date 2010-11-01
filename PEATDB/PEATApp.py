@@ -222,10 +222,10 @@ class App(Frame, GUI_help):
         self.toolbar.add_button('Delete record', self.deleteRecord, img, hlptxt)
         img = PEAT_images.table_add()
         hlptxt="Add a new column"
-        self.toolbar.add_button('Add col', self.addFieldDialog, img, hlptxt)
+        self.toolbar.add_button('Add col', self.addColumnDialog, img, hlptxt)
         img = PEAT_images.table_delete()
         hlptxt="Delete selected column"
-        self.toolbar.add_button('Delete col', self.deleteField, img, hlptxt)
+        self.toolbar.add_button('Delete col', self.deleteColumn, img, hlptxt)
         img = PEAT_images.arrow_undo()
         hlptxt="Undo current changes (since last save)"
         self.toolbar.add_button('Undo', self.undo, img, hlptxt)
@@ -328,9 +328,9 @@ class App(Frame, GUI_help):
 
         self.rec_menu={ '01Add Protein':{'cmd':self.addRecordDialog},
                         '02Delete Protein':{'cmd':self.deleteRecord},
-                        '03Add Field':{'cmd':self.addFieldDialog},
-                        '04Delete Field':{'cmd':self.deleteField},
-                        '05Show/Hide Fields':{'cmd':self.hideFieldsDialog},
+                        '03Add Column':{'cmd':self.addColumnDialog},
+                        '04Delete Column':{'cmd':self.deleteColumn},
+                        '05Show/Hide Columns':{'cmd':self.hideFieldsDialog},
                         '06Add/Change PDB File':{'cmd':self.addPDBFile},
                         '07Add Mutant':{'cmd':self.addMutantDialog},
                         '08sep':'',
@@ -914,7 +914,7 @@ class App(Frame, GUI_help):
         p.addMutant(self.DB, name, parentframe=mframe)
         return
 
-    def addFieldDialog(self):
+    def addColumnDialog(self):
         """Get a description of the field and add it"""
         if self.DB == None:
             return
@@ -965,7 +965,7 @@ class App(Frame, GUI_help):
         """Add a new data field to the database"""
         return
 
-    def deleteField(self):
+    def deleteColumn(self):
         """Delete selected field"""
         col = self.table.getSelectedColumn()
         colname = self.tablemodel.getColumnName(col)

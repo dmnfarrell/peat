@@ -198,9 +198,9 @@ class CorrelationAnalyser(Plugin):
                           limit=None, side=LEFT):
         """Show exp vs pred. for a set of x-y values """
         
-        #check if x and y are number cols
-        x=[float(i) for i in x]
-        y=[float(i) for i in y]
+        #check if x and y are number cols and round
+        x=[round(float(i),2) for i in x]
+        y=[round(float(i),2) for i in y]
    
         colors = ['b','g','r','y','m','c']        
         fig = plt.figure(figsize=(6,6))
@@ -225,7 +225,7 @@ class CorrelationAnalyser(Plugin):
         ax.plot(cx, cy, 'g', alpha=0.7)
         #ax.plot(cx-4, cy, 'g', alpha=0.5,linestyle='--')
         #ax.plot(cx+4, cy, 'g', alpha=0.5,linestyle='--')
-        ax.axhline(y=0, color='grey'); ax.axvline(x=0,color='grey')       
+        ax.axhline(y=0, color='grey'); ax.axvline(x=0,color='grey')
         if limit==None:
             limit=lims[1]       
         ax.set_title(title)

@@ -2624,9 +2624,9 @@ class RecordViewDialog(tkSimpleDialog.Dialog):
 
     def body(self, master):
         """Show all record fields in entry fields or labels"""
-        model = self.model
-        #cols = self.table.cols
+        model = self.model        
         cols = self.recdata.keys()
+        self.editable = []
         self.fieldnames = {}
         self.fieldvars = {}
         self.fieldvars['Name'] = StringVar()
@@ -2636,22 +2636,20 @@ class RecordViewDialog(tkSimpleDialog.Dialog):
                 relief=GROOVE,bg='yellow').grid(row=0,column=1,padx=2,pady=2,sticky='news')
         i=1
         for col in cols:
-
             self.fieldvars[col] = StringVar()
             if self.recdata.has_key(col):
                 val = self.recdata[col]
-                #if Formula.isFormula(self.recdata[colname]):
-                #    val = Formula.getFormula(self.recdata[colname])
                 self.fieldvars[col].set(val)
-
             self.fieldnames[col] = Label(master, text=col).grid(row=i,column=0,padx=2,pady=2,sticky='news')
-            Entry(master, textvariable=self.fieldvars[col],
-                                        relief=GROOVE,bg='white').grid(row=i,column=1,padx=2,pady=2,sticky='news')
-            #Label(master, text=fieldtype,fg='gray').grid(row=i,column=2,padx=2,pady=2,sticky='news')
+            ent = Entry(master, textvariable=self.fieldvars[col], relief=GROOVE,bg='white')
+            ent.grid(row=i,column=1,padx=2,pady=2,sticky='news')
+            if not type(self.recdata[col]) is StringType:
+                ent.config(state=DISABLED)
+            else:
+                self.editable.append(col)
             i+=1
         top=self.winfo_toplevel()
         top.columnconfigure(1,weight=1)
-
         return
 
     def apply(self):
@@ -2662,18 +2660,16 @@ class RecordViewDialog(tkSimpleDialog.Dialog):
         newname = self.fieldvars['Name'].get()
         if newname != self.recname:
             model.setRecName(newname, absrow)
-
+       
         for col in range(cols):
             colname = model.getColumnName(col)
-            val = self.fieldvars[colname].get()
-            print absrow, colname, val
-            if val != '' and val != None:
-                try:
-                    val = eval(val)
-                except:
-                    pass
-                model.setValueAt(val, absrow, col)
-
-        print self.model.data
-        self.table.redrawTable() #should only redraw the row!
+            if not colname in self.editable:
+                continue          
+            if not self.fieldvars.has_key(colname):
+                continue
+            val = self.fieldvars[colname].get()            
+            model.setValueAt(val, absrow, col)
+            #print 'changed field', colname
+        
+        self.table.redrawTable()
         return

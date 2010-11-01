@@ -476,6 +476,7 @@ class PEATSAPlugin(Plugin):
         print 'job status:',job.state()
         #self.addColoredText(self.log,'blu', 'job status: '+job.state() , fg='blue')
         print 'submitted on ',job.date
+        print 'original pdb file ',
         print 'mutations:', len(job.mutationListFile().mutantList())
         print '(this job has id %s)' %job.identification        
         if job.error() != None:
@@ -789,6 +790,7 @@ class PEATSAPlugin(Plugin):
             M = self.parent.tablemodel.simpleCopy(include=['Mutations'])           
             M = self.mergeMatrix(matrix, M)
             x,y,names,muts = M.getColumns(['Total',expcol,'name','Mutations'],allowempty=False)
+            muts = ['mutation: '+i for i in muts]
             labels = zip(names, muts)
             ax,frame,mh = C.plotCorrelation(x,y,labels,title=m,ylabel=expcol)
             table = self.showTable(frame, M)
