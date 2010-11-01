@@ -232,6 +232,13 @@ class PEATSAPlugin(Plugin):
         fd.close()
         return pdbfile
             
+    def getrefPDBName(self):
+        name = self.DB.meta.refprotein
+        if self.DB[name].has_key('pdbname'):
+            return self.DB[name]['pdbname']
+        else:
+            return ''
+        
     def createJobDialog(self):
         """Get details from user using dialog
            required: structure, mutations, type of calc and a tag (optional)"""
@@ -292,7 +299,7 @@ class PEATSAPlugin(Plugin):
             #if self.useref.get() == 1:
             #we use ref pdb by default now
             pdbfile = self.writetempPDB()
-               
+            pdbname = self.getrefPDBName()
             '''else:
                 p = pdbentry.getvalue()
                 if os.path.exists(p):
@@ -315,7 +322,7 @@ class PEATSAPlugin(Plugin):
                            pdb=pdb, pdbfile=pdbfile,
                            ligandfile=self.ligandfile,
                            mutations=mutationlist,
-                           calcs=calcs, meta={'expcol':expcol})         
+                           calcs=calcs, meta={'expcol':expcol,'pdbname':pdbname})         
             close()
             
         jobdlg = Toplevel()
@@ -471,12 +478,13 @@ class PEATSAPlugin(Plugin):
         job, name = self.getJob()
         if job==None:            
             return
+        jobmeta = job.metadata()    
         print
         print 'details for job %s' %name
-        print 'job status:',job.state()
-        #self.addColoredText(self.log,'blu', 'job status: '+job.state() , fg='blue')
+        print 'job status:',job.state()       
         print 'submitted on ',job.date
-        print 'original pdb file ',
+        if jobmeta.has_key('pdbname'):
+            print 'original pdb file:', jobmeta['pdbname']
         print 'mutations:', len(job.mutationListFile().mutantList())
         print '(this job has id %s)' %job.identification        
         if job.error() != None:
