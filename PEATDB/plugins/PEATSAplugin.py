@@ -60,6 +60,7 @@ class PEATSAPlugin(Plugin):
         if parent==None:
             if DB!=None:
                 self.DB = DB
+                self.setupConnection()
             else:
                 return 
         else:

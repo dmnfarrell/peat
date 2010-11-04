@@ -32,6 +32,7 @@ import re
 import os
 import time
 import math
+import pickle
 
 from Tables_IO import TableImporter, TableExporter
 from Prefs import Preferences
@@ -1055,6 +1056,39 @@ class LabbookTableModel(TableModel):
 
         return extfilenames
 
+class Labbook(object):
+    """Labbook object mainly used from other scripts"""
+    def __init__(self, data=None):
+        self.data=data
+        self.filename=None
+        if data != None:
+            self.sheets = data.keys()
+        return
+       
+    def load(self, filename):
+        """Load from file"""
+        self.data = pickle.load(open(filename,'r'))
+        self.filename = filename
+        return
+        
+    def save(self, filename=None):
+        """Save labbook to a file"""
+        if filename == None: filename=self.filename
+        fd=open(filename,'w')        
+        pickle.dump(self.data,fd)
+        fd.close()        
+        return
+
+    def getSheet(self, name):
+         """Get a sheet - returns a tablemodel"""
+         return TableModel(self.data[name])
+         
+    def saveSheet(self, name, model=None, data=None):
+        """Save sheet using model or dict"""
+        if model != None:
+            self.data[name] = model.getData()
+        return
+        
 # Main function, run when invoked as a stand-alone Python program.
 
 def main():
