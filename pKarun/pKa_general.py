@@ -567,7 +567,7 @@ class pKagraph:
                 max=curve[ph]
             if curve[ph]<min:
                 min=curve[ph]        
-        data=Gnuplot.Data(plotdata,title=residue,_with='lines')
+        #data=Gnuplot.Data(plotdata,title=residue,_with='lines')
         #============================================================
         # Set min and max 
         #
@@ -602,7 +602,7 @@ class pKagraph:
             for ph in keys:
                 if string.lower(string.strip(str(ph)))!='pka':
                     plotdata2.append([ph,dict[dict.keys()[0]][ph]])
-            data2=Gnuplot.Data(plotdata2,title='Ideal Henderson-Hasselbalch',_with='lines')
+            #data2=Gnuplot.Data(plotdata2,title='Ideal Henderson-Hasselbalch',_with='lines')
         #
         # Make the plot
         #
@@ -849,7 +849,7 @@ class pKagraph:
                         max=curve[ph]
                     if curve[ph]<min:
                         min=curve[ph]        
-                bigdata.append(Gnuplot.Data(plotdata,title=residue,_with='lines'))
+                #bigdata.append(Gnuplot.Data(plotdata,title=residue,_with='lines'))
             #============================================================
             # Set min and max 
             #
