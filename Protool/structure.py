@@ -178,6 +178,11 @@ class structure(geometry,flags.flags,sequence,analyse_structure.find_pattern,
         self.residues={}
         
         return
+        
+    def resid(self,atomname):
+        """Given an atom name this function return a resid"""
+        sp=atomname.split(':')
+        return '%s:%s' %(sp[0],sp[1])
 
     def resnum(self,uniqueid):
         """Given a uniqueid this function returns the residue number"""

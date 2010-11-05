@@ -187,6 +187,9 @@ class inputGen:
         
         text  = "read\n"
         text += "    mol pqr %s\n" % self.pqrname
+        if self.use_epsmap:
+            for i in range(3):
+                text += "    diel dx xdiel%d.dx ydiel%d.dx zdiel%d.dx\n"%(i, i, i)
         text += "end\n"
         text += "elec\n"
         text += "    %s\n" % self.method
@@ -222,6 +225,10 @@ class inputGen:
         text += "    calcforce no\n"
         text += "    write pot dx pot\n"
         text += "    write smol dx acc\n"
+        text += "    write dielx dx xdiel%\n"
+        text += "    write diely dx ydiel%\n"
+        text += "    write dielz dx zdiel%\n"
+        text += "    write kappa dx kappa%\n"
         text += "end\n"
         return text
 

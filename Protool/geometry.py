@@ -222,6 +222,31 @@ class geometry:
         center_fit.append(coord+vect_fit)
 
       return center_ref,center_fit,vect_ref,vect_fit
+      
+    #
+    # ----
+    #
+    
+    def get_center_of_coords(self):
+        """Get the center of coordinates for this protein"""
+        coor_sum=numpy.array([0.0,0.0,0.0])
+        xmax=-99999 
+        ymax=-99999
+        zmax=-99999
+        xmin=9999
+        ymin=99999
+        zmin=99999
+        for atom in self.atoms:
+            coords=self.GetPosition(atom)
+            xmax=max(xmax,coords[0])
+            xmin=min(xmin,coords[0])
+            ymax=max(ymax,coords[1])
+            ymin=min(ymin,coords[1])
+            zmax=max(zmax,coords[2])
+            zmin=min(zmin,coords[2])
+            coor_sum=coor_sum+coords
+        coor_sum=coor_sum/float(len(self.atoms))
+        return coor_sum,array([abs(xmax-xmin),abs(ymax-ymin),abs(zmax-zmin)])
 
 
 #

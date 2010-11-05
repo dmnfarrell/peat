@@ -241,7 +241,12 @@ class runAPBS:
                 raise APBSError, "Error setting up MG calculation!"
 
             # Print problem parameters 
-
+            print self.dielXMap
+            sys.path.append('/Users/nielsen/bin/APBS/tools/python/vgrid')
+            import vgrid 
+            title='test'
+            #vgrid.Vgrid_writeDX(self.dielXMap, "FILE", "ASC", "", 'Xeps.dx',title, vgrid.null_array());
+            #stop
             #printMGPARM(self.mgparm, self.realCenter)
             #printPBEPARM(self.pbeparm)
 
@@ -285,6 +290,9 @@ class runAPBS:
             for atom in all_atoms:
                 potList[atom]=potentials[count]
                 count=count+1
+            import os
+            print 'Running in %s' %(os.getcwd())
+            stop
         #
         # Cleanup
         #
