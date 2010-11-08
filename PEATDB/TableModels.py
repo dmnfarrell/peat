@@ -574,17 +574,11 @@ class TableModel(object):
     def getDict(self, colnames, filterby=None):  
         """Get the model data as a dict for given columns with filter options"""
         data={}
-        names = self.getColumns(['name'], filterby)
+        names, = self.getColumns(['name'], filterby)        
         cols = self.getColumns(colnames, filterby)
-        coldata = list(zip(*cols))      
-        for i in zip(names, coldata):
-            print i
-            data[name] = {}
-            #for c in colnames:
-            print zip(colnames,cdata)
-            #data['name'][c] = coldata
-            
-
+        coldata = zip(*cols)   
+        for name,cdata in zip(names, coldata):           
+            data[name] = dict(zip(colnames,cdata))
         return data
         
     def filterBy(self, filtercol, value, op='contains', userecnames=False,
