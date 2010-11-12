@@ -628,7 +628,7 @@ class Micro_states(pKa_system_micro2.Micro_states_helper):
         #
         self.state_win=Toplevel()
         self.state_win.title('Microscopic states')
-        self.state_win.geometry('+20+300')
+        #self.state_win.geometry('+20+300')
 
         #
         # Checkboxes
@@ -766,7 +766,7 @@ class Micro_states(pKa_system_micro2.Micro_states_helper):
         #
         # Button for transferring to Ekin
         #
-        Button(self.state_win,text='Copy protonation state population to Ekin',command=self.copy_to_Ekin_micro).grid(row=len(self.states)+offset+2,column=0,columnspan=4,sticky='news')
+        #Button(self.state_win,text='Copy protonation state population to Ekin',command=self.copy_to_Ekin_micro).grid(row=len(self.states)+offset+2,column=0,columnspan=4,sticky='news')
         Button(self.state_win,text='Evaluate fit of pH activity profile',command=self.evaluate_fit_ph_activity).grid(row=len(self.states)+offset+3,column=0,columnspan=4,sticky='news')
         Button(self.state_win,text='Dump graphs to file',command=self.print2file_micro).grid(row=len(self.states)+offset+4,column=0,columnspan=4,sticky='news')
         Button(self.state_win,text='Save CCPS curve to file',command=self.saveCCPS).grid(row=len(self.states)+offset+5,column=0,columnspan=4,sticky='news')

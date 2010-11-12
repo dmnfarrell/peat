@@ -112,6 +112,7 @@ class pKaIO:
         count=0
         while count<len(lines):
             line=lines[count]
+            print line.strip()
             if line.strip()=='<****CALCULATION RESULTS>' and mode=='pKa':
                 pKas={}
                 while line[:10]!='--------------'[:10] or count==len(lines):
@@ -185,7 +186,7 @@ class pKaIO:
                     residue='%s:%s:%s' %('',string.zfill(int(residue[1]),4),residue[0])
                     titgroups.append(residue)
                 #
-                # Now we can read teh matrix
+                # Now we can read the matrix
                 #
                 for item in infodict:
                     residue=item['site'][0].split('-')

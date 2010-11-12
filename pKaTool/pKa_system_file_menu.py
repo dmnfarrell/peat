@@ -1182,7 +1182,7 @@ Avr. absolute errors of individual curves:
 
     def eval(self,silent=0):
         """Evaluate the function"""
-        X,pKa_values=self.calc_pKas_from_scales(self.groups)
+        X,pKa_values,prot_states=self.calc_pKas_from_scales(self.groups)
         curve=titration_curve(X.prot_states)
         if not silent == 1:
             self.pka_count.set(self.pka_count.get()+1)

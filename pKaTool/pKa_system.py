@@ -210,7 +210,7 @@ class pKa_system(Frame,pKa_base.pKa_base,pKa_system_help.system_help,
         #
         self.titwin=self.window
         self.titwin.title('Titration curves [native]')
-        self.titwin.geometry('+20+%d' %(95+self.numgrps*43))
+        #self.titwin.geometry('+20+%d' %(95+self.numgrps*43))
 
         #
         # Draw the window with the titration curves
@@ -935,7 +935,6 @@ class pKa_system(Frame,pKa_base.pKa_base,pKa_system_help.system_help,
         #
         # Calculate pKa values for the folded form
         #
-
         X,pKa_values,prot_states=self.calc_pKas_from_scales(self.groups)
         self.pKa_calc_instance=X
         if not draw:
@@ -986,7 +985,7 @@ class pKa_system(Frame,pKa_base.pKa_base,pKa_system_help.system_help,
             lastcrg=X.prot_states[group][lastpH]
             colour=self.colour_order[group_count%len(self.colour_order)]
             colour_map[group] = colour
-
+            #
             for pH in X.pHvalues[1:]:
                 lastx,lasty=self.get_xy(lastpH,lastcrg)
                 crg=X.prot_states[group][pH]
@@ -1003,9 +1002,6 @@ class pKa_system(Frame,pKa_base.pKa_base,pKa_system_help.system_help,
                                                     dash=(1,2)))]=1
                 lastcrg=crg
                 lastpH=pH
-
-
-
             #
             # Update the counter for colours
             #
@@ -1027,10 +1023,10 @@ class pKa_system(Frame,pKa_base.pKa_base,pKa_system_help.system_help,
         #
         # Should we display loaded titration curves?
         #
-        try:
-            print 'titration_data', self.titration_data
-        except:
-            print 'no titration_data'
+        #try:
+        #    print 'titration_data', self.titration_data
+        #except:
+        #    print 'no titration_data'
         if self.display_loaded_curves.get()==1:
             if not getattr(self,'titration_data',None):
                 import tkMessageBox
