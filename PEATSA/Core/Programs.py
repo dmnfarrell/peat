@@ -1390,7 +1390,7 @@ class PBSolver:
 			pdbCopy = os.path.join(dir, os.path.basename(pdbFile))
 			shutil.copyfile(pdbFile, pdbCopy)
 			
-			if ligand is not None:
+			if ligandFile is not None:
 				ligandCopy = os.path.join(dir, os.path.basename(ligandFile))
 				shutil.copyfile(ligandFile, ligandCopy)
 							
