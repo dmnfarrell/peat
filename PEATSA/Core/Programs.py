@@ -1389,13 +1389,22 @@ class PBSolver:
 		
 			pdbCopy = os.path.join(dir, os.path.basename(pdbFile))
 			shutil.copyfile(pdbFile, pdbCopy)
-			ligandCopy = os.path.join(dir, os.path.basename(ligandFile))
-			shutil.copyfile(ligandFile, ligandCopy)
-						
-			result = pdb2pqr.pdb2pka.pka.get_res_energies(pdbCopy, 
-					ligandCopy ,
-					'L:0001:LIG',
-					 fix_states=protonationStates)
+			
+			if ligand is not None:
+				ligandCopy = os.path.join(dir, os.path.basename(ligandFile))
+				shutil.copyfile(ligandFile, ligandCopy)
+							
+				result = pdb2pqr.pdb2pka.pka.get_res_energies(pdbCopy, 
+						ligandCopy ,
+						'L:0001:LIG',
+						 fix_states=protonationStates)
+			else:
+				result = pdb2pqr.pdb2pka.pka.get_res_energies(pdbCopy, 
+						None,
+						None,
+						 fix_states=protonationStates)
+				
+						 			 
 		except Exception, data:
 			print 'Encountered an exception with file %s' % pdbFile 
 			print data	
