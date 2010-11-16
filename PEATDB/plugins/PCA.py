@@ -63,14 +63,15 @@ class PCAPlugin(Plugin):
             print >>sys.stderr, 'Calculating mean vector'
             data = numpy.array(m.matrix)
             average = numpy.zeros(m.numberOfColumns())
-            for row in data:
-                    average = average + row
+            for row in data:                
+                row = numpy.array(row, dtype=numpy.float)               
+                average = average + row
 
             average /= m.numberOfRows()
             temp = zip(m.columnHeaders(), average)
             print >>sys.stderr, 'Result: '
             for el in temp:
-                    print >>sys.stderr, '\t%s: %lf' % tuple(el)
+                print >>sys.stderr, '\t%s: %lf' % tuple(el)
 
             print >>sys.stderr, '\nMean-Centering'
             data = data - numpy.tile(average, [m.numberOfRows(),1])
@@ -111,20 +112,23 @@ class PCAPlugin(Plugin):
             for v in zip(*data):                
                 c+=1
                 if c>10: break
-                v = [float(j)/(max(v)-min(v)) for j in v]
-               
+                #v = [float(j)/(max(v)-min(v)) for j in v]               
                 l=ax.plot(b[:,i],v,'x',mew=1,alpha=0.8)
                 lines.append(l)
                 ax.set_title('Ev%s' %str(i+1))
                 
             i+=1    
-        f.legend(lines,labels)        
+        f.legend(lines,labels,loc='lower right')        
         ax=f.add_subplot(337)
         ind=numpy.array(range(len(evals)))
         ax.plot(ind,evals,'-o',lw=2)
         ax.set_xlabel('Eigenvalues')
         f.savefig('PCAresults.png')
+        f.subplots_adjust(hspace=0.4,wspace=0.4)
+        print 'Eigenvalues: ', evals
+        print 'Eigenvectors: ', evecs        
         plt.show()
+        return
     
     def test(self):
         
@@ -161,9 +165,6 @@ class PCAPlugin(Plugin):
         
         m = Core.Matrix.matrixFromCSVFile(filename)
         evals, evecs, b = self.doPCA(m)
-        print 'Eigenvalues: ', evals
-        print 'Eigenvectors: ', evecs
-        
         self.plotResults(evals, evecs, b, m)
         return
     
@@ -175,8 +176,10 @@ def main():
                         help="Open a local db")
     parser.add_option("-t", "--test", dest="test", action='store_true',
                        help="test func", default=False) 
-    parser.add_option("-s", "--start", dest="start", action='store_true',
-                       help="start", default=False)     
+    parser.add_option("-s", "--start", dest="start", default=0, type="int",
+                       help="start")
+    parser.add_option("-e", "--end", dest="end", default=0, type="int",
+                       help="end")    
     opts, remainder = parser.parse_args()
     
     P = PCAPlugin()
@@ -184,10 +187,10 @@ def main():
         m = Core.Matrix.matrixFromCSVFile(opts.file)
         if opts.start!=None:
             m = m[:, opts.start:]
-        print 'There are %d samples and %d variables (dof)' % (m.numberOfRows(), m.numberOfColumns())
+        print 'There are %d samples and %d variables (dof)' % (m.numberOfRows(), m.numberOfColumns())       
         evals, evecs, b = P.doPCA(m)
         P.plotResults(evals, evecs, b, m)
-    if opts.test != None:    
+    if opts.test == True:    
         P.test()   
          
 if __name__ == '__main__':
