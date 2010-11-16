@@ -1,0 +1,194 @@
+#!/usr/bin/env python
+#
+# Protein Engineering Analysis Tool DataBase (PEATDB)
+# Copyright (C) 2010 Damien Farrell & Jens Erik Nielsen
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Contact information:
+# Email: Jens.Nielsen_at_gmail.com 
+# Normal mail:
+# Jens Nielsen
+# SBBS, Conway Institute
+# University College Dublin
+# Dublin 4, Ireland
+#
+
+try:
+    from Plugins import Plugin
+except:
+    from PEATDB.Plugins import Plugin
+import math, numpy, sys, os
+import csv
+import matplotlib  
+from matplotlib.font_manager import FontProperties
+import matplotlib.pyplot as plt 
+from mpl_toolkits.mplot3d import Axes3D
+from PEATDB.Ekin.Fitting import Fitting
+from PEATSA import Core
+
+
+class PCAPlugin(Plugin):
+    """PCA plugin"""
+    capabilities = ['gui']
+    menuentry = 'PCA Plugin'
+    gui_methods = {} 
+    about = 'This plugin allows you to do PCA'    
+    
+    def main(self, parent=None, DB=None):       
+        if parent==None:
+            self.DB = DB       
+        else:
+            return
+    
+    def doPCA(self,m):
+            '''Performs pca on the Core.Matrix.Matrix instance m.
+
+            Returns: 
+                    eigenvalues - A numpy 1-D array.
+                    eigenvectors - A numpy 2-D array
+                    transformedData - A numpy 2-D array'''
+
+            print >>sys.stderr, 'Calculating mean vector'
+            data = numpy.array(m.matrix)
+            average = numpy.zeros(m.numberOfColumns())
+            for row in data:
+                    average = average + row
+
+            average /= m.numberOfRows()
+            temp = zip(m.columnHeaders(), average)
+            print >>sys.stderr, 'Result: '
+            for el in temp:
+                    print >>sys.stderr, '\t%s: %lf' % tuple(el)
+
+            print >>sys.stderr, '\nMean-Centering'
+            data = data - numpy.tile(average, [m.numberOfRows(),1])
+
+            print >>sys.stderr, 'Calculating covariance matrix'
+            cov = numpy.cov(data, rowvar=0)
+
+            print >>sys.stderr, 'Performing eigenvalue decomposition'
+            eigenvalues, eigenvectors = numpy.linalg.linalg.eig(cov)
+            eigenvectors = eigenvectors.astype(numpy.float32)
+
+            print >>sys.stderr, 'Sorting'
+            x = range(len(eigenvalues))
+            x.sort(lambda x,y: cmp(eigenvalues[x], eigenvalues[y]), reverse=True)
+            eigenvalues = eigenvalues[x]
+            eigenvectors = eigenvectors[:,x]
+
+            print >>sys.stderr, 'Complete'
+
+            z = numpy.dot(data, eigenvectors)
+            
+            return eigenvalues, eigenvectors, z
+
+    def plotResults(self,evals,evecs,b,m):
+        """Plot results to help visualize components"""
+        data = numpy.array(m.matrix)
+        labels = m.columnHeaders()
+        plt.rc('font', family='monospace')
+        f=plt.figure()
+        i=1
+        
+        length = len(data[0])
+        if length>6: length=6
+        for i in range(0,length):
+            ax=f.add_subplot(3,3,i+1)
+            c=0
+            lines=[]
+            for v in zip(*data):                
+                c+=1
+                if c>10: break
+                v = [float(j)/(max(v)-min(v)) for j in v]
+               
+                l=ax.plot(b[:,i],v,'x',mew=1,alpha=0.8)
+                lines.append(l)
+                ax.set_title('Ev%s' %str(i+1))
+                
+            i+=1    
+        f.legend(lines,labels)        
+        ax=f.add_subplot(337)
+        ind=numpy.array(range(len(evals)))
+        ax.plot(ind,evals,'-o',lw=2)
+        ax.set_xlabel('Eigenvalues')
+        f.savefig('PCAresults.png')
+        plt.show()
+    
+    def test(self):
+        
+        features=['stab','act','solv','res']        
+        x = numpy.random.normal(4, 2, 100)
+        #y = numpy.random.normal(4, 1, 100)
+        y = [i+numpy.random.normal(2,0.3) for i in x]        
+        z = [i+numpy.random.normal(2,0.24) for i in y]
+        s = numpy.random.gamma(4, 1, 100)
+        
+        filename = 'testdata.csv'
+        f=open(filename,'w')
+        cw=csv.writer(f)
+        cw.writerow(features)
+        for i in zip(x,y,z,s):
+            cw.writerow(i)
+        f.close()
+        
+        '''A,X = Fitting.doFit(expdata=zip(x,y), model='Linear',silent=True)
+        fitx = numpy.arange(min(x),max(x),1)
+        fity = X.getFitLine(fitx)
+        A,X1 = Fitting.doFit(expdata=zip(x,z), model='Linear',silent=True)
+        fitz = X.getFitLine(fitx)'''
+        
+        f=plt.figure()
+        ax = Axes3D(f)
+        ax.scatter(x,y,zs=z,marker='o',lw=2,alpha=0.5,c='b',s=30)
+        #ax.plot(fitx,fity,zs=fitz,alpha=0.6,lw=2,c='r',label='fit xyz')
+        ax.set_xlabel('x')
+        ax.set_ylabel('y')
+        ax.set_zlabel('z')
+        ax.legend()
+        f.subplots_adjust(hspace=1,wspace=1)    
+        
+        m = Core.Matrix.matrixFromCSVFile(filename)
+        evals, evecs, b = self.doPCA(m)
+        print 'Eigenvalues: ', evals
+        print 'Eigenvectors: ', evecs
+        
+        self.plotResults(evals, evecs, b, m)
+        return
+    
+def main():
+    import os
+    from optparse import OptionParser
+    parser = OptionParser()
+    parser.add_option("-f", "--file", dest="file",
+                        help="Open a local db")
+    parser.add_option("-t", "--test", dest="test", action='store_true',
+                       help="test func", default=False) 
+    parser.add_option("-s", "--start", dest="start", action='store_true',
+                       help="start", default=False)     
+    opts, remainder = parser.parse_args()
+    
+    P = PCAPlugin()
+    if opts.file != None and os.path.exists(opts.file):
+        m = Core.Matrix.matrixFromCSVFile(opts.file)
+        if opts.start!=None:
+            m = m[:, opts.start:]
+        print 'There are %d samples and %d variables (dof)' % (m.numberOfRows(), m.numberOfColumns())
+        evals, evecs, b = P.doPCA(m)
+        P.plotResults(evals, evecs, b, m)
+    if opts.test != None:    
+        P.test()   
+         
+if __name__ == '__main__':
+    main()
