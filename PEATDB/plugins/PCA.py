@@ -29,7 +29,7 @@ try:
     from Plugins import Plugin
 except:
     from PEATDB.Plugins import Plugin
-import math, numpy, sys, os
+import math, numpy, sys, os, copy
 import csv
 import matplotlib  
 from matplotlib.font_manager import FontProperties
@@ -52,7 +52,7 @@ class PCAPlugin(Plugin):
         else:
             return
     
-    def doPCA(self,m):
+    def doPCA(self,m,standardize=True):
             '''Performs pca on the Core.Matrix.Matrix instance m.
 
             Returns: 
@@ -62,6 +62,8 @@ class PCAPlugin(Plugin):
 
             print >>sys.stderr, 'Calculating mean vector'
             data = numpy.array(m.matrix)
+            if standardize==True:
+                data = self.standardize(data)   
             average = numpy.zeros(m.numberOfColumns())
             for row in data:                
                 row = numpy.array(row, dtype=numpy.float)               
@@ -95,25 +97,47 @@ class PCAPlugin(Plugin):
             
             return eigenvalues, eigenvectors, z
 
+    def standardize(self, data):
+        """standardize data"""
+        import scipy.stats as st
+        newdata = copy.deepcopy(data)
+        i=0
+        for col in zip(*data):
+            newdata[:,i] = st.zs(col)            
+            i+=1
+        print newdata    
+        return newdata
+    
     def plotResults(self,evals,evecs,b,m):
         """Plot results to help visualize components"""
         data = numpy.array(m.matrix)
         labels = m.columnHeaders()
         plt.rc('font', family='monospace')
+
+        #plot first 2 PCs in 3d score plot        
+        x,y,z = b[:,0], b[:,1], b[:,2]
+        f=plt.figure()
+        ax = Axes3D(f)
+        ax.scatter(x,y,zs=z,marker='o',lw=2,alpha=0.5,c='b',s=30)
+        ax.set_xlabel('PC1')
+        ax.set_ylabel('PC2')
+        ax.set_zlabel('PC3')
+        
+        #f.subplots_adjust(hspace=1,wspace=1)
+        
         f=plt.figure()
         i=1
-        
         length = len(data[0])
         if length>6: length=6
         for i in range(0,length):
             ax=f.add_subplot(3,3,i+1)
             c=0
             lines=[]
-            for v in zip(*data):                
+            for v in zip(*data):     
                 c+=1
                 if c>10: break
                 #v = [float(j)/(max(v)-min(v)) for j in v]               
-                l=ax.plot(b[:,i],v,'x',mew=1,alpha=0.8)
+                l=ax.plot(b[:,i],v,'x',mew=1,alpha=0.7)
                 lines.append(l)
                 ax.set_title('Ev%s' %str(i+1))
                 
@@ -126,18 +150,19 @@ class PCAPlugin(Plugin):
         f.savefig('PCAresults.png')
         f.subplots_adjust(hspace=0.4,wspace=0.4)
         print 'Eigenvalues: ', evals
-        print 'Eigenvectors: ', evecs        
+        print 'Eigenvectors: ', evecs
         plt.show()
         return
     
     def test(self):
         
         features=['stab','act','solv','res']        
-        x = numpy.random.normal(4, 2, 100)
-        #y = numpy.random.normal(4, 1, 100)
-        y = [i+numpy.random.normal(2,0.3) for i in x]        
+        x = numpy.random.normal(2, 6, 500)
+        y = numpy.random.normal(4, 1, 500)
+        #y = [i+numpy.random.normal(2,0.3) for i in x]        
         z = [i+numpy.random.normal(2,0.24) for i in y]
-        s = numpy.random.gamma(4, 1, 100)
+        #z = numpy.random.normal(4, 1, 500)
+        s = numpy.random.gamma(4, 1, 500)
         
         filename = 'testdata.csv'
         f=open(filename,'w')
