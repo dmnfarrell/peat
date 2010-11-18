@@ -73,7 +73,7 @@ class EkinProject(object):
                          '2 pKas, 3 Chemical shifts','3 pKas, 4 Chemical shifts',#'4 pKas, 5 Chemical shifts',
                          'Bell-shaped pH-act profile (3 pKas)',
                          'Bell-shaped pH-act profile (2 pKas)',
-                         'Sigmoid', 'Modified Hill'
+                         'Sigmoid', 'Modified Hill', 'schellman',
                          'Denaturation','diffDenaturation','Unfolding',
                          'Residual Activity','Arrhenius',
                          'DSC2state','DSCindependent','DSC2stateIrreversible','DSC2stateIrreversibleII'],

@@ -58,6 +58,7 @@ class Fitting(object):
               'Unfolding':'generalUnfolding',
               'Chemical Denaturation': 'chemicalDenaturation',
               'diffDenaturation': 'diffDenaturation',
+              'schellman':'elwellschellman',
               'DSC2state':'DSC2state',
               'DSCindependent':'DSCindependent',
               'DSC2stateIrreversible':'DSC2stateIrreversible',
@@ -101,7 +102,7 @@ class Fitting(object):
             return generalUnfolding(variables=vrs,exp_data=expdata,callback=callback,name=model)
         elif model == 'diffDenaturation':
             return diffDenaturation(variables=vrs,exp_data=expdata,callback=callback,name=model)
-        elif model == 'elwellschellman':
+        elif model == 'schellman':
             return elwellschellman(variables=vrs,exp_data=expdata,callback=callback,name=model)        
         elif model == 'DSC2state':
             return DSC2state(variables=vrs,exp_data=expdata,callback=callback,name=model)           
