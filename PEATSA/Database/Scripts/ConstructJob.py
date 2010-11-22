@@ -34,6 +34,7 @@ import PEATSA.WebApp as WebApp
 import PEATSA.Core as Core
 import PEATSA.Core.PEATSAParallel as Parallel
 
+#FIXME - Construct DeltapKA calculations
 def ConstructJob(jobId, outputDir, configuration, connection, jobConfigurationFile=None):
 
 	job = WebApp.Data.Job(jobID=jobId, connection=connection)
@@ -93,6 +94,20 @@ def ConstructJob(jobId, outputDir, configuration, connection, jobConfigurationFi
 
 	#Create a list containing all the PEAT-SA command line args
 	args = [structureCommand, '-j', jobId, '-w', os.path.join(outputDir, 'Work'), calculationString, bindingCommand, mutationCommand, '-v']
+	
+	#Add option args
+	optionArgs = job.optionArguments()
+	for key in optionArgs.keys():
+		if key[:2] == '--':
+			arg = [key+'='+optionArgs[key]]
+		else if key[:1] = '-':	
+			arg = [key, optionArgs[key]]
+		else:
+			print 'Option %s not valid - must be long or short option' % key
+			arg = []	
+				
+		args.extend(arg)		
+	
 	if jobConfigurationFile != None:
 		args.append('--configurationFile=%s' % jobConfigurationFile)
 
