@@ -206,7 +206,7 @@ class WebScript:
 			mutantCollection = Core.ProteinDesignTool.CreateMutants(tool.pdbFile, tool.configuration, self.parser, self.environment)			
 
 		if self.environment.isRoot():
-			self.job.addResults(matrix=mutantCollection.mutationScores, name='ModellingResults')			
+			self.job.addDataSet(matrix=mutantCollection.mutationScores, name='ModellingResults')			
 
 		#Check if any mutants were succesfully created
 		if len(mutantCollection.mutantFiles()) == 0:
@@ -220,7 +220,7 @@ class WebScript:
 				
 			tool.runScan(mutantCollection=mutantCollection, verbose=self.parser.verbose())
 			if self.environment.isRoot():
-				self.job.addResults(matrix=tool.dataDirectory.scanResults, name='ScanResults')	
+				self.job.addDataSet(matrix=tool.dataDirectory.scanResults, name='ScanResults')	
 				self.job.setCalculationState('Scan', 'Finished')
 			self.environment.wait()
 	
@@ -231,7 +231,7 @@ class WebScript:
 				
 			tool.runStabilityCalculation(mutantFiles=mutantCollection.mutantFiles(), verbose=self.parser.verbose())			
 			if self.environment.isRoot():
-				self.job.addResults(matrix=tool.dataDirectory.stabilityResults, name='StabilityResults')
+				self.job.addDataSet(matrix=tool.dataDirectory.stabilityResults, name='StabilityResults')
 				#Create graph
 				points = len(tool.dataDirectory.stabilityResults.total)
 				data = Core.Utilities.CreateBarChartData(matrix=tool.dataDirectory.stabilityResults, column="Total", 
@@ -249,7 +249,7 @@ class WebScript:
 					ligandFile=self.parser.ligandFile(), 
 					verbose=self.parser.verbose())
 			if self.environment.isRoot():
-				self.job.addResults(matrix=tool.dataDirectory.deltaBindingResults, name='BindingResults')
+				self.job.addDataSet(matrix=tool.dataDirectory.deltaBindingResults, name='BindingResults')
 				#Create graph
 				points = len(tool.dataDirectory.deltaBindingResults.total)
 				data = Core.Utilities.CreateBarChartData(matrix=tool.dataDirectory.deltaBindingResults, column="Total", 
