@@ -74,7 +74,8 @@ class CommandLineParser(Core.Utilities.CommandLineParser):
 			self.opt = getopt.getopt(sys.argv[1:], 
 					"vw:p:o:j:h", 
 					["pKa", "scan", "path", "modes", "stability", 
-					"mutationList=", "ionisableGroups=","mutation=", "mutants=", "ligand=", "configurationFile=", "create-configuration"])
+					"mutationList=", "ionisableGroups=","mutation=", "mutants=", 
+					"ligand=", "configurationFile=", "mutationQuality=", "create-configuration"])
 			self.opt = dict(self.opt[0])
 		except getopt.GetoptError, data:
 			raise Core.Exceptions.ArgumentError, data
