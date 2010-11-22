@@ -1072,6 +1072,47 @@ class Job:
 			
 		return isMutationList	
 	
+	def addOptionArgument(self, option, value):
+	
+		'''Adds an argument and value to the job
+		
+		Params:
+			option: A command line option for the program that does not specify a file
+			value: The value of the option'''
+	
+		optionArgs = self.optionArguments()
+		optionArgs[option] = value
+		data = SerializeDictionary(metadata)
+		data = MySQLdb.escape_string(data)
+		
+		statement = """UPDATE %s SET OptionArguments='%s' WHERE JobID='%s' """ % (self.jobTable, data, self.identification)
+		self.cursor.execute(statement)
+		self.connection.commit()
+		
+	def addFileArgument(self, option, contentsAttribute, fileName=None):
+	
+		'''Adds an argument whose value reference a file to the job
+		
+		Params:
+			option: A command line option for the program that does not specify a file
+			contentsAttribute: The name of the method that supplies the file contents
+			fileName: The name of the file to write the contents to'''
+	
+		if gettattr(self, contentsAttribute) == None:
+			raise AttributeError, 'Attribute %s does not exist - cannot use as content attribute' % contentsAttribute
+	
+		fileData = {'contentsAttribute':contentsAttribute}
+		if fileName is not None:
+			fileData['fileName'] = fileName
+	
+		fileArgs = self.fileArguments()
+		fileArgs[option] = fileData
+		data = SerializeDictionary(metadata)
+		data = MySQLdb.escape_string(data)
+		
+		statement = """UPDATE %s SET FileArguments='%s' WHERE JobID='%s' """ % (self.jobTable, data, self.identification)
+		self.cursor.execute(statement)
+		self.connection.commit()			
 	
 	def setMutation(self, mutationCode):
 	
