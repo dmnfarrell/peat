@@ -100,7 +100,7 @@ def ConstructJob(jobId, outputDir, configuration, connection, jobConfigurationFi
 	for key in optionArgs.keys():
 		if key[:2] == '--':
 			arg = [key+'='+optionArgs[key]]
-		else if key[:1] = '-':	
+		elif key[:1] == '-':	
 			arg = [key, optionArgs[key]]
 		else:
 			print 'Option %s not valid - must be long or short option' % key
