@@ -115,13 +115,13 @@ class PCAPlugin(Plugin):
         plt.rc('font', family='monospace')
 
         #plot first 2 PCs in 3d score plot        
-        x,y,z = b[:,0], b[:,1], b[:,2]
+        '''x,y,z = b[:,0], b[:,1], b[:,2]
         f=plt.figure()
         ax = Axes3D(f)
         ax.scatter(x,y,zs=z,marker='o',lw=2,alpha=0.5,c='b',s=30)
         ax.set_xlabel('PC1')
         ax.set_ylabel('PC2')
-        ax.set_zlabel('PC3')
+        ax.set_zlabel('PC3')'''
         
         #f.subplots_adjust(hspace=1,wspace=1)
         
@@ -137,7 +137,7 @@ class PCAPlugin(Plugin):
                 c+=1
                 if c>10: break
                 #v = [float(j)/(max(v)-min(v)) for j in v]               
-                l=ax.plot(b[:,i],v,'x',mew=1,alpha=0.7)
+                l=ax.plot(b[:,i],v,'x',mew=1,alpha=0.2)
                 lines.append(l)
                 ax.set_title('Ev%s' %str(i+1))
                 
@@ -156,19 +156,20 @@ class PCAPlugin(Plugin):
     
     def test(self):
         
-        features=['stab','act','solv','res']        
+        features=['stab','act','solv','res','asa']        
         x = numpy.random.normal(2, 6, 500)
         y = numpy.random.normal(4, 1, 500)
         #y = [i+numpy.random.normal(2,0.3) for i in x]        
         z = [i+numpy.random.normal(2,0.24) for i in y]
         #z = numpy.random.normal(4, 1, 500)
         s = numpy.random.gamma(4, 1, 500)
+        t = numpy.random.gamma(4, 1, 500)
         
         filename = 'testdata.csv'
         f=open(filename,'w')
         cw=csv.writer(f)
         cw.writerow(features)
-        for i in zip(x,y,z,s):
+        for i in zip(x,y,z,s,t):
             cw.writerow(i)
         f.close()
         
@@ -186,7 +187,7 @@ class PCAPlugin(Plugin):
         ax.set_ylabel('y')
         ax.set_zlabel('z')
         ax.legend()
-        f.subplots_adjust(hspace=1,wspace=1)    
+        f.subplots_adjust(hspace=1,wspace=1) 
         
         m = Core.Matrix.matrixFromCSVFile(filename)
         evals, evecs, b = self.doPCA(m)

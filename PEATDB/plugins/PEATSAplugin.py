@@ -392,7 +392,8 @@ class PEATSAPlugin(Plugin):
         if pdb==None and pdbfile==None:
             return
         job = self.jobManager.createJob(name, calculations=calcs, 
-                                          dataTable='Data', metadata=meta)
+                                          dataTable='Data', metadata=meta,
+                                          optionArgs={'--mutationQuality':'2.0'})
         if pdb != None:
             job.setStructure(pdb)
         else:
@@ -426,10 +427,8 @@ class PEATSAPlugin(Plugin):
         job, name = self.getJob()
         if job == None:
             return
-        DB=self.DB
-        dataset = job.data
-        matrices = {'binding':dataset.bindingResults,
-                    'stability':dataset.stabilityResults}
+        DB=self.DB       
+        self.matrices = job.data.allMatrices()
         for m in matrices:
             matrix=matrices[m]
             if matrix==None: return
@@ -479,8 +478,9 @@ class PEATSAPlugin(Plugin):
         job, name = self.getJob()
         if job==None:            
             return
-        jobmeta = job.metadata()    
+        jobmeta = job.metadata()
         print
+        print job.data
         print 'details for job %s' %name
         print 'job status:',job.state()       
         print 'submitted on ',job.date
@@ -530,9 +530,8 @@ class PEATSAPlugin(Plugin):
         job, name = self.getJob()
         if job==None:            
             return
-        dataset = job.data
-        self.matrices = {'binding':dataset.bindingResults,
-                         'stability':dataset.stabilityResults}
+      
+        self.matrices = job.data.allMatrices()        
         #get field name to use
         name = tkSimpleDialog.askstring("Column name?",
                                    "Name for column:",
@@ -595,9 +594,8 @@ class PEATSAPlugin(Plugin):
         body = Frame(resdlg)
         resdlg.initial_focus = body
         body.pack(fill=BOTH,expand=1,padx=5, pady=5) 
-        dataset = job.data
-        self.matrices = {'binding':dataset.bindingResults,
-                         'stability':dataset.stabilityResults}
+
+        self.matrices = job.data.allMatrices()
         fr=Frame(body)
         fr.grid(row=0,column=0,sticky='news',rowspan=2)
         for m in self.matrices:
@@ -647,15 +645,19 @@ class PEATSAPlugin(Plugin):
             except:
                 print 'no name selected'
                 return
-        for m in self.matrices:
-            matrix = self.matrices[m]
-            if matrix == None: continue
-            if main == True:
+
+        if main == True:
+            for m in self.matrices:            
+                matrix = self.matrices[m]
+                if matrix == None: continue            
                 M = self.parent.tablemodel
                 M = self.mergeMatrix(matrix, M)
                 self.parent.updateTable()
-            else:
-                M = self.DB.getLabbookSheet(name)
+        else:
+            M = self.DB.getLabbookSheet(name)
+            for m in self.matrices:            
+                matrix = self.matrices[m]
+                if matrix == None: continue            
                 M = self.mergeMatrix(matrix, M)
                 if M != None:
                     self.DB.createLabbookSheet(name, M)
@@ -769,9 +771,9 @@ class PEATSAPlugin(Plugin):
         if job.state() != 'Finished':
             print 'job not finished'
             return
-        dataset = job.data
-        self.matrices = {'binding':dataset.bindingResults,
-                         'stability':dataset.stabilityResults}
+
+        self.matrices = job.data.allMatrices()
+        #print self.matrices['ModellingResults'].csvRepresentation()
         jobmeta = job.metadata()
         if jobmeta.has_key('expcol'):
             expcol = jobmeta['expcol']
