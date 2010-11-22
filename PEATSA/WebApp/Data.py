@@ -448,7 +448,6 @@ class JobManager:
 		Returns:
 			A instance of the Job class'''
 
-
 		if len(calculations) is 0:
 			raise Core.Exceptions.ArgumentError, 'At least one calculation must be specified'
 		else:
@@ -456,6 +455,9 @@ class JobManager:
 			for calculation in calculations:
 				if aDict.has_key(calculation):
 					aDict[calculation] = 'Selected'
+					#Temporary hack
+					if calculation != 'binding':
+						optionArgs['--'+calculation] = ""
 				else:
 					raise Core.Exceptions.ArgumentError, 'Invalid calculation types requested - %s' % calculations
 
@@ -1027,7 +1029,6 @@ class Job:
 			mutationData  = rows[0][0]
 
 		return mutationData
-
 	
 	def mutationListFile(self):
 	
@@ -1049,7 +1050,24 @@ class Job:
 			mutationList = Core.Data.mutationListFileFromStream(stream=mutationDataStream)
 
 		return mutationList
-				
+			
+	
+	def mutationList(self):
+	
+		'''Returns the mutation list as a string if one has been set'''
+	
+		if not self.exists():
+			raise Exceptions.DatabaseRetrievalError, "Job Id %s does not exist in the database" % self.identification
+	
+		mutationList = None
+		if self.isMutationList():
+			self.connection.commit()
+			statement = """SELECT MutationData FROM %s WHERE JobID='%s' """ % (self.jobTable, self.identification)
+			self.cursor.execute(statement)
+			rows = self.cursor.fetchall()
+			mutationList = rows[0][0]
+
+		return mutationList
 	
 	def isMutationList(self):
 	
@@ -1114,6 +1132,7 @@ class Job:
 		self.cursor.execute(statement)
 		self.connection.commit()			
 	
+	
 	def setMutation(self, mutationCode):
 	
 		'''Sets the job to do a scan by mutating each residue in structure to mutation.
@@ -1136,6 +1155,8 @@ class Job:
 		statement = """UPDATE %s SET MutationData='%s' WHERE JobID='%s' """ % (self.jobTable, mutationCode, self.identification)
 		self.cursor.execute(statement)
 		self.connection.commit()
+		
+		self.addOptionArgument('--mutation', mutationCode)
 		
 	
 	def setMutationListFile(self, mutationList):
@@ -1168,7 +1189,8 @@ class Job:
 		statement = """UPDATE %s SET MutationData='%s' WHERE JobID='%s' """ % (self.jobTable, MySQLdb.escape_string(data), self.identification)
 		self.cursor.execute(statement)
 		self.connection.commit()	
-					
+			
+		self.addFileArgument('--mutationList', contentAttribute='mutationList', fileName='mutationList')					
 				
 	def setStructure(self, structure):
 	
@@ -1184,7 +1206,9 @@ class Job:
 		#Set mutation command
 		statement = """UPDATE %s SET Structure='%s' WHERE JobID='%s' """ % (self.jobTable, MySQLdb.escape_string(structure), self.identification)
 		self.cursor.execute(statement)
-		self.connection.commit()	
+		self.connection.commit()
+		
+		self.addFileArgument('-p', contentAttribute=structure, fileName='protein.pdb')		
 		
 	def setStructureFromFile(self, structureFile):
 	
@@ -1216,7 +1240,9 @@ class Job:
 		#Set mutation command
 		statement = """UPDATE %s SET Ligand='%s' WHERE JobID='%s' """ % (self.jobTable, MySQLdb.escape_string(ligand), self.identification)
 		self.cursor.execute(statement)
-		self.connection.commit()	
+		self.connection.commit()
+		
+		self.addFileArgument('--ligand', contentAttribute='ligand', fileName='ligand.pdb')
 		
 	def setLigandFromFile(self, ligandFile):
 	
@@ -1232,8 +1258,7 @@ class Job:
 		data = stream.read()
 		stream.close()
 		self.setLigand(data)			
-		
-	
+			
 	def setCalculationState(self, calculation, state):
 	
 		'''Sets the state of a calculation in the job.
