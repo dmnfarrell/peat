@@ -182,8 +182,8 @@ def MutantFromRotamerOperations(structure, operations):
 		Raises an Exceptions.MutantModellingError if an error occurs during mutant creation'''
  
  
- 	mutant = copy.deepcopy(stucture)
-	mutationSet = mutationSetFromOperations(operations)
+ 	mutant = copy.deepcopy(structure)
+	mutationSet = mutationSetFromRotamerOperations(operations)
  
 	for operation, atomCode, atomData in operations:
 		if operation == 'delete':
@@ -197,7 +197,7 @@ def MutantFromRotamerOperations(structure, operations):
 			result = mutant.add_atom(uniqueid=atomCode,
 					     atomname=atomName,
 					     residuenumber=residueNumber,
-					     chainid=chainID,
+					     chainid=chainId,
 					     residuename=atomData['RESNAME'],
 					     xcoord=atomData['X'],
 					     ycoord=atomData['Y'],
