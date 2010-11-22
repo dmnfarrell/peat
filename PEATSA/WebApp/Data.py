@@ -1190,7 +1190,7 @@ class Job:
 		self.cursor.execute(statement)
 		self.connection.commit()	
 			
-		self.addFileArgument('--mutationList', contentAttribute='mutationList', fileName='mutationList')					
+		self.addFileArgument('--mutationList', contentsAttribute='mutationList', fileName='mutationList')					
 				
 	def setStructure(self, structure):
 	
@@ -1208,7 +1208,7 @@ class Job:
 		self.cursor.execute(statement)
 		self.connection.commit()
 		
-		self.addFileArgument('-p', contentAttribute='structure', fileName='protein.pdb')		
+		self.addFileArgument('-p', contentsAttribute='structure', fileName='protein.pdb')		
 		
 	def setStructureFromFile(self, structureFile):
 	
@@ -1242,7 +1242,7 @@ class Job:
 		self.cursor.execute(statement)
 		self.connection.commit()
 		
-		self.addFileArgument('--ligand', contentAttribute='ligand', fileName='ligand.pdb')
+		self.addFileArgument('--ligand', contentsAttribute='ligand', fileName='ligand.pdb')
 		
 	def setLigandFromFile(self, ligandFile):
 	
