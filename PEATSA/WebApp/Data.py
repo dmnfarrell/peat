@@ -1082,7 +1082,7 @@ class Job:
 	
 		optionArgs = self.optionArguments()
 		optionArgs[option] = value
-		data = SerializeDictionary(metadata)
+		data = SerializeDictionary(optionArgs)
 		data = MySQLdb.escape_string(data)
 		
 		statement = """UPDATE %s SET OptionArguments='%s' WHERE JobID='%s' """ % (self.jobTable, data, self.identification)
@@ -1098,7 +1098,7 @@ class Job:
 			contentsAttribute: The name of the method that supplies the file contents
 			fileName: The name of the file to write the contents to'''
 	
-		if gettattr(self, contentsAttribute) == None:
+		if getattr(self, contentsAttribute) == None:
 			raise AttributeError, 'Attribute %s does not exist - cannot use as content attribute' % contentsAttribute
 	
 		fileData = {'contentsAttribute':contentsAttribute}
@@ -1107,7 +1107,7 @@ class Job:
 	
 		fileArgs = self.fileArguments()
 		fileArgs[option] = fileData
-		data = SerializeDictionary(metadata)
+		data = SerializeDictionary(fileArgs)
 		data = MySQLdb.escape_string(data)
 		
 		statement = """UPDATE %s SET FileArguments='%s' WHERE JobID='%s' """ % (self.jobTable, data, self.identification)
