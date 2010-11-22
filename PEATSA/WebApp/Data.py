@@ -410,7 +410,7 @@ class JobManager:
 		except Exception:
 			pass
 	
-	def __createInsertString__(self, jobID, pdbID, dateString, scan, stability, binding, metadata):
+	def __createInsertString__(self, jobID, pdbID, dateString, scan, stability, binding, metadata, optionArgs, fileArgs):
 
 		'''Creates an SQL insert statement based on the provided data.
 		
@@ -425,13 +425,19 @@ class JobManager:
 		data = SerializeDictionary(metadata)
 		data = MySQLdb.escape_string(data)
 		
-		data = [self.jobTable, jobID, pdbID, dateString, scan, stability, binding, data]
+		optionArgs = SerializeDictionary(optionArgs)
+		optionArgs = MySQLdb.escape_string(optionArgs)
 		
-		insertData = """INSERT INTO %s (JobID, PDBID, Date, Scan, Stability, Binding, Metadata) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s')""" % tuple(data)
+		fileArgs = SerializeDictionary(fileArgs)
+		fileArgs = MySQLdb.escape_string(fileArgs)
+		
+		data = [self.jobTable, jobID, pdbID, dateString, scan, stability, binding, data, optionArgs, fileArgs]
+		
+		insertData = """INSERT INTO %s (JobID, PDBID, Date, Scan, Stability, Binding, Metadata, OptionArguments, FileArguments) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')""" % tuple(data)
 	
 		return insertData
 	
-	def createJob(self, pdbId, calculations=[], dataTable='Data', metadata={}):
+	def createJob(self, pdbId, calculations=[], dataTable='Data', metadata={}, optionArgs={}, fileArgs={}):
 
 		'''Creates a new job entry in the database.
 		
@@ -459,7 +465,7 @@ class JobManager:
 		#Create the insert SQL command 		
 		dateString = UtilityFunctions.CreateDateString()
 		insertQuery = self.__createInsertString__(jobId, pdbId, dateString, 
-					aDict['scan'], aDict['stability'], aDict['binding'], metadata)
+					aDict['scan'], aDict['stability'], aDict['binding'], metadata, optionArgs, fileArgs)
 		
 		res = self.cursor.execute(insertQuery)
 		self.connection.commit()
@@ -504,7 +510,6 @@ class JobManager:
 			stateDict[row[0]] = {'State':row[1], 'Date':row[2]}
 				
 		return stateDict
-		
 		
 	def jobsWithCalculationsInState(self, state):
 	
@@ -851,22 +856,7 @@ class Job:
 		self.cursor.execute(statement)
 		self.connection.commit()	
 			
-	
-	def addResults(self, matrix, name):
-	
-		'''Adds matrix to the jobs dataset
 		
-		Params:
-			matrix: A Core.Matrix.Matrix instance
-			name: The name to be associated with the matrix'''
-	
-		if not self.exists():
-			raise Exceptions.DatabaseRetrievalError, "Job Id %s does not exist in the database" % self.identification
-			
-		#Add the data to the SQL database
-		self.data.addMatrix(matrix, name)
-		
-
 	def addDataSet(self, dataSet):
 	
 		'''Adds all the matrices in dataSet to the receiver
