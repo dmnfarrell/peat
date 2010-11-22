@@ -46,55 +46,39 @@ def ConstructJob(jobId, outputDir, configuration, connection, jobConfigurationFi
 		os.mkdir(outputDir)
 
 	outputDir = os.path.abspath(outputDir)
-
-	#
-	# In the following we
-	# 1. retrieve the data from the db
-	# 2. write the data to files (if necessary)
-	# 3. construct the PEAT_SA command line arguments
-	#
-
-	#Get the mutation data
-	if job.isMutationList() is True:
-		mutationList = job.mutationListFile()
-		outputFile = os.path.join(outputDir, 'mutationList')
-		mutationList.writeToFile(outputFile)
-		mutationCommand = '--mutationList=%s' % outputFile
-	else:
-		mutationCommand = '--mutation=%s' % job.mutation()
-
-	#Get the protein structure and write it out
-	structureString = job.structure()
-	filename = os.path.join(outputDir, 'protein.pdb')
-	stream = open(filename, 'w+')
-	stream.write(structureString)
-	stream.close
-	structureCommand = '-p %s' % filename
-
-	#Get ligand structure and write it out (if present)
-	bindingCommand = ""
-	if job.ligand() is not None: 
-		structureString = job.ligand()
-		filename = os.path.join(outputDir, 'ligand.mol2')
-		stream = open(filename, 'w+')
-		stream.write(structureString)
-		stream.close
-		bindingCommand = '--ligand=%s' % filename
-
-	#Get information on the requested calculations
-	calculationStates = job.calculationStates()	
-	calculationString = ""
-	for calculation in calculationStates.keys():
-		state = calculationStates[calculation]
-		#Skip binding because it was handled when getting ligand data
-		if state != 'NotSelected' and calculation != 'Binding':	
-			print state, calculation
-			calculationString = calculationString + '--%s ' % calculation.lower()
-
-
-	#Create a list containing all the PEAT-SA command line args
-	args = [structureCommand, '-j', jobId, '-w', os.path.join(outputDir, 'Work'), calculationString, bindingCommand, mutationCommand, '-v']
 	
+	args = [structureCommand, '-j', jobId, '-w', os.path.join(outputDir, 'Work'), '-v']
+	
+	#Add file args
+	fileArgs = job.fileArguments()
+	count = 0
+	for option in fileArgs.keys():
+		contentsAttribute = fileArgs[option]['contentsAttribute']
+		if contentsAttribute is None:
+			print 'Error - no contents attribute specified for file option %s' % option
+			print 'Skipping'
+			continue
+	
+		fileName = fileArgs[option]['fileName']
+		if fileName is None:
+			fileName = 'file%d.txt' % count
+		
+		outputFile = os.path.join(outputDir, 'mutationList')		
+					
+		contents = getattr(job, contentsAttribute)()		
+		f = open(outputFile, 'w+')
+		f.write(contents)
+		f.close()
+		
+		if option[:-2] == '--':
+			command = option+'='+outputFile
+		elif option[:-1] == '-':
+			command = option+' '+outputFile			
+							
+		args.append(command)
+																
+		count += 1
+
 	#Add option args
 	optionArgs = job.optionArguments()
 	for key in optionArgs.keys():
