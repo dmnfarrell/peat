@@ -1225,8 +1225,16 @@ class SQLDataSet(Core.Data.DataSet):
 	
 		'''Reads the available data'''
 		
+		#Get the names of the matrcies stored in this dataset
+		self.connection.commit()
+		query = "SELECT MatrixName FROM %s WHERE JobID = '%s' AND DataSetName = '%s'" % (self.table, self.jobId, self.name)
+		self.cursor.execute(query)
+		rows = self.cursor.fetchall()	
+		names = [row[0] for row in rows]
+		
+		#load the matrces
 		self.data = {}
-		for name in Core.Data.peatMatrices:
+		for name in names:
 			self.data[name] = self.__loadMatrix__(name)
 		
 	def __init__(self, jobIdentification, name="Output",  location=None, table="Data", overwrite=True):
