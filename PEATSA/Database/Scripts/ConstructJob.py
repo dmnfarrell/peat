@@ -47,7 +47,7 @@ def ConstructJob(jobId, outputDir, configuration, connection, jobConfigurationFi
 
 	outputDir = os.path.abspath(outputDir)
 	
-	args = [structureCommand, '-j', jobId, '-w', os.path.join(outputDir, 'Work'), '-v']
+	args = ['-j', jobId, '-w', os.path.join(outputDir, 'Work'), '-v']
 	
 	#Add file args
 	fileArgs = job.fileArguments()
@@ -63,16 +63,16 @@ def ConstructJob(jobId, outputDir, configuration, connection, jobConfigurationFi
 		if fileName is None:
 			fileName = 'file%d.txt' % count
 		
-		outputFile = os.path.join(outputDir, 'mutationList')		
+		outputFile = os.path.join(outputDir, fileName)		
 					
 		contents = getattr(job, contentsAttribute)()		
 		f = open(outputFile, 'w+')
 		f.write(contents)
 		f.close()
 		
-		if option[:-2] == '--':
+		if option[:2] == '--':
 			command = option+'='+outputFile
-		elif option[:-1] == '-':
+		elif option[:1] == '-':
 			command = option+' '+outputFile			
 							
 		args.append(command)
@@ -83,7 +83,10 @@ def ConstructJob(jobId, outputDir, configuration, connection, jobConfigurationFi
 	optionArgs = job.optionArguments()
 	for key in optionArgs.keys():
 		if key[:2] == '--':
-			arg = [key+'='+optionArgs[key]]
+			if optionArgs[key] == "":
+				arg = [key]
+			else:
+				arg = [key+'='+optionArgs[key]]
 		elif key[:1] == '-':	
 			arg = [key, optionArgs[key]]
 		else:
@@ -132,7 +135,7 @@ if __name__ == '__main__':
 	outputDir = options.dir
 
 	#Connect to the database as get the job
-	connection = WebApp.UtilityFunctions.ConnectionFromDefaultConfiguration()
 	configuration = Core.Environment.Configuration(filename=configurationFile)
+	connection = WebApp.UtilityFunctions.ConnectionFromConfiguration(configuration)
 	ConstructJob(options.jobID, outputDir, configuration, connection)
 	connection.close()
