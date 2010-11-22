@@ -629,7 +629,9 @@ class CommandLineParser:
 		#getopt will append "--" to all the optional arguments
 		#Therefore to check if they were present we have to add the -- here.
 		#Ligand isn't included here because it requires a file
-		self.optionalArguments = ["--pKa", "--scan", "--delta-pKa", "--mutation", "--stability", "--mutationList", "--ligand", "--modes", "--ionisableGroups="]
+		self.optionalArguments = ["--pKa", "--scan", "--delta-pKa", "--mutation", 
+					"--stability", "--mutationList", "--ligand",
+					"--mutationQuality", "--modes", "--ionisableGroups="]
 		self.environment = Environment.Environment()
 	
 	def parseCommandLine(self):
@@ -644,7 +646,7 @@ class CommandLineParser:
 			self.opt = getopt.getopt(sys.argv[1:], 
 					"vw:p:o:hn:", 
 					["pKa", "scan", "delta-pKa", "path", "modes", "stability", 
-					"mutationList=", "mutation=", "mutants=", "ligand=", 
+					"mutationList=", "mutation=", "mutants=", "ligand=", "mutationQuality="
 					"ionisableGroups=", "configurationFile=", "create-configuration"])
 			self.opt = dict(self.opt[0])
 		except getopt.GetoptError, data:
@@ -853,5 +855,18 @@ class CommandLineParser:
 			
 		return None		
 								
-										
+	def mutationQuality(self):
+
+		'''Defines the threshold modelled mutations must be below to be used.
+		
+		Returns None if this was not specified
+		
+		Note: This is the limit on each subsitution'''
+		
+		if self.opt.has_key('--mutationQuality'):
+			return float(self.opt['--mutationQuality'])
+			
+		return None		
+																																			
+																													
 	

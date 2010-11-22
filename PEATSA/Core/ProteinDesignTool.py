@@ -107,7 +107,11 @@
 		 
 	--ionisableGroups=[ResidueCodes]
 		ResidueCodes is a list of the residue codes of the ionisable groups to use in a
-		delta-pKa calculation. 		 
+		delta-pKa calculation. 
+		
+	--mutationQuality=[value]
+		The score of each modelled subsitution must be less than this value for the model to be used.
+		Note: The threshold must be passed by every mutation in a multi-mutant. 
 	'''
  
 import sys, os.path, datetime
@@ -361,13 +365,20 @@ def CreateMutants(pdbFile, configuration, parser, environment, cleanPDB=False):
 
 		mutationList = Data.CreateScanList(pdbFile=pdbFile, mutation=parser.scanMutation(), skipResidueTypes=skipResidueTypes)	
 		
+	#Check if the overlap (mutationQuality) was specified on the command line
+	
+	overlap = configuration.getfloat('PKA SCAN PARAMETERS', 'mutation_quality')
+	if parser.mutationQuality() is not None:
+		overlap = parser.mutationQuality()
+		environment.output('[PEAT-SA] Overriding conf mutation quality with command line value of %f' % overlap)
+		
 	#Create the collection		
 	mutantCollection = Data.MutantCollection(pdbFile=pdbFile,
 					name=parser.outputName(),
 					mutationList=mutationList,
 					ligandFiles=ligandFile,
 					location=parser.outputDirectory(),
-					maxOverlap=configuration.getfloat('PKA SCAN PARAMETERS', 'mutation_quality'),
+					maxOverlap=overlap,
 					clean=cleanPDB)
 				
 				
