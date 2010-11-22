@@ -709,22 +709,57 @@ class Job:
 			retval = False
 		
 		return retval											
+
+	def optionArguments(self):
+	
+		'''Returns the option arguments dictionary associated with the job.
 		
-	
-	def isEmailSent(self):
-	
-		'''Returns True if an email has been sent in relation to this job already'''
+		This dictionaries keys are command line option switches and values are the corresponding values.
+		Note: This are NON file arguments i.e. they must not refer to a specific file or location.		
+		
+		If no option arguments were associated with the job this method returns None'''
 		
 		if not self.exists():
 			raise Exceptions.DatabaseRetrievalError, "Job Id %s does not exist in the database" % self.identification
 		
 		self.connection.commit()
-		selectQuery = """SELECT SentMail FROM %s WHERE JobID='%s'""" % (self.jobTable, self.identification)
+		selectQuery = """SELECT OptionArguments FROM %s WHERE JobID='%s'""" % (self.jobTable, self.identification)
 		self.cursor.execute(selectQuery)		
 		rows = self.cursor.fetchall()
 		
-		return bool(rows[0][0])
+		data = rows[0][0]
+		dict = UnserializeDictionary(data)
+		
+		return dict
+		
+	def fileArguments(self):
 	
+		'''Returns the file arguments dictionary associated with the job.
+		
+		This returns a dictionary whose keys are command line arguments that refer to files.
+		The values of each key is another dictionary with two keys
+		- contentsAttribute
+		- fileName
+		
+		contentsAttribute is the name of a method of this class (or a subclass) 
+		which returns the contents of the file.
+		fileName is an optional key providing a name for the file. If not present files are named in the
+		order they are written e.g. file1, file2, with the extension txt
+		
+		If no file arguments were associated with the job this method returns None'''
+		
+		if not self.exists():
+			raise Exceptions.DatabaseRetrievalError, "Job Id %s does not exist in the database" % self.identification
+		
+		self.connection.commit()
+		selectQuery = """SELECT FileArguments FROM %s WHERE JobID='%s'""" % (self.jobTable, self.identification)
+		self.cursor.execute(selectQuery)		
+		rows = self.cursor.fetchall()
+		
+		data = rows[0][0]
+		dict = UnserializeDictionary(data)
+		
+		return dict		
 	
 	def metadata(self):
 	
@@ -745,6 +780,20 @@ class Job:
 		
 		return dict
 				
+	
+	def isEmailSent(self):
+	
+		'''Returns True if an email has been sent in relation to this job already'''
+		
+		if not self.exists():
+			raise Exceptions.DatabaseRetrievalError, "Job Id %s does not exist in the database" % self.identification
+		
+		self.connection.commit()
+		selectQuery = """SELECT SentMail FROM %s WHERE JobID='%s'""" % (self.jobTable, self.identification)
+		self.cursor.execute(selectQuery)		
+		rows = self.cursor.fetchall()
+		
+		return bool(rows[0][0])
 	
 	def state(self):
 	
