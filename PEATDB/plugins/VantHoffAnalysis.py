@@ -57,6 +57,7 @@ class VantHoff(Plugin):
     R = 8.3144
     
     def __init__(self):
+        self.path = os.path.expanduser("~")
         self.pltConfig()
         return
 
@@ -80,17 +81,19 @@ class VantHoff(Plugin):
             self.mainwin.title(self.menuentry)
             self.mainwin.geometry('800x600+200+100')
          
-        methods = self._getmethods()        
+        methods = self._getmethods()
+        fr = Frame(self.mainwin)
+        fr.pack(side=LEFT,fill=BOTH)
         methods = [m for m in methods if m[0] in self.gui_methods.keys()]
-        self._createButtons(methods)
+        self._createButtons(methods, fr)
         self.showDatasetSelector()
-        self.doall = Pmw.RadioSelect(self.mainwin,
+        self.doall = Pmw.RadioSelect(fr,
                 buttontype = 'checkbutton',
                 orient = 'horizontal',
                 labelpos = 'w')
         self.doall.add('Process All')
         self.doall.pack()
-        self.methods = Pmw.RadioSelect(self.mainwin,
+        self.methods = Pmw.RadioSelect(fr,
                 buttontype = 'checkbutton',
                 orient = 'horizontal',
                 labelpos = 'w',               
@@ -99,12 +102,12 @@ class VantHoff(Plugin):
             self.methods.add(m)
         self.methods.invoke('method 1')    
         self.methods.pack() 
-        self.sm = Pmw.EntryField(self.mainwin,
+        self.sm = Pmw.EntryField(fr,
                 labelpos = 'w',
                 value = 5,
                 label_text = 'Smoothing:')        
         self.sm.pack()
-        self.tw = Pmw.EntryField(self.mainwin,
+        self.tw = Pmw.EntryField(fr,
                 labelpos = 'w',
                 value = 60,
                 label_text = 'Width of transition:')
@@ -118,11 +121,11 @@ class VantHoff(Plugin):
         methods = [m for m in mems if not m[0].startswith('_')]
         return methods
 
-    def _createButtons(self, methods):
+    def _createButtons(self, methods, fr=None):
         """Dynamically create buttons for supplied methods, which is a tuple
-            of (method name, label)"""      
+            of (method name, label)"""
         for m in methods:           
-            b=Button(self.mainwin,text=self.gui_methods[m[0]],command=m[1])
+            b=Button(fr,text=self.gui_methods[m[0]],command=m[1])
             b.pack(side=TOP,fill=BOTH)
         return
     
@@ -318,12 +321,14 @@ class VantHoff(Plugin):
             
         if figname != None:
             figname = figname.replace('.','_')
-            f.savefig(figname+'m1',dpi=300)
+            fname = os.path.join(self.path, figname+'m1')
+            f.savefig(fname,dpi=300)
+            print 'plot saved to %s' %os.path.abspath(fname)
             plt.close()
         if E!=None:          
             fdata = Fitting.makeFitData(X.name,vrs=X.variables)
             E.insertDataset(xydata=[t,k], newname=d+'_vanthoff',replace=True,fit=fdata)
-            E.saveProject() 
+            E.saveProject()
         return deltaH, deltaS, ax
 
     def fitElwellSchellman(self,E=None, d=None, xy=None,transwidth=50,
@@ -373,8 +378,9 @@ class VantHoff(Plugin):
             self.showTkFigure(f)
         if figname != None:
             figname = figname.replace('.','_')
-            f.savefig(figname+'m2',dpi=300)
-            plt.close()            
+            fname = os.path.join(self.path, figname+'m1')
+            f.savefig(fname,dpi=300)
+            plt.close()
         if E!=None:          
             fdata = Fitting.makeFitData(X.name,vrs=X.variables)
             E.insertDataset(xydata=[t,dg], newname=d+'_vanthoff2',replace=True,fit=fdata)
@@ -660,8 +666,7 @@ class VantHoff(Plugin):
         ax.set_title('Correlation')
         from scipy.stats import stats
         cc = str(round(pow(stats.pearsonr(x,y)[0],2),2))
-        ax.text(400,180, r'$r^2= %s$' %cc, fontsize=16)
-        #plt.rc('text', usetex=True)        
+        ax.text(400,180, r'$r^2= %s$' %cc, fontsize=16)             
         self.showTkFigure(f)
         return
 
@@ -670,11 +675,10 @@ class VantHoff(Plugin):
         fr = Toplevel()
         canvas = FigureCanvasTkAgg(fig, master=fr)
         #self.canvas.show()
-        canvas.get_tk_widget().pack(side=TOP, fill=BOTH, expand=1)
-        canvas._tkcanvas.pack(side=BOTTOM, fill=BOTH, expand=1)
+        canvas.get_tk_widget().pack(side=TOP, fill=X, expand=1)        
         mtoolbar = NavigationToolbar2TkAgg( canvas, fr )
         mtoolbar.update()
-        
+        canvas._tkcanvas.pack(side=BOTTOM, fill=BOTH, expand=1)
         return
 
 def main():
@@ -716,7 +720,7 @@ def main():
         d='cdtest'
         E.insertDataset(xydata=[x,y], newname=d)
     if opts.all == True:
-        self.doAll(E, methods)             
+        self.doAll(E, methods)
     if opts.benchmark == True:
         app.benchmark(E,d,method=opts.method)           
 

@@ -128,10 +128,11 @@ class PEATSAPlugin(Plugin):
     def updateJobsTable(self):
         """Show table for current jobs list"""        
         self.checkJobsDict()
-        jobdict = self.DB.meta.peatsa_jobs       
+        jobdict = self.DB.meta.peatsa_jobs      
         M = TableModel()
         #open job log from file
-        jl = pickle.load(open('jobstates.log','r'))      
+        f=open('jobstates.log','r')
+        jl = pickle.load(f) 
         for j in jobdict:            
             jobid = jobdict[j]           
             try:
@@ -141,6 +142,7 @@ class PEATSAPlugin(Plugin):
         self.jobstable = TableCanvas(self.tf, model=M, height=100, editable=False)
         self.jobstable.createTableFrame()       
         self.log.yview('moveto', 1)
+        f.close()
         return
 
     def manageJobsButtons(self, parent):

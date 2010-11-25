@@ -184,7 +184,7 @@ class DBActions(object):
     @classmethod
     def addPDBFile(self, DB=None, name=None, pdbfile=None, pdbdata=None):
         """Add a PDB file to the record given as argument"""
-        import os        
+        import os, tkMessageBox
         if pdbdata == None and pdbfile == None:
             savedir=os.getcwd()
             global PDB_code
@@ -206,12 +206,36 @@ class DBActions(object):
             # Try to read it using Protool    
             try:
                 self.X.readpdb(filename=pdbfile)
-            except:
-                import tkMessageBox
+            except:                
                 tkMessageBox.showwarning('Error reading PDB file',
                                          'I could not read the PDB file. This probably means that the PDB file is corrupt in some way.')
                 return
 
+        if tkMessageBox.askyesno('Reset AA Seq?', 'Do you want to reset the amino acid Sequence?'):      
+            AlignmentMap = self.checkPDBSequence(name)
+        else:
+            AlignmentMap = None
+            
+        #store it    
+        DB.storePDB(name, self.X, AlignmentMap)       
+        ref = DB.meta.refprotein
+        #if this is the reference protein remodel mutations and rewrite mut codes   
+        if name == ref:
+            print name, ref
+            print 'rechecking mutation codes, ref prot structure has changed'                
+            #get new mutation codes
+            import PEATSA.Core as Core
+            for p in DB.getRecs():
+                self.checkMutation(DB, p, ref, self.X)
+            #self.checkModels(DB) 
+                
+        #add the original pdb name
+        DB.data[name]['pdbname'] = pdbname
+        return
+
+    def checkPDBSequence(self):
+        """Check the PDB sequence against a newly added structure, optional.
+           Adds the amino acod seq of the PDB file, overwriting the old one"""
         # Extract the sequence
         import sequence_alignment
         pdb_1,ignored_res1=sequence_alignment.Protool2pir(self.X.sequence)
@@ -237,6 +261,7 @@ class DBActions(object):
         record_AA1=copy.deepcopy(pdb_1)
 
         # Also deposit the amino acid sequence in the protein record
+        
         DB.data[name]['aaseq'] = copy.deepcopy(self.X.sequence)
 
         # Align the two sequences
@@ -254,23 +279,9 @@ class DBActions(object):
             if res_pdb==res_rec:
                 ids=ids+1
         print 'Sequence identity %5.3f' %(100.0*float(ids)/float(len(al_pdb)))
-        self.AlignmentMap = {}
-        self.AlignmentMap['OrigAa']=al_record
-        self.AlignmentMap['AlignedAa']=al_pdb
-
-        def storePDB():
-            DB.storePDB(name, self.X, self.AlignmentMap)
-            AlignWindow.destroy()
-            ref = DB.meta.refprotein
-            print name, ref
-            #if this is the reference protein remodel mutations and rewrite mut codes   
-            if name == ref:
-                print 'rechecking mutation codes, ref prot structure has changed'                
-                #get new mutation codes
-                import PEATSA.Core as Core
-                for p in DB.getRecs():
-                    self.checkMutation(DB, p, ref, self.X)
-                #self.checkModels(DB)                   
+        AlignmentMap = {}
+        AlignmentMap['OrigAa']=al_record
+        AlignmentMap['AlignedAa']=al_pdb     
 
         #Make alignment window
         AlignWindow=Toplevel()
@@ -294,13 +305,8 @@ class DBActions(object):
         listbox.grid(row=0,column=0,columnspan=2)
         listbox.config(xscrollcommand=AlignWindow.Slider.set)
         AlignWindow.Slider.config(command=listbox.xview)
-
-        if accept_alignment_automatically:
-            storePDB()            
-        #add the original name
-        DB.data[name]['pdbname'] = pdbname
-        return
-
+        return AlignmentMap
+        
     @classmethod    
     def fetchPDB(self, pdbid):
         import urllib

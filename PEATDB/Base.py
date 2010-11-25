@@ -730,14 +730,15 @@ class PDatabase(zDatabase):
 
     #these should be at protein rec level?
 
-    def storePDB(self, name, X, AlignmentMap):
+    def storePDB(self, name, X, AlignmentMap=None):
         """Store the PDB file for the selected protein"""
         rec = self.data[name]
         rec.Structure = X.writepdb('dummy',nowrite=1)
         rec.Structuretype = 'xray'
         # Store the map between sequences
-        rec.Structure_alnseq_EATrecord = AlignmentMap['OrigAa']
-        rec.Structure_alnseq_PDBfile = AlignmentMap['AlignedAa']
+        if AlignmentMap != None:
+            rec.Structure_alnseq_EATrecord = AlignmentMap['OrigAa']
+            rec.Structure_alnseq_PDBfile = AlignmentMap['AlignedAa']
         return
 
     def getStructure(self, protein, field_name=None):
