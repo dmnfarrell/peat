@@ -463,6 +463,9 @@ class JobManager:
 
 		#Create a unique id for the job
 		jobId = UtilityFunctions.GetNewSID("PDT")
+		
+		#Add PDB id to metadata
+		metadata['pdbID'] = pdbID
 
 		#Create the insert SQL command 		
 		dateString = UtilityFunctions.CreateDateString()
