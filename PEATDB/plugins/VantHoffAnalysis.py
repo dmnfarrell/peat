@@ -534,7 +534,7 @@ class VantHoff(Plugin):
 
     def pltConfig(self):
         #plt.rc('text', usetex=True)
-        plt.rc('figure.subplot', hspace=0.3,wspace=0.2)
+        plt.rc('figure.subplot', hspace=0.3,wspace=0.3)
         #plt.rc('axes',titlesize=22)
         plt.rc('font',family='monospace')
         return
@@ -671,7 +671,7 @@ class VantHoff(Plugin):
         canvas = FigureCanvasTkAgg(fig, master=fr)
         #self.canvas.show()
         canvas.get_tk_widget().pack(side=TOP, fill=BOTH, expand=1)
-        canvas._tkcanvas.pack(side=TOP, fill=BOTH, expand=1)
+        canvas._tkcanvas.pack(side=BOTTOM, fill=BOTH, expand=1)
         mtoolbar = NavigationToolbar2TkAgg( canvas, fr )
         mtoolbar.update()
         

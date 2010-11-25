@@ -128,13 +128,13 @@ class PEATSAPlugin(Plugin):
     def updateJobsTable(self):
         """Show table for current jobs list"""        
         self.checkJobsDict()
-        jobdict = self.DB.meta.peatsa_jobs
+        jobdict = self.DB.meta.peatsa_jobs       
         M = TableModel()
         #open job log from file
-        jl = pickle.load(open('jobstates.log','r'))
-        for j in jobdict: 
-            jobid =jobdict[j]           
-            try:                
+        jl = pickle.load(open('jobstates.log','r'))      
+        for j in jobdict:            
+            jobid = jobdict[j]           
+            try:
                 M.addRecord(j,state=jl[jobid]['State'],date=jl[jobid]['Date'])
             except:
                 M.addRecord(j,state='Not in DB')
@@ -295,24 +295,17 @@ class PEATSAPlugin(Plugin):
             mutationlist = mutlist.getvalue().split('\n')
             mutationlist.remove('')
             pdbfile=None; pdb = None
+            quality = mutqualentry.getvalue()
             
             if not hasattr(self.DB.meta, 'refprotein') or self.DB.meta.refprotein == None:
                 tkMessageBox.showinfo('No ref protein',
                                       'Set a reference (wt) protein first')
-                return     
+                return
             #if self.useref.get() == 1:
             #we use ref pdb by default now
             pdbfile = self.writetempPDB()
             pdbname = self.getrefPDBName()
-            '''else:
-                p = pdbentry.getvalue()
-                if os.path.exists(p):
-                    pdbfile=p
-                elif len(p) == 4:                    
-                    pdb = DBActions.fetchPDB(p)       
-                else:
-                    print 'no valid pdb given'
-                    return  '''        
+            
          
             if len(mutationlist) == 0 or mutationlist==[u'']:
                 print 'mutation list is empty'
@@ -326,7 +319,8 @@ class PEATSAPlugin(Plugin):
                            pdb=pdb, pdbfile=pdbfile,
                            ligandfile=self.ligandfile,
                            mutations=mutationlist,
-                           calcs=calcs, meta={'expcol':expcol,'pdbname':pdbname})         
+                           calcs=calcs, mutationquality=quality,
+                           meta={'expcol':expcol,'pdbname':pdbname})         
             close()
             
         jobdlg = Toplevel()
@@ -358,16 +352,13 @@ class PEATSAPlugin(Plugin):
         calcmenu.pack(fill=X,expand=1)
         fr=Frame(jobdlg)
         fr.pack(fill=X,expand=1)
-        '''self.useref = IntVar()
-        Label(fr,text='Use reference protein').pack(side=LEFT)
-        Checkbutton(fr,variable=self.useref).pack(side=LEFT)        
-        pdbentry = Pmw.EntryField(jobdlg,
+        mutqualentry = Pmw.EntryField(jobdlg,
                 labelpos = 'w',
-                label_text = 'PDB Structure:')
-        pdbentry.pack(fill=X,expand=1)
-        balloon.bind(pdbentry, 'Enter the PDB ID or load a file')
-        Button(jobdlg,text='load PDB from file',command=getstruct).pack(fill=X,expand=1)
-        Button(jobdlg,text='load Ligand file',command=getligand).pack(fill=X,expand=1)'''
+                label_text = 'Quality:',
+                validate = validatename,
+                value = '2.0')
+        mutqualentry.pack(fill=BOTH,expand=1)
+        
         self.ligandfile=None
         mutlist = Pmw.ScrolledText(jobdlg,
                 labelpos = 'n',
@@ -389,7 +380,7 @@ class PEATSAPlugin(Plugin):
         return
     
     def submitJob(self, name='mycalc', pdbname=None, pdb=None, pdbfile=None, ligandfile=None,
-                     mutations=[], calcs=['stability'], meta={}):
+                     mutations=[], calcs=['stability'], mutationquality='2.0', meta={}):
         """Submit job to server"""
 
         if 'scan' in calcs and pdbname==None:
@@ -399,7 +390,7 @@ class PEATSAPlugin(Plugin):
             return
         job = self.jobManager.createJob(pdbId=pdbname, calculations=calcs, 
                                           dataTable='Data', metadata=meta,
-                                          optionArgs={'--mutationQuality':'2.0'})
+                                          optionArgs={'--mutationQuality':mutationquality})
         if pdb != None:
             job.setStructure(pdb)
         else:
