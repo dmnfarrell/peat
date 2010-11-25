@@ -254,7 +254,7 @@ class VantHoff(Plugin):
         """Derive fraction unfolded, get K and fit to Van't Hoff.
            see http://www.jbc.org/content/277/43/40717.full
            or http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2144003/
-        """        
+        """
         if E != None:
             if not d in E.datasets:
                 print 'no such dataset, %s' %d
@@ -318,13 +318,13 @@ class VantHoff(Plugin):
         
         if show==True:            
             self.showTkFigure(f)
-            
-        if figname != None:
-            figname = figname.replace('.','_')
-            fname = os.path.join(self.path, figname+'m1')
-            f.savefig(fname,dpi=300)
-            print 'plot saved to %s' %os.path.abspath(fname)
-            plt.close()
+
+        if figname == None: figname = d       
+        figname = figname.replace('.','_')
+        fname = figname+'m1'+'.png'
+        f.savefig(fname,dpi=300)
+        print 'plot saved to %s' %os.path.abspath(fname)
+        #plt.close()
         if E!=None:          
             fdata = Fitting.makeFitData(X.name,vrs=X.variables)
             E.insertDataset(xydata=[t,k], newname=d+'_vanthoff',replace=True,fit=fdata)
@@ -376,11 +376,12 @@ class VantHoff(Plugin):
         f.suptitle("Method 2 - deltaH: %2.2f deltaCp: %2.2f Tm: %2.2f" %(deltaH,deltacp,Tm),size=18)
         if show == True:
             self.showTkFigure(f)
-        if figname != None:
-            figname = figname.replace('.','_')
-            fname = os.path.join(self.path, figname+'m1')
-            f.savefig(fname,dpi=300)
-            plt.close()
+            
+        if figname == None: figname = d       
+        figname = figname.replace('.','_')
+        fname = figname+'m1'+'.png'
+        f.savefig(fname,dpi=300)
+        print 'plot saved to %s' %os.path.abspath(fname)
         if E!=None:          
             fdata = Fitting.makeFitData(X.name,vrs=X.variables)
             E.insertDataset(xydata=[t,dg], newname=d+'_vanthoff2',replace=True,fit=fdata)
