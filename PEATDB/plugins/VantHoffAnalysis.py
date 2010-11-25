@@ -318,7 +318,7 @@ class VantHoff(Plugin):
             
         if figname != None:
             figname = figname.replace('.','_')
-            f.savefig(figname)
+            f.savefig(figname+'m1',dpi=300)
             plt.close()
         if E!=None:          
             fdata = Fitting.makeFitData(X.name,vrs=X.variables)
@@ -331,18 +331,19 @@ class VantHoff(Plugin):
         """Fit entire raw data simultaneously to the three main thermodynamic
            parameters using Elwell/Schellman method"""
         if E !=None:
-            ek=EkinDataset(E.getDataset(d))       
-            x,y = ek.getXYActive()            
+            ek = E.getDataset(d)       
+            x,y,a, xerr,yerr = ek.getAll()
         elif xy!=None:
             x,y = xy
         else:
             return
         if invert == True:
             y = [max(y)-i for i in y[:]]
-        f=plt.figure(figsize=(10,6))
-        ax=f.add_subplot(121)
-        ax.set_xlabel('T')
+        f=plt.figure(figsize=(10,5))
+        ax=f.add_subplot(121)                
         p=ax.plot(x,y,'o',alpha=0.5)
+        ax.set_xlabel('T');ax.set_xlabel('mdeg')
+        ax.set_title('raw data')
 
         x1,y1,x,y = self.transformCD(x,y,transwidth,ax)
         
@@ -357,11 +358,11 @@ class VantHoff(Plugin):
             t.append(T)
 
         ax1=f.add_subplot(122)
-        p=ax1.plot(t,dg,'x',color='black')
-        ax1.set_xlabel('T')
-        ax1.set_ylabel('dG(T)')
+        p=ax1.plot(t,dg,'x',mew=2,color='black')
+        ax1.set_xlabel('T'); ax1.set_ylabel('dG(T)')
+        ax.set_title('stability curve')
         
-        A,X=Fitting.doFit(expdata=zip(t,dg),model='elwellschellman',grad=1e-9,conv=1e-10)        
+        A,X=Fitting.doFit(expdata=zip(t,dg),model='schellman',grad=1e-9,conv=1e-9)
         fity = X.getFitLine(t)
         p=ax1.plot(t,fity,'r',lw=2)
         fd=X.getFitDict()
@@ -372,7 +373,7 @@ class VantHoff(Plugin):
             self.showTkFigure(f)
         if figname != None:
             figname = figname.replace('.','_')
-            f.savefig(figname,dpi=300)
+            f.savefig(figname+'m2',dpi=300)
             plt.close()            
         if E!=None:          
             fdata = Fitting.makeFitData(X.name,vrs=X.variables)
@@ -385,8 +386,8 @@ class VantHoff(Plugin):
         """Finds slope of trans region and plugs this in to equation
         http://www.springerlink.com/content/r34n0201g30563u7/  """
         if E !=None:
-            ek=EkinDataset(E.getDataset(d))       
-            x,y = ek.getXYActive()            
+            ek = E.getDataset(d)       
+            x,y,a, xerr,yerr = ek.getAll()        
         elif xy!=None:
             x,y = xy
         else:
@@ -420,8 +421,8 @@ class VantHoff(Plugin):
            See http://www.ncbi.nlm.nih.gov/pubmed/10933511"""
       
         if E !=None:
-            ek=EkinDataset(E.getDataset(d))       
-            x,y = ek.getXYActive()
+            ek = E.getDataset(d)       
+            x,y,a, xerr,yerr = ek.getAll() 
         elif xy!=None:
             x,y = xy
         else:
@@ -430,7 +431,7 @@ class VantHoff(Plugin):
             y = [max(y)-i for i in y[:]] 
 
         leg=[]; lines=[]
-        f=plt.figure(figsize=(10,6))
+        f=plt.figure(figsize=(10,5))
         ax=f.add_subplot(121)
         p=ax.plot(x,y,'x',color='black',mew=3,alpha=0.5)
         leg.append(p); lines.append('original')
@@ -469,7 +470,7 @@ class VantHoff(Plugin):
             self.showTkFigure(f)
         if figname != None:
             figname = figname.replace('.','_')
-            f.savefig(figname)
+            f.savefig(figname+'m3',dpi=300)
             plt.close()
         if E!=None:          
             fdata = Fitting.makeFitData(X.name,vrs=X.variables)
@@ -533,7 +534,7 @@ class VantHoff(Plugin):
 
     def pltConfig(self):
         #plt.rc('text', usetex=True)
-        plt.rc('figure.subplot', hspace=0.2,wspace=0.2)
+        plt.rc('figure.subplot', hspace=0.3,wspace=0.2)
         #plt.rc('axes',titlesize=22)
         plt.rc('font',family='monospace')
         return
@@ -689,7 +690,7 @@ def main():
     parser.add_option("-d", "--dataset", dest="dataset",
                         help="Dataset name")    
     parser.add_option("-m", "--method", dest="method", default=1, type='int',
-                        help="Choose method - 1: Van't Hoff plot, 2: Differential fit")      
+        help="Choose method - 1: Van't Hoff plot, 2: Schellman, 3: Differential fit, 4: Breslauer")      
     parser.add_option("-b", "--benchmark", dest="benchmark", action='store_true',
                        help="Test", default=False)
     parser.add_option("-a", "--all", dest="all", action='store_true',
