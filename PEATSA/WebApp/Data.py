@@ -1211,7 +1211,8 @@ class Job:
 		self.cursor.execute(statement)
 		self.connection.commit()
 		
-		self.addFileArgument('-p', contentsAttribute='structure', fileName='protein.pdb')		
+		metadata = self.metadata()
+		self.addFileArgument('-p', contentsAttribute='structure', fileName='%s.pdb' % metadata['pdbId'])		
 		
 	def setStructureFromFile(self, structureFile):
 	
