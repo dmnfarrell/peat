@@ -54,7 +54,7 @@ class PEATSAPlugin(Plugin):
     buttonorder = ['createJobDialog','fetchJob','editConfigFile','help','quit']
     about = 'This plugin allows you to call PEATSA'    
 
-    calctypes = ['stability','binding','both']
+    calctypes = ['stability','binding','pka']
     
     def main(self, parent=None, DB=None):       
         if parent==None:
@@ -236,7 +236,8 @@ class PEATSAPlugin(Plugin):
     def getrefPDBName(self):
         name = self.DB.meta.refprotein
         if self.DB[name].has_key('pdbname'):
-            return self.DB[name]['pdbname']
+            name = self.DB[name]['pdbname']
+            return name.split('.')[0]            
         else:
             return ''
         
@@ -285,8 +286,10 @@ class PEATSAPlugin(Plugin):
             
         def submit():
                   
-            if calcmenu.getcurselection() == 'both':
-                calcs = ['stability','binding']
+            #if calcmenu.getcurselection() == 'both':
+            #    calcs = ['stability','binding']
+            if calcmenu.getcurselection() == 'pka':
+                calcs = ['scan']
             else:
                 calcs = [calcmenu.getcurselection()]
             mutationlist = mutlist.getvalue().split('\n')
@@ -319,7 +322,7 @@ class PEATSAPlugin(Plugin):
                 return
             name=nameentry.getvalue()
             expcol = expcolmenu.getcurselection()
-            self.submitJob(name=name,
+            self.submitJob(name=name, pdbname=pdbname,
                            pdb=pdb, pdbfile=pdbfile,
                            ligandfile=self.ligandfile,
                            mutations=mutationlist,
@@ -385,13 +388,16 @@ class PEATSAPlugin(Plugin):
         self.parent.wait_window(jobdlg)
         return
     
-    def submitJob(self, name='myjob', pdb=None, pdbfile=None, ligandfile=None,
-                     mutations=[], calcs=['stability'], meta={}):    
+    def submitJob(self, name='mycalc', pdbname=None, pdb=None, pdbfile=None, ligandfile=None,
+                     mutations=[], calcs=['stability'], meta={}):
         """Submit job to server"""
 
+        if 'scan' in calcs and pdbname==None:
+            print 'You must provide pdb code for pKa calcs'
+            return
         if pdb==None and pdbfile==None:
             return
-        job = self.jobManager.createJob(name, calculations=calcs, 
+        job = self.jobManager.createJob(pdbId=pdbname, calculations=calcs, 
                                           dataTable='Data', metadata=meta,
                                           optionArgs={'--mutationQuality':'2.0'})
         if pdb != None:

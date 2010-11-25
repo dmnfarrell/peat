@@ -57,7 +57,7 @@ class VantHoff(Plugin):
     R = 8.3144
     
     def __init__(self):
-        
+        self.pltConfig()
         return
 
     def main(self, parent):
@@ -69,7 +69,7 @@ class VantHoff(Plugin):
             return
         self.xydata = None
         self.E = None
-        self._doFrame()
+        self._doFrame()        
         return
 
     def _doFrame(self):
@@ -212,7 +212,8 @@ class VantHoff(Plugin):
         """Transform raw data into fraction unfolded per temp value, by fitting to
             a general unfolding equation that extracts baseline/slopes"""
         #fit baseline slopes and get intercepts
-        A,X=Fitting.doFit(expdata=zip(x,y),model='Unfolding',conv=1e-7,noiter=100,silent=True)
+        print 'fitting to get baseline slopes and intercepts..'
+        A,X=Fitting.doFit(expdata=zip(x,y),model='Unfolding',conv=1e-4,noiter=100,silent=True)
         fity = X.getFitLine(x)        
         fd=X.getFitDict()
         if ax!=None:
@@ -223,16 +224,7 @@ class VantHoff(Plugin):
         #if mu>0.01: mu = 0.01
         yn = fd['an']; yu = fd['ad'] #intercepts
         d50 = fd['d50']; m = fd['m']
-        
-        #try to take useful transition region of data 
-        if transwidth != None:
-            for i in x:
-                if i>d50: 
-                    mid = x.index(i)
-                    break
-            L=int(mid-transwidth); U=int(mid+transwidth)        
-            x,y = x[L:U], y[L:U]
-        
+                
         t=[]; f=[]
         #print mu, mn
         for T,yo in zip(x,y):            
@@ -240,30 +232,45 @@ class VantHoff(Plugin):
             #print fu, (yo-(yn+mn*T)), (m), mu, mn
             #if f>0:
             f.append(fu)
-            t.append(T)            
-        return t,f
+            t.append(T)
+
+        #try to take useful transition region of data
+        at,af=t,f
+        if transwidth != None:
+            for i in t:
+                if i>d50: 
+                    mid = t.index(i)
+                    break
+            L=int(mid-transwidth); U=int(mid+transwidth)        
+            t,f = t[L:U], f[L:U]
+            
+        return at,af,t,f
     
     def fitVantHoff(self, E=None, d=None, xy=None, transwidth=80, invert=False,
                         show=True, figname=None):
         """Derive fraction unfolded, get K and fit to Van't Hoff.
            see http://www.jbc.org/content/277/43/40717.full
            or http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2144003/
-        """
-        
-        if E !=None:
-            ek=EkinDataset(E.getDataset(d))       
-            x,y = ek.getXYActive()
+        """        
+        if E != None:
+            if not d in E.datasets:
+                print 'no such dataset, %s' %d
+                print 'available datasets:', E.datasets
+                return            
+            ek = E.getDataset(d)          
+            x,y,a, xerr,yerr = ek.getAll()
         elif xy!=None:
             x,y = xy            
         if invert == True:
             y = [max(y)-i for i in y[:]] 
             
-        f=plt.figure(figsize=(10,6))
-        ax=f.add_subplot(121)
+        f=plt.figure(figsize=(10,10))
+        ax=f.add_subplot(221)
         p=ax.plot(x,y,'o',alpha=0.6)
-        ax.set_xlabel('T')
+        ax.set_xlabel('T(K)'); ax.set_ylabel('mdeg')
+        ax.set_title('raw data') 
 
-        x,y = self.transformCD(x,y,transwidth,ax)
+        x1,y1,x,y = self.transformCD(x,y,transwidth,ax)
         
         #derive lnK vs 1/T
         t=[]; k=[]
@@ -275,29 +282,37 @@ class VantHoff(Plugin):
             k.append(klog)
             t.append(1/T)
         if len(t)<2: return None, None, None
-        ax1=f.add_subplot(122)
-        p=ax1.plot(t,k,'x',color='black')
-        ax1.set_xlabel('1/T')#(r'$1/T ($K^-1)$') 
-        ax1.set_ylabel('ln K') 
+         
+        ax=f.add_subplot(222)
+        p=ax.plot(x1,y1,'o',color='g',alpha=0.6)
+        ax.set_xlabel('T(K)'); ax.set_ylabel('fu') 
+        ax.set_title('fraction unfolded')
+        
+        ax=f.add_subplot(223)
+        p=ax.plot(t,k,'x',mew=2,color='black')
+        ax.set_xlabel('1/T')#(r'$1/T ($K^-1)$') 
+        ax.set_ylabel('ln K') 
         
         formatter = matplotlib.ticker.ScalarFormatter()
         formatter.set_scientific(True) 
         formatter.set_powerlimits((0,0))
-        ax1.xaxis.set_major_formatter(formatter)
-        for l in ax1.get_xticklabels():
+        ax.xaxis.set_major_formatter(formatter)
+        for l in ax.get_xticklabels():
             l.set_rotation(30)
             
         #fit this van't hoff plot
         A,X=Fitting.doFit(expdata=zip(t,k),model='Linear')
         fitk = X.getFitLine(t)      
-        p=ax1.plot(t,fitk,'r',lw=2)
+        p=ax.plot(t,fitk,'r',lw=2)
         fd=X.getFitDict()
-        self.drawParams(ax1,fd)
+        #self.drawParams(ax,fd)
         
         #slope is deltaH/R/1000 in kJ
         deltaH = -fd['a']*self.R/1000
         deltaS = fd['b']*self.R/1000
         f.suptitle("Method 1 - deltaH: %2.2f deltaS: %2.2f" %(deltaH,deltaS),size=18)
+        #f.subplots_adjust(vpsace=0.4)
+        
         if show==True:            
             self.showTkFigure(f)
             
@@ -329,7 +344,7 @@ class VantHoff(Plugin):
         ax.set_xlabel('T')
         p=ax.plot(x,y,'o',alpha=0.5)
 
-        x,y = self.transformCD(x,y,transwidth,ax)
+        x1,y1,x,y = self.transformCD(x,y,transwidth,ax)
         
         t=[];dg=[]
         R=8.3144e-3
@@ -357,7 +372,7 @@ class VantHoff(Plugin):
             self.showTkFigure(f)
         if figname != None:
             figname = figname.replace('.','_')
-            f.savefig(figname)
+            f.savefig(figname,dpi=300)
             plt.close()            
         if E!=None:          
             fdata = Fitting.makeFitData(X.name,vrs=X.variables)
@@ -516,8 +531,11 @@ class VantHoff(Plugin):
             y-=inc            
         return
 
-    def usetex(self):
-        plt.rc('text', usetex=True)
+    def pltConfig(self):
+        #plt.rc('text', usetex=True)
+        plt.rc('figure.subplot', hspace=0.2,wspace=0.2)
+        #plt.rc('axes',titlesize=22)
+        plt.rc('font',family='monospace')
         return
    
     def doAll(self, methods=['method 1']):
@@ -642,7 +660,7 @@ class VantHoff(Plugin):
         from scipy.stats import stats
         cc = str(round(pow(stats.pearsonr(x,y)[0],2),2))
         ax.text(400,180, r'$r^2= %s$' %cc, fontsize=16)
-        plt.rc('text', usetex=True)        
+        #plt.rc('text', usetex=True)        
         self.showTkFigure(f)
         return
 
@@ -686,7 +704,7 @@ def main():
     opts, remainder = parser.parse_args()
    
     if opts.file != None and os.path.exists(opts.file):
-        app.loadDB(opts.file)        
+        app.loadDB(opts.file)       
     if opts.ekinprj != None and os.path.exists(opts.ekinprj):
         E = EkinProject()
         E.openProject(opts.ekinprj)
@@ -702,13 +720,13 @@ def main():
         app.benchmark(E,d,method=opts.method)           
 
         #app.plotCorrelation()
-    else:        
+    else:
         if opts.method == 1:
-            app.fitVantHoff(E,d,transwidth=opts.width,invert=opts.invert)
+            app.fitVantHoff(E,d,transwidth=opts.width,invert=opts.invert,figname=d)
         elif opts.method == 2:
-            app.fitElwellSchellman(E,d,transwidth=opts.width,invert=opts.invert)
+            app.fitElwellSchellman(E,d,transwidth=opts.width,invert=opts.invert,figname=d)
         elif opts.method == 3:
-            app.fitDifferentialCurve(E,d,smooth=opts.smoothing,invert=opts.invert)
+            app.fitDifferentialCurve(E,d,smooth=opts.smoothing,invert=opts.invert,figname=d)
         elif opts.method == 4:
             app.breslauerMethod(E,d,invert=opts.invert)                       
             
