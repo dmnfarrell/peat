@@ -1211,8 +1211,11 @@ class Job:
 		self.cursor.execute(statement)
 		self.connection.commit()
 		
+		#Use the pdb id for the pdb file name
+		#We use lower case since pKD uses lower case for its output files
+		#And PEATSA will uses the name of the protein file to match to the pKD files.
 		metadata = self.metadata()
-		self.addFileArgument('-p', contentsAttribute='structure', fileName='%s.pdb' % metadata['pdbId'])		
+		self.addFileArgument('-p', contentsAttribute='structure', fileName='%s.pdb' % metadata['pdbId'].lower())		
 		
 	def setStructureFromFile(self, structureFile):
 	
