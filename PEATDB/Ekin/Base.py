@@ -122,6 +122,7 @@ class EkinProject(object):
             self.loadData(data)
         self.current = None    #track 'current' dataset
         self.length = 0
+        self.filename = None
         return
 
     def loadData(self, data=None):
@@ -789,7 +790,7 @@ class EkinProject(object):
 
                 lineclr = self._getlineColor(line)
                 if prms.showerrorbars == True and (yerr != None or xerr != None):
-                    print xerr,yerr
+                    #print xerr,yerr
                     errline = ax.errorbar(x, y, xerr=xerr, yerr=yerr, fmt=None,
                                             elinewidth=1.0, ecolor=lineclr, alpha=prms.alpha)
             elif prms.graphtype == 'bar':
@@ -899,8 +900,7 @@ class EkinProject(object):
             return
         #data =
         l = self.ax.get_lines()
-        print l
-
+        #print l
         return
 
     def checkDatasetParam(self, datasets):

@@ -50,8 +50,9 @@ class VantHoff(Plugin):
 
     gui_methods = {'getCSV': 'Import CSV',
                     'loadEkin':'Load Ekin Proj',
+                    'saveEkin':'Save Ekin Proj',
                     'doAnalysis':"Do Analysis",
-                    'benchmark': 'Do Benchmark',                  
+                    #'benchmark': 'Do Benchmark',                  
                     'close':'Close' }
     about = "A plugin to do Van't Hoff Analysis of temperature melting curves"
     R = 8.3144
@@ -59,23 +60,21 @@ class VantHoff(Plugin):
     def __init__(self):
         self.path = os.path.expanduser("~")
         self.pltConfig()
+        self.E = None
         return
 
     def main(self, parent):
         if parent==None:
             return
         self.parent = parent
-        self.DB = parent.DB
-        if self.DB == None:
-            return
-        self.xydata = None
-        self.E = None
+        self.DB = parent.DB        
+        self.xydata = None        
         self._doFrame()        
         return
 
     def _doFrame(self):
         if 'uses_sidepane' in self.capabilities:
-            self.mainwin = self.parent.createChildFrame()
+            self.mainwin = self.parent.createChildFrame(width=600)
         else:
             self.mainwin=Toplevel()
             self.mainwin.title(self.menuentry)
@@ -188,6 +187,21 @@ class VantHoff(Plugin):
         self.E.openProject(filename)
         self.showDatasetSelector()
         self.showPreview()
+        return
+        
+    def saveEkin(self):
+        """save proj"""        
+        if self.E != None:
+            if self.E.filename == None:
+                import tkFileDialog
+                self.E.filename = tkFileDialog.asksaveasfilename(defaultextension='.ekinprj',
+                                                          initialdir=os.getcwd(),
+                                                          filetypes=[("ekinprj","*.ekinprj"),
+                                                                     ("All files","*.*")],
+                                                          parent=self.mainwin)
+            
+            self.E.saveProject()
+            print 'saved ekin proj'
         return
         
     def doAnalysis(self):
@@ -328,7 +342,7 @@ class VantHoff(Plugin):
         if E!=None:          
             fdata = Fitting.makeFitData(X.name,vrs=X.variables)
             E.insertDataset(xydata=[t,k], newname=d+'_vanthoff',replace=True,fit=fdata)
-            E.saveProject()
+            #E.saveProject()
         return deltaH, deltaS, ax
 
     def fitElwellSchellman(self,E=None, d=None, xy=None,transwidth=50,
@@ -385,7 +399,7 @@ class VantHoff(Plugin):
         if E!=None:          
             fdata = Fitting.makeFitData(X.name,vrs=X.variables)
             E.insertDataset(xydata=[t,dg], newname=d+'_vanthoff2',replace=True,fit=fdata)
-            E.saveProject()
+            #E.saveProject()
         return deltaH, Tm, deltacp
     
     def breslauerMethod(self,E=None, d=None, xy=None,invert=False,
@@ -482,7 +496,7 @@ class VantHoff(Plugin):
         if E!=None:          
             fdata = Fitting.makeFitData(X.name,vrs=X.variables)
             E.insertDataset(xydata=[dx,ds], newname=d+'_diff',replace=True,fit=fdata)
-            E.saveProject()
+            #E.saveProject()
         return t['deltaH'],t['Tm']
     
     def differentiate(self, x,y):
@@ -677,7 +691,7 @@ class VantHoff(Plugin):
         canvas = FigureCanvasTkAgg(fig, master=fr)
         #self.canvas.show()
         canvas.get_tk_widget().pack(side=TOP, fill=X, expand=1)        
-        mtoolbar = NavigationToolbar2TkAgg( canvas, fr )
+        mtoolbar = NavigationToolbar2TkAgg(canvas, fr)
         mtoolbar.update()
         canvas._tkcanvas.pack(side=BOTTOM, fill=BOTH, expand=1)
         return
