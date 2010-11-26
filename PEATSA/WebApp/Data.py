@@ -705,7 +705,14 @@ class Job:
 		retval = True
 		
 		#Check the job entry exists in the database
-		self.connection.commit()
+		try:
+			self.connection.commit()
+		except Exception, data:
+			print 'Caught exception', Exception, 'when attempting db commit'
+			print 'Reason:', data
+			print 'Attempting reconnect'
+			self.connection.ping()
+				
 		query = "SELECT * FROM %s WHERE JobID = '%s'" % (self.jobTable, self.identification)
 		self.cursor.execute(query)
 		rows = self.cursor.fetchall()
