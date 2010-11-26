@@ -505,8 +505,7 @@ class WorkingDirectory:
 					raise Exceptions.WorkingDirectoryError, "Directory %s exists and cannot create copy at %s" % (originalLocation, self.directory())
 				else:
 					#Delete existing dir
-					shutil.rmtree(self.directory, ignore_errors=1, 
-							onerror=self._removeErrorHandler)
+					shutil.rmtree(self.directory, ignore_errors=True)
 				
 				#Copy the directory to the new destination
 				try:
@@ -546,10 +545,12 @@ class WorkingDirectory:
 	
 	def _removeErrorHandler(self, function, path, execInfo):
 	
-		'''Handler for shutil.rmtree - Does nothing at the moment except raise an exception'''
+		'''Convience method for creating an remove directory exception
+		
+		Note: Do not use as handler to shutil.rmtree as the exception raised here
+		cannot be caught then'''
 		
 		data = 'Error removing directory %s\n' % path
-		data = data + 'Exception raised by %s\n' % function
 		data = data + 'Exception information - %s\n' % str(execInfo)
 		
 		raise Exceptions.WorkingDirectoryError, data
@@ -771,7 +772,8 @@ class WorkingDirectory:
 					else:
 						self.environment.output('Leaving  mutants present at %s' % renamedPath)
 						self.environment.output('Deleting mutants present at %s' % mutantPath)
-						shutil.rmtree(mutantPath, ignore_errors=1, onerror=self._removeErrorHandler)
+						try:
+							shutil.rmtree(mutantPath, ignore_errors=True)
 				
 				#Create a link to the mutant collection dir
 				os.symlink(os.path.join(mutantCollection.location, "Mutants"), mutantPath)
@@ -789,14 +791,14 @@ class WorkingDirectory:
 			self.environment.log('Creating process specific directory at %s' % destination)
 			if os.path.exists(destination):
 				self.environment.output('Deleting previous process specific directory at %s' % destination, rootOnly=True)
-				shutil.rmtree(destination, ignore_errors=1, onerror=self._removeErrorHandler)
+				shutil.rmtree(destination, ignore_errors=True)
 
 			template = os.path.join(self.path(), "template")
 				
 			if self.environment.isRoot():
 				if os.path.exists(template):
 					self.environment.output('Deleting previous template directory at %s' % template, rootOnly=True)
-					shutil.rmtree(template, ignore_errors=1, onerror=self._removeErrorHandler)
+					shutil.rmtree(template, ignore_errors=True)
 					
 				#Create process temp copy without the sim links
 				shutil.copytree(self.path(), template, symlinks=True)
@@ -806,7 +808,7 @@ class WorkingDirectory:
 
 			self.environment.wait()
 			if self.environment.isRoot():
-				shutil.rmtree(template, ignore_errors=1, onerror=self._removeErrorHandler)
+				shutil.rmtree(template, ignore_errors=True)
 
 			os.chdir(destination)
 			self.environment.output('After move: Current path %s. Current dir %s' % (self.path(), os.getcwd()), rootOnly=True)
@@ -822,9 +824,9 @@ class WorkingDirectory:
 			os.chdir(self.path())
 			directory = os.path.join(self.path(), "Process%d" % self.environment.rank())
 			try:
-				shutil.rmtree(directory, ignore_errors=0, onerror=self._removeErrorHandler)
-			except Exceptions.WorkingDirectoryError, data:
-				print data
+				shutil.rmtree(directory, ignore_errors=True)
+			except Exception, data:
+				print Exception, data
 			
 	def setupUFFBAPS(self):
 		
@@ -836,7 +838,7 @@ class WorkingDirectory:
 		if self.environment.isRoot():
 			#There is a chance the directory will already be present - delete it
 			if os.path.isdir(self.uffbapsRunDirectory()):
-				shutil.rmtree(self.uffbapsRunDirectory(), ignore_errors=1, onerror=self._removeErrorHandler)
+				shutil.rmtree(self.uffbapsRunDirectory(), ignore_errors=True)
 			
 			#Copy all the neccessary stuff for running Chrestens stability tool
 			try:
@@ -879,7 +881,7 @@ class WorkingDirectory:
 		'''Cleans the working directory of unnecessary files.'''
 		
 		if self.environment.isRoot():
-			shutil.rmtree(self.uffbapsRunDirectory(), ignore_errors=1, onerror=self._removeErrorHandler)
+			shutil.rmtree(self.uffbapsRunDirectory(), ignore_errors=True)
 			
 		#Remove scan files?
 		
