@@ -772,8 +772,7 @@ class WorkingDirectory:
 					else:
 						self.environment.output('Leaving  mutants present at %s' % renamedPath)
 						self.environment.output('Deleting mutants present at %s' % mutantPath)
-						try:
-							shutil.rmtree(mutantPath, ignore_errors=True)
+						shutil.rmtree(mutantPath, ignore_errors=True)
 				
 				#Create a link to the mutant collection dir
 				os.symlink(os.path.join(mutantCollection.location, "Mutants"), mutantPath)
