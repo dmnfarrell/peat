@@ -397,18 +397,12 @@ class Micro_states(pKa_system_micro2.Micro_states_helper):
         JTJd = JTJ + self.LM_damper.get()*identity(shape(JTJ)[0])
         invJTJd = inv(JTJd)
         q = -dot(JTE,invJTJd)
-
-#        print 'q',q
-#        print 'J',J
-#        print 'E',E
         out1 ='bv '
         out2 ='av '
         for var in range(len(self.vars)):
             out1 += '%4.6f '%self.vars[var].get()
             self.vars[var].set(self.vars[var].get()+q[var])
             out2 += '%4.6f '%self.vars[var].get()
-#        print out1
-#        print out2
         return
 
 
