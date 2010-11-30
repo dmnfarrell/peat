@@ -276,14 +276,14 @@ class profile_fitter:
         #
         import string, random
         groups=[]
-        for group in range(options.ngroups):
+        for group in range(self.options.ngroups):
             groups.append('%s:%s' %(string.zfill(group,4),'ASP'))
         #
         CCPS_def=[[0,1,0],[0,1,1]]
         #
-        print 'Doing %5d fits with maxstep: %4d with groups: %s and CCPS definition: %s' %(options.nfits,options.max_steps,str(groups),str(CCPS_def))
+        print 'Doing %5d fits with maxstep: %4d with groups: %s and CCPS definition: %s' %(self.options.nfits,self.options.max_steps,str(groups),str(CCPS_def))
         solutions=[]
-        for fitno in range(options.nfits):
+        for fitno in range(self.options.nfits):
             self.set_random_state(groups)
             score,variables,profile=self.fit_system(CCPS_def)
             print 'Fit# %4d, score: %6.3f' %(fitno,score)
@@ -291,7 +291,7 @@ class profile_fitter:
         #
         # Save the solutions
         #
-        fd=open(options.outfile,'w')
+        fd=open(self.options.outfile,'w')
         import pickle
         pickle.dump(solutions,fd)
         fd.close()
@@ -306,19 +306,11 @@ class profile_fitter:
         solutions.sort()
         ref_sol=solutions[0][1]
         aligned_sols=[solutions[0]]
-        for score,variables,profile,CCPS_def,groups in solutions:
+        for score,variables,profile,CCPS_def,groups in solutions[1:]:
             best_vars=variables[:]
             diff=self.get_similarity(variables,ref_sol)
             for permutation in range(len(groups)-1):
-                nv=len(variables)*[0.0]
-                nv[0]=variables[1]
-                nv[1]=variables[2]
-                nv[2]=variables[0]
-                nv[3]=variables[5]
-                nv[4]=variables[3]
-                nv[5]=variables[4]
-                # I should write something general here
-                variables=nv[:]
+                variables=self.permute(variables,len(groups))
                 if self.get_similarity(variables,ref_sol)<diff:
                     #print 'I found a better alignment',self.get_similarity(variables,ref_sol),diff
                     diff=self.get_similarity(variables,ref_sol)
@@ -326,6 +318,43 @@ class profile_fitter:
             aligned_sols.append([score,best_vars,profile,CCPS_def,groups])
         return aligned_sols
         
+        
+    def permute(self,variables,numgroups):
+        """Construct a permutation of variables that is consistent with the geometry of the system"""
+        groups=[]
+        intpkas={}
+        matrix={}
+        count=0
+        for group in range(numgroups):
+            groups.append(group)
+            intpkas[group]=variables[count]
+            count=count+1
+        # Matrix
+        for group1 in groups:
+            matrix[group1]={}
+        for group1 in groups:
+            for group2 in groups:
+                if group1<group2:
+                    intene=variables[count]
+                    count=count+1
+                    matrix[group1][group2]=intene
+                    matrix[group2][group1]=intene
+        #
+        # permute so that group1 becomes last. subtract 1 from all other group numbers
+        #
+        variables=[]
+        groups=groups[1:]+[groups[0]]
+        for group in groups:
+            variables.append(intpkas[group])
+        # Matrix
+        for pos1 in range(len(groups)):
+            group1=groups[pos1]
+            for pos2 in range(len(groups)):
+                group2=groups[pos2]
+                if pos1<pos2:
+                    variables.append(matrix[group1][group2])
+        return variables
+            
     #
     # ------
     #
@@ -376,50 +405,54 @@ class profile_fitter:
         #
         # Plot the ranges of the variables
         #
-        xs=[]
-        ys=[]
-        for score,variables,profile,CCPS_def,groups in ok_sols:
-            count=1
-            for var in variables:
-                xs.append(count)
-                ys.append(var)
-                count=count+1
         import pylab
-        pylab.plot(xs,ys,'ro')
-        pylab.xlabel('Variable number')
-        pylab.ylabel('Value')
-        pylab.show()
+        if self.options.var_ranges:
+            xs=[]
+            ys=[]
+            for score,variables,profile,CCPS_def,groups in ok_sols:
+                count=1
+                for var in variables:
+                    xs.append(count)
+                    ys.append(var)
+                    count=count+1
+            import pylab
+            pylab.plot(xs,ys,'ro')
+            pylab.xlabel('Variable number')
+            pylab.ylabel('Value')
+            pylab.show()
         #
         # Plot all the fits
         #
-        import pylab
-        count=0
-        for score,variables,profile,CCPS_def,groups in ok_sols:
-            pHs=sorted(profile.keys())
+        if self.options.plotfits:
+            import pylab
+            count=0
+            for score,variables,profile,CCPS_def,groups in ok_sols:
+                pHs=sorted(profile.keys())
+                xs=[]
+                ys=[]
+                for pH in pHs:
+                    xs.append(pH)
+                    ys.append(profile[pH])
+                if count==0:
+                    pylab.plot(xs,ys,'r-',label='Fitted solutions')
+                else:
+                    pylab.plot(xs,ys,'r-')
+                count=count+1
+            #
+            # Plot the exp data
+            #
             xs=[]
             ys=[]
-            for pH in pHs:
+            for pH,act in self.exp_data:
                 xs.append(pH)
-                ys.append(profile[pH])
-            if count==0:
-                pylab.plot(xs,ys,'r-',label='Fitted solutions')
-            else:
-                pylab.plot(xs,ys,'r-')
-            count=count+1
-        #
-        # Plot the exp data
-        #
-        xs=[]
-        ys=[]
-        for pH,act in self.exp_data:
-            xs.append(pH)
-            ys.append(act)
-        pylab.plot(xs,ys,'bo',label='Experimental data')
-        pylab.legend()
-        pylab.xlabel('pH')
-        pylab.ylabel('Normalized population')
-        pylab.show()
-
+                ys.append(act)
+            pylab.plot(xs,ys,'bo',label='Experimental data')
+            pylab.legend()
+            pylab.xlabel('pH')
+            pylab.ylabel('Normalized population')
+            pylab.show()
+        if self.options.pca:
+            self.PCA(ok_sols)
         return
         
     #
@@ -484,6 +517,68 @@ class profile_fitter:
     # -------
     #
     
+    
+    def PCA(self,solutions):
+        import csv
+        import matplotlib  
+        from matplotlib.font_manager import FontProperties
+        import matplotlib.pyplot as plt 
+        from mpl_toolkits.mplot3d import Axes3D
+        features=[]
+        x=[]
+        y=[]
+        z=[]
+        for parm in range(len(solutions[0][1])):
+            features.append('parm%d' %parm)
+        filename = 'testdata.csv'
+        f=open(filename,'w')
+        cw=csv.writer(f)
+        cw.writerow(features)
+        for score,variables,profile,CCPS_def,groups in solutions:
+            cw.writerow(variables)
+            x.append(variables[0])
+            y.append(variables[1])
+            z.append(variables[2])
+        f.close()
+        #
+        if False:
+            f=plt.figure()
+            ax = Axes3D(f)
+            ax.scatter(x,y,zs=z,marker='o',lw=2,alpha=0.5,c='b',s=30)
+            ax.set_xlabel('pKa1')
+            ax.set_ylabel('pKa2')
+            ax.set_zlabel('pKa3')
+            ax.legend()
+            f.subplots_adjust(hspace=1,wspace=1) 
+        from PEATDB.Ekin.Fitting import Fitting
+        from PEATSA import Core
+        m = Core.Matrix.matrixFromCSVFile(filename)
+        import PEATDB.plugins.PCA as PCA
+        P = PCA.PCAPlugin()
+        evals, evecs, transformed_data = P.doPCA(m)
+        print 'Eigenvalues'
+        print evals
+        print '-------------------'
+        print 'Eigenvectors'
+        for v in evecs:
+            print v
+        print
+        #P.plotResults(evals, evecs, b, m)
+        #
+        # Plot the data in Ev1, Ev2 space
+        #
+        xs=[]
+        ys=[]
+        for evs in transformed_data:
+            xs.append(evs[0])
+            ys.append(evs[1])
+        import pylab
+        pylab.plot(xs,ys,'ro')
+        pylab.xlabel('Ev1')
+        pylab.ylabel('Ev2')
+        pylab.show()
+        return
+    
 
 def main():
     print
@@ -509,6 +604,12 @@ def main():
                         help='Fractional deviation of solution scores from best score that is accepted when filtering solutions. Default: %default',default=0.1)
     parser.add_option('-a','--analyze',dest='analyze',action='store_true',default=False,
                         help='Do only analysis (i.e. skip fitting and use old output file). Default: %default')
+    parser.add_option('-r','--var_ranges',dest='var_ranges',action='store_true',default=False,
+                        help='Plot aligned variables ranges. Default: %default')
+    parser.add_option('-f','--fits',dest='plotfits',action='store_true',default=False,
+                        help='Plot experimental data and fits. Default: %default')
+    parser.add_option('-p','--pca',dest='pca',action='store_true',default=False,
+                        help='Do principal component analysis. Default: %default')
     
     (options, args) = parser.parse_args()
     #
@@ -520,10 +621,5 @@ def main():
 
 if __name__=="__main__":
     main()
-    #import cProfile
-    #cProfile.run('main()','profiler.out')
-    #import pstats
-    #p = pstats.Stats('profiler.out')
-    #p.sort_stats('cumulative').print_stats(10)
 
 
