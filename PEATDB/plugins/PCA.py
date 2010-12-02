@@ -51,51 +51,57 @@ class PCAPlugin(Plugin):
             self.DB = DB       
         else:
             return
-    
+
+    def writeToFile(self, matrix, filename):                    
+        stream = open(filename, 'w')
+        stream.write(matrix.csvRepresentation())
+        stream.close()
+        return
+	
     def doPCA(self,m,standardize=True):
-            '''Performs pca on the Core.Matrix.Matrix instance m.
+        '''Performs pca on the Core.Matrix.Matrix instance m.
 
-            Returns: 
-                    eigenvalues - A numpy 1-D array.
-                    eigenvectors - A numpy 2-D array
-                    transformedData - A numpy 2-D array'''
+        Returns: 
+                eigenvalues - A numpy 1-D array.
+                eigenvectors - A numpy 2-D array
+                transformedData - A numpy 2-D array'''
 
-            print >>sys.stderr, 'Calculating mean vector'
-            data = numpy.array(m.matrix)
-            if standardize==True:
-                data = self.standardize(data)   
-            average = numpy.zeros(m.numberOfColumns())
-            for row in data:                
-                row = numpy.array(row, dtype=numpy.float)               
-                average = average + row
+        print >>sys.stderr, 'Calculating mean vector'
+        data = numpy.array(m.matrix)
+        if standardize==True:
+            data = self.standardize(data)   
+        average = numpy.zeros(m.numberOfColumns())
+        for row in data:                
+            row = numpy.array(row, dtype=numpy.float)               
+            average = average + row
 
-            average /= m.numberOfRows()
-            temp = zip(m.columnHeaders(), average)
-            print >>sys.stderr, 'Result: '
-            for el in temp:
-                print >>sys.stderr, '\t%s: %lf' % tuple(el)
+        average /= m.numberOfRows()
+        temp = zip(m.columnHeaders(), average)
+        print >>sys.stderr, 'Result: '
+        for el in temp:
+            print >>sys.stderr, '\t%s: %lf' % tuple(el)
 
-            print >>sys.stderr, '\nMean-Centering'
-            data = data - numpy.tile(average, [m.numberOfRows(),1])
+        print >>sys.stderr, '\nMean-Centering'
+        data = data - numpy.tile(average, [m.numberOfRows(),1])
 
-            print >>sys.stderr, 'Calculating covariance matrix'
-            cov = numpy.cov(data, rowvar=0)
+        print >>sys.stderr, 'Calculating covariance matrix'
+        cov = numpy.cov(data, rowvar=0)
 
-            print >>sys.stderr, 'Performing eigenvalue decomposition'
-            eigenvalues, eigenvectors = numpy.linalg.linalg.eig(cov)
-            eigenvectors = eigenvectors.astype(numpy.float32)
+        print >>sys.stderr, 'Performing eigenvalue decomposition'
+        eigenvalues, eigenvectors = numpy.linalg.linalg.eig(cov)
+        eigenvectors = eigenvectors.astype(numpy.float32)
 
-            print >>sys.stderr, 'Sorting'
-            x = range(len(eigenvalues))
-            x.sort(lambda x,y: cmp(eigenvalues[x], eigenvalues[y]), reverse=True)
-            eigenvalues = eigenvalues[x]
-            eigenvectors = eigenvectors[:,x]
+        print >>sys.stderr, 'Sorting'
+        x = range(len(eigenvalues))
+        x.sort(lambda x,y: cmp(eigenvalues[x], eigenvalues[y]), reverse=True)
+        eigenvalues = eigenvalues[x]
+        eigenvectors = eigenvectors[:,x]
 
-            print >>sys.stderr, 'Complete'
+        print >>sys.stderr, 'Complete'
 
-            z = numpy.dot(data, eigenvectors)
-            
-            return eigenvalues, eigenvectors, z
+        z = numpy.dot(data, eigenvectors)
+        
+        return eigenvalues, eigenvectors, z
 
     def standardize(self, data):
         """standardize data"""
@@ -190,8 +196,8 @@ class PCAPlugin(Plugin):
         f.subplots_adjust(hspace=1,wspace=1) 
         
         m = Core.Matrix.matrixFromCSVFile(filename)
-        evals, evecs, b = self.doPCA(m)
-        self.plotResults(evals, evecs, b, m)
+        evals, evecs, z = self.doPCA(m)
+        self.plotResults(evals, evecs, z, m)
         return
     
 def main():
@@ -205,18 +211,39 @@ def main():
     parser.add_option("-s", "--start", dest="start", default=0, type="int",
                        help="start")
     parser.add_option("-e", "--end", dest="end", default=0, type="int",
-                       help="end")    
+                       help="end")
+    parser.add_option("-z", "--standardize", dest="standardize", action='store_true',
+                       help="end", default=False)    
     opts, remainder = parser.parse_args()
     
     P = PCAPlugin()
     if opts.file != None and os.path.exists(opts.file):
-        m = Core.Matrix.matrixFromCSVFile(opts.file)
-        if opts.start!=None:
-            m = m[:, opts.start:]
+        r = Core.Matrix.matrixFromCSVFile(opts.file)
+        if opts.start != None:
+            m = r[:, opts.start:]
         print 'There are %d samples and %d variables (dof)' % (m.numberOfRows(), m.numberOfColumns())       
-        evals, evecs, b = P.doPCA(m)
-        P.plotResults(evals, evecs, b, m)
-    if opts.test == True:    
+        evals, eigenvectors, z = P.doPCA(m, opts.standardize)
+        P.plotResults(evals, eigenvectors, z, m)
+        
+	#Write out vectors
+	ev = Core.Data.Matrix.Matrix(rows=list(eigenvectors))
+	ev.addColumn(m.columnHeaders(), 0)
+	headers = ['Variables']
+	for i in range(m.numberOfColumns()):
+            headers.append('Ev%d' % i)
+	ev.setColumnHeaders(headers)
+	P.writeToFile(ev, 'Eigenvectors.csv')
+
+	#Write out new basis
+	basis = Core.Matrix.Matrix(rows=list(z))
+	basis.addColumn(r.column(0), 0)
+	basis.addColumn(r.column(1), 1)
+	headers.pop(0)
+	headers = r.columnHeaders()[:2] + tuple(headers)
+	basis.setColumnHeaders(headers)
+	P.writeToFile(basis, 'NewBasis.csv')
+	
+    if opts.test == True:
         P.test()   
          
 if __name__ == '__main__':

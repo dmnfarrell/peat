@@ -562,13 +562,13 @@ class TableModel(object):
                     return False
             return True        
           
-        coldata=[]
+        coldata=[]       
         for c in colnames:
-            vals = self.getColumnData(columnName=c, filterby=filterby)
-            coldata.append(vals)
+            vals = self.getColumnData(columnName=c, filterby=filterby)            
+            coldata.append(vals)          
         if allowempty == False:  
             result = [i for i in zip(*coldata) if evaluate(i) == True]               
-            coldata = zip(*result)    
+            coldata = zip(*result)        
         return coldata
         
     def getDict(self, colnames, filterby=None):  
