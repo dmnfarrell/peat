@@ -237,9 +237,9 @@ def main():
 	#Write out new basis
 	basis = Core.Matrix.Matrix(rows=list(z))
 	basis.addColumn(r.column(0), 0)
-	basis.addColumn(r.column(1), 1)
+	#basis.addColumn(r.column(1), 1)
 	headers.pop(0)
-	headers = r.columnHeaders()[:2] + tuple(headers)
+	headers = r.columnHeaders()[:1] + tuple(headers)
 	basis.setColumnHeaders(headers)
 	P.writeToFile(basis, 'NewBasis.csv')
 	
