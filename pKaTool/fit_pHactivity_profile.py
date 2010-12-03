@@ -24,6 +24,130 @@
 # University College Dublin
 # Dublin 4, Ireland
 
+import numpy 
+import matplotlib.pyplot as plt
+from matplotlib.colors import LinearSegmentedColormap
+
+cdict1 = {'red':   ((0.0, 0.0, 0.0),
+                   (0.5, 0.0, 0.1),
+                   (1.0, 1.0, 1.0)),
+
+         'green': ((0.0, 0.0, 0.0),
+                   (1.0, 0.0, 0.0)),
+
+         'blue':  ((0.0, 0.0, 1.0),
+                   (0.5, 0.1, 0.0),
+                   (1.0, 0.0, 0.0))
+        }
+
+cdict2 = {'red':   ((0.0, 0.0, 0.0),
+                   (0.5, 0.0, 1.0),
+                   (1.0, 0.1, 1.0)),
+
+         'green': ((0.0, 0.0, 0.0),
+                   (1.0, 0.0, 0.0)),
+
+         'blue':  ((0.0, 0.0, 0.1),
+                   (0.5, 1.0, 0.0),
+                   (1.0, 0.0, 0.0))
+        }
+
+cdict3 = {'red':  ((0.0, 0.0, 0.0),
+                   (0.25,0.0, 0.0),
+                   (0.5, 0.8, 1.0),
+                   (0.75,1.0, 1.0),
+                   (1.0, 0.4, 1.0)),
+
+         'green': ((0.0, 0.0, 0.0),
+                   (0.25,0.0, 0.0),
+                   (0.5, 0.9, 0.9),
+                   (0.75,0.0, 0.0),
+                   (1.0, 0.0, 0.0)),
+
+         'blue':  ((0.0, 0.0, 0.4),
+                   (0.25,1.0, 1.0),
+                   (0.5, 1.0, 0.8),
+                   (0.75,0.0, 0.0),
+                   (1.0, 0.0, 0.0))
+        }
+
+def heatmap(values,title='Effect of mutations',firstkey='X',secondkey='Y',colorbar=True,zlabel='Z',firstticks=False,secondticks=False,vmin=None,vmax=None):
+    # Now we will use this example to illustrate 3 ways of
+    # handling custom colormaps.
+    # First, the most direct and explicit:
+
+    blue_red1 = LinearSegmentedColormap('BlueRed1', cdict1)
+
+    # Second, create the map explicitly and register it.
+    # Like the first method, this method works with any kind
+    # of Colormap, not just
+    # a LinearSegmentedColormap:
+
+    blue_red2 = LinearSegmentedColormap('BlueRed2', cdict2)
+    #plt.register_cmap(cmap=blue_red2)
+
+    # Third, for LinearSegmentedColormap only,
+    # leave everything to register_cmap:
+
+    #plt.register_cmap(name='BlueRed3', data=cdict3) # optional lut kwarg
+    #
+    # Reformat the data
+    #
+    X=[]
+    Y=[]
+    Z=[]
+    allvals=[]
+    xvals=values.keys()
+    xvals.sort()
+    yvals=values[xvals[0]].keys()
+    yvals.sort()
+    for yval in yvals:
+        xs=[]
+        ys=[]
+        zs=[]
+        for xval in xvals:
+            xs.append(xval)
+            ys.append(yval)
+            zs.append(values[xval][yval])
+            if values[xval][yval]:
+                allvals.append(values[xval][yval])
+        X.append(xs)
+        Y.append(ys)
+        Z.append(zs)
+
+    #plt.figure(figsize=(10,10))
+    # 
+    # Set value axis min and max
+    #
+    if vmin is None:
+        vmin=min(allvals)
+    if vmax is None:
+        vmax=max(allvals)
+    #
+    # Plot
+    #
+    plt.imshow(Z,interpolation='nearest',vmin=vmin,vmax=vmax)#,vmax=2.8)#, interpolation='nearest', cmap=blue_red1)
+    plt.ylabel(secondkey)
+    plt.xlabel(firstkey)
+    #
+    # Plot ticks if so asked
+    #
+    if firstticks:
+        plt.xticks(range(len(xvals)),xvals,rotation='vertical')
+    if secondticks:
+        plt.yticks(range(len(yvals)),yvals)
+    if colorbar:
+        cbar=plt.colorbar()
+        cbar.set_label(zlabel)
+    # Add the title
+    plt.title(title)
+    import numpy
+    #plt.xticks(numpy.arange(0,121,10))
+    #plt.yticks(numpy.arange(0,165,10))
+
+    plt.show()
+    return
+
 import LM_Fitter
 
 from numpy import *
@@ -57,6 +181,7 @@ class pKaTool_fitter:
             for group2 in self.groups:
                 if system_spec[group1]['matrix'].has_key(group2):
                     self.vars.append(system_spec[group1]['matrix'][group2])
+        self.start_vars=self.vars[:]
         #
         # Set up the pKaTool stuff
         #
@@ -77,6 +202,7 @@ class pKaTool_fitter:
         old_diff=0.0000001
         #print 'Step    Diff   LM_damper'
         now_diff=self.activity_diff()
+        self.start_score=now_diff
         #print '%5d  %6.4f  %6.4f' %(0, now_diff, self.LM_damper)
         for x in range(1,max_steps):
             self.fit_LM_activity()
@@ -162,7 +288,8 @@ class pKaTool_fitter:
     # -------
     #
         
-    def activity_diff(self, just_activity_fit = 0):
+    def activity_diff(self):
+        """Get the sum of differences between exp data and fitted data"""
         act_prof_and_tc = self.get_act_prof()
         diff = 0.0
         for ph,act in self.exp_data:
@@ -269,6 +396,10 @@ class profile_fitter:
         else:
             self.do_fitting()
         return
+    
+    #
+    # -----
+    #
             
     def do_fitting(self):
         #
@@ -279,15 +410,15 @@ class profile_fitter:
         for group in range(self.options.ngroups):
             groups.append('%s:%s' %(string.zfill(group,4),'ASP'))
         #
-        CCPS_def=[[0,1,0],[0,1,1]]
+        CCPS_def=eval(self.options.CCPS) #[[0,1,0],[0,1,1]]
         #
         print 'Doing %5d fits with maxstep: %4d with groups: %s and CCPS definition: %s' %(self.options.nfits,self.options.max_steps,str(groups),str(CCPS_def))
         solutions=[]
         for fitno in range(self.options.nfits):
             self.set_random_state(groups)
-            score,variables,profile=self.fit_system(CCPS_def)
+            score,variables,start_variables,start_score,profile=self.fit_system(CCPS_def)
             print 'Fit# %4d, score: %6.3f' %(fitno,score)
-            solutions.append([score,variables,profile,CCPS_def,groups])
+            solutions.append([score,variables,profile,CCPS_def,groups,start_variables,start_score])
         #
         # Save the solutions
         #
@@ -302,22 +433,25 @@ class profile_fitter:
     #
     
     def align_parms(self,solutions):
-        """Sort the solutions so parameters are shifted around to give optimal overlap"""
+        """Sort the solutions so parameters are shifted around to give optimal overlap
+        This only works well for 3-group systems (and perhaps not even for them)"""
         solutions.sort()
         ref_sol=solutions[0][1]
         aligned_sols=[solutions[0]]
-        for score,variables,profile,CCPS_def,groups in solutions[1:]:
+        for score,variables,profile,CCPS_def,groups,start_values,start_scores in solutions[1:]:
             best_vars=variables[:]
             diff=self.get_similarity(variables,ref_sol)
             for permutation in range(len(groups)-1):
                 variables=self.permute(variables,len(groups))
                 if self.get_similarity(variables,ref_sol)<diff:
-                    #print 'I found a better alignment',self.get_similarity(variables,ref_sol),diff
                     diff=self.get_similarity(variables,ref_sol)
                     best_vars=variables[:]
-            aligned_sols.append([score,best_vars,profile,CCPS_def,groups])
+            aligned_sols.append([score,best_vars,profile,CCPS_def,groups,start_values,start_scores])
         return aligned_sols
-        
+    
+    #
+    # ------
+    #
         
     def permute(self,variables,numgroups):
         """Construct a permutation of variables that is consistent with the geometry of the system"""
@@ -409,7 +543,7 @@ class profile_fitter:
         if self.options.var_ranges:
             xs=[]
             ys=[]
-            for score,variables,profile,CCPS_def,groups in ok_sols:
+            for score,variables,profile,CCPS_def,groups,start_vals,start_score in ok_sols:
                 count=1
                 for var in variables:
                     xs.append(count)
@@ -426,7 +560,7 @@ class profile_fitter:
         if self.options.plotfits:
             import pylab
             count=0
-            for score,variables,profile,CCPS_def,groups in ok_sols:
+            for score,variables,profile,CCPS_def,groups,start_vals,start_score in ok_sols:
                 pHs=sorted(profile.keys())
                 xs=[]
                 ys=[]
@@ -451,8 +585,11 @@ class profile_fitter:
             pylab.xlabel('pH')
             pylab.ylabel('Normalized population')
             pylab.show()
+        #
+        # Do PCA and produce heatmap?
+        #
         if self.options.pca:
-            self.PCA(ok_sols)
+            self.PCA(solutions)
         return
         
     #
@@ -481,11 +618,11 @@ class profile_fitter:
         
     def fit_system(self,CCPS_def):
         #
-        # Fit
+        # Fit the system
         #
         self.FIT=pKaTool_fitter(self.system_spec,self.exp_data,CCPS_def,max_steps=self.options.max_steps,conv_crit=self.options.conv_crit)
         prof=self.FIT.get_act_prof()
-        return self.FIT.diff,self.FIT.vars,prof
+        return self.FIT.diff,self.FIT.vars,self.FIT.start_vars,self.FIT.start_score,prof
     
     #
     # -----
@@ -519,6 +656,7 @@ class profile_fitter:
     
     
     def PCA(self,solutions):
+        """Reduce the dimensionality of the space, and produce a heatmap showing where the good fits cluster"""
         import csv
         import matplotlib  
         from matplotlib.font_manager import FontProperties
@@ -533,23 +671,37 @@ class profile_fitter:
         filename = 'testdata.csv'
         f=open(filename,'w')
         cw=csv.writer(f)
-        cw.writerow(features)
-        for score,variables,profile,CCPS_def,groups in solutions:
-            cw.writerow(variables)
-            x.append(variables[0])
-            y.append(variables[1])
-            z.append(variables[2])
+        if self.options.addscore:
+            cw.writerow(features+['score'])
+        else:
+            cw.writerow(features)
+        orgdata=[]
+        for score,variables,profile,CCPS_def,groups,start_vals,start_score in solutions:
+            if self.options.addscore:
+                cw.writerow(variables+[score])
+                cw.writerow(start_vals+[start_score])
+            else:
+                cw.writerow(variables)
+                cw.writerow(start_vals)
+            #
+            # Add this for the colouring
+            #
+            orgdata.append(variables+[score])
+            orgdata.append(start_vals+[start_score])
+            #x.append(variables[0])
+            #y.append(variables[1])
+            #z.append(variables[2])
         f.close()
         #
-        if False:
-            f=plt.figure()
-            ax = Axes3D(f)
-            ax.scatter(x,y,zs=z,marker='o',lw=2,alpha=0.5,c='b',s=30)
-            ax.set_xlabel('pKa1')
-            ax.set_ylabel('pKa2')
-            ax.set_zlabel('pKa3')
-            ax.legend()
-            f.subplots_adjust(hspace=1,wspace=1) 
+        #if False:
+        #    f=plt.figure()
+        #    ax = Axes3D(f)
+        #    ax.scatter(x,y,zs=z,marker='o',lw=2,alpha=0.5,c='b',s=30)
+        #    ax.set_xlabel('pKa1')
+        #    ax.set_ylabel('pKa2')
+        #    ax.set_zlabel('pKa3')
+        #    ax.legend()
+        #    f.subplots_adjust(hspace=1,wspace=1) 
         from PEATDB.Ekin.Fitting import Fitting
         from PEATSA import Core
         m = Core.Matrix.matrixFromCSVFile(filename)
@@ -567,16 +719,43 @@ class profile_fitter:
         #
         # Plot the data in Ev1, Ev2 space
         #
+        matrix={}
         xs=[]
         ys=[]
+        data=[]
+        count=0
         for evs in transformed_data:
             xs.append(evs[0])
             ys.append(evs[1])
-        import pylab
-        pylab.plot(xs,ys,'ro')
-        pylab.xlabel('Ev1')
-        pylab.ylabel('Ev2')
-        pylab.show()
+            data.append([evs[0],evs[1],orgdata[count][-1]])
+            count=count+1
+        minx=min(xs)
+        maxx=max(xs)
+        stepx=(maxx-minx)/100.0
+        miny=min(ys)
+        maxy=max(ys)
+        stepy=(maxy-miny)/100.0
+        import numpy
+        for x in range(101):
+            matrix[x]={}
+            for y in range(101):
+                matrix[x][y]=[]
+        #
+        # Populate the matrix
+        #
+        for x,y,z in data:
+            xbin=int((x-minx)/stepx)
+            ybin=int((y-miny)/stepy)
+            matrix[xbin][ybin].append(z)
+        newmatrix={}
+        for x in matrix.keys():
+            newmatrix[x]={}
+            for y in matrix[x].keys():
+                if len(matrix[x][y])>0:
+                    newmatrix[x][y]=sum(matrix[x][y])/float(len(matrix[x][y]))
+                else:
+                    newmatrix[x][y]=nan
+        heatmap(newmatrix,title='pH-activity profile parameter space',firstkey='Ev1',secondkey='Ev2',zlabel='Abs(error)',vmin=0.0,vmax=self.options.vmax)
         return
     
 
@@ -610,7 +789,12 @@ def main():
                         help='Plot experimental data and fits. Default: %default')
     parser.add_option('-p','--pca',dest='pca',action='store_true',default=False,
                         help='Do principal component analysis. Default: %default')
-    
+    parser.add_option('--addscore',dest='addscore',action='store_true',default=False,
+                        help='Add the score to the PCA variables. Default: %default')
+    parser.add_option('--vmax',dest='vmax',type='float',action='store',
+                        help='Max value for colorbar in pca heatmap. Default: %default',default=10.0)
+    parser.add_option('-s',"--CCPS",type='string',dest='CCPS',action='store',
+                        help='Define the CCPS for pH-activity profile. Default: %default',default='[[1,0,0],[0,1,1]]')
     (options, args) = parser.parse_args()
     #
     # Call main
