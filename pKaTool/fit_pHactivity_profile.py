@@ -382,12 +382,18 @@ class profile_fitter:
         fd=open(options.expdata)
         lines=fd.readlines()
         fd.close()
-        self.exp_data=[]
+        self.tempexp_data=[]
+        vals=[]
         for line in lines:
             if line.strip()[0]=='#' or line.split()[0]=='pH':
                 continue
             sp=line.split()
-            self.exp_data.append([float(sp[0]),float(sp[1])])
+            self.tempexp_data.append([float(sp[0]),float(sp[1])])
+            vals.append(float(sp[1]))
+        maxval=max(vals)
+        self.exp_data=[]
+        for pH,act in self.tempexp_data:
+            self.exp_data.append([pH,act/maxval])
         #
         # What should we do
         #
