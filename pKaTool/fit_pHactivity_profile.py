@@ -565,19 +565,6 @@ class profile_fitter:
         #
         if self.options.plotfits:
             import pylab
-            count=0
-            for score,variables,profile,CCPS_def,groups,start_vals,start_score in ok_sols:
-                pHs=sorted(profile.keys())
-                xs=[]
-                ys=[]
-                for pH in pHs:
-                    xs.append(pH)
-                    ys.append(profile[pH])
-                if count==0:
-                    pylab.plot(xs,ys,'r-',label='Fitted solutions')
-                else:
-                    pylab.plot(xs,ys,'r-')
-                count=count+1
             #
             # Plot the exp data
             #
@@ -587,6 +574,20 @@ class profile_fitter:
                 xs.append(pH)
                 ys.append(act)
             pylab.plot(xs,ys,'bo',label='Experimental data')
+            count=0
+            for score,variables,profile,CCPS_def,groups,start_vals,start_score in ok_sols:
+                pHs=sorted(profile.keys())
+                xs=[]
+                ys=[]
+                for pH in pHs:
+                    xs.append(pH)
+                    ys.append(profile[pH])
+                if count==0:
+                    pylab.plot(xs,ys,'ro-',label='Fitted solutions')
+                else:
+                    pylab.plot(xs,ys,'ro-')
+                count=count+1
+            
             pylab.legend()
             pylab.xlabel('pH')
             pylab.ylabel('Normalized population')
