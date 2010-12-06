@@ -368,7 +368,10 @@ class JobConstructor:
 			#Check the provided pdb
 			structure = self.job.protoolStructure()
 			if structure.hasMissingMainChainAtoms():
-				suggestion = "PEAT-SA requires that all main-chain heavy atoms are present in the structure.<br>"
+				missing = structure.hasMissingMainChainAtoms()
+				missing = ", ".join(missing)
+				suggestion = "The residues with missing atoms are: %s.<br>" % missing
+				suggestion = suggestion + "PEAT-SA requires that all main-chain heavy atoms are present in the structure.<br>"
 				suggestion = suggestion + "You could try submitting a fragment of the structure that meets this requirement."
 				self.errorData = {"domain":"PDT.SubmissionDomain",
 					"description":"Error in submitted pdb structure.",
