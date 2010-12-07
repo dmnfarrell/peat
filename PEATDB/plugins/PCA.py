@@ -41,7 +41,7 @@ from PEATSA import Core
 
 class PCAPlugin(Plugin):
     """PCA plugin"""
-    capabilities = ['gui']
+    #capabilities = ['gui']
     menuentry = 'PCA Plugin'
     gui_methods = {} 
     about = 'This plugin allows you to do PCA'    

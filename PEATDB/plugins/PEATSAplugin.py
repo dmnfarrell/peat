@@ -359,8 +359,8 @@ class PEATSAPlugin(Plugin):
                 label_text = 'Quality:',
                 validate = validatename,
                 value = '2.0')
-        mutqualentry.pack(fill=BOTH,expand=1)
-        
+        mutqualentry.pack(fill=BOTH,expand=1)        
+        Label(jobdlg,text='Using PDB: '+self.getrefPDBName()).pack(fill=BOTH,expand=1)
         self.ligandfile=None
         mutlist = Pmw.ScrolledText(jobdlg,
                 labelpos = 'n',
