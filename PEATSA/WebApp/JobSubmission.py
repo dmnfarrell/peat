@@ -366,7 +366,22 @@ class JobConstructor:
 			self.job.setStructure(stream.read())
 			
 			#Check the provided pdb
-			structure = self.job.protoolStructure()
+			error = False
+			try:
+				structure = self.job.protoolStructure()
+			except Exceptions.FileFormatError, data:
+				error = True
+				self.errorData = {"domain":"PDT.SubmissionDomain",
+					"description":"Error in with submission.",
+					"detailedDescription": "There is an error in the format of the pdb file",
+					"recoverySuggestion": 'Check the file to ensure its format is correct'}
+				self.job.setError(description=self.errorData['description'], 
+						detailedDescription=self.errorData['detailedDescription'])
+				self.job.setState('Finished')
+			
+			if error is True:
+				return
+
 			if structure.hasMissingMainChainAtoms():
 				missing = structure.hasMissingMainChainAtoms()
 				missing = ", ".join(missing)
