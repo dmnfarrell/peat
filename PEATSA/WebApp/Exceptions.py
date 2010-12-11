@@ -39,3 +39,9 @@ class SubmissionException(Core.Exceptions.ProteinDesignToolException):
 	'''Generic error with the submitted data'''
 	
 	errorString = "Error occured while submitting job"
+
+class FileFormatError(Core.Exceptions.ProteinDesignToolException):
+
+	'''Something wrong with a file submitted to the web-app'''
+	
+	errorString = "Error with submitted file"
