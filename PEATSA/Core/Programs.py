@@ -1417,7 +1417,7 @@ class PBSolver:
 				sys.stderr = stderr
 
 			os.chdir('..')
-			shutil.rmtree(dir)
+			#shutil.rmtree(dir)
 			#if os.path.isdir('phidir'):
 			#	shutil.rmtree('phidir')
 

@@ -86,7 +86,7 @@ class StructureClassifier(object):
     
         sen = classifier.getSensitivityAnalyzer(force_training=True)
         perturber = mvpa.measures.noiseperturbation.NoisePerturbationSensitivity(sen)
-        pertuberResults = perturber(data)
+        self.perturberResults = perturber(data)
     
         result = []
         errorCutoff = 1
@@ -100,7 +100,7 @@ class StructureClassifier(object):
             weight = classifier.weights[i]
             entry = [features[i], classifier.weights[i], sum]
             if weight != 0:
-                print entry, " ", pertuberResults[i]
+                print entry, " ", self.perturberResults[i]
                 found.append(entry)
             if sum >= setCutoff and weight >= errorCutoff:
                 systematicGroups.append(entry)
