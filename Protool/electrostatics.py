@@ -136,7 +136,8 @@ class electrostatics:
     
     def calculate_titgroup_center(self,residue):
         """Given a residue, check if it's a titgroup and return its centers (there might be more than one)"""
-        self.get_titratable_groups()
+        if not hasattr(self,'titratable_groups'):
+            self.get_titratable_groups()
         centers={}
         if self.titratable_groups.has_key(residue):
             centers[residue]={}
@@ -554,6 +555,36 @@ class electrostatics:
             X.backgr=self.background
             X.write_backgr(filename+'.BACKGR.DAT')
         return self.background
+        
+    #
+    # --------------
+    #
+    
+    def find_salt_bridges(self,cutoff=8.0):
+        """Find all salt bridges in the protein
+        """
+        SBs=[]
+        self.get_titratable_groups()
+        for res1 in self.titratable_groups.keys():
+            r1_cens=self.calculate_titgroup_center(res1)
+            for group1 in r1_cens[res1].keys():
+                group1_ID='%s:%s' %(res1,group1)
+                for res2 in self.titratable_groups.keys():
+                    r2_cens=self.calculate_titgroup_center(res2)
+                    for group2 in r2_cens[res2].keys():
+                        group2_ID='%s:%s' %(res2,group2)
+                        if group1_ID!=group2_ID:
+                            if self.titgroups[group1]['charge']*self.titgroups[group2]['charge']==-1:
+                                import geometry
+                                dist=geometry.length(r1_cens[res1][group1]-r2_cens[res2][group2])
+                                if dist<=cutoff:
+                                    SBs.append([group1_ID,group2_ID,dist])
+        #
+        # Done
+        #
+        return SBs
+                    
+                    
                     
                 
                 
