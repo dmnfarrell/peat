@@ -50,10 +50,10 @@ def doSummary(DB):
 
 def miscanalysis(DB):
     
-    p=t.extractpKas(e,names='HEWL',titratable=True)
+    #p=t.extractpKas(e,names='HEWL',titratable=True)
 
     #t.compareProteinpKas(p, prot1='Plastocyanin (Phormidium)',  prot2='Plastocyanin (Anabaena variabilis)')
-    #t.compareNuclei(n, h)
+    t.compareNuclei(DB, N, H, titratable=False)
 
     #combekindata = t.makeCombined(h, n, names=complete)
     #pickle.dump(combekindata, open('1h15ncomb.obj', 'w'))
