@@ -53,6 +53,7 @@ def miscanalysis(DB):
     #p=t.extractpKas(e,names='HEWL',titratable=True)
 
     #t.compareProteinpKas(p, prot1='Plastocyanin (Phormidium)',  prot2='Plastocyanin (Anabaena variabilis)')
+    t.publicationSetting()
     t.compareNuclei(DB, N, H, titratable=False)
 
     #combekindata = t.makeCombined(h, n, names=complete)

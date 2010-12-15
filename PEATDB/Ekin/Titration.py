@@ -152,7 +152,12 @@ class TitrationAnalyser():
                   '__datatab_structmapping__','__meta_data__']
         return
 
-
+    def publicationSetting(self):
+        pylab.rc("font", family="serif")
+        pylab.rc("font", size=16)
+        pylab.rc('text', usetex=True)
+        return
+    
     def do_summary(self, DB, cols=None):
         """Print a summary of the current data loaded - no longer used"""
         summary=[]
@@ -1025,8 +1030,8 @@ class TitrationAnalyser():
         cc = cls.doXYPlot(ax1, relpkas1, relpkas2, annotate=outliers,
                         title='pKa 1H vs comb : reliable pKas', xlabel='15N', ylabel='1H')
         print 'reliable pKas, correl coeff:', cc
-        cc = cls.doXYPlot(ax2, otherpkas1, otherpkas2, color='r',#annotate=,
-                            title='pKa 1H vs comb : other pKas', xlabel='1H', ylabel='c')
+        cc = cls.doXYPlot(ax2, otherpkas1, otherpkas2, color='r',
+                        title='pKa 1H vs comb : other pKas', xlabel='15N', ylabel='1H')
         print 'other pKas, correl coeff:', cc
         f.savefig('comparenuclei.png', dpi=300)
         
@@ -1884,9 +1889,6 @@ class TitrationAnalyser():
         else:
             symb = symbol
         #ax=fig.add_subplot(111)
-        #pylab.rc("font", family="serif")
-        pylab.rc("font", size=14)
-        #pylab.rc('text', usetex=True)
 
         cc = numpy.corrcoef(numpy.array([x,y]))
         #print 'corr. coeff.:', cc[0][1]
@@ -1899,9 +1901,11 @@ class TitrationAnalyser():
             for an in annotate:
                 x,y=an[0]
                 txt=an[1]
-                ax.annotate(txt, xy=(x+0.05,y),
+                c = pylab.Circle((x, y), 0.2,fill=False,alpha=0.7)
+                ax.add_patch(c)
+                '''ax.annotate(txt, xy=(x+0.05,y),
                         xycoords='data', size=8,
-                        horizontalalignment='left', verticalalignment='bottom' )
+                        horizontalalignment='left', verticalalignment='bottom' )'''
               
         #ax.axis([1,9,1,9])
         ax.set_title(title)
