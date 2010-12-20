@@ -112,6 +112,9 @@
 	--mutationQuality=[value]
 		The score of each modelled subsitution must be less than this value for the model to be used.
 		Note: The threshold must be passed by every mutation in a multi-mutant. 
+		
+	--keepHeterogens
+		If specified hetgroups (HETATM entries) won't be removed from the pdb.
 	'''
  
 import sys, os.path, datetime
@@ -119,7 +122,7 @@ import Environment, Exceptions, Programs, Utilities, Data
 			
 class ProteinDesignTool:
 	
-	def __init__(self, configurationFile, workingDirectory, pdbFile, outputDirectory, dataName=None):
+	def __init__(self, configurationFile, workingDirectory, pdbFile, outputDirectory, removeHeterogens=True, dataName=None):
 
 		'''Creates a new PDT instance for running calculations on pdbName.
 		
@@ -132,6 +135,8 @@ class ProteinDesignTool:
 			pdbFile - The file to run the jobs on.
 			
 			outputDirectory - Where to output information on the calculations and the results
+			
+			removeHeterogens - If true any hetatoms will be removed from the PDB file
 			
 		The results of any calculation are accesible through the returned objects
 		dataDirectory attribute which is an instance of the Data.DataSet class.'''
@@ -155,7 +160,7 @@ class ProteinDesignTool:
 		
 		#Set the pdb - This copies the pdb to the working directory and cleans it.
 		#If also created the dataDirectory if requested.
-		self.setPDB(pdbFile=pdbFile, dataDirectoryName=dataName)	
+		self.setPDB(pdbFile=pdbFile, dataDirectoryName=dataName, removeLigand=removeHeterogens)	
 					
 		#These will be created when they're needed. 
 		#If some calculations are run on self.pdbFile before these are used
@@ -307,7 +312,9 @@ class ProteinDesignTool:
 		
 		Parameters:
 			dataDirectoryName: If None the current data directory is used.
-			removeLigand: If True all ligands are removed from the pdb as well as standard cleaning. Defaults to True'''
+			removeLigand: If True all ligands (heterogens) are removed from the pdb as well as standard cleaning. Defaults to True
+			
+		Note: removeLigand keyword param should be changed to removeHetereogens'''
 		
 		#Copy the pdbfile to the working directory - this is the version of the file
 		#we will use with all subsequent processes.
@@ -414,7 +421,8 @@ def main():
 			workingDirectory=parser.workingDirectory(),
 			pdbFile=parser.pdbFile(), 
 			outputDirectory=parser.outputDirectory(),
-			dataName=parser.outputName())
+			dataName=parser.outputName(),
+			removeHeterogens=parser.removeHeterogens())
 	
 	#Check if an initial pKa run requested
 	if parser.pKa() is True:	
