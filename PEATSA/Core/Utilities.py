@@ -837,6 +837,17 @@ class CommandLineParser:
 			
 		return None
 		
+	def removeHeterogens(self):
+	
+		'''If keepHeterogens command line argument was specified this returns False.
+		
+		Otherwise it returns True'''
+		
+		if self.opt.has_key('--keepHeterogens'):
+			return False
+			
+		return True
+		
 	def outputName(self):
 	
 		'''Returns the values of the output name command line argument if it exists'''
