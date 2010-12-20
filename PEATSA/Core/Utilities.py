@@ -631,7 +631,8 @@ class CommandLineParser:
 		#Ligand isn't included here because it requires a file
 		self.optionalArguments = ["--pKa", "--scan", "--delta-pKa", "--mutation", 
 					"--stability", "--mutationList", "--ligand",
-					"--mutationQuality", "--modes", "--ionisableGroups="]
+					"--mutationQuality", "--modes", "--ionisableGroups=", 
+					"--keepHeterogens"]
 		self.environment = Environment.Environment()
 	
 	def parseCommandLine(self):
@@ -647,7 +648,7 @@ class CommandLineParser:
 					"vw:p:o:hn:", 
 					["pKa", "scan", "delta-pKa", "path", "modes", "stability", 
 					"mutationList=", "mutation=", "mutants=", "ligand=", "mutationQuality="
-					"ionisableGroups=", "configurationFile=", "create-configuration"])
+					"ionisableGroups=", "configurationFile=", "create-configuration", "keepHeterogens"])
 			self.opt = dict(self.opt[0])
 		except getopt.GetoptError, data:
 			raise Exceptions.ArgumentError, data
