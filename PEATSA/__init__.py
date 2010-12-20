@@ -1,1 +1,1 @@
-'''A command line and web tool for unifying pKa, stability an binding calculations'''
+'''A command line and web tool for unifying pKa, stability and binding calculations'''
