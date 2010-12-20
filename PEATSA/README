@@ -1,6 +1,6 @@
-The ProteinDesignTool module contains tools for calculating a the effect of mutations on a number of properties of a protein.
+The PEATSA module contains tools for calculating a the effect of mutations on a number of properties of a protein.
 
-The Core sub-module contains the ProteinDesignTool command line program - handly called ProteinDesignTool.py - along with the classes that make it tick.
+The Core sub-module contains the ProteinDesignTool command line program along with the classes that make it tick.
 See INSTALL in Core for whats required to install this tool.
 
 The WebApp sub-module defines a LAMP (linux apache mysql php) Web Application that is built on top of the core ProteinDesignTool.
