@@ -2884,7 +2884,7 @@ def parse_options(inputargs):
     #
     # Options controlling the selection of mutations
     #
-    parser.add_option('-d',"--min_target_dist",type='int',dest='min_target_dist',action='store',
+    parser.add_option('-d',"--min_target_dist",type='float',dest='min_target_dist',action='store',
                       help='Minimum distance between a mutated atom and the target residue',default=10)
     parser.add_option('-n',"--max_mutations",type='int',dest='max_mutations',action='store',
                       help='Maximum number of mutations to employ',default=6)
@@ -2938,7 +2938,7 @@ def parse_options(inputargs):
     # PBE options
     #
     parser.add_option('--PBEsolver',dest='PBEsolver',type='string',action='store',
-                      help='PBE solver to use (DelPhi/APBS/pKaTool[still to be implemented]). Default= %default',default='APBS')
+                      help='PBE solver to use (DelPhi/APBS/pKaTool[still to be implemented]). Default= %default',default='DelPhi')
     
     parser.add_option('--ionic_strength',dest='ion',type='float',action='store',
                       help='ionic strength to use in the calculations. Default= %default',default=0.144)
@@ -2978,6 +2978,7 @@ def parse_options(inputargs):
     parser.add_option("--list_mutations",dest='list_mutations',action='store_true',
                       help='List all mutations then exit',default=False)
 
+    parser.add_option("--disable_main",dest='disable_main',action='store_true',help='Make the program this it is not the main program',default=False)
     (options, args) = parser.parse_args(inputargs)
     return options,args
 
@@ -3002,7 +3003,7 @@ def main(options,args):
     #
     # Delete old files if we are the main program
     #
-    if __name__=='__main__':
+    if __name__=='__main__' and not options.disable_main:
         delete_old_files(defaults['pdb'][0])
     #
     # Start the program

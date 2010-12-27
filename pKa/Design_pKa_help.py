@@ -231,7 +231,9 @@ def make_mutation(pdbfile,mutation,topdir=None):
     #
     import os
     dirname=os.path.join(rootdir,'%s.pdbs' %(os.path.split(pdbfile)[1]))
-    if not os.path.isdir(dirname):
+    if not os.path.exists(dirname):
+        if os.path.lexists(dirname):
+            os.unlink(dirname)
         os.mkdir(dirname)
     #
     # Is this a real mutation?
