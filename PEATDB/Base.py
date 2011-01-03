@@ -122,6 +122,7 @@ class zDatabase(object):
                                             passwd=password, db=project, port=port,
                                             connect_timeout=3)
                 self.storage = RelStorage(self.adapter)
+                                          #shared_blob_dir=False, blob_dir=self.blob_dir)
             except OperationalError, message:
                 self.connection = None; self.dbroot = None
                 self.errormessage = message

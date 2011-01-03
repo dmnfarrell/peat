@@ -350,7 +350,7 @@ def testRelstorage():
     port=8080
     adapter = MySQLAdapter(host=server, user=username,
                                     passwd=password, db=project, port=port)                           
-    storage = RelStorage(adapter, shared_blob_dir=False)
+    storage = RelStorage(adapter, shared_blob_dir=False, blob_dir='tempblob')
     db = DB(storage)
     connection = db.open()
     print storage
@@ -370,7 +370,7 @@ def testRelstorage():
     f='gogh.chambre-arles.jpg'
     b=addfile(f)
     data['aaa'] = FileRecord(name=f,blob=b)
-    t = transaction.get()
+    #t = transaction.get()
     #t.commit()
     return
 
