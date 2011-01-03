@@ -332,18 +332,46 @@ def testBlob():
 
     #app = PILViewer(imgfile=f.name)
     #app.mainloop()
-
     DB.close()
     return
 
-def testcellCache():
-    """caching of cell display vals"""
+def testRelstorage():
+    
+    import ZODB, transaction
+    from ZODB import FileStorage, DB
+    from relstorage.adapters.mysql import MySQLAdapter
+    from relstorage.storage import RelStorage
+    from MySQLdb import OperationalError
 
-    DB = PDatabase(local='test.fs')
-    print DB
-    DB.add('daks')
-    print DB.cellcache
-    DB.commit()
+    server='peat.ucd.ie'
+    username='guest'
+    password='123'
+    project='filestest'
+    port=8080
+    adapter = MySQLAdapter(host=server, user=username,
+                                    passwd=password, db=project, port=port)                           
+    storage = RelStorage(adapter, shared_blob_dir=False)
+    db = DB(storage)
+    connection = db.open()
+    print storage
+    connection = db.open()
+    dbroot = connection.root()
+    data = dbroot['data']
+    
+    def addfile(fname):
+        myblob = Blob()
+        b=myblob.open('w')
+        o=open(fname)
+        data = o.read()
+        b.write(data)
+        print b.name
+        b.close()
+        return myblob
+    f='gogh.chambre-arles.jpg'
+    b=addfile(f)
+    data['aaa'] = FileRecord(name=f,blob=b)
+    t = transaction.get()
+    #t.commit()
     return
 
 def testLoading():
@@ -476,11 +504,11 @@ if __name__ == '__main__':
     #testBlob()
     #speedTest1()
     #print Timeit(speedTest1)
-    #testcellCache()
     #testLoading()
     #testnewRecord()
     #testMemory()
     #importTest()
     #remodel()
-    convertEkinprjs(local='tit_db.fs')#server='localhost', username='farrell', project='titration_db')
+    #convertEkinprjs(local='tit_db.fs')#server='localhost', username='farrell', project='titration_db')
+    testRelstorage()
 

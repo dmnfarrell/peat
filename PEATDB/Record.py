@@ -50,7 +50,7 @@ class Record(OOBTree):
     def setDisplayAttribute(self, key, data):
         """Set the text to display for this attribute of the record
            Override this for specific field objects"""
-        text = ''
+        text = ''        
         if type(data) is types.StringType:
             text = data
         else:
@@ -61,10 +61,9 @@ class Record(OOBTree):
 
     def getDisplayAttribute(self, key):
         """Get the text to display for this attribute of the record
-           This is used for the table display to cache the values"""
-       
+           This is used for the table display to cache the values"""       
         if not self._display.has_key(key):
-            return ''       
+            return ''        
         return self._display[key]
         
     def getFields(self):
@@ -255,7 +254,9 @@ class PEATRecord(Record):
         elif type(data) is EkinProject:
             #numkeys = data.length
             numkeys = len(data.datasets)
-            text = str(numkeys) + ' recs'         
+            text = str(numkeys) + ' recs'
+        elif type(data) is FileRecord:           
+            text = data.name
         elif type(data) is types.DictType:
              if data =='':
                  text = '-'

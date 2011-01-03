@@ -569,8 +569,8 @@ class TitrationAnalyser():
                         spanerr = 0.0
                     #print  d, plst#, pkaerr, spanerr
                     if reliable==True and (pkaerr > 1.5 or spanerr > sp):
-                        if silent == False:
-                            print d, 'exp error too big, omitting: %s %s' %(pkaerr, spanerr)
+                        #if silent == False:
+                        print d, 'exp error too big, omitting: %s %s' %(pkaerr, spanerr)
                         continue
 
                     pkasdict[d][p]={}

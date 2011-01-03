@@ -60,8 +60,9 @@ class FileHandler(object):
         """Uses a new method of file storage with blobs"""
         #now we just get the blob from the filerecord object...
         from PILView import PILViewer
-        #check class
-        if not type(filerec) is FileRecord:
+        from PEATDB.Record import FileRecord
+        #check class        
+        if not type(filerec) is FileRecord:           
             return False
         myblob = filerec.blob
         ext = filerec.ext

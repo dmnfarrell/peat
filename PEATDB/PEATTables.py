@@ -267,13 +267,13 @@ class PEATTable(TableCanvas):
         return popupmenu
 
     def draw_file_tooltip(self, row, col):
-        """Draw a tooltip for image and file previews"""
+        """Draw a tooltip for image and file previews"""       
         import os
         h=self.height
         x1,y1,x2,y2 = self.getCellCoords(row,col)
         w=x2-x1
         absrow = self.get_AbsoluteRow(row)
-        text = self.model.getValueAt(absrow,col)
+        text = self.model.getValueAt(absrow,col)      
         if text == '' or text == None:
             return
 
@@ -524,10 +524,7 @@ class PEATTableModel(TableModel):
 
         p = self.data[name]
         #display info is now handled in the record class
-        #try:           
-        value = p.getDisplayAttribute(colname)
-        #except:
-        #    value = ''
+        value = p.getDisplayAttribute(colname)        
 
         return value
 

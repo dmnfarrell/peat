@@ -1614,7 +1614,7 @@ class App(Frame, GUI_help):
         if D[protein].has_key(field_name):
             filerec=D[protein][field_name]
         else:
-            return
+            return        
         fh = FileHandler(self)
         fh.displayFile(filerec)
         return
@@ -1629,10 +1629,9 @@ class App(Frame, GUI_help):
             filerec=None
         fh = FileHandler(self)
         newfile = fh.addFileDialog(filerec)
-        #self.main.wait_window(win)
-        if newfile != None:
-            self.DB.addBlob(protein, field_name, fh.newfile)
-            #self.updateTable(protein, field_name)
+        
+        if newfile:
+            self.DB.addBlob(protein, field_name, fh.newfile)           
             self.table.redrawCell(recname=protein, colname=field_name)
         return
 

@@ -331,6 +331,7 @@ class zDatabase(object):
         self.add(recname)
         blob = self.getBlob(filename)
         self.data[recname][field] = FileRecord(name=filename, blob=blob)
+        print self.data[recname][field]
         return
 
     def getBlob(self, filename):
