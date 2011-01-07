@@ -171,8 +171,7 @@ class Fitting(object):
         """Get paired active data points for fitter from ekin dataset"""
         #print data
         if ek == None:            
-            return None 
-               
+            return None
         x,y = ek.getActive()
         if len(x)==0 or len(y)==0:
             return None
@@ -243,7 +242,8 @@ class Fitting(object):
         '''we iterate over runs and re-fit the data, each time adjusting x-y points
            then accumulate a fit val for each parameter and get mean/stdev.
            Note: errors are added +/- values'''
-
+        
+        from PEATDB.Ekin.Dataset import EkinDataset
         grad=1e-6; conv=1e-6
         for k in kwargs:
             if k=='conv':
@@ -262,11 +262,9 @@ class Fitting(object):
         fitvars = {}
         for v in varnames:
             fitvars[v] = []     #group lists by variable name
-
-        #xd,yd,a,xerrs,yerrs = EkinConvert.ekin2xy(ekindata, geterrors=True)
+        
 	xd,yd,a,xerrs,yerrs = ekindata.getAll()
-
-        estdata={}; estdata['__datatabs_fits__']={}
+	estdata={}; estdata['__datatabs_fits__']={}
         for r in range(runs):
             mut_x=[];mut_y=[]
             #if the datapoint has x or y error values, we use that instead
@@ -279,17 +277,15 @@ class Fitting(object):
                     mut_y.append(yd[i] + random.uniform(-yerrs[i], yerrs[i]))
                 else:
                     mut_y.append(yd[i] + random.uniform(-yuncert,yuncert))
-
-            #edata = EkinConvert.xy2ekin([mut_x, mut_y], activelist=a)
+           
 	    ek = EkinDataset(xy=[mut_x,mut_y],active=a)
-
             fitres, X = cls.doFit(ek, model=model, fitdata=fitdata, grad=1e-6, conv=1e-6,
                                     silent=True, guess=guess, noiter=100)
             vrs = X.getVariables()
-            #print vrs, varnames
+
             for n in range(len(varnames)):
                 fitvars[varnames[n]].append(vrs[n])
-            estdata[str(r)] = edata
+            estdata[str(r)] = ek
             estdata['__datatabs_fits__'][str(r)] = fitres
 
             if callback != None:
@@ -298,18 +294,14 @@ class Fitting(object):
                     fitstats[v] = numpy.mean(fitvars[v]), numpy.std(fitvars[v])
                 callback(r, fitstats)
 
-        fitstats = {}
-        #print 'results'
+        fitstats = {}       
         for v in varnames:
             #print fitvars[v]
             err = numpy.std(fitvars[v])/2
             #print v, numpy.mean(fitvars[v]), err
             #we store the final error as +/- half the stdev.
             fitstats[v] = numpy.mean(fitvars[v]), err
-        if doplots == True:
-            #from PEATDB.Ekin.Base import EkinProject
-            #Es = EkinProject(data=estdata)
-            #Es.plotDatasets()            
+        if doplots == True:           
             from PEATDB.Ekin.Web import EkinWeb
             ew = EkinWeb()
             ew.showEkinPlots(ekindata=estdata, outfile='est_exp_err.html',
@@ -679,8 +671,7 @@ class pHActivity2pkas(LM_Fitter):
         except:
             x=data_point
         pka1=variables[0]; pka2=variables[1]
-        scale=variables[2];
-
+        scale=variables[2]
         value = scale*(1.0/(math.pow(10,-x)/math.pow(10,-pka1)+1+math.pow(10,-pka2)/math.pow(10,-x)))
         return value
 

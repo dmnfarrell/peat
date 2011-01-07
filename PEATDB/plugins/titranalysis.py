@@ -343,7 +343,7 @@ def main():
         app.mainwin.mainloop()
         return
         
-    #some tit db funcs    
+    #some tit db funcs
     if opts.titdb == True:
         DB = PDatabase(server='peat.ucd.ie', username='guest',
                        password='123', project='titration_db',

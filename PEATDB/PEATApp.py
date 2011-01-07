@@ -1531,13 +1531,13 @@ class App(Frame, GUI_help):
         self.main.wait_window(self.mwin)
         return
 
-    def editDictField(self, protein, field_name):
+    def editDictField(self, protein, field_name, default={}):
         """Edit a field that's a dict structure"""
         D = self.DB.data
         if D[protein].has_key(field_name):
             data=D[protein][field_name]
         else:
-            return  
+            data=default       
         import types
         if not type(data) is types.DictType:
             return
@@ -1571,7 +1571,8 @@ class App(Frame, GUI_help):
 
     def edit_link(self, protein, field_name):
         """Edit a hyperlink"""
-        self.editDictField(protein, field_name)
+        blank = {'text':'','link':''}
+        self.editDictField(protein, field_name, blank)
         return
 
     def edit_notes(self, protein, field_name):

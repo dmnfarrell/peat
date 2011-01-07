@@ -31,7 +31,8 @@ import time
 import timeit
 
 class EkinDataset(object):
-    """Prototype dataset structure for new ekin datasets"""
+    """Dataset structure for new ekin datasets, note that x and y lists
+       can have None values, this is to allow values to be removed/changed e.g. a table"""
 
     names = ['data', 'active', 'errors', 'labels']
 
@@ -158,10 +159,6 @@ class EkinDataset(object):
         a=[i[2] for i in xya if i[0]!=None and i[1]!=None]
         return x,y,a
     
-    def getAll(self):
-	"""Get all data"""
-	return self.x,self.y,self.active,self.errors[0],self.errors[1]
-    
     def getActive(self):
         """Get only active points"""
         x=[];y=[]
@@ -170,6 +167,13 @@ class EkinDataset(object):
                 x.append(i[0])
                 y.append(i[1])
         return x,y
+  
+    def getAll(self):
+	"""Get all data, including error vals"""
+	x,y,a = self.getxya()	
+	xerrs = [self.errors[0][i] for i in range(len(self.x)) if self.x[i]!=None and self.y[i]!=None]
+	yerrs = [self.errors[1][i] for i in range(len(self.x)) if self.x[i]!=None and self.y[i]!=None]	
+	return x,y,a,xerrs,yerrs
         
     def setActive(self, i, a=1):
         """Set a point as active"""
