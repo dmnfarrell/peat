@@ -40,9 +40,11 @@ N = '15N NMR'
 C = '13C NMR'
 
 '''yuncerts = {H: 0.03, fields[1]:0.2, fields[2]: 0.1} #from lawrence
-minspans = {fields[0]: 0.06, fields[1]:0.2, fields[2]: 0.2} 
+minspans = {fields[0]: 0.06, fields[1]:0.2, fields[2]: 0.2} '''
+
 complete= ['HEWL', 'Bovine Beta-Lactoglobulin', 'Plastocyanin (Anabaena variabilis)',
-                'Plastocyanin (Phormidium)']'''
+           'Plastocyanin (Phormidium)', 'CexCD (Apo)', 'Protein G B1',
+           'Glutaredoxin','Staphylococcal Nuclease D+PHS']
 
 def loadDB():
     from PEATDB.Base import PDatabase
@@ -58,7 +60,6 @@ def refitAll():
         t.getExpErrors(e, xuncert=0.1, yuncert=yuncerts[i])
         t.returnData()
    
-
 def doSummary(DB):
     ekindicts = t.getEkinDicts(DB)
     t.dotitDBStats(ekindicts)
@@ -73,7 +74,7 @@ def miscanalysis(DB):
 
     #t.compareProteinpKas(p, prot1='Plastocyanin (Phormidium)',  prot2='Plastocyanin (Anabaena variabilis)')
     #t.publicationSetting()
-    t.compareNuclei(DB, N, H, titratable=False)
+    t.compareNuclei(DB, N, H, titratable=False, names=complete)
 
     #combekindata = t.makeCombined(h, n, names=complete)
     #pickle.dump(combekindata, open('1h15ncomb.obj', 'w'))
@@ -190,7 +191,6 @@ def analyseHill(ekindicts):
         i+=1
     f.subplots_adjust(hspace=0.4)
     f.savefig('n_hist.png')
-
     return
 
 def dofigure5():
@@ -212,7 +212,6 @@ def dofigure5():
                     print num
                     ndata = En.getDataset(d)
                     Eh.plotDatasets(d, filename=d+'.png')
-
     return
 
 if __name__ == '__main__':
