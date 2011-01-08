@@ -1059,35 +1059,31 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
         return
 
     def set_residue_type(self, event=None):
-        d = self.currentdataset.get()
-        meta = self.E.getMetaData(d)
+        d = self.currentdataset.get()     
         if d == None:
             return
-        meta['residue'] = self.residue_type.get()
+        self.E.addMeta(d,'residue',self.residue_type.get())
         return
 
     def set_residue_num(self, event=None):
-        d = self.currentdataset.get()
-        meta = self.E.getMetaData(d)
+        d = self.currentdataset.get()        
         if d == None:
-            return
-        meta['res_num'] = self.residue_num.get()
+            return     
+        self.E.addMeta(d,'res_num',self.residue_num.get())
         return
 
     def set_atom_type(self, event=None):
-        d = self.currentdataset.get()
-        meta = self.E.getMetaData(d)
+        d = self.currentdataset.get()       
         if d == None:
             return
-        meta['atom_type'] = self.atom_type.get()
+        self.E.addMeta(d,'atom_type',self.atom_type.get())
         return
 
     def set_chain_id(self, event=None):
-        d = self.currentdataset.get()
-        meta = self.E.getMetaData(d)
+        d = self.currentdataset.get()       
         if d == None:
-            return
-        meta['chain_id'] = self.chain_id.get()
+            return       
+        self.E.addMeta(d,'chain_id',self.chain_id.get())
         return
 
     def save_comments(self,event=None):
