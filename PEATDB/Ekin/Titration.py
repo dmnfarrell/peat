@@ -516,11 +516,9 @@ class TitrationAnalyser():
     def findpKas(cls, E, titratable=True, reliable=True, minspan=0.06):
         """Get pkas for an ekin project"""
         pkasdict = {}
-        for d in E.datasets:           
-            #edata = E.getDataset(d)
-            #resdata = cls.getResidueFields(edata)            
+        for d in E.datasets:               
             resdata = E.getMetaData(d)
-            print resdata
+            print d
             if not resdata.has_key('residue'): continue
             res = resdata['residue']
             try:
