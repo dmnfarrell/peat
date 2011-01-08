@@ -154,8 +154,8 @@ class TitrationAnalyser():
 
     def publicationSetting(self):
         pylab.rc("font", family="serif")
-        pylab.rc("font", size=16)
-        pylab.rc('text', usetex=True)
+        pylab.rc("font", size=22)   
+        #pylab.rc('text', usetex=True)
         return
     
     def do_summary(self, DB, cols=None):
@@ -1022,14 +1022,14 @@ class TitrationAnalyser():
         print 'reliable pkas matched:', len(relpkas1)
         print 'others:', len(otherpkas1)
    
-        f=pylab.figure(figsize=(20,10))
-        ax1=f.add_subplot(121)
-        ax2=f.add_subplot(122)
+        f=pylab.figure(figsize=(10,20))
+        ax1=f.add_subplot(211)
+        ax2=f.add_subplot(212)
         cc = cls.doXYPlot(ax1, relpkas1, relpkas2, annotate=outliers,
-                        title='pKa 1H vs comb : reliable pKas', xlabel='15N', ylabel='1H')
+                        title='15N vs 1H : reliable pKas', xlabel='15N', ylabel='1H')
         print 'reliable pKas, correl coeff:', cc
         cc = cls.doXYPlot(ax2, otherpkas1, otherpkas2, color='r',
-                        title='pKa 1H vs comb : other pKas', xlabel='15N', ylabel='1H')
+                        title='15N vs 1H : other pKas', xlabel='15N', ylabel='1H')
         print 'other pKas, correl coeff:', cc
         f.savefig('comparenuclei.png', dpi=300)
         
@@ -1890,8 +1890,8 @@ class TitrationAnalyser():
 
         cc = numpy.corrcoef(numpy.array([x,y]))
         #print 'corr. coeff.:', cc[0][1]
-        cl = numpy.arange(0,max(x)+2)
-        ax.plot(cl, cl, 'r', alpha=0.5)
+        cl = numpy.arange(min(x)-2,max(x)+2)
+        ax.plot(cl, cl, 'black', lw=2, alpha=0.3)
         ax.scatter(x, y, facecolor=clr, marker=symb, s=markersize, linewidth=0.8,
                             picker=4, alpha=0.6)
 
@@ -1909,8 +1909,9 @@ class TitrationAnalyser():
         ax.set_title(title)
         ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)
-        if xaxislabels != None:
-            #ax.set_xticks(ind)
+        ax.set_xlim(0,12)
+        ax.set_ylim(0,12)
+        if xaxislabels != None:         
             ax.set_xticklabels(xaxislabels, rotation='vertical', fontproperties=ft)
         if xerrs!=None or yerrs!=None:
             errline = ax.errorbar(x, y, xerr=xerrs, yerr=yerrs, fmt=None,
