@@ -25,8 +25,8 @@
 # Dublin 4, Ireland
 
 import numpy 
-import matplotlib.pyplot as plt
-from matplotlib.colors import LinearSegmentedColormap
+#import matplotlib.pyplot as plt
+#from matplotlib.colors import LinearSegmentedColormap
 
 cdict1 = {'red':   ((0.0, 0.0, 0.0),
                    (0.5, 0.0, 0.1),
@@ -384,6 +384,7 @@ class profile_fitter:
         fd.close()
         self.tempexp_data=[]
         vals=[]
+        start_values=eval(self.options.svr)
         for line in lines:
             if line.strip()[0]=='#' or line.split()[0]=='pH':
                 continue
@@ -398,18 +399,23 @@ class profile_fitter:
         # What should we do
         #
         if self.options.analyze:
-            self.analyze()
+            self.analyze(1)
         elif self.options.pca:
             self.PCA()
-        else:
-            self.do_fitting()
+        elif self.options.PCA_dependent:
+            self.do_fitting(start_values,1)
+            self.analyze(1)
+            self.PCA()
+        elif self.options.PCA_independent:
+            self.PCAindependent(start_values)
+            
         return
     
     #
     # -----
     #
             
-    def do_fitting(self):
+    def do_fitting(self,start_values,count):
         #
         # Set the group definition
         #
@@ -418,19 +424,20 @@ class profile_fitter:
         for group in range(self.options.ngroups):
             groups.append('%s:%s' %(string.zfill(group,4),'ASP'))
         #
-        CCPS_def=eval(self.options.CCPS) #[[0,1,0],[0,1,1]]
+        CCPS_def=eval(self.options.CCPS) 
         #
-        print 'Doing %5d fits with maxstep: %4d with groups: %s and CCPS definition: %s' %(self.options.nfits,self.options.max_steps,str(groups),str(CCPS_def))
+        print 'Doing %5d fits with maxstep: %4d with groups: %s, and CCPS definition: %s' %(self.options.nfits,self.options.max_steps,str(groups),str(CCPS_def))
+        print 'The range of starting values: %s' %(str(start_values))
         solutions=[]
         for fitno in range(self.options.nfits):
-            self.set_random_state(groups)
+            self.set_random_state(groups,start_values)
             score,variables,start_vals,start_score,profile=self.fit_system(CCPS_def)
             print 'Fit# %4d, score: %6.3f' %(fitno,score)
             solutions.append([score,variables,profile,CCPS_def,groups,start_vals,start_score])
         #
         # Save the solutions as pickle
         #
-        fd=open(self.options.outfile+'.pickle','w')
+        fd=open(str(count)+self.options.outfile+'.pickle','w')
         import pickle
         pickle.dump(solutions,fd)
         fd.close()
@@ -441,7 +448,7 @@ class profile_fitter:
         features=[]
         for parm in range(len(solutions[0][1])):
             features.append('parm%d' %parm)
-        f=open(self.options.outfile+'.csv','w')
+        f=open(str(count)+self.options.outfile+'.csv','w')
         cw=csv.writer(f)
         cw.writerow(features)
         for score,variables,profile,CCPS_def,groups,start_vals,start_score in solutions:
@@ -531,11 +538,11 @@ class profile_fitter:
     # -------
     #
         
-    def analyze(self):
+    def analyze(self,ccountt):
         #
         # Load the pickle file and do the analysis
         #
-        fd=open(self.options.outfile+'.pickle')
+        fd=open(self.options.infile+'.pickle')
         import pickle
         solutions=pickle.load(fd)
         fd.close()
@@ -611,18 +618,28 @@ class profile_fitter:
         #
         # Generate files (.csv and .pickle) to store the analyzed data
         #
-        if self.options.sol_only:
+        if self.options.sol_only or self.options.PCA_dependent or self.options.PCA_independent:
             import csv
             features=[]
+            features2=[]
+            maxparm=[]
+            minparm=[]
+            minandmax=[]
             for parm in range(len(ok_sols[0][1])):
                 features.append('parm%d' %parm)
-            filename1='anal_sols_only_score.csv'
-            filename2='anal_sols_only.csv'
+            filename1=str(ccountt)+'anal_sols_only_score'+'.csv'
+            filename2=str(ccountt)+'anal_sols_only'+'.csv'
             f=open(filename1,'w')
             cw=csv.writer(f)
             cw.writerow(features+['score'])
             for score,variables,profile,CCPS_def,groups,start_vals,start_score in ok_sols:  
                 cw.writerow(variables+[score])
+            for parm in range(len(ok_sols[0][1])):
+                features2.append('parm%d range' %parm)
+            maxparm,minparm,minandmax=self.maxmindetermine(ok_sols)
+            cw.writerow(features2)
+            cw.writerow(minparm)
+            cw.writerow(maxparm)
             f.close()
             f=open(filename2,'w')
             cw=csv.writer(f)
@@ -630,24 +647,33 @@ class profile_fitter:
             for score,variables,profile,CCPS_def,groups,start_vals,start_score in ok_sols:  
                 cw.writerow(variables)
             f.close()
-            filename3='anal_sols_only.pickle'
+            filename3=str(ccountt)+'anal_sols_only'+'.pickle'
             fd=open(filename3,'w')
             import pickle
             pickle.dump(ok_sols,fd)
             fd.close()
+            if self.options.PCA_independent:
+                return minandmax,ok_sols
         if self.options.both:
             import csv
             features=[]
             for parm in range(len(ok_sols[0][1])):
                 features.append('parm%d' %parm)
-            filename1='anal_sols_score.csv'
-            filename2='anal_sols.csv'
+            filename1=str(ccountt)+'anal_sols_score'+'.csv'
+            filename2=str(ccountt)+'anal_sols'+'.csv'
             f=open(filename1,'w')
             cw=csv.writer(f)
             cw.writerow(features+['score'])
             for score,variables,profile,CCPS_def,groups,start_vals,start_score in ok_sols:  
                 cw.writerow(variables+[score])
                 cw.writerow(start_vals+[start_score])
+            maxparm=[]
+            minparm=[]
+            minandmax=[]
+            maxparm,minparm,minandmax=self.maxmindetermine(ok_sols)
+            cw.writerow(features2)
+            cw.writerow(minparm)
+            cw.writerow(maxparm)
             f.close()
             f=open(filename2,'w')
             cw=csv.writer(f)
@@ -656,7 +682,7 @@ class profile_fitter:
                 cw.writerow(variables)
                 cw.writerow(start_vals)
             f.close()
-            filename3 = 'anal_sols.pickle'
+            filename3 = str(ccountt)+'anal_sols'+'.pickle'
             fd=open(filename3,'w')
             import pickle
             pickle.dump(ok_sols,fd)
@@ -664,15 +690,15 @@ class profile_fitter:
         #
         # Extract solutions according to the desired score range 
         #
-        if self.options.extract:
-            self.extract(ok_sols)        
+        #if self.options.extract:
+        #    self.extract(ok_sols)        
         return
         
     #
     # -----
     #
     
-    def set_random_state(self,groups):
+    def set_random_state(self,groups,start_values):
         #
         # Construct random starting values for the system
         #
@@ -680,15 +706,18 @@ class profile_fitter:
         import random
         X=pKa_calc.Boltzmann()
         self.system_spec={}
-        allstart_vals=eval(self.options.svr)
+        #if self.options.tran:
+        #    allstart_vals=start_values
+        #else:
+        #    allstart_vals=eval(self.options.svr)
         count=0
         for group in groups:
-            self.system_spec[group]={'intpka':random.uniform(allstart_vals[count][0],allstart_vals[count][1]),'matrix':{}}
+            self.system_spec[group]={'intpka':random.uniform(start_values[count][0],start_values[count][1]),'matrix':{}}
             count=count+1
         for group1 in groups:
             for group2 in groups:
                 if group1<group2:
-                    self.system_spec[group1]['matrix'][group2]=random.uniform(allstart_vals[count][0],allstart_vals[count][1])
+                    self.system_spec[group1]['matrix'][group2]=random.uniform(start_values[count][0],start_values[count][1])
                     count=count+1
         return
 
@@ -842,12 +871,36 @@ class profile_fitter:
         heatmap(newmatrix,title='pH-activity profile parameter space',firstkey='Ev1',secondkey='Ev2',zlabel='Abs(error)',vmin=self.options.vmin,vmax=self.options.vmax)
         return
 
+    
     #
     # -------
     #
+    
+    def maxmindetermine(self,solutions):
+        #
+        #
+        #
+        temp=[]
+        maxparm=[]
+        minparm=[]
+        minandmax=[]
+        for i in range(len(solutions[0][1])):
+            for variables in solutions:
+                temp.append(variables[1][i])
+            maxparm.append(max(temp))
+            minparm.append(min(temp))
+            minandmax.append([min(temp),max(temp)])
+            temp=[]
+        return maxparm,minparm,minandmax
+    
+    #
+    # -------
+    #    
     def translate(self,targetm,solutions):
         #
-        # find the dots of interest in the targetm and translate it back into its original solution values from the sourcem
+        # find the dots of interest in the targetm and translate it back into its original solution values from the source.
+        # In PCA_translation_score.csv, the range of each parameter is given at the bottom.
+        # A new round of fitting, whose start_val is based on the parameter ranges acquired here, is intrinsic in this function, i.e. you do not need to type in the ranges manually for re-fitting.
         #
         coordinate=eval(self.options.trange)
         translate=[]
@@ -862,6 +915,11 @@ class profile_fitter:
         print [ran[0],ran[3]],[ran[1],ran[3]]
         import csv
         features=[]
+        features2=[]
+        maxparm=[]
+        minparm=[]
+        minandmax=[]
+        temp=[]
         for parm in range(len(solutions[0][1])):
             features.append('parm%d' %parm)
         f=open('PCA_translation.csv','w')
@@ -870,7 +928,7 @@ class profile_fitter:
         #cw.writerow([ran[0],ran[3]]+[ran[1],ran[3]])
         cw.writerow(features)
         for i in range (ran[0],ran[1]+1):
-            for j in range (ran[2],ran[3]+1):
+            for j in range (ran[2],ran[3]+1): 
                 if len(targetm[i][j])>0:
                     for k in range (len(targetm[i][j])):
                         num=targetm[i][j][k]
@@ -888,11 +946,23 @@ class profile_fitter:
                     for k in range (len(targetm[i][j])):
                         num=targetm[i][j][k]
                         cw.writerow(solutions[num][1]+[solutions[num][0]])
+        for parm in range(len(solutions[0][1])):
+            features2.append('parm%d range' %parm)
+        maxparm,minparm,minandmax=self.maxmindetermine(translate)
+        cw.writerow(features2)
+        cw.writerow(minparm)
+        cw.writerow(maxparm)
         f.close()
         fd=open('PCA_translation.pickle','w')
         import pickle
         pickle.dump(translate,fd)
         fd.close()
+        if self.options.PCA_dependent:
+            self.do_fitting(minandmax,1)
+            self.analyze(1)
+            self.PCA()
+        elif self.options.PCA_independent:
+            self.options.PCAindependent(minandmax)
         return
         
 
@@ -932,7 +1002,40 @@ class profile_fitter:
 
     #
     # -------
+    #    
+
+    def PCAindependent(self, start_values):
+        #
+        # Do the PCA_independent fitting cycle. The cycle ends when the average score of the new fitted data does not improve the amount indicated by the cutoff. 
+        #
+        count=1
+        determinant=1
+        minandmax=[]
+        solutions=[]
+        old_score_ave=100.0
+        scoresum=0.0
+        item=0
+        while determinant!=0:
+            self.do_fitting(start_values,count)
+            start_values,solutions=self.analyze(count)
+            for score,variables,profile,CCPS_def,groups,start_vals,start_score in solutions:
+                scoresum=scoresum+score
+                item=item+1
+            new_score_ave=scoresum/item
+            if (old_score_ave-new_score_ave)/old_score_ave>=0 and (old_score_ave-new_score_ave)/old_score_ave>=self.options.PCA_ind_cutoff:
+                determinant=1
+                old_score_ave=new_score_ave
+                count=count+1
+                item=0
+            else:
+                determinant=0
+                return
+            
+
     #
+    # -------
+    #
+
 
 def main():
     print
@@ -946,6 +1049,8 @@ def main():
                       help='File with experimental pH-activity profile. Space separation. Default: %default',default='pH_act.txt')
     parser.add_option('-o',"--outfile",type='string',dest='outfile',action='store',
                       help='output file for solutions (type the filename WITHOUT the extensions). Default: %default',default='solutions')
+    parser.add_option('-i',"--infile",type='string',dest='infile',action='store',
+                      help='input file for analysis (type the filename WITHOUT the extensions). Default: %default',default='1solutions')
     parser.add_option('-n','--nfits',dest='nfits',action='store',type='int',
                         help='Number of random starting positions to evaluate. Default: %default',default=10)
     parser.add_option('-m','--maxsteps',dest='max_steps',action='store',type='int',
@@ -969,13 +1074,13 @@ def main():
     parser.add_option('--vmin',dest='vmin',type='float',action='store',
                         help='Min value for colorbar in pca heatmap. Default: %default',default=0.0)
     parser.add_option('-s',"--CCPS",type='string',dest='CCPS',action='store',
-                        help='Define the CCPS for pH-activity profile. Default: %default',default='[[1,0,0],[0,1,1]]')
-    parser.add_option('--PCAfile',type='string',dest='PCAfile',action='store',default='anal_sols',
+                        help='Define the CCPS for pH-activity profile. Default: %default',default='[[1,0,0],[1,0,1]]')
+    parser.add_option('--PCAfile',type='string',dest='PCAfile',action='store',default='1anal_sols_only',
                         help='Perform PCA on old files (type the filename WITHOUT the extensions). Default: %default')
-    parser.add_option('--extract',dest='extract',action='store_true',default=False,
-                        help='Extract solutions with scores of desired range. Default: %default')
-    parser.add_option("--scr",type='string',dest='scr',action='store',
-                        help='Define the score range for solution extraction. Default: %default',default='[0.0,1.0]')
+    #parser.add_option('--extract',dest='extract',action='store_true',default=False,
+    #                    help='Extract solutions with scores of desired range. Default: %default')
+    #parser.add_option("--scr",type='string',dest='scr',action='store',
+    #                    help='Define the score range for solution extraction. Default: %default',default='[0.0,1.0]')
     parser.add_option('--both',dest='both',action='store_true',default=False,
                         help='Create solution+start_values file (including three files) after analysis. Default: %default')
     parser.add_option('--sol_only',dest='sol_only',action='store_true',default=False,
@@ -983,10 +1088,15 @@ def main():
     parser.add_option("--svr",type='string',dest='svr',action='store',
                         help='Define the range of randomly selected starting values in the format of [pKa0,pKa1,pKa2,intene01,intene02,intene12]. Default: %default',default='[[0,8],[0,8],[0,8],[0,10],[0,10],[0,10]]')
     parser.add_option('--tran',dest='tran',action='store_true',default=False,
-                        help='Translate the dot on PCA map back to its original solution values. Default: %default')
+                        help='Translate the dot on PCA map back to its original solution values, and automatically start a new round of fitting based on the ranges of the values. Default: %default')
     parser.add_option('--trange',type='string',dest='trange',action='store',
                         help='Give the diagonal vertices coordinates (int format) of the rectangular area of interest on PCA map for translation. Default: %default',default='[[0,0],[100,100]]')
-
+    parser.add_option('--PCA_dependent',dest='PCA_dependent',action='store_true',default=False,
+                        help='Allow you to do the PCA_dependent fitting of the pH-activity profile. Default: %default')
+    parser.add_option('--PCA_independent',dest='PCA_independent',action='store_true',default=False,
+                        help='Allow you to do the PCA_independent fitting of the pH-activity profile. Default: %default')
+    parser.add_option('--PCA_ind_cutoff',dest='PCA_ind_cutoff',action='store',type='float',
+                        help='Cutoff determining when the PCA_independent fitting cycle should end. Default: %default',default=0.05)
       
     (options, args) = parser.parse_args()
     #
