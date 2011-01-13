@@ -534,17 +534,15 @@ class TitrationAnalyser():
     def findpKas(cls, E, titratable=True, reliable=True, minspan=0.06):
         """Get pkas for an ekin project"""
         pkasdict = {}
-        for d in E.datasets:               
-            resdata = E.getMetaData(d)
-            print d
+        for d in E.datasets:   
+            resdata = E.getMetaData(d)            
             if not resdata.has_key('residue'): continue
             res = resdata['residue']
             try:
                 atom = resdata['atom']
             except:
                 atom = resdata['atom_type']
-            resnum = resdata['res_num']
-            #chain = resdata['chain_id']
+            resnum = resdata['res_num']          
             fitdata = E.getFitData(d)
             
             if titratable == True and not res in cls.titratable:
@@ -566,8 +564,7 @@ class TitrationAnalyser():
                 pkasdict[d]={}
                 pkasdict[d]['res']=res
                 pkasdict[d]['resnum']=resnum
-                pkasdict[d]['atom']=atom
-                #pkasdict[d]['chain_id']=chain
+                pkasdict[d]['atom']=atom               
                 pkasdict[d]['model']=fitdata['model']
                 for plst in pkas:
                     (p, pval, sp) = plst
@@ -580,20 +577,19 @@ class TitrationAnalyser():
                         pkaerr = round(E.getMeta(d, 'exp_errors')[p][1],4)
                         spanerr = round(E.getMeta(d, 'exp_errors')[s][1],4)
                     except:
-                        print 'failed to get exp errs'
+                        #print 'failed to get exp errs'
                         pkaerr = 0.0
                         spanerr = 0.0
                     #print  d, plst#, pkaerr, spanerr
-                    if reliable==True and (pkaerr > 1.5 or spanerr > sp):
-                        #if silent == False:
-                        print d, 'exp error too big, omitting: %s %s' %(pkaerr, spanerr)
+                    if reliable==True and (pkaerr > 1.5 or spanerr > sp):                        
+                        #print d, 'exp error too big, omitting: %s %s' %(pkaerr, spanerr)
                         continue
-
                     pkasdict[d][p]={}
                     pkasdict[d][p][p]=pval
                     pkasdict[d][p]['span']=sp                       
                     pkasdict[d][p]['pkaerror']=pkaerr
                     pkasdict[d][p]['spanerror']=spanerr
+
         return pkasdict        
                         
     def extractpKas(cls, DB, col, names=None, minspan=0.06, reliable=True,
@@ -620,7 +616,7 @@ class TitrationAnalyser():
             pkainfo[name] = cls.findpKas(E, titratable=titratable,
                                          reliable=reliable, minspan=minspan)
             
-            print 'found %s' %len(pkainfo[name])
+            if silent == False: print 'found %s' %len(pkainfo[name])
             total+=len(pkainfo[name])
         print 'found %s total pKa values' %total
         return pkainfo
@@ -629,7 +625,7 @@ class TitrationAnalyser():
                         silent=False, prefix=''):
         """Read in the pkainfo dict from extractpkas method and do 
           additional analyses, makes plots for titdb"""
-
+    
         if path==None:
             path=os.getcwd()
         aminoacids = cls.residue_names.keys()
@@ -658,18 +654,18 @@ class TitrationAnalyser():
 
         count=0
         titrcount = 0       
-        for name in pkainfo.keys(): 
-            print name
+        for name in pkainfo.keys():            
             for d in pkainfo[name].keys():
                 PI = pkainfo[name][d]
                 res = PI['res'] 
-                atom = PI['atom']  
+                atom = PI['atom']
+                model = PI['model']  
                 for p in PI:
-                    count =+1
-                    if 'pk' in p:
-                    	pval = PI[p][p]
-                    	sp = PI[p]['span']
-                    	model = PI[p]['model']                           
+                    #print p, d, '<p>'                    
+                    if 'pK' in p:
+                        count += 1
+                        pval = PI[p][p]
+                        sp = PI[p]['span']                    	                      
                    
                         #print  d, p, pval,  sp
                         #change atom if handling HB2/3 in ASP, HIS and GLU, so
@@ -683,18 +679,21 @@ class TitrationAnalyser():
                         
                         if model == '1 pKa 2 Chemical shifts' and res in titratable:
                             primaryspans[res].append(sp)
-                        else:
+                        elif res in titratable:
                             titrspans[res].append(sp)
-        
-                	#assign spans by atom
-                	if not atomshfts[res].has_key(atom):
-                    		atomshfts[res][atom] = []
-                	if satoms != 'all' and not atom in satoms:
-                    	if silent == False:
-                        	print 'excluding atom', atom
-                    continue
-                else:
-                    atomshfts[res][atom].append(sp)
+                            titrcount+=1
+                        else:
+                            allspans[res].append(sp)
+                       
+                        #assign spans by atom
+                        if not atomshfts[res].has_key(atom):
+                            atomshfts[res][atom] = []
+                        if satoms != 'all' and not atom in satoms:
+                            if silent == False:
+                                print 'excluding atom', atom
+                                continue
+                        else:
+                            atomshfts[res][atom].append(sp)
 
             '''if allpkas != None:
                 for s in allsp:
@@ -790,18 +789,16 @@ class TitrationAnalyser():
 
         for name in kys:
             for d in pkainfo[name]:
-                for p in pkainfo[name][d]:
-
-                    pka = pkainfo[name][d][p][p]
-                    resnum = pkainfo[name][d][p]['resnum']
-                    res = pkainfo[name][d][p]['res']
-                    atom = pkainfo[name][d][p]['atom']
-                    span = pkainfo[name][d][p]['span']
-                    model = pkainfo[name][d][p]['model'][:6]
-                    '''except:
-                        print 'failed to get all the info for this row'
-                        continue'''
-
+                PI = pkainfo[name][d]
+                resnum = PI['resnum']
+                res = PI['res']
+                atom = PI['atom']
+                model = PI['model']
+                for p in PI:
+                    if not 'pK' in p: continue
+                    pka = PI[p][p]
+                    span = PI[p]['span']
+      
                     if primary == True and not '1 pKa' in model:
                         continue
                     if pkainfo[name][d][p].has_key('pkaerror'):
