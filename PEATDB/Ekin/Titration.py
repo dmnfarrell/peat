@@ -28,7 +28,7 @@
 """A class for doing some analyses on Ekin NMR titration data"""
 
 
-import sys,os
+import sys,os,math
 import pickle
 import Pmw
 import numpy
@@ -157,7 +157,25 @@ class TitrationAnalyser():
         pylab.rc("font", size=22)   
         pylab.rc('text', usetex=True)
         return
-    
+   
+    def getEkinDicts(self, DB):
+        '''reform peat db into sets of ekin data stored per nucleus type'''
+
+        protnames={}
+        ekindicts = {}
+        for protein in DB.getRecs():
+            name = DB[protein].name
+            protnames[protein] = name
+            for col in DB[protein].keys():
+                if DB['userfields'].has_key(col):
+                    if 'NMR' in DB['userfields'][col]['field_type']:
+                        if not ekindicts.has_key(col):
+                            ekindicts[col] = {}
+                        ekindicts[col][protein] = DB[protein][col]
+        self.protnames=protnames
+        self.ekindicts = ekindicts
+        return ekindicts
+ 
     def do_summary(self, DB, cols=None):
         """Print a summary of the current data loaded - no longer used"""
         summary=[]
@@ -247,15 +265,15 @@ class TitrationAnalyser():
 
         return stats
 
-    def dotitDBStats(self, DB, proteins=None, redirect=False):
+    def dotitDBStats(self, ekindata, proteins=None, redirect=False):
         """Stats for titration datasets - takes a dict of ekindata, with the nmr
            column name as the key"""
 
         #stats on fits first
         stats={}
 
-        for i in ekindicts:
-            s = self.getFitStats(ekindicts[i])
+        for i in ekindata:
+            s = self.getFitStats(ekindata[i])
             stats[i] = s
             modls=s.keys()
 
@@ -288,36 +306,36 @@ class TitrationAnalyser():
         totaltitres=0
         for t in self.residue_list: residuestats[t]=0
         names = {}
-        for i in ekindicts:
+        for i in ekindata:
             names[i] = {}
             proteinstats[i] = {}
 
-        for i in ekindicts:
-            ekindata = ekindicts[i]
+        for i in ekindata:
+            ekinprjs = ekindata[i]
             avgchemshft=0
             names[i]['total'] = 0
-            for prot in ekindata:
+            for prot in ekinprjs:
                 proteinstats[prot]={}
                 proteinstats[prot][i]={}
-                E = ekindata[prot]                
+                E = ekinprjs[prot]                
                 totaldatasets += len(E.datasets)
                 names[i]['total'] += len(E.datasets)
                 proteinstats[prot][i]['total'] = len(E.datasets)
                 for ed in E.datasets:
                     try:
-                        ek = EkinDataset(E.data[ed])
-                        totalphpoints.append(ek.getlenDps())
-                        maxphpoints.append(ek.getmaxX())
-                        minphpoints.append(ek.getminX())
-                        phranges.append(ek.getmaxX()-ek.getminX())
-                        phstep = (ek.getmaxX()-ek.getminX()) / ek.getlenDps()
-                        if phstep <= 0.3:
-                            lessXphstep+=1
-                        ek.getavgY()
-                        fit = E.getFitData(ed)
-                        res = E.getField(ed, 'residue')
-                        if res != None:
-                            residuestats[res] += 1
+		                ek = EkinDataset(E.data[ed])
+		                totalphpoints.append(ek.length())
+		                maxphpoints.append(ek.maxX())
+		                minphpoints.append(ek.minX())
+		                phranges.append(ek.maxX()-ek.minX())
+		                phstep = (ek.maxX()-ek.minX()) / ek.length()
+		                if phstep <= 0.3:
+		                    lessXphstep+=1
+		                ek.avgY()
+		                fit = E.getFitData(ed)
+		                res = E.getField(ed, 'residue')
+		                if res != None:
+		                    residuestats[res] += 1
                     except:
                         pass
 
@@ -609,7 +627,7 @@ class TitrationAnalyser():
 
     def analysepKas(cls, pkainfo, satoms='all', path=None, exclude=[],
                         silent=False, prefix=''):
-        """Read in the pjainfo dict from extractpkas method and do 
+        """Read in the pkainfo dict from extractpkas method and do 
           additional analyses, makes plots for titdb"""
 
         if path==None:
@@ -644,34 +662,36 @@ class TitrationAnalyser():
             print name
             for d in pkainfo[name].keys():
                 PI = pkainfo[name][d]
+                res = PI['res'] 
+                atom = PI['atom']  
                 for p in PI:
                     count =+1
-                    pval = PI[p][p]
-                    sp = PI[p]['span']
-                    model = PI[p]['model']                    
-                    res = PI[p]['res']                    
-                    atom = PI[p]['atom']
-                    print  d, p, pval,  sp
-                    #change atom if handling HB2/3 in ASP, HIS and GLU, so
-                    #we group them together as HB* for the stats
-                    
-                    #move to extract??
-                    if res in ['ASP','GLU','HIS'] and atom in ['HB2', 'HB3']:
-                        atom = 'HB*'
-                    elif res == 'GLU' and atom in ['HG2','HG3']:
-                        atom = 'HG*'
-                    
-                    if model == '1 pKa 2 Chemical shifts' and res in titratable:
-                        primaryspans[res].append(sp)
-                    else:
-                        titrspans[res].append(sp)
+                    if 'pk' in p:
+                    	pval = PI[p][p]
+                    	sp = PI[p]['span']
+                    	model = PI[p]['model']                           
+                   
+                        #print  d, p, pval,  sp
+                        #change atom if handling HB2/3 in ASP, HIS and GLU, so
+                        #we group them together as HB* for the stats
+                        
+                        #move to extract??
+                        if res in ['ASP','GLU','HIS'] and atom in ['HB2', 'HB3']:
+                            atom = 'HB*'
+                        elif res == 'GLU' and atom in ['HG2','HG3']:
+                            atom = 'HG*'
+                        
+                        if model == '1 pKa 2 Chemical shifts' and res in titratable:
+                            primaryspans[res].append(sp)
+                        else:
+                            titrspans[res].append(sp)
         
-                #assign spans by atom
-                if not atomshfts[res].has_key(atom):
-                    atomshfts[res][atom] = []
-                if satoms != 'all' and not atom in satoms:
-                    if silent == False:
-                        print 'excluding atom', atom
+                	#assign spans by atom
+                	if not atomshfts[res].has_key(atom):
+                    		atomshfts[res][atom] = []
+                	if satoms != 'all' and not atom in satoms:
+                    	if silent == False:
+                        	print 'excluding atom', atom
                     continue
                 else:
                     atomshfts[res][atom].append(sp)
@@ -1825,10 +1845,9 @@ class TitrationAnalyser():
     @classmethod
     def doMultipleHistograms(cls, fig, recs, bins=20, title='', xlabel=None, ylabel=None, color=None,
                          subplots=True, colors=False, xticks=True, yticks=True, xlim=None):
-        """Do a pylab histogram of a dict of 1 or more dicts """
-
+        """Do a pylab histogram of a dict of 1 or more dicts """		
         subplots=[]
-        dim=int(ceil(len(recs)/2.0))
+        dim=int(math.ceil(len(recs)/2.0))
         i=1
 
         for r in recs:
