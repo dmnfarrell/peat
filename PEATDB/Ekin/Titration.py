@@ -155,7 +155,7 @@ class TitrationAnalyser():
     def publicationSetting(self):
         pylab.rc("font", family="serif")
         pylab.rc("font", size=22)   
-        #pylab.rc('text', usetex=True)
+        pylab.rc('text', usetex=True)
         return
     
     def do_summary(self, DB, cols=None):

@@ -432,7 +432,7 @@ class KineticsAnalyser(Plugin):
                     row+=1
                     S=subconcs[s]
                     rawdata[name][ph][S] = EkinDataset(xy=[mins, yvals],
-                                               yerrs=yerrs), xlabel='t',ylabel='A')
+                                               yerrs=yerrs, xlabel='t',ylabel='A')
                 i+=1
 
         return rawdata
@@ -1853,7 +1853,7 @@ class KineticsAnalyser(Plugin):
         """Get map of clone/seq names to plate/well name used here, we now use
            the master list stored in novo db labbook"""
 
-        import PEAT_SA.Core as Core
+        import PEATSA.Core as Core
         pdb = '/enc/10R_TS.pdb'
         confseq = self.DB.getLabbookData('confirmedseq',
                         ['plate','well','Tapo.check','variant'])

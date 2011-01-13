@@ -144,7 +144,15 @@ class EkinDataset(object):
             return self.fits['default']
         else:
             return None
-    
+
+    def getx(self):
+         x=[i for i in self.x if i!=None and i!=None]
+         return x
+        
+    def gety(self):
+         y=[i for i in self.y if i!=None and i!=None]
+         return y
+        
     def getxy(self):
         """Get x-y lists"""
         xy=zip(self.x,self.y)
@@ -245,27 +253,27 @@ class EkinDataset(object):
 
     def minX(self):
         """Get average of x datapoints"""
-        return min(self.x)
+        return min(self.getx())
 
     def maxX(self):
         """Get average of x datapoints"""
-        return max(self.x)
+        return max(self.getx())
 
     def minY(self):
         """Get average of y datapoints"""
-        return min(self.y)
+        return min(self.gety())
 
     def maxY(self):
         """Get average of y datapoints"""
-        return max(self.y)
+        return max(self.gety())
 
     def avgX(self):
         """Get average of x datapoints"""
-        return np.mean(self.x)
+        return np.mean(self.getx())
 
     def avgY(self):
         """Get average of y datapoints"""
-        return np.mean(self.y)
+        return np.mean(self.gety())
 
     def getData(self):
         return self.__dict__
