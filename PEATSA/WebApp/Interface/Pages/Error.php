@@ -7,7 +7,7 @@
 	</head>
 	<body>
 	<div id="container">
-	<h1><span>Heuston, we have a problem ...</span></h1>
+	<h1><span>Houston, we have a problem ...</span></h1>
 	<h3>An error was detected</h3>
 	
 	<?php 
@@ -42,7 +42,7 @@
 				echo '</p>';
 
 			echo '<p>If the above information makes no sense to you please contact us. ';
-			echo "We'll be happy to help you out.</p>";
+			echo "We'll be happy to help you out.<br>Also check the FAQ - there may be more information on your error there.</p>";
 		}
 		else
 		{
