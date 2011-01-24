@@ -14,7 +14,7 @@
 			function HideFAQDivs()
 			{
 				var divs = new Array("acronym", "calculationTime", "state", "pKaCode", "calculationDifference", 
-						"calculationFormat", "weird", "binding", "coloring",
+						"calculationFormat", "weird", "chainbreak-error", "mainchain-error", "binding", "coloring",
 						"mutationList", "graph", "mutationColumn",
 						"resultsColumns", "colorScale", "jobTime", "units");
 			
@@ -120,7 +120,26 @@
 		Older browsers do not correcly support CSS (Cascading Style Sheets) which are used to define the site layout.
 		The website has been tested, and renders correctly, on Firefox 3+, Internet Explorer 7 & 8, Safari 3+ and Google Chrome.
 		</div>
-		
+
+		<br><b style="font-size: 14px; margin-left:3em;">Errors</b><br><br>
+
+		<a name='mainchain-error' class='faq-question' onclick=ToggleElement("mainchain-error")>
+		I get the error "The supplied structure is missing main chain heavy atoms" but they all seem to be there?</a><br>
+		<div id="mainchain-error" class='faq-answer'>
+		The webserver expects every residue to have a main-chain oxygen called 'O'. 
+		However some programs produce PDB files where the oxygens in the C-Terminal are called 'OT1' and 'OT2' (or some variation).
+		This causes PEATSA to think an atom is missing. The easiest way around this problem is to use the standard PDB naming for
+		these oxygens 'O' and 'OXT'.
+		</div>
+
+		<a name='chainbreak-error' class='faq-question' onclick=ToggleElement("chainbreak-error")>
+		I get the error "The supplied structure contains at least one chain break" but there is none?</a><br>
+		<div id="chainbreak-error" class='faq-answer'>
+		In the situation where there is no actual chain break this often means that two chains have been given the same chain id in the PDB file. 
+		PEATSA checks for chain-breaks by seeing if more than one C-Terminal is present for a particular chain id after it has cleaned the structure,
+		and this will happen in the above situation.
+		</div>
+
 		<br><b style="font-size: 14px; margin-left:3em;">Results</b><br><br>
 
 		<a name='units' class='faq-question' onclick=ToggleElement("units")>
