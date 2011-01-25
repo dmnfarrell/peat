@@ -550,7 +550,7 @@ class Matrix:
 		if self.keyColumn() is not None:
 			self._createColumnHash(self.keyColumn())
 		
-	def addColumn(self, column, index=-1):
+	def addColumn(self, column, index=-1, header='None'):
 	
 		'''Adds a column to the receiver
 		
@@ -584,7 +584,7 @@ class Matrix:
 			self.matrix[i].insert(index, column[i])
 	
 		#Add a new header 
-		self.headers.insert(index, 'None')
+		self.headers.insert(index, header)
 		self.numberColumns = self.numberColumns + 1		
 	
 	def removeRows(self, index):

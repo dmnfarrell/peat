@@ -5,7 +5,7 @@ columns correspond to the variables. The range of columns containing the variale
 Outputs eigenvectors to Eigenvectors.csv and the original data transformed to a new basis is output to NewBasis.csv'''
 import numpy
 import sys, optparse
-from PEAT_SA import Core
+from PEATSA import Core
 
 def writeToFile(matrix, filename):
 		
