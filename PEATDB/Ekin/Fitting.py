@@ -62,7 +62,8 @@ class Fitting(object):
               'DSC2state':'DSC2state',
               'DSCindependent':'DSCindependent',
               'DSC2stateIrreversible':'DSC2stateIrreversible',
-              'Residual Activity':'residualActivity'}
+              'Residual Activity':'residualActivity',
+              'Amyloid Fibre Formation':'amyloidFibreFormation' }
     conv=1e-9
     grad=1e-9
 
@@ -115,8 +116,9 @@ class Fitting(object):
         elif model == 'Residual Activity':
             return residualActivity(variables=vrs,exp_data=expdata,callback=callback,name=model)
         elif model == 'Arrhenius':
-            return Arrhenius(variables=vrs,exp_data=expdata,callback=callback,name=model)          
-            
+            return Arrhenius(variables=vrs,exp_data=expdata,callback=callback,name=model)
+        elif model == 'Amyloid Fibre Formation':
+            return amyloidFibreFormation(variables=vrs,exp_data=expdata,callback=callback,name=model)           
         else:
             return None
 
@@ -1376,3 +1378,49 @@ class Arrhenius(LM_Fitter):
         value = A * math.exp(-(Ea/R*x))
         return value  
         
+
+class amyloidFibreFormation(LM_Fitter):
+    """Fit to a denaturation curve. with 6 parameters, including baseline slopes"""
+
+    def __init__(self, variables, exp_data, callback, name):
+        LM_Fitter.__init__(self,variables,exp_data,callback,name)
+        self.name = name
+        self.names = ['yi','yf','mi','mf','x0','t']
+        self.labels = ['U','e']
+        if variables == None:
+            self.variables = [0, 1, 1, 1, 1, 1]
+        else:
+            self.variables = variables
+        self.setChangeVars()
+        return
+
+    def guess_start(self):
+        """This guess works best for data normalised to 1"""
+        x=[i[0] for i in self.exp_data]
+        y=[i[1] for i in self.exp_data] 
+        self.variables[0]=(max(x)-min(x))/2+min(x)
+        self.variables[1]=min(y)
+        self.variables[2]=max(y)
+        return self.variables
+
+    def get_equation(self):
+        """Return a text form of the model for printing"""
+        eq = 'yi + mi*x + (yf+mf*x)/(1+math.exp((-x-x0)/t))'
+        return eq
+
+    def get_value(self, variables, data_point):       
+        try:
+            x=data_point[0]
+        except:
+            x=data_point
+        yi=variables[0]
+        yf=variables[1]
+        mi=variables[2]
+        mf=variables[3]
+        x0=variables[4]
+        t=variables[5]
+
+        value = yi + mi*x + (yf+mf*x)/(1+math.exp((-x-x0)/t))
+        return value
+        
+         

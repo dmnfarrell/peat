@@ -40,13 +40,7 @@ try:
     import pylab
 except:
     pass
-try:
-    from Tables import TableCanvas, ColumnHeader
-    from TableModels import TableModel
-except:
-    from PEATDB.Tables import TableCanvas, ColumnHeader
-    from PEATDB.TableModels import TableModel
-from Convert import *
+
 from NMR import NMR_data
 import Utils
 from PEATDB.Ekin.Base import EkinProject, EkinDataset

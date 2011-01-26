@@ -152,7 +152,6 @@ def doFtest(model1, model2, numparams1, numparams2, numdps, alpha=0.05):
         p = 1 - betai(a,b,x,)
         return p
 
-
     ss1 = float(model1['error'])
     ss2 = float(model2['error'])
     if ss1==0 or ss2==0:
@@ -171,17 +170,14 @@ def doFtest(model1, model2, numparams1, numparams2, numdps, alpha=0.05):
             return 0, 0
         else:
             return 1, 0
-
-    #print 'ss1', 'ss2', 'numparams1', 'numparams2', 'df1', 'df2'
-    #print ss1, ss2, numparams1, numparams2, df1, df2
-    #
+    
     #get F value
-    F = ((ss1-ss2) / (df1-df2)) / (ss2/df2)
-    #print 'F', F
-    #find P value
-    #print 'dfn', 'dfd', df1-df2, df2
+    F = ((ss1-ss2) / (df1-df2)) / (ss2/df2)    
+    #find P value   
     P = fdist(F, df1-df2, df2)
-    #print 'P', P
+    print 'ss1', 'ss2', 'numparams1', 'numparams2', 'df1', 'df2'
+    print ss1, ss2, numparams1, numparams2, df1, df2
+    print 'F-ratio:', F, 'P:', P
     #if P value is less than alpha than the null hypothesis is rejected,
     #model2 actually does fit the data better not just due to the extra param
     #we return 1

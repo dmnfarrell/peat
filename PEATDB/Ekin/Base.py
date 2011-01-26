@@ -76,7 +76,8 @@ class EkinProject(object):
                          'Sigmoid', 'Modified Hill', 'schellman',
                          'Denaturation','diffDenaturation','Unfolding',
                          'Residual Activity','Arrhenius',
-                         'DSC2state','DSCindependent','DSC2stateIrreversible','DSC2stateIrreversibleII'],
+                         'DSC2state','DSCindependent','DSC2stateIrreversible','DSC2stateIrreversibleII',
+                         'Amyloid Fibre Formation'],
                      'Simple enzyme kinetic':['Michaelis-Menten','Michaelis-Menten-competitive-inhibition',
                                               'Competitive inhibition','Non-competitive inhibition'],
                      'Enzyme pH-activity':['Bell-shaped pH-act profile (3 pKas)','Bell-shaped pH-act profile (2 pKas)'],
@@ -84,7 +85,7 @@ class EkinProject(object):
                      'NMR titration':[ 'Linear', '1 pKa 2 Chemical shifts','3 pKas, 2 Chemical shifts','2 pKas, 3 Chemical shifts',
                                       '3 pKas, 4 Chemical shifts'],#,'4 pKas, 5 Chemical shifts'],
                      'Protein Stability':['Sigmoid'],
-                     'Amyloid formation':['Linear']}
+                     'Amyloid formation':['Linear','Amyloid Fibre Formation']}
 
 
     def __init__(self, parent=None, ekinproj=None, data=None, mode=None,
