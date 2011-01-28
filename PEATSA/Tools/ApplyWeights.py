@@ -2,7 +2,7 @@
 '''Reweights the terms of an uffbaps calculation and recalcualtes the totals.
 
 The components of the UFFBAPS calculation are assumed to be in contiguous columns in the provided file.'''
-from PEAT_SA import Core
+from PEATSA import Core
 import sys, operator, optparse
 
 usage = "usage: %prog [options]"
