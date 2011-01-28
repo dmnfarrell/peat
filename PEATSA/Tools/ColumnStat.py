@@ -76,7 +76,8 @@ def normalityTests(array):
 	data = zip(invnormStat, normalised)
 	qq = Core.Matrix.Matrix(rows=data, headers=['Theoretical', 'Experimental'])
 
-	return shapiro + dangostino + kolomogrov + (histogram, qq)
+	tup = (shapiro[1], dangostino[1], kolomogrov[1])
+	return tup + (histogram, qq)
 
 if __name__ == "__main__":
 	
@@ -124,8 +125,8 @@ if __name__ == "__main__":
 		row.extend(stats[2:4])
 		row[3] = math.sqrt(row[3])
 		
-		#Returns ShapiroValue, Shapiro Prob, Dangostino Value, Dangostino Prob
-		#Kolomogrov Value, Kolomogrov Prob, histogram, qq
+		#Returns Shapiro Prob, Dangostino Prob
+		#Kolomogrov Prob, histogram, qq
 		stats = normalityTests(col)
 		qq = stats[-1]
 		histogram = stats[-2]
@@ -145,8 +146,8 @@ if __name__ == "__main__":
 			f.write(histogram.csvRepresentation())
 			f.close()
 
-	headers = ['Name', 'Min', 'Max', 'Mean', 'Stdev', 'Shapiro', 'ShaprioProb', 
-			'DAngostino', 'DAngostino', 'KS', 'KSProb']
+	headers = ['Name', 'Min', 'Max', 'Mean', 'Stdev', 'ShaprioProb', 
+			'DAngostinoProb', 'KSProb']
 	matrix = Core.Matrix.Matrix(rows=rows, headers=headers)
 	print matrix.csvRepresentation(),
 
