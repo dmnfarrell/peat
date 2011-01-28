@@ -195,6 +195,7 @@ class DSCFitter:
 			#Cp(t) = Cn(T) + fraction*deltaCp - where Cn(T) is the extrapoloated HC of the folded state
 			#print 'Fraction %lf D-SHC %lf Slope %lf Temp %lf Offset %lf' % (fraction, self.deltaHC, self.foldedSlope, temperature, self.foldedOffset)
 			value = fraction*self.deltaHC + self.foldedSlope*temperature + self.foldedIntercept
+			value = (self.foldedSlope*temperature + self.foldedIntercept)*(1 - fraction) + fraction*(self.unfoldedSlope*temperature + self.unfoldedIntercept)
 			baseline.append(value)
 
 		lnk = [(math.log(fraction) - math.log(1-fraction)) for fraction in fractions[1:-1]]
@@ -479,19 +480,23 @@ if __name__ == "__main__":
 		print fitter
 
 	results = Core.Matrix.Matrix(rows=results, headers=fitter.fitHeaders(options.model))
-	results.sort('Error', descending=False)	
-	stream = open('%sFits.csv' % options.model ,'w+')
-	stream.write(results.csvRepresentation())
-	stream.close()
 
 	if options.twiddle is True:
+
+		results.sort('Error', descending=False)	
+		stream = open('%sFits.csv' % options.model ,'w+')
+		stream.write(results.csvRepresentation())
+		stream.close()
+
 		print 'Recalculating best fit and outputing fit data'
 		print bestFolded, bestUnfolded
 		fitter.setRanges(bestFolded, bestUnfolded)
 		print '\n'
-		print fitter	
 		data, newError = fitter.fit(options.model)
+		print fitter	
 		print newError
+	else:
+		print results.csvRepresentation(),
 
 	stream = open('IntegrationData.csv' ,'w+')
 	stream.write(fitter.progressBaseline().csvRepresentation())
