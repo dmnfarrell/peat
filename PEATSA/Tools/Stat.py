@@ -60,6 +60,19 @@ def normalityTests(array):
 	histogram, xedges = numpy.histogram(array, 100, new=True)
 	histogram = Core.Matrix.Matrix(rows=zip(list(xedges), list(histogram)))
 
+	cumulative = [histogram.element(0,1)]
+	for i in range(1, histogram.numberOfRows()):
+		cumulative.append(cumulative[i-1] + histogram.element(i,1))
+
+	length = float(cumulative[-1])
+	cdf = [el/length for el in cumulative]
+
+	histogram.addColumn(cumulative, -1)
+	histogram.setColumnHeader(-1, 'Cumulative')
+
+	histogram.addColumn(cdf, -1)
+	histogram.setColumnHeader(-1, 'CDF')
+
 	mean = numpy.mean(array)
 	stdev= numpy.std(array)
 	normalised = (array - mean)/stdev	
@@ -244,7 +257,7 @@ if __name__ == "__main__":
 		histogram = data[-2]
 
 		rows.append([percentage, division, correlation, mean, stdev, rmse, chisquared, r, 
-				pvalue, data[0], data[1], data[2], data[3], data[4], data[5]])
+				pvalue, data[1], data[3], data[5]])
 
 		if options.outputQQ:
 			f = open('QQ%s.csv' % percentage, 'w+')
@@ -267,7 +280,7 @@ if __name__ == "__main__":
 			f.close()
 		
 	headers = ['Percentage', 'Samples', 'Correl', 'MeanError', 'StdevError', 'RMSE', 'ChiSquared', 	
-			'ReducedChi', 'ChiProb', 'Shapiro', 'ShaprioProb', 'DAngostino', 'DAngostino', 'KS', 'KSProb']
+			'ReducedChi', 'ChiProb', 'ShaprioProb', 'DAngostinoProb', 'KSProb']
 	matrix = Core.Matrix.Matrix(rows=rows, headers=headers)
 	includeHeaders = not options.suppressHeaders
 	print matrix.csvRepresentation(includeHeaders=includeHeaders),
