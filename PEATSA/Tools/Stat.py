@@ -179,6 +179,10 @@ if __name__ == "__main__":
 			  default=0,
 			  help="The error in the predictions",
 			  metavar='OBSERROR')		  		  		  		  		  		  
+	parser.add_option("", "--leverages",
+			  dest="leverage",
+			  help="Optional one column matrix containing the leverages for point. Used to computed studentized residuals",
+			  metavar='LEVERAGE')		  		  		  		  		  		  
 	parser.add_option("", "--qq", action="store_true",
 			  dest="outputQQ", default=False,
 			  help="Output QQ matrix")
@@ -217,6 +221,12 @@ if __name__ == "__main__":
 	predicted = m.columnWithHeader(options.predicted)
 	predicted = [el*float(options.scalePredicted) for el in predicted]
 
+	#Add leverage info is supplied
+	if options.leverage is not None:
+		leverage = Core.Matrix.matrixFromCSVFIle(options.leverage)
+		m.addColumn(leverage.column(0))
+		m.setColumnHeader(m.numberOfColumns() - 1, 'Leverage')
+
 	#Calculate the errors andd sort by them
 	error = map(operator.sub, predicted, exp)
 	m.addColumn(error)
@@ -236,6 +246,11 @@ if __name__ == "__main__":
 	exp = m.columnWithHeader(options.experimental)
 	predicted = m.columnWithHeader(options.predicted)
 	error = m.internalError
+
+	#Assign the leverages to an array (if available) for later use
+	leverages = None
+	if options.leverage:
+		leverages = m.columnWithHeader('Leverage')
 
 	#Divisions to be tested
 	percentages = range(100 - int(options.end), 101 - int(options.start), int(options.step))
@@ -278,7 +293,15 @@ if __name__ == "__main__":
 			f = open('Outliers%s.csv' % percentage, 'w+')
 			f.write(m[division:].csvRepresentation())
 			f.close()
-		
+
+		if options.leverage is not None:
+			array = zip(errors[:division], leverages[:division])
+			mse = rmse*rmse
+			studentized = [el[0]/math.sqrt(mse*(1 - el[1]) for el in array]
+			f = open('Studentized%s.csv' % percentage, 'w+')
+			f.write(",\n".join(studentized))
+			f.close()
+			
 	headers = ['Percentage', 'Samples', 'Correl', 'MeanError', 'StdevError', 'RMSE', 'ChiSquared', 	
 			'ReducedChi', 'ChiProb', 'ShaprioProb', 'DAngostinoProb', 'KSProb']
 	matrix = Core.Matrix.Matrix(rows=rows, headers=headers)
