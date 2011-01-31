@@ -146,9 +146,13 @@ def SendNotificationEmail(job):
 	message.attach(bodyText)
 
 	# Send the email
-	server=smtplib.SMTP('mail.ucd.ie')
-	server.sendmail('peatadmin@ucd.ie',job.email(),message.as_string())
-	server.quit()  
+	try:
+		server=smtplib.SMTP('mail.ucd.ie')
+		server.sendmail('peatadmin@ucd.ie',job.email(),message.as_string())
+		server.quit()  
+	except Exception, data:
+		print 'Exception sending emaili to', job.email()
+		print data
 
 	job.setEmailSent()
 	
