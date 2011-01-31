@@ -131,7 +131,7 @@ def SendNotificationEmail(job):
 	message['Reply-To'] = 'peatadmin@ucd.ie'
 	message['To'] = job.email()
 
-	if job.error()[0] == 0:
+	if job.error() is None:
 		message['Subject'] = 'PEATSA Job Finished'
 		text = "Your job has finished.\n\n"
 		text = text + "See http://peat.ucd.ie/PEATSA/Pages/Results.php?jobId=%s" % job.identification
