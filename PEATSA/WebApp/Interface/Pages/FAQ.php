@@ -139,6 +139,17 @@
 		PEATSA checks for chain-breaks by seeing if more than one C-Terminal is present for a particular chain id after it has cleaned the structure,
 		and this will happen in the above situation.
 		</div>
+		
+		<a name='pka-error' class='faq-question' onclick=ToggleElement("pka-error")>
+		I get the error "No pKa data corresponding to supplied code [some-code] is present" when trying to run a &Delta;pKa calculation?</a><br>
+		<div id="chainbreak-error" class='faq-answer'>
+		In order to run a &Delta;pKa you must previously have run a standard pKa calculation 
+		on your protein using <a href="http://enzyme.ucd.ie/cgi-bin/pKD/server_start.cgi">pKD Server</a>.
+		This essentially precalculates information that can be used to accelerate any subsequent perturbation calculation
+		on that structure.
+		When you submit your protein to pKDServer the job get assigned a pKD Id (see question above). It is this code you
+		must specify when submitting a &Delta;pKa calculation, in order that the correct information can be found.
+		</div>
 
 		<br><b style="font-size: 14px; margin-left:3em;">Results</b><br><br>
 
