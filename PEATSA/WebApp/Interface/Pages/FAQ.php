@@ -16,7 +16,7 @@
 				var divs = new Array("acronym", "calculationTime", "state", "pKaCode", "calculationDifference", 
 						"calculationFormat", "weird", "chainbreak-error", "mainchain-error", "binding", "coloring",
 						"mutationList", "graph", "mutationColumn",
-						"resultsColumns", "colorScale", "jobTime", "units");
+						"resultsColumns", "colorScale", "jobTime", "units", "pka-error");
 			
 				//If the div's name is in the anchor don't hide it
 				//This allows urls linking to the question to arrive here with the question open
@@ -142,12 +142,11 @@
 		
 		<a name='pka-error' class='faq-question' onclick=ToggleElement("pka-error")>
 		I get the error "No pKa data corresponding to supplied code [some-code] is present" when trying to run a &Delta;pKa calculation?</a><br>
-		<div id="chainbreak-error" class='faq-answer'>
-		In order to run a &Delta;pKa you must previously have run a standard pKa calculation 
-		on your protein using <a href="http://enzyme.ucd.ie/cgi-bin/pKD/server_start.cgi">pKD Server</a>.
+		<div id="pka-error" class='faq-answer'>
+		In order to run a &Delta;pKa you must previously have prepared your protein using <a href="http://enzyme.ucd.ie/cgi-bin/pKD/server_start.cgi">pKD Server</a>.
 		This essentially precalculates information that can be used to accelerate any subsequent perturbation calculation
 		on that structure.
-		When you submit your protein to pKDServer the job get assigned a pKD Id (see question above). It is this code you
+		When you submit your protein to pKDServer your job gets assigned a pKD ID (see question above). It is this code you
 		must specify when submitting a &Delta;pKa calculation, in order that the correct information can be found.
 		</div>
 
