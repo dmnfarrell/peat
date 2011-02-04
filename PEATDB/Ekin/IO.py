@@ -716,8 +716,10 @@ class Importer:
 
         #add to ekin from here - easier for now...
         self.parent.mode_var.set(4)
-        self.parent.update_mode()
-        self.parent.insert_multiple_datasets(datasets, overwrite=self.overwrite_all.get())
+        #self.parent.update_mode()
+        #self.parent.insert_multiple_datasets(datasets, overwrite=self.overwrite_all.get())
+        for d in datasets:
+            self.parent.insertDataset(datasets[d],d)
 
         return
 

@@ -1420,7 +1420,7 @@ class amyloidFibreFormation(LM_Fitter):
         x0=variables[4]
         t=variables[5]
 
-        value = yi + mi*x + (yf+mf*x)/(1+math.exp((-x-x0)/t))
+        value = yi + mi*x + (yf+mf*x)/(1+math.exp(-(x-x0)/t))
         return value
         
          
