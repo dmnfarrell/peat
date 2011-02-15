@@ -1540,7 +1540,8 @@ class TitrationAnalyser():
         t = TitrationAnalyser()
         t.setResidueNames(E)
         t.setResidueNumbers(E)
-        t.setAtomTypes(E, atom=atom)        
+        if atom!=None:
+            t.setAtomTypes(E, atom=atom)        
         return E
         
     @classmethod

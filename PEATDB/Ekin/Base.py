@@ -74,7 +74,7 @@ class EkinProject(object):
                          'Bell-shaped pH-act profile (3 pKas)',
                          'Bell-shaped pH-act profile (2 pKas)',
                          'Sigmoid', 'Modified Hill', 'schellman',
-                         'Denaturation','diffDenaturation','Unfolding',
+                         'Chemical Denaturation','diffDenaturation','Unfolding',
                          'Residual Activity','Arrhenius',
                          'DSC2state','DSCindependent','DSC2stateIrreversible','DSC2stateIrreversibleII',
                          'Amyloid Fibre Formation'],
@@ -936,11 +936,11 @@ class EkinProject(object):
     def getFields(self):
         return self.__dict__.keys()
     
-    def addProject(self, E):
-        """Combine another project with the current one"""
+    def addProject(self, E, overwrite=False):
+        """Combine another project with the current one, duplicates are renamed"""
         import copy
-        for d in E.datasets:
-            edata = copy.deepcopy(E.getDataset(d))
+        for d in E.datasets:            
+            edata = copy.deepcopy(E.getDataset(d))            
             fitdata = E.getFitData(d)
             if d in self.datasets:
                 name = d + '_1'
@@ -948,11 +948,12 @@ class EkinProject(object):
                 name = d            
             self.insertDataset(edata, name, fit=fitdata)
             for field in self.ekinfields:
-                if not E.__dict__.has_key(field) or not type(E.__dict__[field]) is types.DictType():
+                if not E.__dict__.has_key(field):
                     continue
-                if E.__dict__[field].has_key(name):
-                    self.__dict__[field][name]=copy.deepcopy(E.__dict__[field][name])
-
+                #if E.__dict__.has_key(field):
+                #    print field, type(E.__dict__[field]), E.__dict__[field][name]                
+                if E.__dict__[field].has_key(name):   
+                    self.__dict__[field][name] = copy.deepcopy(E.__dict__[field][name])
         return
 
 #

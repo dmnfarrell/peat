@@ -156,16 +156,24 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
         """Show a list of all datasets in a table"""
         if self.showdatasetstable.get() == 1:              
             from PEATDB.Ekin.Tables import EkinProjModel, EkinProjTable
-            self.currentmodel = EkinProjModel(self.E)
-            self.datasetsframe = Frame(self.m)
-            self.m.add(self.datasetsframe,minsize=200)        
-            self.datasetstable = EkinProjTable(self.datasetsframe, self.currentmodel)       
-            self.datasetstable.createTableFrame()
+
             def plotselected():
                 datasets = self.datasetstable.get_selectedRecordNames()        
                 self.plotframe.plotCurrent(datasets=datasets, plotoption=self.overlayPlots.get())
-            b=Button(self.datasetsframe, text='plot selected', command=plotselected)
+            def createTable():
+                self.currentmodel = EkinProjModel(self.E)
+                self.datasetsframe = Frame(self.m)
+                self.m.add(self.datasetsframe,minsize=250)
+                self.datasetstable = EkinProjTable(self.datasetsframe, self.currentmodel)       
+                self.datasetstable.createTableFrame()
+            def refresh():
+                self.currentmodel = EkinProjModel(self.E)
+                self.datasetstable.redrawTable()
+            createTable()
+            b=Frame(self.datasetsframe)
             b.grid(row=3,column=1)
+            Button(b, text='plot selected', command=plotselected).pack(side=LEFT,fill=BOTH)
+            Button(b, text='refresh', command=refresh).pack(side=LEFT,fill=BOTH)
         else:
             self.m.forget(self.datasetsframe)
         return
@@ -303,9 +311,7 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
         self.view_menu.add_checkbutton(label='Show fit panel',command=self.updateView,
                                        variable=self.showfitpanel,onvalue=1,offvalue=0)        
         self.view_menu.add_checkbutton(label='Show datasets in table',command=self.showDatasetsTable,
-                                       variable=self.showdatasetstable,onvalue=1,offvalue=0)
-        self.view_menu.add_command(label='Hide sidepane',
-                                        command=lambda: self.hideSidePane)       
+                                       variable=self.showdatasetstable,onvalue=1,offvalue=0)     
         self.menu.add_cascade(label='View',menu=self.view_menu)
         
         # Help menu
@@ -1864,12 +1870,12 @@ class FitterPanel(Frame):
         if len(models)==0:
             return None
         print doall 
-        if doall==False:   
+        if doall == False:   
             res = Fitting.findBestModel(self.data, models)
         else: 
             E = self.parentapp.E
             E.fitDatasets(datasets='ALL', update=True, findbest=True, models=models) 
-           
+            res = None
         return res
 
     def showBestModelDialog(self):
@@ -1893,7 +1899,8 @@ class FitterPanel(Frame):
         for m in models:
             self.tempmodelvars[m]=IntVar(); self.tempmodelvars[m].set(0)
             Label(frame1,text=m).grid(row=r,column=0)
-            X=Fitting.getFitter(model=m)
+            X = Fitting.getFitter(model=m)
+            print X, m
             n = len(X.variables)
             Label(frame1,text=n).grid(row=r,column=1)
             Checkbutton(frame1,variable=self.tempmodelvars[m],
