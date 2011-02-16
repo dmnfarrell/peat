@@ -683,7 +683,7 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
             for name in newdata.keys():
                 if name in self.E.datasets:
                     if overwrite == 1:
-                        self.deleteDataset(name, confirm=None)
+                        self.deleteDataset(name, confirm=None, update=False)
                         self.insertDataset(newdata[name], name, update=None)
                 else:
                     self.insertDataset(newdata[name], name, update=None)

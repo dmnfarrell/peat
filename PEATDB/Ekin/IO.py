@@ -691,15 +691,13 @@ class Importer:
                     data[residue][pH]['both']=sparky.calc_delta_shift(h, n, href, nref ,f)
 
             #print data[residue]
-        #
-        # Delete all the other tabs first if needed
-        #
+        
+        # Delete all the other tabs first if needed        
         if self.removecurrent.get()==1:
             self.parent.delete_all()
 
-        #
-        # Insert the data if it's not already there, but ask to overwrite if it is!
-        #
+        
+        # Insert the data if it's not already there, but ask to overwrite if it is!        
         datasets = {}
         for peak in data.keys():
             num_vars=2
@@ -709,18 +707,13 @@ class Importer:
             for pH in data[peak].keys():
                 x.append(pH)
                 y.append(data[peak][pH][self.assigncol])
-                count=count+1
-            
-            #datasets[peak] = EkinConvert.xy2ekin([x,y])
+                count=count+1            
+           
 	    datasets[peak]=EkinDataset(xy=[x,y])
 
         #add to ekin from here - easier for now...
+	self.parent.insertMultipleDatasets(datasets, overwrite=self.overwrite_all.get())    
         self.parent.mode_var.set(4)
-        #self.parent.update_mode()
-        #self.parent.insert_multiple_datasets(datasets, overwrite=self.overwrite_all.get())
-        for d in datasets:
-            self.parent.insertDataset(datasets[d],d)
-
         return
 
     def import_chem_shift(self,event=None):
