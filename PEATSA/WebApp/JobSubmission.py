@@ -40,7 +40,14 @@ def GetPDB(pdbCode, dict={}):
 	url = "http://www.rcsb.org//pdb/download/downloadFile.do?fileFormat=pdb&compression=NO&structureId=" + pdbCode
 	 
 	try:
-		stream = urllib2.urlopen(url, None, 10)		
+		#URLLib API changed in 2.6
+		if sys.version_info[:2] == (2,5):
+			import socket
+			socket.setdefaulttimeout(10)
+			stream = urllib2.urlopen(url)		
+		else:
+			stream = urllib2.urlopen(url, None, timeout=10)		
+
 		#Check for an error
 		info = stream.info()
 		status = info.status
