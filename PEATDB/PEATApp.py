@@ -2281,7 +2281,7 @@ class App(Frame, GUI_help):
         import MySQLdb as mysql      
         mpDlg = MultipleValDialog(title='Create DB on Server',
                                     initialvalues=(self.server, self.port,
-                                                   self.project,'root','',''),
+                                                   self.project,'peatadmin','',self.username),
                                     labels=('server','port','project',
                                             'user','password','access list'),
                                     types=('string','int','string',
@@ -2301,14 +2301,14 @@ class App(Frame, GUI_help):
             c = db.cursor()    
             cmd = "create database " + dbname + ";"
             c.execute(cmd)
-            cmd = "grant all privileges on " + dbname + ".* to" + access + "@%;"
+            cmd = "grant all privileges on " + dbname + ".* to " + "'"+access+"'"+ "@'%';"            
             c.execute(cmd)
         except mysql.OperationalError, e:
             tkMessageBox.showinfo('Error',e)
             return
         self.connect(self, server=self.server, port=self.port,
                 project=dbname, backend=relstorage)
-        return        
+        return
     
     def set_geometry(self,pwidget,widget):
         """Set the position of widget in the middle of pwidget"""

@@ -198,7 +198,6 @@ class Options(object):
             self.redraw(options=self.opts)            
         return
 
-
     def plotSetup(self, data=None):
         """Plot options dialog"""
         
