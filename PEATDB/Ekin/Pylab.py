@@ -54,6 +54,7 @@ class Options(object):
         self.dpi = 300
         self.opts = {'shape':'o', 'markersize':20, 'grid':0,
                      'xscale':0, 'yscale':0, 'showlegend':0,
+                     'xlim':0, 'ylim':0,
                      'legendloc':'best', 'graphtype':'XY',
                      'linewidth':1.0, 'font':'monospace', 'fontsize':12,
                      'normalise':False, 'alpha':0.7, 'showerrorbars':False,
@@ -127,6 +128,10 @@ class Options(object):
         self.yscalevar = IntVar()
         self.xscalevar.set(0)
         self.yscalevar.set(0)
+        self.xlimvar = DoubleVar()
+        self.xlimvar.set(0)        
+        self.ylimvar = DoubleVar()
+        self.ylimvar.set(0)
         self.showerrorbarsvar = IntVar()
         self.showerrorbarsvar.set(self.showerrorbars)
         self.graphtypevar = StringVar()
@@ -162,6 +167,7 @@ class Options(object):
         """Apply the gui option vars to the plotter options"""
         self.setOptions(shape=self.pltsymbol.get(), grid=self.pltgrid.get(),
                xscale=self.xscalevar.get(), yscale=self.yscalevar.get(),
+               xlim=self.xlimvar.get(),ylim=self.ylimvar.get(),
                showlegend = self.pltlegend.get(),
                legendloc = self.legendlocvar.get(),
                linewidth = self.linewidthvar.get(),
@@ -186,6 +192,8 @@ class Options(object):
                 'ylabel':self.plotylabelvar.get(),
                 'logx':self.xscalevar.get(),
                 'logy':self.yscalevar.get(),
+                'xlim':self.xlimvar.get(),                          
+                'ylim':self.ylimvar.get(),
                 'grid':self.pltgrid.get(),
                 'graphtype':self.graphtypevar.get(),
                 'normalise':self.normalisevar.get(),
@@ -298,13 +306,17 @@ class Options(object):
         Checkbutton(frame2, text="grayscale", variable=self.grayscalevar,
                     onvalue=1, offvalue=0).grid(row=6,column=0,columnspan=2,sticky='news')                    
                     
-        scalesframe = LabelFrame(self.plotprefswin, text="Axes Scales")
+        scalesframe = LabelFrame(self.plotprefswin, text="Axes")
         scales={0:'norm',1:'log'}
         for i in range(0,2):
             Radiobutton(scalesframe,text='x-'+scales[i],variable=self.xscalevar,
                             value=i).grid(row=0,column=i,pady=2)
             Radiobutton(scalesframe,text='y-'+scales[i],variable=self.yscalevar,
                             value=i).grid(row=1,column=i,pady=2)
+        Label(scalesframe,text='xlim:').grid(row=2,column=0,padx=2,pady=2)  
+        Entry(scalesframe,textvariable=self.xlimvar,bg='white',relief=GROOVE).grid(row=2,column=1,padx=2,pady=2)
+        Label(scalesframe,text='ylim:').grid(row=3,column=0,padx=2,pady=2)  
+        Entry(scalesframe,textvariable=self.ylimvar,bg='white',relief=GROOVE).grid(row=3,column=1,padx=2,pady=2)  
         scalesframe.grid(row=1,column=0,sticky='news',padx=2,pady=2)
 
         row=row+1

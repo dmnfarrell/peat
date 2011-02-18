@@ -803,6 +803,13 @@ class EkinProject(object):
                 if abs(min(yd))>0.01 and max(yd)<1e4:               
                     major_formatter = plt.FormatStrFormatter('%2.2f')
                     ax.yaxis.set_major_formatter(major_formatter)
+
+            if prms.xlim!=0:                           
+                l = min(x)-prms.xlim; u=max(y)+prms.xlim
+                ax.set_xlim((l,u))                
+            if prms.ylim!=0:                          
+                l = min(y)-prms.ylim; u=max(y)+prms.ylim
+                ax.set_ylim((l,u))
                 
             legendlines.append(line)
             if self.__datatabs_fits__.has_key(name):
