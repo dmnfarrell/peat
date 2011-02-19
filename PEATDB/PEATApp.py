@@ -1762,6 +1762,8 @@ class App(Frame, GUI_help):
     def startDNAtool(self, data=None):
         """Start DNAtool - this function is far too long and should be simplified"""
         self.DNAtool_instance = None
+        if self.DB == None:
+            return        
         DB = self.DB
         D = DB.data
         M = DB.meta  #DNAtool/primers stuff is now stored in DB.meta
@@ -1920,12 +1922,13 @@ class App(Frame, GUI_help):
         import copy
         from Ekin.Ekin_main import EkinApp
 
+        if self.DB == None:
+            return
         D = self.DB.data
         #Get the data of the cell
         if protein and field_name:
             if D[protein].has_key(field_name):
-                E = copy.deepcopy(D[protein][field_name])
-                #E = D[protein][field_name]
+                E = copy.deepcopy(D[protein][field_name])                
             else:
                 E = None
             #add to open instances
@@ -1967,7 +1970,9 @@ class App(Frame, GUI_help):
 
     def startLabbook(self, protein=None, field_name=None):
         """Edit a labbook style sub-table"""
-
+        
+        if self.DB == None:
+            return 
         D = self.DB.data
         tabledata = None
         info = None
