@@ -230,7 +230,7 @@ class VantHoff(Plugin):
             a general unfolding equation that extracts baseline/slopes"""
         #fit baseline slopes and get intercepts
         print 'fitting to get baseline slopes and intercepts..'
-        A,X=Fitting.doFit(expdata=zip(x,y),model='Unfolding',conv=1e-4,noiter=100,silent=True)
+        A,X=Fitting.doFit(expdata=zip(x,y),model='Unfolding',conv=1e-2,noiter=40,silent=True)
         fity = X.getFitLine(x)        
         fd=X.getFitDict()
         if ax!=None:
@@ -281,14 +281,18 @@ class VantHoff(Plugin):
         if invert == True:
             y = [max(y)-i for i in y[:]] 
             
-        f=plt.figure(figsize=(10,10))
-        ax=f.add_subplot(221)
+        f=plt.figure(figsize=(18,6))
+        ax=f.add_subplot(131)
         p=ax.plot(x,y,'o',alpha=0.6)
         ax.set_xlabel('T(K)'); ax.set_ylabel('mdeg')
-        ax.set_title('raw data') 
+        ax.set_title('raw data')
 
-        x1,y1,x,y = self.transformCD(x,y,transwidth,ax)
-        
+        x1,y1,x,y = self.transformCD(x,y,transwidth,ax)        
+        cw=csv.writer(open('frac_unfolded_'+d+'.csv','w'))
+        cw.writerow(['temp','frac'])
+        for i in zip(x1,y1):
+            cw.writerow(i)
+            
         #derive lnK vs 1/T
         t=[]; k=[]
         for T,fu in zip(x,y):
@@ -300,12 +304,12 @@ class VantHoff(Plugin):
             t.append(1/T)
         if len(t)<2: return None, None, None
          
-        ax=f.add_subplot(222)
+        ax=f.add_subplot(132)
         p=ax.plot(x1,y1,'o',color='g',alpha=0.6)
         ax.set_xlabel('T(K)'); ax.set_ylabel('fu') 
         ax.set_title('fraction unfolded')
         
-        ax=f.add_subplot(223)
+        ax=f.add_subplot(133)
         p=ax.plot(t,k,'x',mew=2,color='black')
         ax.set_xlabel('1/T')#(r'$1/T ($K^-1)$') 
         ax.set_ylabel('ln K') 
@@ -327,13 +331,13 @@ class VantHoff(Plugin):
         #slope is deltaH/R/1000 in kJ
         deltaH = -fd['a']*self.R/1000
         deltaS = fd['b']*self.R/1000
-        f.suptitle("Method 1 - deltaH: %2.2f deltaS: %2.2f" %(deltaH,deltaS),size=18)
-        #f.subplots_adjust(vpsace=0.4)
+        f.suptitle("Method 1 - deltaH: %2.2f deltaS: %2.2f" %(deltaH,deltaS),size=18)        
+        f.subplots_adjust(bottom=0.15,top=0.85)
         
-        if show==True:            
+        if show==True:
             self.showTkFigure(f)
 
-        if figname == None: figname = d       
+        if figname == None: figname = d
         figname = figname.replace('.','_')
         fname = figname+'m1'+'.png'
         f.savefig(fname,dpi=300)

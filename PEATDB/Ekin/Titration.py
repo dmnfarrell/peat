@@ -1069,9 +1069,10 @@ class TitrationAnalyser():
         pylab.show()
         return
 
-    def compareProteinpKas(cls, pkas, prot1, prot2):
+    def comparepKas(cls, DB, col, prot1, prot2):
         """Compare extracted pKas across similar proteins and plot correlations per res"""
 
+        pkas = cls.extractpKas(DB, col)
         p1={};p2={};p1errs={};p2errs={}
         labels={}
         tp=['conserved','non-conserved']
