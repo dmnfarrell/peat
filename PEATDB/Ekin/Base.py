@@ -804,32 +804,33 @@ class EkinProject(object):
                     major_formatter = plt.FormatStrFormatter('%2.2f')
                     ax.yaxis.set_major_formatter(major_formatter)
 
-            if prms.xlim!=0:                           
-                l = min(x)-prms.xlim; u=max(y)+prms.xlim
-                ax.set_xlim((l,u))                
-            if prms.ylim!=0:                          
-                l = min(y)-prms.ylim; u=max(y)+prms.ylim
-                ax.set_ylim((l,u))
-                
             legendlines.append(line)
             if self.__datatabs_fits__.has_key(name):
                 f = self.__datatabs_fits__[name]
-                if not f.has_key('model'):
-                    continue
-                #create the required fitter
-                d=[]
-                X = Fitting.makeFitter(f, zip(x,y))
-                if X==None:
-                    continue
-                #we now use this model to draw the fit line
-                fitclr = lineclr
-                if plotoption != 3:
-                    fitclr='r'
-                if prms.grayscale==True:
-                    fitclr='0.4'
-                xx, fity = self.updateFit(X, ax, xdata[name], clr=fitclr,
-                                            normalise=prms.normalise, plotoption=plotoption)
-               
+                if f.has_key('model'):                    
+                    #create the required fitter
+                    d=[]
+                    X = Fitting.makeFitter(f, zip(x,y))
+                    if X==None:
+                        continue
+                    #we now use this model to draw the fit line
+                    fitclr = lineclr
+                    if plotoption != 3:
+                        fitclr='r'
+                    if prms.grayscale==True:
+                        fitclr='0.4'
+                    xx, fity = self.updateFit(X, ax, xdata[name], clr=fitclr,
+                                              normalise=prms.normalise,
+                                              plotoption=plotoption)
+
+            if prms.xlim!=0:
+                l = min(x)-prms.xlim; u=max(y)+prms.xlim
+                ax.set_xlim((l,u))
+                print l,u
+            if prms.ylim!=0: 
+                l = min(y)-prms.ylim; u=max(y)+prms.ylim
+                ax.set_ylim((l,u))
+                               
         if plotoption != 2:
             if prms.title == None or prms.title == '':
                 prms.title=name
