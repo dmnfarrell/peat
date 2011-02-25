@@ -358,7 +358,7 @@ class App(Frame, GUI_help):
         self.menu.add_cascade(label='View',menu=self.view_menu['var'])
 
         self.settings_menu={ '01General':{'cmd':self.showSettings},
-                             '02DB Specific Settings':{'cmd':self.editDBInfo},
+                             '02Project Info':{'cmd':self.editDBInfo},
                              '03Table Prefs':{'cmd':self.showtablePrefs},
                              '04sep':'',
                              '05Inspect DB Meta':{'cmd':self.inspectDBMeta},

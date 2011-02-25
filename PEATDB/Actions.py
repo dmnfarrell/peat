@@ -175,7 +175,7 @@ class DBActions(object):
             import Protool
             X=Protool.structureIO()
             X.parsepdb(DB.get(ref).Structure)
-          
+        print X 
         mset = Core.Data.mutationSetFromSequencesAndStructure(refseq, seq, X)
         #prot.Mutations = '+'.join(mset.mutationCodes())
         prot.Mutations = mset.codeString(X)
@@ -217,25 +217,27 @@ class DBActions(object):
             AlignmentMap = None
             
         #store it    
-        DB.storePDB(name, self.X, AlignmentMap)       
-        ref = DB.meta.refprotein
-        #if this is the reference protein remodel mutations and rewrite mut codes   
-        if name == ref:
-            print name, ref
-            print 'rechecking mutation codes, ref prot structure has changed'                
-            #get new mutation codes
-            import PEATSA.Core as Core
-            for p in DB.getRecs():
-                self.checkMutation(DB, p, ref, self.X)
-            #self.checkModels(DB) 
+        DB.storePDB(name, self.X, AlignmentMap)
+        if hasattr(DB.meta,'refprotein'):                
+            ref = DB.meta.refprotein
+            #if this is the reference protein remodel mutations and rewrite mut codes   
+            if name == ref:
+                print name, ref
+                print 'rechecking mutation codes, ref prot structure has changed'                
+                #get new mutation codes
+                import PEATSA.Core as Core
+                for p in DB.getRecs():
+                    self.checkMutation(DB, p, ref, self.X)
+                #self.checkModels(DB)
                 
         #add the original pdb name
         DB.data[name]['pdbname'] = pdbname
         return
 
-    def checkPDBSequence(self):
+    @classmethod
+    def checkPDBSequence(self, name):
         """Check the PDB sequence against a newly added structure, optional.
-           Adds the amino acod seq of the PDB file, overwriting the old one"""
+           Adds the amino acid seq of the PDB file, overwriting the old one"""
         # Extract the sequence
         import sequence_alignment
         pdb_1,ignored_res1=sequence_alignment.Protool2pir(self.X.sequence)
