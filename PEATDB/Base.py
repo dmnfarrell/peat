@@ -396,11 +396,11 @@ class zDatabase(object):
     def __repr__(self):
         return 'DB with %s records' %len(self.data.keys())
 
-    def importDict(self, importdata, namefield='name', overwrite=True):
+    def importDict(self, importdata, namefield='name', overwrite=True, mapnames={}):
         """Import list of dicts, each one is a record"""
         if len(importdata) == 0:
             return        
-        fields = importdata[0].keys()       
+        fields = importdata[0].keys()
         if not namefield in fields:
             print 'no such field for keyname field'
             namefield = fields[0]
@@ -412,9 +412,13 @@ class zDatabase(object):
         for d in importdata:
             name = d[namefield]
             self.add(name)
-            for f in fields:               
-                self.data[name][f] = d[f]        
-        #print self
+            for f in fields:
+                if f in mapnames:
+                    mf = mapnames[f]
+                else:
+                    mf = f
+                self.data[name][mf] = d[f]
+        
         return
 
     def importCSV(self, filename, namefield='name'):

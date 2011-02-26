@@ -318,7 +318,7 @@ class App(Frame, GUI_help):
                          '05Close DB':{'cmd':self.closeDB},
                          '06Save Changes':{'cmd':self.saveDB},
                          '07Save a Copy As':{'cmd':self.saveAs},
-                         '08Create DB on Server':{'cmd':self.createServerProject},
+                         '08Create DB on Server':{'cmd':self.createDBonServerDialog},
                          '09Undo Current Changes':{'cmd':self.undo},
                          '10Undo Previous Commits':{'cmd':self.showUndoLog},
                          '11Quit':{'cmd':self.quit}}
@@ -1437,24 +1437,29 @@ class App(Frame, GUI_help):
             return
         from PEATDB.IO import Importer
         IM = Importer()
-        IM.getLines()
+        result = IM.getLines()
+        if result==None: return
         IM.showimportDialog()
         self.wait_window(IM.ask_csv)
         #also get field for unique key
-        vals = IM.data[0].keys()
-        mpDlg = MultipleValDialog(title='Provide a Key Field',
-                                    initialvalues=([vals]),
-                                    labels=(['key field:']),
+        keys = IM.data[0].keys()
+        mpDlg = MultipleValDialog(title='Import Helper',
+                                    initialvalues=([keys]),
+                                    labels=(['Choose key field:']),
                                     types=(['list']),
                                     parent=self.main)
         if mpDlg.result == True:
-            key = mpDlg.results[0]
+            key = mpDlg.results[0]            
         else:
-            key = 'name'    
+            return
         self.DB.importDict(importdata=IM.data, namefield=key)
         self.updateTable()
         return
 
+    def importSequences(self):
+        """Import AA sequences"""
+        return
+    
     def importMutants(self):
         """Specialised import method for adding mutant data from a csv
         file. Requires a wt structure to create mutant AA sequences"""
@@ -2280,10 +2285,14 @@ class App(Frame, GUI_help):
         S.pack()        
         return
 
-    def createServerProject(self):
+    def createDBonServer(self):
+        
+        return
+        
+    def createDBonServerDialog(self):
         """Allow users with admin passwd to create a project
            on the remote MySql DB. Relstorage only."""        
-        import MySQLdb as mysql      
+        import MySQLdb as mysql
         mpDlg = MultipleValDialog(title='Create DB on Server',
                                     initialvalues=(self.server, self.port,
                                                    self.project,'peatadmin','',self.username),
@@ -2303,16 +2312,26 @@ class App(Frame, GUI_help):
         try:
             db = mysql.connect(user=user, host=server,
                                passwd=passwd, port=port)
-            c = db.cursor()    
-            cmd = "create database " + dbname + ";"
-            c.execute(cmd)
-            cmd = "grant all privileges on " + dbname + ".* to " + "'"+access+"'"+ "@'%';"            
-            c.execute(cmd)
+            c = db.cursor()
         except mysql.OperationalError, e:
             tkMessageBox.showinfo('Error',e)
             return
+        try:
+            cmd = "create database " + dbname + ";"
+            c.execute(cmd)
+        except Exception, e:
+            tkMessageBox.showinfo('Error',e)
+        try:   
+            cmd = "grant all privileges on " + dbname + ".* to " + "'"+access+"'"+ "@'%';"
+            print cmd
+            c.execute(cmd)
+            c.execute('flush privileges;')
+        except mysql.OperationalError, e:
+            tkMessageBox.showinfo('Error',e)
+            
+        self.recordEvent('Project successfully created on %s' %server)
         self.connect(self, server=self.server, port=self.port,
-                project=dbname, backend=relstorage)
+                project=dbname)
         return
     
     def set_geometry(self,pwidget,widget):

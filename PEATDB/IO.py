@@ -157,10 +157,13 @@ class Importer:
             filename=tkFileDialog.askopenfilename(defaultextension='.csv',
                                        initialdir=os.getcwd(),
                                        filetypes=[("csv","*.csv"),("All files","*.*")])
+        if filename=='':
+            self.lines = None
+            return None
         if os.path.isfile(filename):
             fd=open(filename)
             lines = fd.readlines()
-            fd.close()
+            fd.close()     
         self.lines = lines
         return lines
 
