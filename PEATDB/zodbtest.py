@@ -346,7 +346,7 @@ def testRelstorage():
     server='peat.ucd.ie'
     username='guest'
     password='123'
-    project='filestest'
+    project='test'
     port=8080
     adapter = MySQLAdapter(host=server, user=username,
                                     passwd=password, db=project, port=port)                           
@@ -357,6 +357,7 @@ def testRelstorage():
     connection = db.open()
     dbroot = connection.root()
     data = dbroot['data']
+    print data
     
     def addfile(fname):
         myblob = Blob()
@@ -367,9 +368,9 @@ def testRelstorage():
         print b.name
         b.close()
         return myblob
-    f='gogh.chambre-arles.jpg'
+    '''f='gogh.chambre-arles.jpg'
     b=addfile(f)
-    data['aaa'] = FileRecord(name=f,blob=b)
+    data['aaa'] = FileRecord(name=f,blob=b)'''
     #t = transaction.get()
     #t.commit()
     return
