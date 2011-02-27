@@ -46,6 +46,7 @@ from PEATDB.Dialogs import *
 import PEAT_images as PEAT_images
 import Table_images as Table_images
 from Actions import DBActions
+import Utils
 from Extfile import FileHandler
 from Prefs import Preferences
 from Plugins import Plugin
@@ -1917,7 +1918,7 @@ class App(Frame, GUI_help):
                     
                     #add a code for the mutation, this can be parsed to create
                     #a PEATSA mutationset later
-                    ref = self.DB.meta.refprotein      
+                    ref = self.DB.meta.refprotein
                     #DBActions.checkMutation(self.DB, record_name, ref)
                     self.updateTable(record_name, 'Mutations')                    
         return
@@ -2074,10 +2075,11 @@ class App(Frame, GUI_help):
         """Set a reference protein for making point mutation models"""
         if self.DB == None:
             return
-        cframe = self.createChildFrame(200)
-        Label(cframe,text='Ref Prot:').pack()
-        o = self.createRecsOptsMenu(cframe)
-        o.pack()
+        selected = self.table.get_selectedRecordNames()[0]
+        answer = tkMessageBox.askyesno("Changing ref protein",
+                                       'Change ref protein to %s?' %selected)
+        if answer:
+            self.DB.meta.refprotein = selected
         return
 
     def updateMutations(self):
@@ -2218,8 +2220,12 @@ class App(Frame, GUI_help):
             pdbid = mpDlg.results[0]
             recname = mpDlg.results[1]
             
-        pdb = DBActions.fetchPDB(pdbid)       
-        DBActions.addPDBFile(self.DB, recname, pdbdata=pdb)
+        stream = DBActions.fetchPDB(pdbid)
+        if stream == None:
+            tkMessageBox.showinfo('info',
+                                  'failed to retrieve the structure')
+            return
+        DBActions.addPDBFile(self.DB, recname, pdbdata=stream, pdbname=pdbid)
         self.updateTable()
         return
     

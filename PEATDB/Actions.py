@@ -182,7 +182,8 @@ class DBActions(object):
         return
         
     @classmethod
-    def addPDBFile(self, DB=None, name=None, pdbfile=None, pdbdata=None):
+    def addPDBFile(self, DB=None, name=None, pdbfile=None,
+                       pdbdata=None, pdbname=None):
         """Add a PDB file to the record given as argument"""
         import os, tkMessageBox
         if pdbdata == None and pdbfile == None:
@@ -195,7 +196,8 @@ class DBActions(object):
                                                     ("All files","*.*")])
             if not pdbfile:
                 return
-        pdbname = os.path.basename(pdbfile)
+        if pdbfile:    
+            pdbname = os.path.basename(pdbfile)
         import Protool
         self.X=Protool.structureIO()
         # Extracting PDB_code from pdbfile
@@ -312,18 +314,12 @@ class DBActions(object):
     @classmethod    
     def fetchPDB(self, pdbid):
         import urllib
-        url = 'http://www.rcsb.org/pdb/files/%s.pdb' % pdbid
-       
-        stream = urllib.urlopen(url).read()
-        info = stream.info()
-        status = info.status
-        if status is not "":
-            return None            
-        elif not info.has_key('content-disposition'):
-            return None
-        elif len(pdb) < 10:
+        url = 'http://www.rcsb.org/pdb/files/%s.pdb' % pdbid       
+        stream = urllib.urlopen(url).read()           
+        if stream.startswith('<html>') or len(stream)<10:
             return None
         else:
+            print 'pdb file %s found' %pdbid
             return stream
 
     @classmethod

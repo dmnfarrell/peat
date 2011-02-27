@@ -394,6 +394,8 @@ class zDatabase(object):
         return self.data[key]
 
     def __repr__(self):
+        if not hasattr(self, 'data'):
+            return 'This DB has no data, it has failed to load'
         return 'DB with %s records' %len(self.data.keys())
 
     def importDict(self, importdata, namefield='name', overwrite=True):

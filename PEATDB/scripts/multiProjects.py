@@ -30,6 +30,7 @@ import pickle, sys, os, copy, time, types
 import numpy
 from PEATDB.Base import PDatabase 
 from PEATDB import Utils
+from PEATDB.Actions import DBActions
 from PEATDB.plugins.PEATSAplugin import PEATSAPlugin
 from PEATDB.plugins.Correlation import CorrelationAnalyser
 from PEATDB.PEATTables import PEATTableModel
@@ -37,11 +38,31 @@ import matplotlib.pyplot as plt
 
 settings={'server':'peat.ucd.ie','username':'guest',
            'password':'123'}
-path = '/home/farrell/Desktop/SADBPaperData/projects'
+path = '/home/farrell/Desktop/SADBPaperData/'
+savepath = os.path.join(path,'projects')
 dbnames = ['1a2p.fs','1bf4.fs']
 
-def createStabilityJobs():
+def submitPEATSAJobs():
     """do PEATSA runs for all projects"""
+    return
+
+def createProjects():
+    """Create multiple projects at once from csv files"""
+
+    csvfiles = os.listdir(path)[:2]
+    for filename in csvfiles:
+        print filename
+        name = os.path.splitext(filename)[0]
+        #create/open db
+        DB = PDatabase(local=os.path.join(savepath,name))
+        DB.add('wt')
+        #add wt pdb
+        stream = DBActions.fetchPDB(name)
+        DBActions.addPDBFile(DB, 'wt', pdbdata=stream, pdbname=name)        
+        DB.meta.refprotein = 'wt'
+        #import data from csv
+        
+        DB.commit()
     return
 
 def summarise(projects):
@@ -63,6 +84,6 @@ def summarise(projects):
     return
 
 if __name__ == '__main__':
-    
-    summarise(dbnames)
+    createProjects()    
+    #summarise(dbnames)
   

@@ -30,36 +30,76 @@ import pickle, sys, os, copy, time, types
 import numpy
 from PEATDB.Base import PDatabase 
 
-"""Factory methods for handling PEAT Datbases, such as combining
+"""Helper methods for handling PEAT Datbases, such as copying, merging
    two databases"""
 
-def loadDB(prj, remote=True, settings={}):
+settings={'server':'localhost','username':'guest',
+           'password':'123'}
+
+def loadDB(prj, remote=False, settings={}):
     """Load a local or remote db, settings are the remote db arguments
        such as server, username, password and project name"""
     if remote==True:
-        DB = PDatabase(**settings)
+        DB = PDatabase(project=prj,**settings)
     else:
         DB = PDatabase(local=prj)
     return DB
 
-def combineDBs(db1, db2):
-    """Combine tow databases"""
-    comb = PDatabase()
-    return comb
+def mergeDBs(DB1, DB2):
+    """Combine two databases"""
+    newDB = PDatabase()
+    return newDB
 
-def createDBonServer(self, settings={}, callback=None):
+def copyDB(DB1, DB2, overwrite=True):
+    """Copy one db to another"""
+    count=0
+    for r in DB1.getRecs():
+        rec = copy.deepcopy(DB1.data[r])
+        DB2.add(r, record=rec)
+        count+=1
+    for m in DB1.meta.keys():
+        DB2.meta[m] = copy.deepcopy(DB1.meta[m])
+    print 'copied db successfully'
+    return DB2
+
+def saveDBCopy(DB, filename, callback=None):
+    """Save local copy of a remote or another local DB"""
+    import copy
+    total = len(DB.getRecs())
+    if filename == '' or filename == None:
+        return False
+    if os.path.exists(filename):
+        for i in ['.lock','.index','']:
+            os.remove(filename+i)
+    newDB = PDatabase(local=filename)
+    newDB = copyDB(DB, newDB)
+    newDB.commit()    
+    newDB.close() 
+    return newDB
+
+def createDBonServer(prj, settings={}, callback=None):
     """Create a project on the mysql server"""
     import MySQLdb as mysql
     db = mysql.connect(**settings)
     c = db.cursor()
-    cmd = "create database " + dbname + ";"
+    cmd = "create database " + prj + ";"
     c.execute(cmd)
     return True
     
-def copyDBtoServer(localdb, remotedb):
+def copyDBtoServer(DB, prj, settings):
     """Copy the contents of a local db to a remote one, requires
-      that user has already made the remote connection and passes
+      settings to make the remote connection and get
       the remote db object"""
-    
+    remoteDB = loadDB(prj, remote=True, settings=settings)
+    print DB, remoteDB
+    newDB = copyDB(DB, remoteDB)
+    newDB.commit(note='copy')
     return True
                    
+if __name__ == '__main__':
+    #test    
+    db = loadDB(os.path.join('scripts','testing.fs'))
+    print db
+    #db1 = saveDBCopy(db, filename='test1')
+    copyDBtoServer(db, 'test1', settings)
+    
