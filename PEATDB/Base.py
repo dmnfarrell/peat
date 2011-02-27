@@ -396,7 +396,7 @@ class zDatabase(object):
     def __repr__(self):
         return 'DB with %s records' %len(self.data.keys())
 
-    def importDict(self, importdata, namefield='name', overwrite=True, mapnames={}):
+    def importDict(self, importdata, namefield='name', overwrite=True):
         """Import list of dicts, each one is a record"""
         if len(importdata) == 0:
             return        
@@ -413,11 +413,10 @@ class zDatabase(object):
             name = d[namefield]
             self.add(name)
             for f in fields:
-                if f in mapnames:
-                    mf = mapnames[f]
-                else:
-                    mf = f
-                self.data[name][mf] = d[f]
+                try:
+                    self.data[name][f] = float(d[f])
+                except:
+                    self.data[name][f] = d[f]
         
         return
 

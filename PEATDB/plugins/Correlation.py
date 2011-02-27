@@ -195,15 +195,16 @@ class CorrelationAnalyser(Plugin):
                           title='',
                           xlabel='Predicted',
                           ylabel='Experimental',
-                          limit=None, side=LEFT):
+                          limit=None, side=LEFT, fig=None):
         """Show exp vs pred. for a set of x-y values """
         
         #check if x and y are number cols and round
         x=[round(float(i),2) for i in x]
         y=[round(float(i),2) for i in y]
    
-        colors = ['b','g','r','y','m','c']        
-        fig = plt.figure(figsize=(6,6))
+        colors = ['b','g','r','y','m','c']
+        if fig == None:
+            fig = plt.figure(figsize=(6,6))
         ax = fig.add_subplot(111)
         ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)

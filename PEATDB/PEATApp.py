@@ -2284,10 +2284,6 @@ class App(Frame, GUI_help):
         S = searchDialog(self.sidepane, self.DB)        
         S.pack()        
         return
-
-    def createDBonServer(self):
-        
-        return
         
     def createDBonServerDialog(self):
         """Allow users with admin passwd to create a project

@@ -43,7 +43,7 @@ from PEATDB.Tables import TableCanvas
 import tkMessageBox, tkSimpleDialog
 
 class SummaryPlugin(Plugin):
-    """Plugin for PEAT that enables several projects to be sumamrised together"""
+    """Plugin for PEAT that enables several projects to be summarised together"""
     capabilities = ['gui']
     requires = ['PEATSA']
     menuentry = 'Summary Plugin'
@@ -51,6 +51,8 @@ class SummaryPlugin(Plugin):
                    'quit':'Close Window'}
     buttonorder = ['createJobDialog','fetchJob','editConfigFile','help','quit']
     about = 'This plugin allows several projects to be sumamrised together'    
+
+    projects = {}
     
     def main(self, parent=None, DB=None):       
         if parent==None:
@@ -77,5 +79,23 @@ class SummaryPlugin(Plugin):
         self.stdout2Log()
         return
     
-
+    def add(self, db):
+        """Add db to projects"""
+        name = db.meta.info['project']
+        self.projects[name] = db
+        
+    def setup(self, fields):
+        return
     
+    def populate(self):
+        """Clear the current data and populate with db data
+           from dbs in projects dictionary"""
+
+        print self.DB
+        if self.DB == None:
+            return
+        for db in self.projects:
+            recs = db.getRecs()
+        
+            
+        
