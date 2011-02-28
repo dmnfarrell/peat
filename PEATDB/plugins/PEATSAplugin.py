@@ -74,6 +74,7 @@ class PEATSAPlugin(Plugin):
         return
 
     def setupConnection(self):
+        """Set up connection"""
         homepath = os.path.expanduser("~") 
         self.confpath = os.path.join(homepath, 'peatsa.conf')
         if os.path.exists(self.confpath):    
@@ -416,8 +417,12 @@ class PEATSAPlugin(Plugin):
         self.jobManager.logJobStates('jobstates.log')
         #add job to peat database
         self.storeJob(name, job)
-        self.DB.commit(note='peatsa job',user=self.parent.username)  
-        self.updateJobs()
+        if self.parent != None:
+            username = self.parent.username
+            self.updateJobs()
+        else:
+            username = None
+        self.DB.commit(note='peatsa job',user=username)
         print 'job submitted successfully'
         return
 

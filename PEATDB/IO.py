@@ -39,7 +39,13 @@ class Importer:
         self.parent = parent
         self.data = None
         return
-   
+
+    def quickImport(self, sep=',',startnum):
+        """Non gui import"""
+        lines = self.lines
+        data = []        
+        return
+    
     def doImport(self, event=None):
         """This does the import using the current dialog options
            and shows a preview. Only works within GUI context."""
@@ -163,7 +169,7 @@ class Importer:
         if os.path.isfile(filename):
             fd=open(filename)
             lines = fd.readlines()
-            fd.close()     
+            fd.close()
         self.lines = lines
         return lines
 

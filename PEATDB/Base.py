@@ -418,16 +418,17 @@ class zDatabase(object):
                 try:
                     self.data[name][f] = float(d[f])
                 except:
-                    self.data[name][f] = d[f]
-        
+                    self.data[name][f] = d[f]        
         return
 
     def importCSV(self, filename, namefield='name'):
         """Import from a CSV file"""
-        from IO import Importer
-        IM = Importer()
-        importdata = IM.doImport(filename)
-        self.importDict(importdata, namefield)
+        import csv
+        dr = csv.DictReader(open(filename,'r'))
+        data = []
+        for r in dr:            
+            data.append(r)        
+        self.importDict(data, namefield)
         return
 
     def addFile(self, blob):

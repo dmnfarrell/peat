@@ -38,18 +38,32 @@ import matplotlib.pyplot as plt
 
 settings={'server':'peat.ucd.ie','username':'guest',
            'password':'123'}
-path = '/home/farrell/Desktop/SADBPaperData/'
+path = '/home/people/farrell/Desktop/SADBPaperData/'
 savepath = os.path.join(path,'projects')
 dbnames = ['1a2p.fs','1bf4.fs']
 
-def submitPEATSAJobs():
+def submitPEATSAJobs(prjs):
     """do PEATSA runs for all projects"""
+    for name in prjs:
+        DB = PDatabase(local=os.path.join(savepath,name))        
+        PS = PEATSAPlugin()
+        PS.main(DB=DB)
+        pdb = DB['wt'].Structure
+        mutlist = []
+        for p in DB.getRecs():
+            mutlist.append(DB.get(p).Mutations)
+        #print mutlist
+        pdbfile = PS.writetempPDB()    
+        PS.submitJob(name='mycalc', pdbname=DB.meta.refprotein, pdbfile=pdbfile, 
+                     mutations=mutlist, calcs=['stability'], meta={'protein':name})
+        PS.jobManager.stopLogging()
+        
     return
 
 def createProjects():
     """Create multiple projects at once from csv files"""
 
-    csvfiles = os.listdir(path)[:2]
+    csvfiles = os.listdir(path)[:2]    
     for filename in csvfiles:
         print filename
         name = os.path.splitext(filename)[0]
@@ -58,10 +72,11 @@ def createProjects():
         DB.add('wt')
         #add wt pdb
         stream = DBActions.fetchPDB(name)
-        DBActions.addPDBFile(DB, 'wt', pdbdata=stream, pdbname=name)        
+        DBActions.addPDBFile(DB, 'wt', pdbdata=stream, pdbname=name, gui=False)        
         DB.meta.refprotein = 'wt'
         #import data from csv
-        
+        DB.importCSV(os.path.join(path,filename), namefield='Mutations')
+        #DB.deleteField('PDB')
         DB.commit()
     return
 
@@ -84,6 +99,7 @@ def summarise(projects):
     return
 
 if __name__ == '__main__':
-    createProjects()    
-    #summarise(dbnames)
+    #createProjects()
+    #submitPEATSAJobs(['1a2p','2chf'])
+    summarise(dbnames)
   

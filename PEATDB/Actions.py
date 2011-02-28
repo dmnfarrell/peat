@@ -183,7 +183,7 @@ class DBActions(object):
         
     @classmethod
     def addPDBFile(self, DB=None, name=None, pdbfile=None,
-                       pdbdata=None, pdbname=None):
+                       pdbdata=None, pdbname=None, gui=True):
         """Add a PDB file to the record given as argument"""
         import os, tkMessageBox
         if pdbdata == None and pdbfile == None:
@@ -208,15 +208,16 @@ class DBActions(object):
             # Try to read it using Protool    
             try:
                 self.X.readpdb(filename=pdbfile)
-            except:                
+            except:
                 tkMessageBox.showwarning('Error reading PDB file',
                                          'I could not read the PDB file. This probably means that the PDB file is corrupt in some way.')
                 return
-
-        if tkMessageBox.askyesno('Reset AA Seq?', 'Do you want to reset the amino acid Sequence?'):      
-            AlignmentMap = self.checkPDBSequence(name)
-        else:
-            AlignmentMap = None
+            
+        AlignmentMap = None    
+        if gui==True:
+            if tkMessageBox.askyesno('Reset AA Seq?',
+                                     'Do you want to reset the amino acid Sequence?'):      
+                AlignmentMap = self.checkPDBSequence(name)               
             
         #store it    
         DB.storePDB(name, self.X, AlignmentMap)
