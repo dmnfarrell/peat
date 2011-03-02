@@ -111,7 +111,7 @@ class EkinProject(object):
         else:
             self.protein_name=protein
         self.field=field
-
+        self.filename = None
         #create IO vars
         self.savedir = os.getcwd()
 
@@ -122,8 +122,7 @@ class EkinProject(object):
             #just load the data
             self.loadData(data)
         self.current = None    #track 'current' dataset
-        self.length = 0
-        self.filename = None
+        self.length = 0        
         return
 
     def loadData(self, data=None):
@@ -402,8 +401,7 @@ class EkinProject(object):
         if filename==None:
             return
         if os.path.splitext(filename)[1] == '':
-            filename = filename + '.ekinprj'
-        #print filename
+            filename = filename + '.ekinprj'        
         if not os.path.exists(filename):
             #print 'no such file'
             return None
@@ -416,13 +414,14 @@ class EkinProject(object):
                 fd.close()
 
         self.loadData(data)
-        self.filename = filename
+        self.filename = filename       
         return
 
     def saveProject(self, filename=None):
         """Save data to an ekin project file"""
         if filename == None:
             if not hasattr(self, 'filename') or self.filename==None:
+                print 'no filename'
                 return
             else:
                 filename=self.filename

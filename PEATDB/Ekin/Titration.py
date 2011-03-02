@@ -894,7 +894,6 @@ class TitrationAnalyser():
         """Make combined chem shft and fit,then compare to originals"""
 
         proteins = ekindata1.keys()
-
         ekindatac = {}
         E1 = EkinProject(ekindata1)
         E2 = EkinProject(ekindata2)
@@ -925,12 +924,100 @@ class TitrationAnalyser():
                 f, p = Ec.findBestModel(d, models=cls.models, strictchecking=True, alpha=0.05)
             Ec.saveProject(name[:5]+'_combined')
             ekindatac[prot] = Ec.prepare_data()
-
         return 
 
+    def getClosest(cls, val, pkas):
+        #print val ,pkas
+        c=100
+        ind=0
+        for j in pkas:
+            d=abs(val - j)
+            if d < c:
+                c=d
+                ind=pkas.index(j)
+        return pkas[ind]
+
+    def comparepKas(cls, E1, E2, d, titratable=False):
+        """Compare pKas from fits in two ekin datasets
+           returns:
+               None if fails to fins meaningful pKas from fits
+               otherwise returns tuple of results"""
+        reliable=True
+        try:    
+            res1 = E1.getMetaData(d)['residue']
+        except:
+            res1 = cls.getResidue(E1.getDataset(d))             
+        if titratable == True and not res1 in cls.titratable:
+            return None
+        fitdata1 = E1.getFitData(d)
+        fitdata2 = E2.getFitData(d)
+        if len(fitdata1)<1:
+            return None
+        model1 = fitdata1['model']
+        model2 = fitdata2['model']
+        if model1 != model2:
+            print 'diff model'
+            return None
+        
+        p1,p1val,sp1 = cls.getMainpKa(fitdata1, res=res1)#,strict=False)
+        p2,p2val,sp2 = cls.getMainpKa(fitdata2, res=res1)#,strict=False)
+        allpkas1,allpkvals1,allsp1 = cls.getallpKas(fitdata1,minspan=0.03)
+        allpkas2,allpkvals2,allsp2 = cls.getallpKas(fitdata2,minspan=0.03)
+        
+        if p1val != None and p2val != None and len(allpkas1) > 0 and len(allpkas2) > 0:
+            pchk = cls.getClosest(p1val, allpkvals2)
+            print d, p1val, p2val, pchk
+            if p2val != pchk:
+                p2val = pchk
+        else:
+            if p1val != None and p2val == None:
+                if len(allpkas2) > 0:
+                    p2val = cls.getClosest(p1val, allpkvals2)                    
+                else:
+                    return None
+            elif p2val != None and p1val == None:
+                if len(allpkas1) > 0:
+                    p1val = cls.getClosest(p2val, allpkvals1)     
+                else:
+                    return None
+            reliable = False    
+            
+        return p1val, p2val, sp1, sp2, reliable
+
+    def compareAllpKas(cls, E1, E2, titratable=False):
+        """Compare all pKas from 2 ekin projects"""
+        relpkas1=[]
+        relpkas2=[]
+        relspans1=[]
+        relspans2=[]        
+        otherpkas1=[]
+        otherpkas2=[]
+        names=[]
+        
+        for d in E1.datasets:        
+            if not d in E2.datasets: continue
+            X = cls.comparepKas(E1, E2, d)
+            if X == None:
+                continue
+            p1val, p2val, sp1, sp2, rel = X
+            if rel == True:
+                relpkas1.append(p1val)
+                relpkas2.append(p2val)     
+                relspans1.append(sp1)
+                relspans2.append(sp2)
+                names.append(d)
+            else:
+                otherpkas1.append(p1val)
+                otherpkas2.append(p2val)        
+            
+        print 'reliable pkas matched:', len(relpkas1)
+        print 'others:', len(otherpkas1)
+
+        return relpkas1, relpkas2, otherpkas1, otherpkas2, relspans1, relspans2, names
+
     def compareNuclei(cls, DB, col1, col2, names=None, titratable=True):
-        """Compare corresponding datasets for a protein that has data
-          for 2 different NMR nuclei e.g. 1H vs 15N """
+        """Compare corresponding datasets for proteins that have data
+          for 2 different NMR nuclei e.g. 1H vs 15N over entire DB"""
 
         relpkas1=[]
         relpkas2=[]
@@ -938,8 +1025,7 @@ class TitrationAnalyser():
         relspans2=[]        
         otherpkas1=[]
         otherpkas2=[]
-        outliers=[]
-        otherannotate=[]
+        names=[]
         pkasbyres1={}
         pkasbyres2={}
         for t in cls.residue_list:
@@ -947,16 +1033,6 @@ class TitrationAnalyser():
             pkasbyres2[t]=[]
      
         cls.getProtNames(DB)    
-        def getClosest(val, pkas):
-            #print val ,pkas
-            c=100
-            ind=0
-            for j in pkas:
-                d=abs(val - j)
-                if d < c:
-                    c=d
-                    ind=pkas.index(j)
-            return pkas[ind]
 
         for prot in DB.getRecs():           
             name = cls.protnames[prot]
@@ -967,76 +1043,23 @@ class TitrationAnalyser():
             if not DB[prot].has_key(col1) or not DB[prot].has_key(col2):
                 continue
             E1 = DB[prot][col1]
-            E2 = DB[prot][col2]
-            for dataset in E1.datasets:
-                if dataset in cls.excluded or not dataset in E2.datasets:
-                    continue
-                try:    
-                    res1 = E1.getMetaData(dataset)['residue']
-                except:
-                    res1 = cls.getResidue(E1.getDataset(dataset))             
-                
-                if titratable == True and not res1 in cls.titratable:
-                    continue
-                fitdata1 = E1.getFitData(dataset)
-                fitdata2 = E2.getFitData(dataset)
-                if len(fitdata1)<1:
-                    continue
-                model1 = fitdata1['model']
-                model2 = fitdata2['model']
-
-                p1,p1val,sp1 = cls.getMainpKa(fitdata1, res=res1)#,strict=False)
-                p2,p2val,sp2 = cls.getMainpKa(fitdata2, res=res1)#,strict=False)
-                allpkas1,allpkvals1,allsp1 = cls.getallpKas(fitdata1,minspan=0.03)
-                allpkas2,allpkvals2,allsp2 = cls.getallpKas(fitdata2,minspan=0.03)
-                
-                if p1val != None and p2val != None and len(allpkas1) > 0 and len(allpkas2) > 0:
-                    #print dataset, p1val, p2val, model1, model2
-                    #print 'pkas1:', allpkas1, 'pkas2:', allpkas2
-                    #we check if we are actually comparing the closest pkas
-                    pchk = getClosest(p1val, allpkvals2)
-                    print dataset, p1val, p2val, pchk
-                    if p2val != pchk:
-                        p2val = pchk
-                        #continue
-                    relpkas1.append(p1val)
-                    relpkas2.append(p2val)
-                    relspans1.append(sp1)
-                    relspans2.append(sp2)                   
-                    pkasbyres1[res1].append(p1val)
-                    pkasbyres2[res1].append(p2val)
-                    if abs(p1val-p2val) > 2:
-                        txt=dataset+' '+prot[:4]
-                        outliers.append(((p1val,p2val),txt))
-                else:
-                    #if we can't find a main pKa for one of them, we set the other to the
-                    #closest pka we can find, less strict..
-                    if p1val != None and p2val == None:
-                        if len(allpkas2) > 0:
-                            p2val = getClosest(p1val, allpkvals2)
-                            #print p2val, max(allpkas2)
-                        else:
-                            continue
-                    elif p2val != None and p1val == None:
-                        if len(allpkas1) > 0:
-                            p1val = getClosest(p2val, allpkvals1)
-                            #p1val = max(allpkas1)
-                        else:
-                            continue
-                    else:
-                        continue
-                    otherpkas1.append(p1val)
-                    otherpkas2.append(p2val)                    
-                    #pkasbyres1[res1].append(p1val)
-                    #pkasbyres2[res1].append(p2val)
-      
+            E2 = DB[prot][col2]            
+            
+            X = compareAllpKas(E1, E2, exclude=cls.excluded)
+            rp1, rp2, op1, rsp1, rsp2, op2, n = X
+            relpkas1.extend(rp1)
+            relpkas2.extend(rp2)
+            otherpkas1.extend(op1)
+            otherpkas2.extend(op2)
+            names.extend(n)
+            
         print 'reliable pkas matched:', len(relpkas1)
         print 'others:', len(otherpkas1)
    
         f=pylab.figure(figsize=(10,20))
         ax1=f.add_subplot(211)
         ax2=f.add_subplot(212)
-        cc = cls.doXYPlot(ax1, relpkas1, relpkas2, annotate=outliers,
+        cc = cls.doXYPlot(ax1, relpkas1, relpkas2, names=names,
                         title='15N vs 1H : reliable pKas', xlabel='15N', ylabel='1H')
         print 'reliable pKas, correl coeff:', cc
         cc = cls.doXYPlot(ax2, otherpkas1, otherpkas2, color='r',
@@ -1069,7 +1092,7 @@ class TitrationAnalyser():
         pylab.show()
         return
 
-    def comparepKas(cls, DB, col, prot1, prot2):
+    def compareExtractedpKas(cls, DB, col, prot1, prot2):
         """Compare extracted pKas across similar proteins and plot correlations per res"""
 
         pkas = cls.extractpKas(DB, col)
@@ -1880,11 +1903,21 @@ class TitrationAnalyser():
             i=i+1
 
         return
+    
+    @classmethod
+    def rmse(cls, ar1, ar2):
+        """Mean squared error"""
+        ar1 = numpy.asarray(ar1)
+        ar2 = numpy.asarray(ar2)
+        dif = ar1 - ar2
+        dif *= dif
+        return numpy.sqrt(dif.sum()/len(ar1))
 
     @classmethod
-    def doXYPlot(cls, ax, x, y, annotate=None, title=None, xerrs=None, yerrs=None,
+    def doXYPlot(cls, ax, x, y, names=None, err=0.5,
+                    title=None, xerrs=None, yerrs=None,
                     xlabel=None, ylabel=None,
-                    xaxislabels=None, color=None, symbol=None, markersize=20):
+                    xaxislabels=None, color=None, symbol=None, markersize=50):
         """Do xy plot of 2 lists and show correlation
            annotate is a list of tuples with x,y coord and text to print at that pt"""
            
@@ -1898,36 +1931,39 @@ class TitrationAnalyser():
             symb = 'o'
         else:
             symb = symbol
-        #ax=fig.add_subplot(111)
 
-        cc = numpy.corrcoef(numpy.array([x,y]))
-        #print 'corr. coeff.:', cc[0][1]
-        cl = numpy.arange(min(x)-2,max(x)+2)
-        ax.plot(cl, cl, 'black', lw=2, alpha=0.3)
-        ax.scatter(x, y, facecolor=clr, marker=symb, s=markersize, linewidth=0.8,
+        if min(x)<min(y): a=min(x)-1
+        else: a=min(y)-1
+        if max(x)>max(y): b=max(x)+1
+        else: b=max(y)+1    
+        
+        ax.plot((a,b),(a,b),color='black')
+        ax.scatter(x, y, facecolor=clr, marker=symb, s=markersize, 
                             picker=4, alpha=0.6)
 
-        if annotate!=None:
-            for an in annotate:
-                x,y=an[0]
-                txt=an[1]
-                c = pylab.Circle((x, y), 0.2,fill=False,alpha=0.7)
-                ax.add_patch(c)
-                '''ax.annotate(txt, xy=(x+0.05,y),
-                        xycoords='data', size=8,
-                        horizontalalignment='left', verticalalignment='bottom' )'''
-              
-        #ax.axis([1,9,1,9])
+        if names!=None:
+            c=0
+            for i in zip(x,y):                
+                if abs(i[0]-i[1])>err:  
+                    #z = pylab.Circle((i[0], i[1]), 0.2,fill=False,alpha=0.7)
+                    #ax.add_patch(z)
+                    ax.annotate(names[c], (i[0]+0.1, i[1]-0.2),
+                                xytext=None, textcoords='data',
+                                fontsize=10)
+                c+=1
+                    
         ax.set_title(title)
         ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)
-        ax.set_xlim(0,12)
-        ax.set_ylim(0,12)
         if xaxislabels != None:         
             ax.set_xticklabels(xaxislabels, rotation='vertical', fontproperties=ft)
         if xerrs!=None or yerrs!=None:
             errline = ax.errorbar(x, y, xerr=xerrs, yerr=yerrs, fmt=None,
                                         elinewidth=.5, ecolor=clr, alpha=0.7)
+        ax.set_xlim(a,b); ax.set_ylim(a,b)    
+        cc = numpy.corrcoef(numpy.array([x,y]))        
+        print 'corr. coeff:', cc[0][1]
+        print 'RMSE:', cls.rmse(x,y)
         return cc[0][1]
 
     @classmethod
