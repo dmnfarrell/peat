@@ -937,7 +937,7 @@ class TitrationAnalyser():
                 ind=pkas.index(j)
         return pkas[ind]
 
-    def comparepKas(cls, E1, E2, d, titratable=False):
+    def comparepKas(cls, E1, E2, d, titratable=False, errcutoff=1e2):
         """Compare pKas from fits in two ekin datasets
            returns:
                None if fails to fins meaningful pKas from fits
@@ -963,10 +963,14 @@ class TitrationAnalyser():
         p2,p2val,sp2 = cls.getMainpKa(fitdata2, res=res1)#,strict=False)
         allpkas1,allpkvals1,allsp1 = cls.getallpKas(fitdata1,minspan=0.03)
         allpkas2,allpkvals2,allsp2 = cls.getallpKas(fitdata2,minspan=0.03)
-        
+
         if p1val != None and p2val != None and len(allpkas1) > 0 and len(allpkas2) > 0:
             pchk = cls.getClosest(p1val, allpkvals2)
-            #print d, p1val, p2val, pchk
+            perr1 = round(E1.getMeta(d, 'exp_errors')[p1][1],4)
+            perr2 = round(E2.getMeta(d, 'exp_errors')[p1][1],4)            
+            print d, p1val, p2val, perr1, perr2
+            print errcutoff
+            if perr1>errcutoff or perr2>errcutoff: return None
             if p2val != pchk:
                 p2val = pchk
         else:            
@@ -982,11 +986,12 @@ class TitrationAnalyser():
                     return None
             elif p1val==None and p2val==None:
                 return None
+            perr1=perr2=None
             reliable = False
             
-        return p1val, p2val, sp1, sp2, reliable
+        return p1val, p2val, sp1, sp2, perr1, perr2, reliable
 
-    def compareAllpKas(cls, E1, E2, titratable=False, exclude=None):
+    def compareAllpKas(cls, E1, E2, titratable=False, exclude=None, errcutoff=1e2):
         """Compare all pKas from 2 ekin projects"""
         relpkas1=[]
         relpkas2=[]
@@ -994,20 +999,24 @@ class TitrationAnalyser():
         relspans2=[]        
         otherpkas1=[]
         otherpkas2=[]
+        errs1=[]
+        errs2=[]
         names=[]
         
         for d in E1.datasets:
             if exclude!=None and d in exclude: continue
             if not d in E2.datasets: continue
-            X = cls.comparepKas(E1, E2, d)            
+            X = cls.comparepKas(E1, E2, d, titratable, errcutoff)            
             if X == None:
                 continue
-            p1val, p2val, sp1, sp2, rel = X
+            p1val, p2val, sp1, sp2, err1, err2, rel = X
             if rel == True:
                 relpkas1.append(p1val)
                 relpkas2.append(p2val)     
                 relspans1.append(sp1)
                 relspans2.append(sp2)
+                errs1.append(err1)
+                errs2.append(err2)
                 names.append(d)
             else:                
                 otherpkas1.append(p1val)
@@ -1016,7 +1025,7 @@ class TitrationAnalyser():
         print 'reliable pkas matched:', len(relpkas1)
         print 'others:', len(otherpkas1)
 
-        return relpkas1, relpkas2, otherpkas1, otherpkas2, relspans1, relspans2, names
+        return relpkas1, relpkas2, otherpkas1, otherpkas2, relspans1, relspans2, errs1, errs2, names
 
     def compareNuclei(cls, DB, col1, col2, names=None, titratable=True):
         """Compare corresponding datasets for proteins that have data
@@ -1920,7 +1929,7 @@ class TitrationAnalyser():
     def doXYPlot(cls, ax, x, y, names=None, err=0.5,
                     title=None, xerrs=None, yerrs=None,
                     xlabel=None, ylabel=None,
-                    xaxislabels=None, color=None, symbol=None, markersize=50):
+                    xaxislabels=None, color=None, symbol=None, markersize=30):
         """Do xy plot of 2 lists and show correlation
            annotate is a list of tuples with x,y coord and text to print at that pt"""
            
