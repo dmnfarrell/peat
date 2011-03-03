@@ -956,8 +956,8 @@ class TitrationAnalyser():
         model1 = fitdata1['model']
         model2 = fitdata2['model']
         if model1 != model2:
-            print 'diff model'
-            return None
+            print 'different models'
+            #return None
         
         p1,p1val,sp1 = cls.getMainpKa(fitdata1, res=res1)#,strict=False)
         p2,p2val,sp2 = cls.getMainpKa(fitdata2, res=res1)#,strict=False)
@@ -966,25 +966,27 @@ class TitrationAnalyser():
         
         if p1val != None and p2val != None and len(allpkas1) > 0 and len(allpkas2) > 0:
             pchk = cls.getClosest(p1val, allpkvals2)
-            print d, p1val, p2val, pchk
+            #print d, p1val, p2val, pchk
             if p2val != pchk:
                 p2val = pchk
-        else:
+        else:            
             if p1val != None and p2val == None:
                 if len(allpkas2) > 0:
-                    p2val = cls.getClosest(p1val, allpkvals2)                    
-                else:
+                    p2val = cls.getClosest(p1val, allpkvals2)                   
+                else:                   
                     return None
             elif p2val != None and p1val == None:
                 if len(allpkas1) > 0:
-                    p1val = cls.getClosest(p2val, allpkvals1)     
+                    p1val = cls.getClosest(p2val, allpkvals1)                   
                 else:
                     return None
-            reliable = False    
+            elif p1val==None and p2val==None:
+                return None
+            reliable = False
             
         return p1val, p2val, sp1, sp2, reliable
 
-    def compareAllpKas(cls, E1, E2, titratable=False):
+    def compareAllpKas(cls, E1, E2, titratable=False, exclude=None):
         """Compare all pKas from 2 ekin projects"""
         relpkas1=[]
         relpkas2=[]
@@ -994,9 +996,10 @@ class TitrationAnalyser():
         otherpkas2=[]
         names=[]
         
-        for d in E1.datasets:        
+        for d in E1.datasets:
+            if exclude!=None and d in exclude: continue
             if not d in E2.datasets: continue
-            X = cls.comparepKas(E1, E2, d)
+            X = cls.comparepKas(E1, E2, d)            
             if X == None:
                 continue
             p1val, p2val, sp1, sp2, rel = X
@@ -1006,7 +1009,7 @@ class TitrationAnalyser():
                 relspans1.append(sp1)
                 relspans2.append(sp2)
                 names.append(d)
-            else:
+            else:                
                 otherpkas1.append(p1val)
                 otherpkas2.append(p2val)        
             
@@ -1947,7 +1950,7 @@ class TitrationAnalyser():
                 if abs(i[0]-i[1])>err:  
                     #z = pylab.Circle((i[0], i[1]), 0.2,fill=False,alpha=0.7)
                     #ax.add_patch(z)
-                    ax.annotate(names[c], (i[0]+0.1, i[1]-0.2),
+                    ax.annotate(names[c], (i[0]+0.1, i[1]),
                                 xytext=None, textcoords='data',
                                 fontsize=10)
                 c+=1
@@ -1961,10 +1964,11 @@ class TitrationAnalyser():
             errline = ax.errorbar(x, y, xerr=xerrs, yerr=yerrs, fmt=None,
                                         elinewidth=.5, ecolor=clr, alpha=0.7)
         ax.set_xlim(a,b); ax.set_ylim(a,b)    
-        cc = numpy.corrcoef(numpy.array([x,y]))        
-        print 'corr. coeff:', cc[0][1]
-        print 'RMSE:', cls.rmse(x,y)
-        return cc[0][1]
+        cc = round(numpy.corrcoef(numpy.array([x,y]))[0][1],2)
+        rmse = round(cls.rmse(x,y),2)
+        print 'corr. coeff:', cc
+        print 'RMSE:', rmse
+        return cc, rmse
 
     @classmethod
     def get_param_index(self, paramname, model):
