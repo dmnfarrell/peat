@@ -365,10 +365,12 @@ def read_clustal_aln_file(filename):
         lines=fd.readlines()
         fd.close()
         #
-        # Skip first three lines
+        # Read the lines
         #
         import string
-        for line in lines[1:]:
+        for line in lines:
+            if line[0]=='#':
+                continue
             split=string.strip(line).split()
             if len(split)>1 and line[1]!=' ':
                 if seqs.has_key(split[0]):
@@ -376,3 +378,33 @@ def read_clustal_aln_file(filename):
                 else:
                     seqs[split[0]]=split[1]
     return seqs
+    
+def read_fasta_aln_file(filename):
+    """Read a FASTA aln file"""
+    import os
+    seqs={}
+    if os.path.isfile(filename):
+        fd=open(filename)
+        lines=fd.readlines()
+        fd.close()
+        #
+        # Read the lines
+        #
+        import string
+        for line in lines:
+            if line[0]=='#':
+                continue
+            split=string.strip(line).split()
+            
+            if split[0][0]=='>':
+                # New sequence
+                seqname=split[0]
+                seqname=seqname[1:]
+                #
+            else:
+                if len(split)==1 and line[1]!=' ':
+                    if seqs.has_key(seqname):
+                        seqs[seqname]=seqs[seqname]+split[0]
+                    else:
+                        seqs[seqname]=split[0]
+    return seqs    
