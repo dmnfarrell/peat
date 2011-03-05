@@ -291,7 +291,7 @@ class zDatabase(object):
             '''if self.db.cacheSize() > self.meta.info['cachesize']:
                 self.commit('field deletion')
                 self.db.cacheMinimize()'''
-            print self.db.cacheSize() 
+            #print self.db.cacheSize() 
             if fname in self.data[k].keys() and type(self.data[k]) is PEATRecord:                
                 #del self.data[k][fname]
                 self.data[k].delete(fname)
@@ -424,7 +424,8 @@ class zDatabase(object):
     def importCSV(self, filename, namefield='name'):
         """Import from a CSV file"""
         import csv
-        dr = csv.DictReader(open(filename,'r'))
+        csv.register_dialect('custom', skipinitialspace=True)
+        dr = csv.DictReader(open(filename,'r'),dialect='custom')
         data = []
         for r in dr:            
             data.append(r)        

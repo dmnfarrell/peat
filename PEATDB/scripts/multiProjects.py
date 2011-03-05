@@ -38,7 +38,7 @@ import matplotlib.pyplot as plt
 
 settings={'server':'peat.ucd.ie','username':'guest',
            'password':'123'}
-path = '/home/people/farrell/Desktop/SADBPaperData/'
+path = '/home/people/farrell/Desktop/SADBPaperData'
 savepath = os.path.join(path,'projects')
 dbnames = ['1a2p.fs','1bf4.fs']
 
@@ -62,8 +62,8 @@ def submitPEATSAJobs(prjs):
 
 def createProjects():
     """Create multiple projects at once from csv files"""
-
-    csvfiles = os.listdir(path)[:2]    
+    cpath = os.path.join(path,'data')
+    csvfiles = os.listdir(cpath)#[:2]    
     for filename in csvfiles:
         print filename
         name = os.path.splitext(filename)[0]
@@ -75,9 +75,11 @@ def createProjects():
         DBActions.addPDBFile(DB, 'wt', pdbdata=stream, pdbname=name, gui=False)        
         DB.meta.refprotein = 'wt'
         #import data from csv
-        DB.importCSV(os.path.join(path,filename), namefield='Mutations')
-        #DB.deleteField('PDB')
+        DB.importCSV(os.path.join(cpath,filename), namefield='Mutations')
+        DB.deleteField('PDB')
         DB.commit()
+        DB.close()
+        print 'done'
     return
 
 def summarise(projects):
@@ -100,6 +102,6 @@ def summarise(projects):
 
 if __name__ == '__main__':
     #createProjects()
-    #submitPEATSAJobs(['1a2p','2chf'])
-    summarise(dbnames)
+    submitPEATSAJobs(['1a2p','2chf'])
+    #summarise(dbnames)
   
