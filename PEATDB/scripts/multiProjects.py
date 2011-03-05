@@ -26,6 +26,10 @@
 # 
 # Author: Damien Farrell 2011
 
+"""This script will create multiple projects from csv files and
+add pdbs based on the csv names. It can also create peatsa jobs
+and merge them back into the database"""
+
 import pickle, sys, os, copy, time, types
 import numpy
 from PEATDB.Base import PDatabase 
@@ -36,35 +40,54 @@ from PEATDB.plugins.Correlation import CorrelationAnalyser
 from PEATDB.PEATTables import PEATTableModel
 import matplotlib.pyplot as plt
 
+#plt.rc('text',usetex=True)
+plt.rc('font',size=8)
+plt.rc('savefig',dpi=300)
+
 settings={'server':'peat.ucd.ie','username':'guest',
            'password':'123'}
 path = '/home/people/farrell/Desktop/SADBPaperData'
 savepath = os.path.join(path,'projects')
-dbnames = ['1a2p.fs','1bf4.fs']
+cpath = os.path.join(path,'data')
+csvfiles = os.listdir(cpath)#[:4]
+dbnames = [os.path.splitext(i)[0] for i in csvfiles]
+print dbnames
 
-def submitPEATSAJobs(prjs):
-    """do PEATSA runs for all projects"""
+    
+def PEATSAJobs(prjs):
+    """Submit PEATSA runs for all projects or merge results if done"""
     for name in prjs:
-        DB = PDatabase(local=os.path.join(savepath,name))        
-        PS = PEATSAPlugin()
-        PS.main(DB=DB)
+        print name
+        DB = PDatabase(local=os.path.join(savepath,name))
         pdb = DB['wt'].Structure
-        mutlist = []
-        for p in DB.getRecs():
-            mutlist.append(DB.get(p).Mutations)
-        #print mutlist
-        pdbfile = PS.writetempPDB()    
-        PS.submitJob(name='mycalc', pdbname=DB.meta.refprotein, pdbfile=pdbfile, 
-                     mutations=mutlist, calcs=['stability'], meta={'protein':name})
+        PS = PEATSAPlugin()
+        PS.main(DB=DB)        
+        if hasattr(DB.meta,'peatsa_jobs'):
+            if 'mycalc' in DB.meta.peatsa_jobs:
+                print 'job already present'
+                #try to merge results
+                S = PEATTableModel(DB)
+                job,n = PS.getJob('mycalc')
+                PS.mergeResults(job, 'prediction', S)
+                DB.commit()
+                print 'merged results'
+        else:
+            mutlist = []
+            for p in DB.getRecs():
+                mutlist.append(DB.get(p).Mutations)
+            #print mutlist
+            pdbfile = PS.writetempPDB()
+            PS.submitJob(name='mycalc', pdbname=DB.meta.refprotein, pdbfile=pdbfile, 
+                         mutations=mutlist, calcs=['stability'], meta={'protein':name})
+            #required to end process
         PS.jobManager.stopLogging()
-        
+        DB.close()
     return
 
-def createProjects():
+def createProjects(files):
     """Create multiple projects at once from csv files"""
-    cpath = os.path.join(path,'data')
-    csvfiles = os.listdir(cpath)#[:2]    
-    for filename in csvfiles:
+
+    for filename in files:
         print filename
         name = os.path.splitext(filename)[0]
         #create/open db
@@ -74,8 +97,10 @@ def createProjects():
         stream = DBActions.fetchPDB(name)
         DBActions.addPDBFile(DB, 'wt', pdbdata=stream, pdbname=name, gui=False)        
         DB.meta.refprotein = 'wt'
+        DB.meta.info['protein'] = name
         #import data from csv
         DB.importCSV(os.path.join(cpath,filename), namefield='Mutations')
+        print 'imported ok'
         DB.deleteField('PDB')
         DB.commit()
         DB.close()
@@ -86,22 +111,52 @@ def summarise(projects):
     summDB = PDatabase(local='summary.fs')
     C = CorrelationAnalyser()
     fig = plt.figure()
+    from mpl_toolkits.axes_grid1 import AxesGrid
+    grid = AxesGrid(fig, 111, 
+                    nrows_ncols = (5, 5),
+                    share_all=True,
+                    #label_mode = "1",      
+                    axes_pad = 0.3)
+    i=0
+    data=[]
     for p in projects:
-        DB = Utils.loadDB(os.path.join(path,p), remote=False)
+        print p
+        DB = PDatabase(local=os.path.join(savepath,p))
         S = PEATTableModel(DB)
-        print DB.meta.info
-        print DB.meta.userfields
-        exp,pre = S.getColumns(['Exp','predictions'],allowempty=False)
-        print exp,pre
-        ax,fr,mh = C.plotCorrelation(pre,exp,title=p)
-        fig.add_subplot(111)
-        fig.savefig('test.png')    
-    #print S.projects
-    #summDB.commit()
+        #print DB.meta.info
+        try:
+            exp,pre = S.getColumns(['Exp','prediction'],allowempty=False)
+        except:
+            print 'no results'
+            continue
+        #print exp,pre
+        ax,fr,mh = C.plotCorrelation(pre,exp,title=p,ms=2,ax=grid[i])        
+        cc,rmse = C.getStats(pre,exp)
+        print 'rmse',rmse
+        data.append({'name':p,'rmse':rmse,'cc':cc})
+        i+=1        
+    print data
+    summDB.importDict(data)    
+    summDB.commit()
+    fig.savefig('test.png')
+    plt.show()
     return
 
 if __name__ == '__main__':
-    #createProjects()
-    submitPEATSAJobs(['1a2p','2chf'])
-    #summarise(dbnames)
+    from optparse import OptionParser
+    parser = OptionParser()
+    
+    parser.add_option("-c", "--create", dest="create", action='store_true',
+                       help="create/import", default=False)
+    parser.add_option("-j", "--jobs", dest="jobs", action='store_true',
+                       help="do/merge jobs", default=False)
+    parser.add_option("-s", "--summary", dest="summary", action='store_true',
+                       help="do summary", default=False)
+    opts, remainder = parser.parse_args()
+    if opts.create == True:
+        createProjects(csvfiles)
+    if opts.jobs == True:    
+        PEATSAJobs(dbnames)
+    if opts.summary == True:
+        summarise(dbnames)
   

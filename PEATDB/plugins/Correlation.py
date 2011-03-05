@@ -194,18 +194,24 @@ class CorrelationAnalyser(Plugin):
                           key='Mutations',
                           title='',
                           xlabel='Predicted',
-                          ylabel='Experimental',
-                          limit=None, side=LEFT, fig=None):
+                          ylabel='Experimental', ms=5,
+                          err=None,
+                          limit=None, side=LEFT, ax=None):
         """Show exp vs pred. for a set of x-y values """
         
         #check if x and y are number cols and round
         x=[round(float(i),2) for i in x]
         y=[round(float(i),2) for i in y]
-   
-        colors = ['b','g','r','y','m','c']
-        if fig == None:
-            fig = plt.figure(figsize=(6,6))
-        ax = fig.add_subplot(111)
+
+        if min(x)<min(y): a=min(x)-2
+        else: a=min(y)-4
+        if max(x)>max(y): b=max(x)+2
+        else: b=max(y)+4
+        print a,b
+        colors = ['b','g','r','y','m','c']        
+        fig = plt.figure(figsize=(6,6))            
+        if ax==None:
+            ax = fig.add_subplot(111)
         ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)
         legs=[]; legnames=[]
@@ -213,22 +219,20 @@ class CorrelationAnalyser(Plugin):
        
         if len(x) ==0:
             return
-        errs = [a - b for a, b in zip(x, y)]
-        line = ax.plot(x, y, 'x', color='red', mew=2, alpha=0.7, picker=3)  
+        errs = [i - j for i, j in zip(x, y)]
+        line = ax.plot(x, y, 'o', color='blue', ms=ms, alpha=0.6, picker=3)  
 
         #draw expected correlation line with slope x
         slope=1
         #set range of axes
-        if max(y)>max(x): lims = min(y)-5,max(y)+5
-        else: lims = min(x)-5,max(x)+5
-        cx = numpy.arange(lims[0],lims[1])
-        cy = [slope*i for i in cx]
-        ax.plot(cx, cy, 'g', alpha=0.7)
-        #ax.plot(cx-4, cy, 'g', alpha=0.5,linestyle='--')
-        #ax.plot(cx+4, cy, 'g', alpha=0.5,linestyle='--')
+        ax.plot((a,b),(a,b),'g')
+        
+        if err!=None:
+            ax.plot((a,b),(a+err,b+err),'--',color='g')
+            ax.plot((a,b),(a-err,b-err),'--',color='g')
         ax.axhline(y=0, color='grey'); ax.axvline(x=0,color='grey')
-        if limit==None:
-            limit=lims[1]       
+        ax.set_xlim(a,b); ax.set_ylim(a,b)        
+  
         ax.set_title(title)
         cc = math.pow(numpy.corrcoef(x,y)[0][1],2)      
         fig.suptitle(r'Predicted vs Experimental $r^2= %s$' %round(cc,3))
@@ -244,13 +248,21 @@ class CorrelationAnalyser(Plugin):
         m = MouseHandler(ax, labels, self)
         m.connect()
         return
-    
+
+    def rmse(self, ar1, ar2):
+        """Mean squared error"""
+        ar1 = numpy.asarray(ar1)
+        ar2 = numpy.asarray(ar2)
+        dif = ar1 - ar2
+        dif *= dif
+        return numpy.sqrt(dif.sum()/len(ar1))
+
     def getStats(self,x,y):
-        '''finalx=[x[i] for i in range(len(labels)) if labels[i] not in outliers]
-        finaly=[y[i] for i in range(len(labels)) if labels[i] not in outliers]
-        cc1 = str(round(pow(stats.pearsonr(finalx,finaly)[0],2),2))
-        #ax.text(1,14, r'$r^2_{final}= %s$' %cc1, fontsize=16)'''
-        return
+        x=[round(float(i),2) for i in x]
+        y=[round(float(i),2) for i in y]        
+        cc = round(numpy.corrcoef(x,y)[0][1],2)
+        rmse = round(self.rmse(x,y),2)
+        return cc, rmse
         
     def markOutliers(self,x,y):
         labels = model.getColumnData(columnName=labelcol,filterby=filterby)      

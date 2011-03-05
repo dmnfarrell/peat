@@ -617,9 +617,10 @@ class App(Frame, GUI_help):
         print 'local file'
         print filename
         if filename == None:
-            filename=tkFileDialog.askopenfilename(defaultextension='.fs',
-                                       initialdir=os.getcwd(),
-                                       filetypes=[("zodb fs","*.fs"),("All files","*.*")])
+            filename=tkFileDialog.askopenfilename(initialdir=os.getcwd(),
+                                       filetypes=[("zodb fs","*.fs"),
+                                                  ("Files with ext","*.*"),
+                                                  ("All files","*")])
         if filename:
             if self.DB != None:
                 answer = self.closeDB()

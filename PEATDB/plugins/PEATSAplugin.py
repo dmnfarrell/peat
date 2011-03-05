@@ -150,7 +150,7 @@ class PEATSAPlugin(Plugin):
         fr1 = Frame(parent)
         Button(fr1,text='View Results',command=self.showResults,bg='#ccFFFF').pack(side=TOP,fill=BOTH,expand=1)
         fr1.pack(fill=BOTH)
-        Button(fr1,text='Merge Results',command=self.mergeResults).pack(side=TOP,fill=BOTH,expand=1)
+        Button(fr1,text='Merge Results',command=self.mergeCurrent).pack(side=TOP,fill=BOTH,expand=1)
         fr1.pack(fill=BOTH)        
         fr = Frame(parent)
         c='#ADD8E6'
@@ -529,27 +529,35 @@ class PEATSAPlugin(Plugin):
         self.wait=self.mainwin.after(60000, self.updateJobs)
         return
 
-    def mergeResults(self):
-        """Auto merge selected job results to main table"""
+    def mergeResults(self, job, colname, tablemodel):
+        """Merge given job results to tablemodel"""       
+        if job==None:
+            return      
+        matrices = job.data.allMatrices()
+        if not colname:
+            return
+        nf={'Total':colname}
+        for m in matrices:
+            matrix = matrices[m]
+            if matrix == None: continue
+            M = self.mergeMatrix(matrix, tablemodel, fields=['Total'], newfields=nf)            
+        return
+    
+    def mergeCurrent(self):
+        """Auto merge selected job results to main table
+            called from GUI """
         job, name = self.getJob()
         if job==None:            
-            return
-      
-        self.matrices = job.data.allMatrices()        
+            return      
+        
         #get field name to use
-        name = tkSimpleDialog.askstring("Column name?",
+        colname = tkSimpleDialog.askstring("Column name?",
                                    "Name for column:",
                                     initialvalue=name+'_Predictions',
                                     parent=self.mainwin)
-        if not name:
-            return            
-        nf={'Total':name}
-        for m in self.matrices:
-            matrix = self.matrices[m]
-            if matrix == None: continue           
-            M = self.parent.tablemodel
-            M = self.mergeMatrix(matrix, M, fields=['Total'], newfields=nf)
-            self.parent.updateTable()
+        M = self.parent.tablemodel
+        self.mergeResults(job, colname, M)
+        self.parent.updateTable()            
         return
     
     def manageResults(self, name=None):

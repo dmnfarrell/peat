@@ -253,7 +253,7 @@ class zDatabase(object):
 
     def add(self, key, record=None):
         if key in self.data.keys():
-            print 'key %s is already present' %key
+            #print 'key %s is already present' %key
             return False
         if record == None:
             record = Record(name=key)
@@ -507,7 +507,7 @@ class PDatabase(zDatabase):
 
     def add(self, key, record=None):
         if key in self.data.keys():
-            print 'key %s is already present' %key
+            #print 'key %s is already present' %key
             return False
         if record == None:
             record = PEATRecord(name=key)
