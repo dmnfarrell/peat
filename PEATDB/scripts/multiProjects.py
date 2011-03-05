@@ -95,7 +95,7 @@ def createProjects(files):
         DB.add('wt')
         #add wt pdb
         stream = DBActions.fetchPDB(name)
-        DBActions.addPDBFile(DB, 'wt', pdbdata=stream, pdbname=name, gui=False)        
+        DBActions.addPDBFile(DB, 'wt', pdbdata=stream, pdbname=name, gui=False)
         DB.meta.refprotein = 'wt'
         DB.meta.info['protein'] = name
         #import data from csv
@@ -134,8 +134,9 @@ def summarise(projects):
         cc,rmse = C.getStats(pre,exp)
         print 'rmse',rmse
         data.append({'name':p,'rmse':rmse,'cc':cc})
+        #,'Structure':DB['wt'].Structure})
         i+=1        
-    print data
+    
     summDB.importDict(data)    
     summDB.commit()
     fig.savefig('test.png')

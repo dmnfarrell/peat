@@ -40,7 +40,7 @@ class Importer:
         self.data = None
         return
 
-    def quickImport(self, sep=',',startnum):
+    def quickImport(self, sep,startnum):
         """Non gui import"""
         lines = self.lines
         data = []        

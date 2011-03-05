@@ -56,6 +56,7 @@ class LabbookApp(Frame, GUI_help):
             self.peatinfo=None
         else:
             self.labbook_win=Toplevel()
+            self.master = self.labbook_win
             self.peatinfo=peatinfo      #reference to peat protein/field
             self.DB = self.parent.DB    #ref to peat
 
@@ -344,7 +345,8 @@ class LabbookApp(Frame, GUI_help):
 
         from Extfile import FileHandler
         fh = FileHandler(parent=self)
-        fh.importFileset(callback=self.currenttable.redrawTable)
+        fh.importFileset(DB=self.DB,
+                         callback=self.currenttable.redrawTable)
 
         return
 
@@ -829,7 +831,7 @@ class LabbookTable(TableCanvas):
         f = FileRecord(name=filename, blob=blob)
         rec = {'text': f.name, 'filename': filename}
         model.setValueAt(rec, row, col)
-        #we add the blob to the parent DB blob struct rather than directly to model
+        #we add the blob to the parent DB blob struct rather than to table model
         self.DB.blobs[filename] = f
         #print f, blob, model.getCellRecord(row,col)
         return

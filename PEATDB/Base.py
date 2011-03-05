@@ -418,7 +418,7 @@ class zDatabase(object):
                 try:
                     self.data[name][f] = float(d[f])
                 except:
-                    self.data[name][f] = d[f]        
+                    self.data[name][f] = d[f]
         return
 
     def importCSV(self, filename, namefield='name'):
@@ -515,7 +515,20 @@ class PDatabase(zDatabase):
         self.data[key] = record
         self.data._p_changed = 1
         return
-    
+
+    def importDict(self, importdata, namefield='name', overwrite=True):
+        zDatabase.importDict(self, importdata, namefield, overwrite)
+        #we check data for reserved field names
+        '''from Actions import DBActions
+        fields = importdata[0].keys()
+        for d in importdata:
+            name = d[namefield]            
+            for f in fields:
+                if f == 'Structure':
+                    DBActions.addPDBFile(self, name, pdbdata=d[f],
+                                         gui=False)'''
+        return
+
     def getRecordWithMutation(self, mutationstring):
         """Get first record with the provided mutation"""
         for p in self.getRecs():
@@ -721,9 +734,7 @@ class PDatabase(zDatabase):
         if self.isknownProtein(protein_name):
             return None
         else:
-            #self.DB[protein_name]=PEAT_dict(changelist=self.changelist,protein=protein_name)
             self.add(protein_name)
-
         return True
 
     def get_AA_sequence(self,protein_name):

@@ -169,9 +169,7 @@ class FileHandler(object):
                 label_text = 'File Type:',
                 menubutton_textvariable = filetype,
                 items = self.extensions.keys(),
-                menubutton_width = 10,
-                #command = ,
-        )
+                menubutton_width = 10 )
         optmenu.pack(fill=BOTH,side=TOP)
         Button(win,text='Import',command=doimport).pack(fill=BOTH,side=TOP)
         Button(win,text='Cancel',command=close).pack(fill=BOTH,side=TOP)
@@ -198,7 +196,7 @@ class FileHandler(object):
         return
 
     def displayExtFiles(self, DB):
-        """Display external files (blobs) in DB"""
+        """Display blobs in DB as web page links"""
         files = DB.getExtFilenames()
         print files
         if len(files) == 0:
@@ -210,10 +208,10 @@ class FileHandler(object):
                          )
         import markup
         page = markup.page( )
-        page.init( title="PEAT_DB Files Preview",
+        page.init( title="PEATDB Files Preview",
                    css=( 'one.css' ),
                    header="Preview for project",
-                   footer="PEAT_DB" )
+                   footer="PEATDB" )
         page.ul( class_='mylist' )
         page.li( items, class_='myitem' )
         page.ul.close()
@@ -226,5 +224,4 @@ class FileHandler(object):
         import webbrowser
         webbrowser.open(filename, autoraise=1)
         return
-
 

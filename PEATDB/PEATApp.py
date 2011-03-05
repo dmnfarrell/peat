@@ -344,14 +344,14 @@ class App(Frame, GUI_help):
         self.IO_menu={'01Import from Text/CSV':{'cmd':self.importCSV},
                       #'02Import Mutants':{'cmd':self.importMutants},
                       #'02Export to csv file':{'cmd':self.exportCSV},
-                      '03Import External/Binary files':{'cmd':self.importFileset},
+                      '03Add External/Binary files':{'cmd':self.importFileset},
                       '04Export Binary Files':{'cmd':self.exportExtFiles}}
         self.IO_menu=self.create_pulldown(self.menu,self.IO_menu)
         self.menu.add_cascade(label='Import/Export',menu=self.IO_menu['var'])
 
         self.view_menu={ '01Show Change Log':{'cmd':self.showUndoLog},
                          '02Show Changed Items':{'cmd':self.showChanged},
-                         '03Show Binary files':{'cmd':self.showExtFiles},
+                         '03Show Binary files in Web Page':{'cmd':self.showExtFiles},
                          '04New Table View':{'cmd':self.createTableView}}
         self.view_menu=self.create_pulldown(self.menu,self.view_menu)
         self.view_menu['var'].add_checkbutton(label="Use Page View", variable=self.pageviewvar,
