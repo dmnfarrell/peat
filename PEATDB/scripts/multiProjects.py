@@ -38,6 +38,7 @@ from PEATDB.Actions import DBActions
 from PEATDB.plugins.PEATSAplugin import PEATSAPlugin
 from PEATDB.plugins.Correlation import CorrelationAnalyser
 from PEATDB.PEATTables import PEATTableModel
+from PEATDB.Parsers import XMLParser
 import matplotlib.pyplot as plt
 
 #plt.rc('text',usetex=True)
@@ -56,7 +57,12 @@ csvfiles = os.listdir(cpath)#[:4]
 dbnames = [os.path.splitext(i)[0] for i in csvfiles]
 print dbnames
 
-    
+def getPDBXML(name):
+    url = 'http://www.rcsb.org/pdb/rest/describePDB?structureId=%s' %name
+    p = XMLParser()
+    d = p.openurl(url)    
+    return d['PDB']
+
 def PEATSAJobs(prjs):
     """Submit PEATSA runs for all projects or merge results if done"""
     for name in prjs:
@@ -114,7 +120,7 @@ def summarise(projects):
     summDB = PDatabase(local='summary.fs')
     C = CorrelationAnalyser()
     fig = plt.figure()
-    #fig1 = plt.figure()
+    fig1 = plt.figure()
     import matplotlib.gridspec as gridspec
     gs = gridspec.GridSpec(5, 5, wspace=0.3, hspace=0.5)    
     i=0
@@ -129,19 +135,22 @@ def summarise(projects):
         except:
             print 'no results'
             continue        
-        ax = plt.subplot(gs[0, i])
+        ax = fig.add_subplot(gs[0, i])
         C.plotCorrelation(pre,exp,title=p,ms=2,axeslabels=False,ax=ax)
-        #ax = C.showHistogram([pre,exp],title=p,ax=ax)
-        
+        ax = fig1.add_subplot(gs[0, i])
+        C.showHistogram([pre,exp],title=p,ax=ax)        
         cc,rmse = C.getStats(pre,exp)
         print 'rmse',rmse
-        data.append({'name':p,'rmse':rmse,'cc':cc})
-        #'Structure':DB['wt'].Structure
+        x={'name':p,'rmse':rmse,'cc':cc}
+        pd = getPDBXML(p)
+        x.update(pd)
+        data.append(x)
         i+=1
     
-    summDB.importDict(data)    
+    summDB.importDict(data)
     summDB.commit()
-    fig.savefig('test.png')
+    fig.savefig('correl.png')
+    fig1.savefig('distr.png')
     plt.show()
     return
 
