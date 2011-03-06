@@ -30,7 +30,7 @@
 add pdbs based on the csv names. It can also create peatsa jobs
 and merge them back into the database"""
 
-import pickle, sys, os, copy, time, types
+import pickle, sys, os, copy, time, types, math
 import numpy
 from PEATDB.Base import PDatabase 
 from PEATDB import Utils
@@ -41,8 +41,11 @@ from PEATDB.PEATTables import PEATTableModel
 import matplotlib.pyplot as plt
 
 #plt.rc('text',usetex=True)
-plt.rc('font',size=8)
+plt.rc('font',size=7)
+plt.rc('legend',fontsize=7)
 plt.rc('savefig',dpi=300)
+plt.rc('axes',linewidth=.5)
+
 
 settings={'server':'peat.ucd.ie','username':'guest',
            'password':'123'}
@@ -111,12 +114,9 @@ def summarise(projects):
     summDB = PDatabase(local='summary.fs')
     C = CorrelationAnalyser()
     fig = plt.figure()
-    from mpl_toolkits.axes_grid1 import AxesGrid
-    grid = AxesGrid(fig, 111, 
-                    nrows_ncols = (5, 5),
-                    share_all=True,
-                    #label_mode = "1",      
-                    axes_pad = 0.3)
+    #fig1 = plt.figure()
+    import matplotlib.gridspec as gridspec
+    gs = gridspec.GridSpec(5, 5, wspace=0.3, hspace=0.5)    
     i=0
     data=[]
     for p in projects:
@@ -128,14 +128,16 @@ def summarise(projects):
             exp,pre = S.getColumns(['Exp','prediction'],allowempty=False)
         except:
             print 'no results'
-            continue
-        #print exp,pre
-        ax,fr,mh = C.plotCorrelation(pre,exp,title=p,ms=2,ax=grid[i])        
+            continue        
+        ax = plt.subplot(gs[0, i])
+        C.plotCorrelation(pre,exp,title=p,ms=2,axeslabels=False,ax=ax)
+        #ax = C.showHistogram([pre,exp],title=p,ax=ax)
+        
         cc,rmse = C.getStats(pre,exp)
         print 'rmse',rmse
         data.append({'name':p,'rmse':rmse,'cc':cc})
-        #,'Structure':DB['wt'].Structure})
-        i+=1        
+        #'Structure':DB['wt'].Structure
+        i+=1
     
     summDB.importDict(data)    
     summDB.commit()
@@ -145,15 +147,17 @@ def summarise(projects):
 
 if __name__ == '__main__':
     from optparse import OptionParser
-    parser = OptionParser()
-    
+    parser = OptionParser()    
     parser.add_option("-c", "--create", dest="create", action='store_true',
                        help="create/import", default=False)
     parser.add_option("-j", "--jobs", dest="jobs", action='store_true',
                        help="do/merge jobs", default=False)
     parser.add_option("-s", "--summary", dest="summary", action='store_true',
                        help="do summary", default=False)
+    parser.add_option("-p", "--path", dest="path",
+                        help="Path with csv files")    
     opts, remainder = parser.parse_args()
+    
     if opts.create == True:
         createProjects(csvfiles)
     if opts.jobs == True:    

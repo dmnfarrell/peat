@@ -168,35 +168,30 @@ class CorrelationAnalyser(Plugin):
         self.plotCorrelation(x,y,labels,side=TOP)
         return        
      
-    @classmethod 
-    def simpleCorrelation(self, ax, x, y):
-        if len(x) == 0 :
-            return      
-        line = ax.scatter(x, y, marker='o',alpha=0.8)
-        cl = numpy.arange(-10,25)
-        ax.plot(cl, cl, 'g', alpha=0.5)
-        ax.set_xlabel('Predicted')
-        ax.set_ylabel('Exp')
-        ax.set_xlim(-10,20); ax.set_ylim(-10,20)
-        ax.axhline(y=0, color='grey'); ax.axvline(x=0,color='grey')
-        ax.set_title(g)
-        n+=1
-        return
-     
-    def showHistogram(self, x):
-        f=plt.figure()
-        ax=f.add_subplot(111)
-        ax.hist(x)
-        ax.set_title('%s points' %len(x))
-        return
+    def showHistogram(self, lists, labels=[],title='distr',
+                      style=0,ax=None):
+        if ax==None:
+            f=plt.figure()
+            ax=f.add_subplot(111)
+        if style==0:
+            n, bins, p = ax.hist(lists, 10, label=labels, histtype='bar',
+                                        alpha=0.6,lw=0.2)            
+        else:         
+            bins=10   
+            for l in lists:
+                n, bins, p = ax.hist(l,bins=bins,label=labels,
+                                     alpha=0.6,lw=0.2)
+        ax.legend()
+        ax.set_title(title)
+        return ax
         
     def plotCorrelation(self, x, y, labels=None,
                           key='Mutations',
                           title='',
                           xlabel='Predicted',
                           ylabel='Experimental', ms=5,
-                          err=None,
-                          limit=None, side=LEFT, ax=None):
+                          err=None, axeslabels=True,
+                          side=LEFT, ax=None):
         """Show exp vs pred. for a set of x-y values """
         
         #check if x and y are number cols and round
@@ -207,20 +202,23 @@ class CorrelationAnalyser(Plugin):
         else: a=min(y)-4
         if max(x)>max(y): b=max(x)+2
         else: b=max(y)+4
-        print a,b
+       
         colors = ['b','g','r','y','m','c']        
-        fig = plt.figure(figsize=(6,6))            
         if ax==None:
+            fig = plt.figure(figsize=(6,6)) 
             ax = fig.add_subplot(111)
-        ax.set_xlabel(xlabel)
-        ax.set_ylabel(ylabel)
+        else:
+            fig=None
+        if axeslabels==True:    
+            ax.set_xlabel(xlabel)
+            ax.set_ylabel(ylabel)
         legs=[]; legnames=[]
         bad=[]; good=[]
        
         if len(x) ==0:
             return
         errs = [i - j for i, j in zip(x, y)]
-        line = ax.plot(x, y, 'o', color='blue', ms=ms, alpha=0.6, picker=3)  
+        line = ax.plot(x, y, 'o', color='b', mew=0, ms=ms, alpha=0.6, picker=3)  
 
         #draw expected correlation line with slope x
         slope=1
@@ -234,12 +232,15 @@ class CorrelationAnalyser(Plugin):
         ax.set_xlim(a,b); ax.set_ylim(a,b)        
   
         ax.set_title(title)
-        cc = math.pow(numpy.corrcoef(x,y)[0][1],2)      
-        fig.suptitle(r'Predicted vs Experimental $r^2= %s$' %round(cc,3))
-        from PEATDB.Actions import DBActions
-        frame = DBActions.showTkFigure(fig, side=side)
-        mh = MouseHandler(ax, self, labels, key)
-        mh.connect()         
+        cc = math.pow(numpy.corrcoef(x,y)[0][1],2)
+        if fig!=None:
+            fig.suptitle(r'Predicted vs Experimental $r^2= %s$' %round(cc,3))
+            from PEATDB.Actions import DBActions
+            frame = DBActions.showTkFigure(fig, side=side)
+            mh = MouseHandler(ax, self, labels, key)
+            mh.connect()
+        else:
+            mh = frame = None
         return ax, frame, mh
 
     def addMouseHandler(self, ax, labels):

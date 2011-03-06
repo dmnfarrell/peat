@@ -557,7 +557,13 @@ class PEATSAPlugin(Plugin):
                                     parent=self.mainwin)
         M = self.parent.tablemodel
         self.mergeResults(job, colname, M)
-        self.parent.updateTable()            
+        self.parent.updateTable()
+        
+        #also send some meta data to peatsa_meta?
+        '''from Correlation import CorrelationAnalyser  
+        C = CorrelationAnalyser()    
+        cc,rmse = C.getStats(pre,exp)        
+        data.append({'name':p,'rmse':rmse,'cc':cc}) '''        
         return
     
     def manageResults(self, name=None):
@@ -769,9 +775,12 @@ class PEATSAPlugin(Plugin):
                             col = newfields[f]
                         else:
                             col = f
-                        if not M.data[rec].has_key(f): continue                        
-                        model.addColumn(col)                      
-                        model.data[row][col] = M.data[rec][f]
+                        if not M.data[rec].has_key(f): continue
+                        model.addColumn(col)
+                        try:
+                            model.data[row][col] = float(M.data[rec][f])
+                        except:
+                            model.data[row][col] = M.data[rec][f]
         return model
         
     def showResults(self):
