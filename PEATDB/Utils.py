@@ -91,7 +91,7 @@ def copyDBtoServer(DB, prj, settings):
       settings to make the remote connection and get
       the remote db object"""
     remoteDB = loadDB(prj, remote=True, settings=settings)
-    print DB, remoteDB
+    print 'source db: %s, remote db: %s' %(DB, remoteDB)
     newDB = copyDB(DB, remoteDB)
     newDB.commit(note='copy')
     return True

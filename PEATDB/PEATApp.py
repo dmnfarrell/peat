@@ -1380,36 +1380,46 @@ class App(Frame, GUI_help):
     def hideFieldsDialog(self):
         """Allow fields to be hidden"""
         fr=Toplevel() 
-        fr.geometry('300x300+300+200')
+        fr.geometry('300x350+300+200')
         fr.title('Show/hide fields')
         fr.grab_set()
         fr.transient()
         userfields = self.DB.meta.userfields
         def apply():
-            show=list(checkbuttons.getcurselection())            
+            show=list(checkbuttons.getcurselection())
             for f in userfields:
-                if f not in show:                    
+                if '_' in f: n=f.replace('_',' ')
+                else: n=f
+                print f,n, show
+                if n not in show:                    
                     self.DB.showField(f, False)
                 else:
-                    self.DB.showField(f)                
+                    self.DB.showField(f)
             self.updateTable()
             return
         def close():
             fr.destroy()
-
-        Button(fr, text='Apply', command=apply).pack(fill=BOTH,expand=1,padx=2, pady=2)
-        Button(fr, text='Close', command=close).pack(fill=BOTH,expand=1,padx=2, pady=2)                    
-        checkbuttons = Pmw.RadioSelect(fr,
+            
+        Button(fr, text='Apply', command=apply).grid(row=0,column=0,padx=2,pady=2)
+        Button(fr, text='Close', command=close).grid(row=1,column=0,padx=2,pady=2)
+        cbfr = Pmw.ScrolledFrame(fr)
+        cbfr.grid(row=2,column=0,padx=2,pady=2)
+        checkbuttons = Pmw.RadioSelect(cbfr.interior(),
                 buttontype = 'checkbutton',
                 orient = 'vertical',
-                labelpos = 'n',                
-                label_text = 'Deselect fields to hide them:')          
-        checkbuttons.pack(fill=BOTH,expand=1)        
-        for f in userfields:            
-            checkbuttons.add(f)
+                labelpos = 'n',
+                label_text = 'Deselect fields to hide them:')
+        
+        for f in userfields:
+            if '_' in f:
+                n=f.replace('_',' ')
+            else: n=f    
+            checkbuttons.add(n)
             if userfields[f]['show'] == True:
-                checkbuttons.invoke(f)
-        checkbuttons.pack(fill=X, padx=5, pady=5)
+                checkbuttons.invoke(n)
+        checkbuttons.pack(fill=BOTH,expand=1,padx=2,pady=2)
+        fr.columnconfigure(0,weight=1)
+        fr.rowconfigure(2,weight=1)
         return
         
     def quit(self,event=None):

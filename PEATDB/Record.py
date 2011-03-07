@@ -50,9 +50,11 @@ class Record(OOBTree):
     def setDisplayAttribute(self, key, data):
         """Set the text to display for this attribute of the record
            Override this for specific field objects"""
-        text = ''        
+        text = ''
         if type(data) is types.StringType:
             text = data
+        elif type(data) is types.UnicodeType:            
+            text = str(data.decode('utf-8'))
         else:
             text = ''
         if text == None:
@@ -92,7 +94,7 @@ class Record(OOBTree):
         else:
             return OOBTree.__getitem__(self, key).data  
 
-    def __setitem__(self, key, data):  
+    def __setitem__(self, key, data):       
         if key == 'display':
             OOBTree.__setitem__(self, key, data)
         else:    
@@ -240,7 +242,7 @@ class PEATRecord(Record):
     def setDisplayAttribute(self, key, data):
         """Set the text to display for this attribute of the record
            This is used for the table display to cache the values"""
-        text = ''      
+        text = ''  
         if key == 'Structure':           
             return self.checkStructure(data)
         if data == None:
@@ -249,6 +251,8 @@ class PEATRecord(Record):
             return ''
         if type(data) is types.StringType:
             text = data
+        elif type(data) is types.UnicodeType:
+            text = str(data.decode('utf-8'))
         elif type(data) is types.FloatType or type(data) is types.IntType:
             text = str(data)
         elif type(data) is EkinProject:
@@ -263,7 +267,7 @@ class PEATRecord(Record):
              elif data.has_key('name'):
                  text = data.name
              elif data.has_key('link'):
-                 return data                 
+                 return data
              elif data.has_key('text'):
                  text = ''
                  t = data['text']

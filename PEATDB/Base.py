@@ -275,6 +275,8 @@ class zDatabase(object):
         """Add a field spec"""
         if name in self.meta.userfields:
             return False
+        if type(name) is types.UnicodeType:
+            name = str(name.decode())
         fieldinfo = {'field_type': fieldtype, 'show': True, 'default_value': ''}
         self.meta.userfields[name] = fieldinfo
         self.meta._p_changed = 1
@@ -399,14 +401,13 @@ class zDatabase(object):
         return 'DB with %s records' %len(self.data.keys())
 
     def importDict(self, importdata, namefield='name', overwrite=True):
-        """Import list of dicts, each one is a record"""
+        """Import a list of dicts, each one is a record"""
         if len(importdata) == 0:
             return        
         fields = importdata[0].keys()
         if not namefield in fields:
             print 'no such field for keyname field'
-            namefield = fields[0]
-            #return
+            namefield = fields[0]            
         if namefield == 'name': fields.remove(namefield)
         for f in fields:
             if f not in self.meta.staticfields:

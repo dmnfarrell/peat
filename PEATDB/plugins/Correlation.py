@@ -260,10 +260,12 @@ class CorrelationAnalyser(Plugin):
 
     def getStats(self,x,y):
         x=[round(float(i),2) for i in x]
-        y=[round(float(i),2) for i in y]        
+        y=[round(float(i),2) for i in y]
+        errs = [i[0]-i[1] for i in zip(x,y)]
         cc = round(numpy.corrcoef(x,y)[0][1],2)
         rmse = round(self.rmse(x,y),2)
-        return cc, rmse
+        meanerr = round(numpy.mean(errs),2)
+        return cc, rmse, meanerr
         
     def markOutliers(self,x,y):
         labels = model.getColumnData(columnName=labelcol,filterby=filterby)      
@@ -302,6 +304,23 @@ class CorrelationAnalyser(Plugin):
         print 'stdev of errors:', numpy.std(errs)
         return   
 
+    def plotNorm(self, data, title='', lw=3, ax=None):
+        """Plot a normal distr given some data"""
+        if ax==None:
+            f=plt.figure()
+            ax=f.add_subplot(111)       
+        mean = numpy.mean(data)
+        std = numpy.std(data)            
+        ax.hist(data,bins=20,normed=1,histtype='step',lw=lw)
+        #draw the normal dist    
+        x=numpy.arange(mean-std*4,mean+std*4,max(data)/100)
+        y=[]               
+        for i in x:
+            fx = 1/(math.sqrt(2*math.pi*math.pow(std,2))) * math.exp( -math.pow(i-mean,2)/(2*math.pow(std,2)))
+            y.append(fx)
+        ax.plot(x,y,'-',lw=lw,alpha=0.7)
+        ax.set_title(title)
+        return ax
 
     def QQplot(self, data=None, labels=None, n=3):
         """Do Q-Q plot to determine if sample is normally distributed"""
@@ -342,6 +361,15 @@ class CorrelationAnalyser(Plugin):
         fig.suptitle('Q-Q plot')
         fig.savefig('qq.png')
         return outliers
+
+    @classmethod
+    def ShapiroWilk(self, a1):
+        """Test departure from normality"""
+        import scipy
+        x1=numpy.mean(a1); n1=len(a1); s1=numpy.std(a1)
+        w,p = scipy.stats.shapiro(a1)
+        print 'W=%s p=%s' %(w,p)
+        return round(w,3),round(p,4)
 
     @classmethod
     def tofloats(self, lsts):

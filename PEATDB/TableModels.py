@@ -280,7 +280,7 @@ class TableModel(object):
              value = self.doFormula(cell)
              return value
            
-         if not type(cell) is DictType:
+         if not type(cell) is DictType:             
              if coltype == 'text' or coltype == 'Text':
                  value = cell
              elif coltype == 'number':
