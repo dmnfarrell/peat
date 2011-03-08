@@ -322,7 +322,7 @@ class CorrelationAnalyser(Plugin):
         ax.set_title(title)
         return ax
 
-    def QQplot(self, data=None, labels=None, n=3):
+    def QQplot(self, data=None, labels=None, title=None,n=3, ax=None):
         """Do Q-Q plot to determine if sample is normally distributed"""
 
         from scipy.stats import norm
@@ -349,17 +349,18 @@ class CorrelationAnalyser(Plugin):
                 ax.text(x[i]+0.2, y[i], lmap[i][1], size=6)
                 outliers.append(lmap[i][1])
             return
-
-        fig = plt.figure()
-        ax = fig.add_subplot(111)
-        ax.set_xlabel('normal distr')
-        ax.set_ylabel('data')
-        ax.plot(x, y, 'o', alpha=0.7)
-        ax.plot(x, x, '-', alpha=0.7)
+        if ax==None:
+            fig = plt.figure()
+            ax = fig.add_subplot(111)
+        #ax.set_xlabel('normal distr')
+        #ax.set_ylabel('data')
+        ax.plot(x, y, 'o', ms=2, alpha=0.7)
+        ax.plot(x, x, '-', ms=2, alpha=0.7)
         if labels!=None:
             markoutliers()
-        fig.suptitle('Q-Q plot')
-        fig.savefig('qq.png')
+        if title!=None:
+            ax.set_title(title)
+        #fig.savefig('qq.png')
         return outliers
 
     @classmethod

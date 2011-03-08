@@ -63,6 +63,15 @@ class XMLParser(object):
         self.feed(data)
         self.close()
         return self.current
+
+class PDBParser(XMLParser):
+    def __init__(self):
+        XMLParser.__init__(self)        
+
+    def getDescription(self,code):
+        url = 'http://www.rcsb.org/pdb/rest/describePDB?structureId='+code
+        d = self.openurl(url)
+        return d['PDB']
     
 if __name__ == '__main__':    
     url = 'http://www.rcsb.org/pdb/rest/describePDB?structureId=4hhb'

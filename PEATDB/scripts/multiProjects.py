@@ -39,8 +39,9 @@ from PEATDB.plugins.PEATSAplugin import PEATSAPlugin
 from PEATDB.plugins.Correlation import CorrelationAnalyser
 from PEATDB.PEATTables import PEATTableModel
 import PEATDB.Utils
-from PEATDB.Parsers import XMLParser
+from PEATDB.Parsers import PDBParser
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
 from scipy.stats import stats
 
 #plt.rc('text',usetex=True)
@@ -58,11 +59,6 @@ csvfiles = os.listdir(cpath)#[:4]
 dbnames = [os.path.splitext(i)[0] for i in csvfiles]
 print dbnames
 
-def getPDBXML(name):
-    url = 'http://www.rcsb.org/pdb/rest/describePDB?structureId=%s' %name
-    p = XMLParser()
-    d = p.openurl(url)    
-    return d['PDB']
 
 def PEATSAJobs(prjs):
     """Submit PEATSA runs for all projects or merge results if done"""
@@ -89,7 +85,7 @@ def PEATSAJobs(prjs):
             pdbfile = PS.writetempPDB()
             PS.submitJob(name='mycalc', pdbname=DB.meta.refprotein, pdbfile=pdbfile, 
                          mutations=mutlist, calcs=['stability'], meta={'protein':name})
-            #required to end process
+        #required to end process
         PS.jobManager.stopLogging()
         DB.close()
     return
@@ -121,10 +117,9 @@ def summarise(projects):
     summDB = PDatabase(local='summary.fs')
     C = CorrelationAnalyser()
     figs = []
-    for f in range(3):
+    for f in range(4):
         figs.append(plt.figure())
     
-    import matplotlib.gridspec as gridspec
     gs = gridspec.GridSpec(5, 5, wspace=0.3, hspace=0.5)    
     i=0
     data=[]
@@ -139,6 +134,7 @@ def summarise(projects):
         except:
             print 'no results'
             continue
+        #stats
         cc,rmse,meanerr = C.getStats(pre,exp)
         #ttest for mean errs 0        
         ttp = round(stats.ttest_1samp(errs, 0)[1],2)
@@ -150,25 +146,35 @@ def summarise(projects):
         C.showHistogram([pre,exp],title=p,labels=['pre','exp'],ax=ax)                
         ax = figs[2].add_subplot(gs[0, i])
         C.plotNorm(errs,title=p,lw=1,ax=ax)
-        x={'name':p,'rmse':rmse,'corrcoef':cc,'meanerr':meanerr,
+        #qqplot
+        ax = figs[3].add_subplot(gs[0, i])
+        C.QQplot(errs,title=p,ax=ax)
+        x={'name':p,'muts':len(pre),'rmse':rmse,'corrcoef':cc,'meanerr':meanerr,
            'ttest':ttp,'shapirowilk':swp}
         print x
-        pd = getPDBXML(p)
-        x.update(pd)
+        parser = PDBParser()
+        descr = parser.getDescription(p)
+        x.update(descr)
         data.append(x)
         i+=1
     
     summDB.importDict(data)
-    #summDB.commit()
+    summDB.commit()
     for i in range(len(figs)):
         figs[i].savefig('fig%s.png' %i)
     #plt.show()
     return
 
+def findOutliers(data):
+    """Outliers in all corr data"""
+    C = CorrelationAnalyser()   
+    
+    return ax
+
 def send2Server():
     settings={'server':'peat.ucd.ie','username':'guest',
                'password':'123','port':8080}
-    DB = PDatabase(local='summary.fs')    
+    DB = PDatabase(local='summary.fs')
     Utils.copyDBtoServer(DB,'PEATSAmultiprojects',settings)
     return
     
@@ -180,11 +186,11 @@ if __name__ == '__main__':
     parser.add_option("-j", "--jobs", dest="jobs", action='store_true',
                        help="do/merge jobs", default=False)
     parser.add_option("-s", "--summary", dest="summary", action='store_true',
-                       help="do summary", default=False)
+                       help="do summary", default=False)  
     parser.add_option("-p", "--path", dest="path",
                         help="Path with csv files")
     parser.add_option("-c", "--copy", dest="copy",action='store_true',
-                        help="copy to server", default=False)   
+                        help="copy to server", default=False)    
     opts, remainder = parser.parse_args()
 
     if opts.path != None:
@@ -194,7 +200,7 @@ if __name__ == '__main__':
     if opts.jobs == True:    
         PEATSAJobs(dbnames)
     if opts.summary == True:
-        summarise(dbnames)
+        summarise(dbnames)     
     if opts.copy == True:
         send2Server()
   

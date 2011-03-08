@@ -242,7 +242,7 @@ class PEATRecord(Record):
     def setDisplayAttribute(self, key, data):
         """Set the text to display for this attribute of the record
            This is used for the table display to cache the values"""
-        text = ''  
+        text = ''      
         if key == 'Structure':           
             return self.checkStructure(data)
         if data == None:

@@ -429,7 +429,7 @@ class zDatabase(object):
         dr = csv.DictReader(open(filename,'r'),dialect='custom')
         data = []
         for r in dr:            
-            data.append(r)        
+            data.append(r)
         self.importDict(data, namefield)
         return
 
