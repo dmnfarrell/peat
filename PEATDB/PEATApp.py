@@ -56,7 +56,7 @@ class App(Frame, GUI_help):
     Main PEAT App for new ZODB-based, DB class is in Base.py
     Author: Damien Farrell, December 2009
     """
-    def __init__(self, parent=None, DB=None):
+    def __init__(self, parent=None, DB=None, filename=None):
         """Initialize the application."""
         self.parent=parent
         #If there is data to be loaded, show the dialog first
@@ -76,11 +76,12 @@ class App(Frame, GUI_help):
         self.port = 8080
         self.username = self.getUserID()
         self.password = ''
-        self.project = 'test'   #project name on server
+        self.project = ''   #project name on server
         self.backend = 'mysql'
 
         self.filename = None       
         self.DB = None
+        self.currentDBs = {}
 
         self.getPrefs()
         self.setupVars()
@@ -92,9 +93,10 @@ class App(Frame, GUI_help):
         self.DNAtool_state = None
 
         #after loading the database instance is self.DB
-        if DB != None:
+        if DB != None:     
             self.loadDB(DB)
-
+        elif filename !=None:
+            self.openLocal(filename)
         self.setTitle()
         return
 
@@ -154,10 +156,27 @@ class App(Frame, GUI_help):
 
     def updatePlugins(self):
         """Update plugins"""             
-        self.Pluginmenu['var'].delete(2, self.Pluginmenu['var'].index(END))            
+        self.Pluginmenu['var'].delete(2, self.Pluginmenu['var'].index(END))
         self.discoverPlugins()
         return
+
+    def updateCurrentMenu(self):
+        """Update currently opened menu from current proj dict"""
         
+        menu = self.curr_menu['var']
+        menu.delete(1, menu.index(END))
+        for name in self.currentDBs:
+            #print name
+            db = self.currentDBs[name]
+            def func(db):
+                def new():
+                    self.removeTable()
+                    self.loadDB(db)
+                return new
+            menu.add_command(label=name,
+                                command=func(db))
+        return
+    
     def setupVars(self):
         """Set some tk vars"""
         self.yasara=False
@@ -204,13 +223,13 @@ class App(Frame, GUI_help):
                               pady=2,ipady=2)
 
         img = PEAT_images.folder_database()
-        hlptxt="Open DB from file"
-        self.toolbar.add_button('Open local DB', self.openLocal, img, hlptxt)
+        hlptxt="Open Project from file"
+        self.toolbar.add_button('Open local Project', self.openLocal, img, hlptxt)
         img = PEAT_images.connect()
         hlptxt="Connect to DB"
-        self.toolbar.add_button('Connect to DB', self.connectDialog, img, hlptxt)
+        self.toolbar.add_button('Connect to Project', self.connectDialog, img, hlptxt)
         img = PEAT_images.database_save()
-        hlptxt="Save current changes to DB"
+        hlptxt="Save current changes"
         self.toolbar.add_button('Save Changes', self.saveDB, img, hlptxt)
         img = PEAT_images.table_refresh()
         hlptxt="Refresh table"
@@ -312,19 +331,19 @@ class App(Frame, GUI_help):
     def createMenuBar(self):
         """Create the menu bar for the application. """
         self.menu=Menu(self.main)
-        self.file_menu={ '01Connect to DB':{'cmd':self.connectDialog},
+        self.file_menu={ '01Remote Project':{'cmd':self.connectDialog},
                          '02User Setup':{'cmd':self.loginSetup},
-                         '03Open local DB':{'cmd':self.openLocal},
-                         '04New DB':{'cmd':self.newDB},
-                         '05Close DB':{'cmd':self.closeDB},
+                         '03Open local Project':{'cmd':self.openLocal},
+                         '04New Project':{'cmd':self.newDB},
+                         '05Close Project':{'cmd':self.closeDB},
                          '06Save Changes':{'cmd':self.saveDB},
                          '07Save a Copy As':{'cmd':self.saveAs},
-                         '08Create DB on Server':{'cmd':self.createDBonServerDialog},
+                         '08Create Project on Server':{'cmd':self.createDBonServerDialog},
                          '09Undo Current Changes':{'cmd':self.undo},
                          '10Undo Previous Commits':{'cmd':self.showUndoLog},
                          '11Quit':{'cmd':self.quit}}
         self.file_menu=self.create_pulldown(self.menu,self.file_menu)
-        self.menu.add_cascade(label='Database',menu=self.file_menu['var'])
+        self.menu.add_cascade(label='Project',menu=self.file_menu['var'])
         self.addPrevProjects(self.file_menu['var'])
 
         self.rec_menu={ '01Add Protein':{'cmd':self.addRecordDialog},
@@ -385,6 +404,11 @@ class App(Frame, GUI_help):
         self.Pluginmenu=self.create_pulldown(self.menu,self.Pluginmenu)
         self.menu.add_cascade(label='Plugins',menu=self.Pluginmenu['var'])
 
+        self.curr_menu={'01Close All':{'cmd':self.closeAll},
+                        '02sep':'',}
+        self.curr_menu=self.create_pulldown(self.menu,self.curr_menu)
+        self.menu.add_cascade(label='Current',menu=self.curr_menu['var'])
+        
         self.help_menu=Menu(self.menu,tearoff=0)
         self.help_menu.add_command(label='Online documentation',command=self.onlineDocumentation)
         self.help_menu.add_command(label='Report Bug',command=self.gotoBugzilla)
@@ -398,13 +422,13 @@ class App(Frame, GUI_help):
         """Do whatever changes to menus required wehen we load and close"""
         if load==True:
             self.updateLabbooksMenu()
+            self.updateCurrentMenu()
         return
 
     def doBindings(self):
         #self.master.bind("<Configure>", self.resize)
         self.master.bind("<Control R>", self.updateTable)
         self.main.protocol('WM_DELETE_WINDOW', self.quit)
-
         return
 
     def createSearchBar(self, event=None):
@@ -580,6 +604,14 @@ class App(Frame, GUI_help):
         self.masterframe.add(self.tableframe)
         self.setTitle()
         self.recordEvent('Loaded db ok')
+
+        if self.DB.meta.info['project'] == '':
+            if self.project!='':
+                self.DB.meta.info['project'] = self.project
+        name = self.DB.meta.info['project']        
+        if not name in self.currentDBs.keys(): 
+            self.currentDBs[name] = self.DB
+            
         self.updateStatusPane()
         self.updateMenus(load=True)
         return
@@ -614,8 +646,7 @@ class App(Frame, GUI_help):
 
     def openLocal(self, filename=None):
         """Open local DB"""
-        print 'local file'
-        print filename
+      
         if filename == None:
             filename=tkFileDialog.askopenfilename(initialdir=os.getcwd(),
                                        filetypes=[("zodb fs","*.fs"),
@@ -623,13 +654,15 @@ class App(Frame, GUI_help):
                                                   ("All files","*")])
         if filename:
             if self.DB != None:
-                answer = self.closeDB()
-                if answer == 'cancel':
-                    return
+                self.hideDB()
+                #answer = self.closeDB()
+                #if answer == 'cancel':
+                #    return
             self.filename = filename
+            self.project = os.path.basename(filename)
             DB = PDatabase(local=filename)
             self.loadDB(DB)
-            self.addtoRecent(filename)
+            self.addtoRecent(filename)           
         return
 
     def saveDB(self, event=None):
@@ -748,6 +781,12 @@ class App(Frame, GUI_help):
             self.recordEvent('Saved current DB as %s' %filename)
         return
 
+    def hideDB(self):
+        """Hide the open DB"""
+        self.removeTable()
+        self.setTitle()
+        return
+    
     def closeDB(self, event=None):
         """Close the open DB"""
         if self.DB == None:
@@ -764,15 +803,46 @@ class App(Frame, GUI_help):
 
         self.DB.close()
         self.DB = None
-        self.removeTable()        
+        self.removeTable()
         self.recordEvent('Closed db')
         self.filename = None
         self.setTitle()
         self.cv = self.showBlankCanvas(self.main,row=1)
         self.welcomeLogo()
         self.updateStatusPane()
+        name = self.project
+        if self.currentDBs:
+            del self.currentDBs[name]
         return True
 
+    def closeAll(self):
+        """close all currently opened DBs"""
+        for name in self.currentDBs.keys()[:]:
+            if name == self.project:
+                self.closeDB()
+            else:    
+                db = self.currentDBs[name]
+                db.close()
+            del self.currentDBs[name]
+        print self.currentDBs
+        self.updateCurrentMenu()
+        return
+
+    def openProjectfromTable(self, protein=None, field_name=None):
+        """ """        
+        if self.DB == None:
+            return 
+        D = self.DB.data
+        if not D[protein].has_key(field_name):
+            return
+        import copy
+        settings = copy.deepcopy(D[protein][field_name])       
+        prj = settings['project']
+        del settings['project']
+        DB = Utils.loadDB(prj,remote=True,settings=settings)
+        self.loadDB(DB)
+        return
+    
     def packDB(self):
         if self.DB == None:
             return
@@ -1586,6 +1656,11 @@ class App(Frame, GUI_help):
             pass
         return
 
+    def editProjectLink(self, protein, field_name):
+        blank = {'project':'','server':'','username':'','password':'','port':8080}
+        self.editDictField(protein, field_name, blank)
+        return
+        
     def edit_link(self, protein, field_name):
         """Edit a hyperlink"""
         blank = {'text':'','link':''}
@@ -2506,17 +2581,10 @@ def main():
         app=App(DB=DB)
     elif opts.file != None:
         if not os.path.exists(opts.file):
-            print 'File does not exist.'
-            DB=None
-
-        else:
-            try:
-                DB = PDatabase(local=opts.file)
-            except:
-                print 'Could not open the file, it may be in use'
-                return
-        app=App(DB=DB)
-        app.addtoRecent(os.path.abspath(opts.file))
+            print 'File does not exist.'            
+            opts.file = None
+        app=App(filename=opts.file)
+        app.addtoRecent(os.path.abspath(opts.file))        
     else:
         app=App()
     app.mainloop()

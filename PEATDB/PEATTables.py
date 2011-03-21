@@ -38,7 +38,9 @@ class PEATTable(TableCanvas):
                             "Save File" : 'save_file'},
                     'Table' : {"Edit Table" : 'startLabbook' },              
                     'Ekintype' : {"Open Ekin" : 'startEkin' },
-                    'Sequence' : {"Show sequence" : 'display_sequence'},           
+                    'Sequence' : {"Show sequence" : 'display_sequence'},
+                    'Project' : {"Edit Link to Project" : 'editProjectLink',
+                                 "Open Project" : 'openProjectfromTable'},
                     }
 
         self.ekin_actions={'NMR titration':'NMR titration',

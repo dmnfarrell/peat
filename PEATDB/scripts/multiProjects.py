@@ -123,10 +123,17 @@ def summarise(projects):
     gs = gridspec.GridSpec(5, 5, wspace=0.3, hspace=0.5)    
     i=0
     data=[]
+    summDB.addField('project',fieldtype='Project')
     for p in projects:
-        print p
+        print 'structure:',p
         DB = PDatabase(local=os.path.join(savepath,p))
         S = PEATTableModel(DB)
+        #add link to proj
+        try:
+            summDB[p]['project'] = {'server':'peat.ucd.ie','username':'guest',
+                              'project':p,'port':'8080'}
+        except:
+            pass
         #print DB.meta.info
         try:
             exp,pre = S.getColumns(['Exp','prediction'],allowempty=False)
@@ -171,9 +178,20 @@ def findOutliers(data):
     
     return ax
 
-def send2Server():
+def send2Server(projects):
+    """Send all projects to remote versions"""
     settings={'server':'peat.ucd.ie','username':'guest',
                'password':'123','port':8080}
+    adminsettings={'host':'peat.ucd.ie','user':'peatadmin',
+               'passwd':'123','port':8080}    
+    for p in projects:
+        print p
+        DB = PDatabase(local=os.path.join(savepath,p))
+        print DB
+        Utils.createDBonServer(prj=p,settings=adminsettings,
+                               access='guest')
+        #Utils.copyDBtoServer(DB,p,settings)
+        
     DB = PDatabase(local='summary.fs')
     Utils.copyDBtoServer(DB,'PEATSAmultiprojects',settings)
     return
@@ -186,7 +204,7 @@ if __name__ == '__main__':
     parser.add_option("-j", "--jobs", dest="jobs", action='store_true',
                        help="do/merge jobs", default=False)
     parser.add_option("-s", "--summary", dest="summary", action='store_true',
-                       help="do summary", default=False)  
+                       help="do summary/stats", default=False)  
     parser.add_option("-p", "--path", dest="path",
                         help="Path with csv files")
     parser.add_option("-c", "--copy", dest="copy",action='store_true',
@@ -202,5 +220,5 @@ if __name__ == '__main__':
     if opts.summary == True:
         summarise(dbnames)     
     if opts.copy == True:
-        send2Server()
+        send2Server(dbnames)
   

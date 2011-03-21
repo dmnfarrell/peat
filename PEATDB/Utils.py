@@ -36,9 +36,11 @@ from PEATDB.Base import PDatabase
 settings={'server':'localhost','username':'guest',
            'password':'123'}
 
-def loadDB(prj, remote=False, settings={}):
+def loadDB(prj=None, remote=False, settings={}):
     """Load a local or remote db, settings are the remote db arguments
        such as server, username, password and project name"""
+    if settings.has_key('port'):
+        settings['port'] = int(settings['port'])
     if remote==True:
         DB = PDatabase(project=prj,**settings)
     else:
@@ -77,13 +79,19 @@ def saveDBCopy(DB, filename, callback=None):
     newDB.close() 
     return newDB
 
-def createDBonServer(prj, settings={}, callback=None):
+def createDBonServer(prj, settings={}, callback=None, access=None):
     """Create a project on the mysql server"""
     import MySQLdb as mysql
     db = mysql.connect(**settings)
     c = db.cursor()
     cmd = "create database " + prj + ";"
-    c.execute(cmd)
+    try:
+        c.execute(cmd)
+    except Exception as e:
+        print e
+    if access != None:
+        cmd = "grant all privileges on " + prj + ".* to " + "'"+access+"'"+ "@'%';"
+        c.execute(cmd)
     return True
     
 def copyDBtoServer(DB, prj, settings):

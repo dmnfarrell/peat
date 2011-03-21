@@ -268,6 +268,8 @@ class PEATRecord(Record):
                  text = data.name
              elif data.has_key('link'):
                  return data
+             elif data.has_key('server'):
+                 return data['server']+':'+data['project']+':'+data['port']              
              elif data.has_key('text'):
                  text = ''
                  t = data['text']
