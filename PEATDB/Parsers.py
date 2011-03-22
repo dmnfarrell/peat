@@ -72,6 +72,12 @@ class PDBParser(XMLParser):
         url = 'http://www.rcsb.org/pdb/rest/describePDB?structureId='+code
         d = self.openurl(url)
         return d['PDB']
+
+    def getSequence(self, code, chain='A'):
+        url = 'http://www.rcsb.org/pdb/rest/das/pdbchainfeatures/sequence?segment='
+        url = url+code+'.'+chain
+        d = self.openurl(url)
+        return d
     
 if __name__ == '__main__':    
     url = 'http://www.rcsb.org/pdb/rest/describePDB?structureId=4hhb'

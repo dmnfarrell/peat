@@ -131,7 +131,7 @@ def summarise(projects):
         #add link to proj
         try:
             summDB[p]['project'] = {'server':'peat.ucd.ie','username':'guest',
-                              'project':p,'port':'8080'}
+                              'project':p,'password':'123','port':'8080'}
         except:
             pass
         #print DB.meta.info
@@ -156,11 +156,11 @@ def summarise(projects):
         #qqplot
         ax = figs[3].add_subplot(gs[0, i])
         C.QQplot(errs,title=p,ax=ax)
-        x={'name':p,'muts':len(pre),'rmse':rmse,'corrcoef':cc,'meanerr':meanerr,
+        x={'name':p,'mutants':len(pre),'rmse':rmse,'corrcoef':cc,'meanerr':meanerr,
            'ttest':ttp,'shapirowilk':swp}
         print x
         parser = PDBParser()
-        descr = parser.getDescription(p)
+        descr = parser.getDescription(p)        
         x.update(descr)
         data.append(x)
         i+=1
@@ -182,14 +182,13 @@ def send2Server(projects):
     """Send all projects to remote versions"""
     settings={'server':'peat.ucd.ie','username':'guest',
                'password':'123','port':8080}
-    adminsettings={'host':'peat.ucd.ie','user':'peatadmin',
+    adminsettings={'host':'localhost','user':'peatadmin',
                'passwd':'123','port':8080}    
     for p in projects:
         print p
-        DB = PDatabase(local=os.path.join(savepath,p))
-        print DB
-        Utils.createDBonServer(prj=p,settings=adminsettings,
-                               access='guest')
+        DB = PDatabase(local=os.path.join(savepath,p))        
+        #Utils.createDBonServer(prj=p,settings=adminsettings,
+        #                       access='guest')
         #Utils.copyDBtoServer(DB,p,settings)
         
     DB = PDatabase(local='summary.fs')

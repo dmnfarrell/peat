@@ -164,7 +164,7 @@ class App(Frame, GUI_help):
         """Update currently opened menu from current proj dict"""
         
         menu = self.curr_menu['var']
-        menu.delete(1, menu.index(END))
+        menu.delete(1, menu.index(END))       
         for name in self.currentDBs:
             #print name
             db = self.currentDBs[name]
@@ -505,15 +505,17 @@ class App(Frame, GUI_help):
         self.recentmenu.delete(0, self.recentmenu.index('last'))
         return
     
-    def connect(self, server=None, port=None, project=None, backend=None):
+    def connect(self, server=None, port=None, project=None, backend='mysql',
+                username=None, password=None):
         """Connect with no dialog"""
-
+        if username == None: username=self.username
+        if password == None: password=self.password
         if server != None:
             self.server = server; self.project = project
             self.backend = backend
 
-            DB = PDatabase(server=server, port=port,
-                      username=self.username,
+            DB = PDatabase(server=server, port=int(port),
+                      username=username,
                       password=self.password,
                       project=project,
                       backend=self.backend,
@@ -524,12 +526,13 @@ class App(Frame, GUI_help):
                          'Error message returned: %s'
                           %(project,server,DB.errormessage))
 
-                return
-            self.closeDB()
+                return False
+            #self.closeDB()
+            self.hideDB()
             self.recordEvent('Connected to '+server)
             self.loadDB(DB)
 
-        return
+        return True
 
     def connectDialog(self, event=None):
         """Get a server/port, storage and open DB"""
@@ -566,11 +569,12 @@ class App(Frame, GUI_help):
                 self.recordEvent('Connection failure to '+self.server)
                 return
             #We can try to close current db now
-            answer = self.closeDB()
+            '''answer = self.closeDB()
             if answer == 'cancel':
-                return
+                return'''
+            self.hideDB()
             self.recordEvent('Connected to '+self.server)
-            self.loadDB(DB)
+            result = self.loadDB(DB)
             self.addtoRecent((self.server,self.port,self.project,self.backend))
 
         return
@@ -604,17 +608,17 @@ class App(Frame, GUI_help):
         self.masterframe.add(self.tableframe)
         self.setTitle()
         self.recordEvent('Loaded db ok')
-
+        print self.project
         if self.DB.meta.info['project'] == '':
             if self.project!='':
                 self.DB.meta.info['project'] = self.project
-        name = self.DB.meta.info['project']        
+        name = self.DB.meta.info['project']
         if not name in self.currentDBs.keys(): 
             self.currentDBs[name] = self.DB
             
         self.updateStatusPane()
         self.updateMenus(load=True)
-        return
+        return True
 
     def setTitle(self):
         """set title of window"""
@@ -783,7 +787,8 @@ class App(Frame, GUI_help):
 
     def hideDB(self):
         """Hide the open DB"""
-        self.removeTable()
+        if hasattr(self, 'table'):
+            self.removeTable()
         self.setTitle()
         return
     
@@ -811,19 +816,21 @@ class App(Frame, GUI_help):
         self.welcomeLogo()
         self.updateStatusPane()
         name = self.project
-        if self.currentDBs:
+        #print self.currentDBs
+        if name in self.currentDBs:
             del self.currentDBs[name]
         return True
 
     def closeAll(self):
-        """close all currently opened DBs"""
+        """close all currently opened DBs except current viewed"""
         for name in self.currentDBs.keys()[:]:
             if name == self.project:
-                self.closeDB()
+                #self.closeDB()
+                pass
             else:    
                 db = self.currentDBs[name]
                 db.close()
-            del self.currentDBs[name]
+                del self.currentDBs[name]
         print self.currentDBs
         self.updateCurrentMenu()
         return
@@ -837,10 +844,13 @@ class App(Frame, GUI_help):
             return
         import copy
         settings = copy.deepcopy(D[protein][field_name])       
-        prj = settings['project']
-        del settings['project']
-        DB = Utils.loadDB(prj,remote=True,settings=settings)
-        self.loadDB(DB)
+        #prj = settings['project']
+        #del settings['project']
+        #DB = Utils.loadDB(prj,remote=True,settings=settings)
+        self.hideDB()
+        #self.loadDB(DB)
+        print settings
+        self.connect(**settings)
         return
     
     def packDB(self):
