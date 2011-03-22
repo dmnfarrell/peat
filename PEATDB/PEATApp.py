@@ -508,6 +508,7 @@ class App(Frame, GUI_help):
     def connect(self, server=None, port=None, project=None, backend='mysql',
                 username=None, password=None):
         """Connect with no dialog"""
+      
         if username == None: username=self.username
         if password == None: password=self.password
         if server != None:
@@ -525,7 +526,6 @@ class App(Frame, GUI_help):
                          'Could not connect to %s:%s.\n'
                          'Error message returned: %s'
                           %(project,server,DB.errormessage))
-
                 return False
             #self.closeDB()
             self.hideDB()
@@ -608,7 +608,7 @@ class App(Frame, GUI_help):
         self.masterframe.add(self.tableframe)
         self.setTitle()
         self.recordEvent('Loaded db ok')
-        print self.project
+        #print self.project
         if self.DB.meta.info['project'] == '':
             if self.project!='':
                 self.DB.meta.info['project'] = self.project
@@ -836,19 +836,13 @@ class App(Frame, GUI_help):
         return
 
     def openProjectfromTable(self, protein=None, field_name=None):
-        """ """        
+        """Open remote project from table cell"""        
         if self.DB == None:
             return 
         D = self.DB.data
         if not D[protein].has_key(field_name):
-            return
-        import copy
-        settings = copy.deepcopy(D[protein][field_name])       
-        #prj = settings['project']
-        #del settings['project']
-        #DB = Utils.loadDB(prj,remote=True,settings=settings)
-        self.hideDB()
-        #self.loadDB(DB)
+            return       
+        settings = D[protein][field_name]       
         print settings
         self.connect(**settings)
         return
