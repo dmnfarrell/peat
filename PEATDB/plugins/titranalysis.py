@@ -229,12 +229,18 @@ class NMRTitration(Plugin, GUI_help):
 
     def analyseTitDB(self, DB, col, names=None):
         """Extract titdb pKas"""
+        import matplotlib.pyplot as plt
+        plt.rc('font',size=22)
+        plt.rc('savefig',dpi=300)
+        plt.rc('axes',linewidth=.5)
+        plt.rc('text',usetex=True)
+        
         nuclnames = {'1H NMR':'H','15N NMR':'N'}
         t = TitrationAnalyser()        
         #extract reliable pkas from selected proteins     
         #p=t.extractpKas(DB, col, names=names, titratable=False, reliable=False, minspan=0.06)
-        #t.analysepKas(p)
-        t.compareNuclei(DB, '15N NMR', '1H NMR', titratable=True, names=names)
+        #t.analysepKas(p)        
+        t.compareNuclei(DB, '15N NMR', '1H NMR', names=names, titratable=True)
         
         #ghost mapping..
         #t.mappKas(DB,col,p,names=['Protein G B1'],nucleus=nuclnames[col],calculatespans=False)       
@@ -323,9 +329,7 @@ def main():
     parser.add_option("-u", "--getexperrs", dest="getexperrs", action='store_true',
                        help="get exp uncertainties", default=False)   
     parser.add_option("-m", "--addmeta", dest="addmeta", action='store_true',
-                       help="add meta data for NMR", default=False)     
-    parser.add_option("-x", "--analyse", dest="analyse", action='store_true',
-                       help="extract pKas", default=False)     
+                       help="add meta data for NMR", default=False) 
     parser.add_option("-p", "--protein", dest="protein", help="protein")
     parser.add_option("-c", "--col", dest="col", help="field")
     parser.add_option("-a", "--atom", dest="atom", help="atom")
@@ -342,36 +346,36 @@ def main():
         app.main()
         app.mainwin.mainloop()
         return
+    
+    yuncerts = {'H':0.03,'N':0.1,'C':0.2}
+    try:
+        yuncert=yuncerts[opts.atom]
+    except:
+        yuncert=None
         
     #some tit db funcs
     if opts.titdb == True:
         DB = PDatabase(server='peat.ucd.ie', username='guest',
                        password='123', project='titration_db',
-                       port=8080)
+                       port=8080)    
+        complete = ['HEWL', 'Bovine Beta-Lactoglobulin',
+                    'Plastocyanin (Anabaena variabilis)',
+                    'Plastocyanin (Phormidium)',
+                    'Glutaredoxin', 'CexCD (Apo)',
+                    'Protein G B1','Xylanase (Bacillus subtilus)']
+        app.analyseTitDB(DB, opts.col, complete)
+        #app.addpKaTables(DB, complete)
         
-    yuncerts = {'H':0.03,'N':0.1,'C':0.2}
-    complete = ['HEWL', 'Bovine Beta-Lactoglobulin',
-                'Plastocyanin (Anabaena variabilis)',
-                'Plastocyanin (Phormidium)',
-                'Glutaredoxin', 'CexCD (Apo)',
-                'Protein G B1','Xylanase (Bacillus subtilus)']
-    try:
-        yuncert=yuncerts[opts.atom]
-    except:
-        yuncert=None
     if opts.ekinprj != None:
         E = EkinProject()
-        E.openProject(opts.ekinprj)
-    
-    if opts.analyse == True:        
-        app.analyseTitDB(DB, opts.col, complete)
-    elif opts.benchmark == True:
+        E.openProject(opts.ekinprj)       
+
+    if opts.benchmark == True:
         app.benchmarkExpErr(DB)
-    else:
+    elif opts.col!=None or E!=None:
         app.titDBUtils(DB, opts.col, opts.protein, a=opts.atom, E=E,
                         refit=opts.refit, addmeta=opts.addmeta, 
                         getexperrs=opts.getexperrs, yuncert=yuncert)
-        #app.addpKaTables(DB, complete)
-        
+           
 if __name__ == '__main__':
     main()

@@ -940,7 +940,7 @@ class TitrationAnalyser():
     def comparepKas(cls, E1, E2, d, titratable=False, errcutoff=1e2):
         """Compare pKas from fits in two ekin datasets
            returns:
-               None if fails to fins meaningful pKas from fits
+               None if fails to find meaningful pKas from fits
                otherwise returns tuple of results"""
         reliable=True
         try:    
@@ -966,10 +966,13 @@ class TitrationAnalyser():
 
         if p1val != None and p2val != None and len(allpkas1) > 0 and len(allpkas2) > 0:
             pchk = cls.getClosest(p1val, allpkvals2)
-            perr1 = round(E1.getMeta(d, 'exp_errors')[p1][1],4)
-            perr2 = round(E2.getMeta(d, 'exp_errors')[p1][1],4)            
+            try:
+                perr1 = round(E1.getMeta(d, 'exp_errors')[p1][1],4)
+                perr2 = round(E2.getMeta(d, 'exp_errors')[p2][1],4)
+            except:
+                return None
             print d, p1val, p2val, perr1, perr2
-            print errcutoff
+            #print errcutoff
             if perr1>errcutoff or perr2>errcutoff: return None
             if p2val != pchk:
                 p2val = pchk
@@ -1037,17 +1040,17 @@ class TitrationAnalyser():
         relspans2=[]        
         otherpkas1=[]
         otherpkas2=[]
-        names=[]
+        #names=[]
         pkasbyres1={}
         pkasbyres2={}
         for t in cls.residue_list:
             pkasbyres1[t]=[]
             pkasbyres2[t]=[]
      
-        cls.getProtNames(DB)    
+        cls.getProtNames(DB)
 
-        for prot in DB.getRecs():           
-            name = cls.protnames[prot]
+        for prot in DB.getRecs():            
+            name = cls.protnames[prot]            
             if names != None and name not in names:
                 continue
             print 'processing protein', name
@@ -1057,13 +1060,16 @@ class TitrationAnalyser():
             E1 = DB[prot][col1]
             E2 = DB[prot][col2]            
             
-            X = compareAllpKas(E1, E2, exclude=cls.excluded)
-            rp1, rp2, op1, rsp1, rsp2, op2, n = X
+            X = cls.compareAllpKas(E1, E2, exclude=cls.excluded)
+            print len(X)
+            if X == None:
+                continue            
+            rp1, rp2, op1, op2, rsp1, rsp2, errs1, errs2, n = X
             relpkas1.extend(rp1)
             relpkas2.extend(rp2)
             otherpkas1.extend(op1)
             otherpkas2.extend(op2)
-            names.extend(n)
+            #names.extend(n)
             
         print 'reliable pkas matched:', len(relpkas1)
         print 'others:', len(otherpkas1)
@@ -1071,7 +1077,7 @@ class TitrationAnalyser():
         f=pylab.figure(figsize=(10,20))
         ax1=f.add_subplot(211)
         ax2=f.add_subplot(212)
-        cc = cls.doXYPlot(ax1, relpkas1, relpkas2, names=names,
+        cc = cls.doXYPlot(ax1, relpkas1, relpkas2, #names=names,
                         title='15N vs 1H : reliable pKas', xlabel='15N', ylabel='1H')
         print 'reliable pKas, correl coeff:', cc
         cc = cls.doXYPlot(ax2, otherpkas1, otherpkas2, color='r',
@@ -1079,7 +1085,7 @@ class TitrationAnalyser():
         print 'other pKas, correl coeff:', cc
         f.savefig('comparenuclei.png', dpi=300)
         
-        f=pylab.figure(figsize=(10,10))
+        '''f=pylab.figure(figsize=(10,10))
         ax=f.add_subplot(111)
         i=0
         leglines = [];series=[]
@@ -1100,8 +1106,8 @@ class TitrationAnalyser():
                              numpoints=1,loc='lower right',
                              prop=FontProperties(size="small"))
         leg.draw_frame(False)
-        f.savefig('comparenuclei_relbyres.png', dpi=300)
-        pylab.show()
+        f.savefig('comparenuclei_relbyres.png', dpi=300)'''
+        #pylab.show()
         return
 
     def compareExtractedpKas(cls, DB, col, prot1, prot2):
