@@ -1078,7 +1078,7 @@ class TitrationAnalyser():
         ax1=f.add_subplot(211)
         ax2=f.add_subplot(212)
         cc = cls.doXYPlot(ax1, relpkas1, relpkas2, #names=names,
-                        title='15N vs 1H : reliable pKas', xlabel='15N', ylabel='1H')
+                        title='15N vs 1H: reliable pKas', xlabel='15N', ylabel='1H')
         print 'reliable pKas, correl coeff:', cc
         cc = cls.doXYPlot(ax2, otherpkas1, otherpkas2, color='r',
                         title='15N vs 1H : other pKas', xlabel='15N', ylabel='1H')

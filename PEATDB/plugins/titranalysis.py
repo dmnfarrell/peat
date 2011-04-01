@@ -230,7 +230,7 @@ class NMRTitration(Plugin, GUI_help):
     def analyseTitDB(self, DB, col, names=None):
         """Extract titdb pKas"""
         import matplotlib.pyplot as plt
-        plt.rc('font',size=22)
+        plt.rc('font',size=28)
         plt.rc('savefig',dpi=300)
         plt.rc('axes',linewidth=.5)
         plt.rc('text',usetex=True)
