@@ -100,7 +100,7 @@ parse_aadefs::parse_aadefs(vector<string> aadeflines) {
 	  return;
 	}
 	//
-	printf ("Parsing: %s\n",name.c_str());
+	//printf ("Parsing: %s\n",name.c_str());
 	if (aapart) {
 	  amino_acids.push_back(name);
 	}
