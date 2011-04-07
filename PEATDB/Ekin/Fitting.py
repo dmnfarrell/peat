@@ -47,6 +47,7 @@ class Fitting(object):
     models = {'Linear':'linear',
               'Power':'power',
               'sigmoid':'sigmoid',
+              'gaussian':'gaussian',
               '1st order decay':'one_decay',
               '1 pKa 2 Chemical shifts':'HH1pKa2shifts',
               '2 pKas, 3 Chemical shifts':'HH2pKa3shifts',
@@ -78,6 +79,8 @@ class Fitting(object):
             return power(variables=vrs,exp_data=expdata,callback=callback,name=model)
         elif model == 'Sigmoid':
             return sigmoid(variables=vrs,exp_data=expdata,callback=callback,name=model)
+        elif model == 'Gaussian':
+            return gaussian(variables=vrs,exp_data=expdata,callback=callback,name=model)
         elif model == '1 pKa 2 Chemical shifts':
             return HH1pKa2shifts(variables=vrs,exp_data=expdata,callback=callback,name=model)
         elif model == '2 pKas, 3 Chemical shifts':
@@ -842,6 +845,50 @@ class sigmoid(LM_Fitter):
             value = bottom + (top - bottom) / (1 + math.exp((tm-x)/slope))
         except:
             value = 0.0
+        return value
+
+class gaussian(LM_Fitter):
+    """Gaussian function"""
+    def __init__(self, variables, exp_data, callback, name):
+        LM_Fitter.__init__(self,variables,exp_data, callback,name)
+        self.name = name
+        self.names = ['a', 'b', 'c']
+        self.labels = ['x', 'y']
+        if self.variables == None:
+            self.variables = [1, 2, 1]
+        else:
+            self.variables = variables
+        self.setChangeVars()
+        return
+
+    def get_equation(self):
+        """Return a text form of the model for printing"""
+        eq ='a*exp(-(pow(x-b),2)/(pow(2*c,2)))'
+        return eq
+
+    def guess_start(self):
+        """Guess start vals for this model"""
+        x=[i[0] for i in self.exp_data]
+        y=[i[1] for i in self.exp_data]
+        try:            
+            self.variables[1]=numpy.mean(x)
+            c=self.variables[2]=numpy.std(x)
+            self.variables[0]=1/c*(math.sqrt(2*3.14))
+        except:
+            pass
+        return
+    
+    def get_value(self, variables, data_point):
+        """Sigmoid: tm, bottom, top, slope"""       
+        try:
+            x=data_point[0]
+        except:
+            x=data_point
+        a=variables[0]; b=variables[1]
+        c=variables[2]        
+       
+        value = a*math.exp(-( pow(x-b,2) / pow(2*c,2) ))
+  
         return value
 
 class modifiedHill(LM_Fitter):

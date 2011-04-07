@@ -69,8 +69,9 @@ class EkinProject(object):
                 'Amyloid formation']
     mode_definition = {'General':
                         ['Michaelis-Menten',#'Michaelis-Menten-competitive-inhibition',
-                         'Linear','Power','1 pKa 2 Chemical shifts','3 pKas, 2 Chemical shifts',
-                         '2 pKas, 3 Chemical shifts','3 pKas, 4 Chemical shifts',#'4 pKas, 5 Chemical shifts',
+                         'Linear','Power','Gaussian',
+                         '1 pKa 2 Chemical shifts','3 pKas, 2 Chemical shifts',
+                         '2 pKas, 3 Chemical shifts','3 pKas, 4 Chemical shifts',
                          'Bell-shaped pH-act profile (3 pKas)',
                          'Bell-shaped pH-act profile (2 pKas)',
                          'Sigmoid', 'Modified Hill', 'schellman',
