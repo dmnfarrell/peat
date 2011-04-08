@@ -252,6 +252,7 @@ class electrostatics:
         if not getattr(self,'titratable_groups',None):
             self.get_titratable_groups()
         self.matrix={}
+        self.distmatrix={}
         titgrps=self.titratable_groups
         residues=titgrps.keys()
         residues.sort()
@@ -265,6 +266,8 @@ class electrostatics:
                 name1=self.get_titgroup_name(residue,group) 
                 if not self.matrix.has_key(name1):
                     self.matrix[name1]={}
+                if not self.distmatrix.has_key(name1):
+                    self.distmatrix[name1]={}
                 #
                 # Calculate distance from center of atoms
                 #
@@ -319,9 +322,12 @@ class electrostatics:
                         #if ene:
                         #    print '%20s - %20s: %7.3f' %(name1,name2,ene)
                         self.matrix[name1][name2]=[ene,0.0,0.0,0.0]
+                        self.distmatrix[name1][name2]=dist 
                         if not self.matrix.has_key(name2):
                             self.matrix[name2]={}
+                            self.matrix[name2]={}
                         self.matrix[name2][name1]=[ene,0.0,0.0,0.0]
+                        self.matrix[name2][name1]=dist
         #
         # Write the matrix file
         #

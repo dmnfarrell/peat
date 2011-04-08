@@ -257,7 +257,7 @@ class Mutate:
                 C_name='%s:C' %prevres
                 if self.PI.atoms.has_key(C_name):
                     bonded.append(C_name)
-            except Nterm:
+            except Protool.errors.Nterm:
                 pass
         elif atname=='C':
             try:
@@ -265,7 +265,7 @@ class Mutate:
                 N_name='%s:N' %nextres
                 if self.PI.atoms.has_key(N_name):
                     bonded.append(N_name)
-            except Cterm:
+            except Protool.errors.Cterm:
                 pass
                 #print 'Cterm',resnum
         #
@@ -309,12 +309,7 @@ class Mutate:
                 if lib and real:
                     if abs(lib-real)<=10.0:
                         ok=ok+1
-                if ok>=crit:
-                    print crit,len(use_rots)
-                    use_rots.append(rot)
-        use_rots=use_rots[:300]
-        for rot in use_rots:
-            print rot
+        #use_rots=use_rots[:300] # Search maximally 300 rotamers
         return use_rots
     #
     # ----
@@ -325,6 +320,9 @@ class Mutate:
         self.mutate_operations={}
         return
 
+    #
+    # -----
+    #
 
     def mutate(self,residue,newtype,orgtype=None):
         """Mutate the residue to the new type
@@ -824,6 +822,8 @@ class Mutate:
 
     def get_overlap(self,atom1,atom2):
         """Find out if two atoms overlap"""
+        if not atom1 or not atom2:
+            raise Exception('Both atoms have to be true: %s %s' %(str(atom1),str(atom2)))
         vdw1=self.PI.vdwr[self.PI.get_atom_element(atom1)]
         vdw2=self.PI.vdwr[self.PI.get_atom_element(atom2)]
         dist=self.PI.dist(atom1,atom2)
@@ -844,7 +844,7 @@ class Mutate:
             elif self.are_1_4_bound(atom1,atom2):
                 tolerance=0.8
             if abs(sub_dist+tolerance)<0.1:
-                print 'BUMP',atom1,atom2,dist,vdw1,vdw2,abs(sub_dist+tolerance)
+                #print 'BUMP',atom1,atom2,dist,vdw1,vdw2,abs(sub_dist+tolerance)
                 return abs(sub_dist+tolerance)
             else:
                 return 0.0
@@ -863,7 +863,7 @@ class Mutate:
 # -----
 #
 
-def Model_Mutations(pdbfile,mol2files,mutations,max_overlap=0.5,max_totalbump=1.0,return_score=False):
+def Model_Mutations(pdbfile,mol2files,mutations,max_overlap=0.5,max_totalbump=1.0,return_score=False,store_mutation_operations=False):
     """Model a number of mutations in a pdbfile when one or more ligands are present"""
     #
     # Check for stupidity
@@ -897,6 +897,11 @@ def Model_Mutations(pdbfile,mol2files,mutations,max_overlap=0.5,max_totalbump=1.
     myFFF.parse_lines(pdblines)
     #myFFF.soup_stat()
     Model=FFF.FFFcontrol.model_class(myFFF,Rotamerlib,FFFaadef_dir)
+    #
+    # Store the wild type PDB file
+    #
+    if store_mutation_operations:
+        wt_lines=myFFF.make_pdblines('PDB')
     #
     import pKa.pKD_tools as pKD_tools
     total_bump=0.0
@@ -938,11 +943,54 @@ def Model_Mutations(pdbfile,mol2files,mutations,max_overlap=0.5,max_totalbump=1.
             self.PI=FFF
             return
     #
-    # Return
+    # Create the instance
+    #
+    FFF_instance=FFF_fix(myFFF)
+    #
+    # Keep track of the changes that were made to the PDB file
+    #
+    if store_mutation_operations:
+        mut_lines=FFF_instance.PI.make_pdblines('PDB')
+        import Protool
+        WT=Protool.structureIO()
+        WT.parsepdb(wt_lines)
+        wt_atoms=sorted(WT.atoms.keys())
+        #
+        MUT=Protool.structureIO()
+        MUT.parsepdb(mut_lines)
+        #
+        mut_atoms=sorted(MUT.atoms.keys())
+        wt_count=0
+        mutcount=0
+        
+        def coord_diff(atom1,atom2):
+            diff=0.0
+            for coord in ['X','Y','Z']:
+                diff=diff+abs(atom1[coord]-atom2[coord])
+            return diff
+        
+        operations=[]
+        for atom in wt_atoms:
+            if not atom in mut_atoms:
+                operations.append(['delete',atom,WT.atoms[atom]])
+            elif coord_diff(WT.atoms[atom],MUT.atoms[atom])>0.1:
+                operations.append(['delete',atom,WT.atoms[atom]])
+                operations.append(['add',atom,MUT.atoms[atom]])
+            else:
+                pass
+        for atom in mut_atoms:
+            if not atom in wt_atoms:
+                operations.append(['add',atom,MUT.atoms[atom]])
+        #
+        # Store these in FFF_fix
+        #
+        FFF_instance.mutate_operations=operations[:]
+    #
+    # Return the info
     #
     if (return_score):
-        return FFF_fix(myFFF),total_bump
-    return FFF_fix(myFFF)
+        return FFF_instance,total_bump
+    return FFF_instance
 
 #
 # ----
@@ -1000,33 +1048,34 @@ def Model_Mutations_old(pdbfile,mol2files,mutations,max_overlap=0.5,return_score
 #
 
 def test_function(options):
-    #X=Mutate()
-    import os
-    mutations=options.mutations
-    pdbfile=options.pdbfile
-    if not os.path.isfile(pdbfile):
-        raise Exception('PDB file not found: %s' %pdbfile)
-    MUT,bs=Model_Mutations(pdbfile,[],mutations,return_score=True,max_overlap=options.bump,max_totalbump=options.totalbump)
-    if MUT:
-        MUT.PI.writepdb(options.outfile)
+    """Model a mutation, or test the function"""
+    if not options.test_modelling:
+        import os
+        mutations=options.mutations
+        pdbfile=options.pdbfile
+        if not os.path.isfile(pdbfile):
+            raise Exception('PDB file not found: %s' %pdbfile)
+        MUT,bs=Model_Mutations(pdbfile,[],mutations,return_score=True,max_overlap=options.bump,max_totalbump=options.totalbump,store_mutation_operations=options.store_operations)
+        if MUT:
+            MUT.PI.writepdb(options.outfile)
+        else:
+            print 'Cannot model mutations'
+        return
     else:
-        print 'Cannot model mutations'
-    return
-    #
-    # Test new score
-    #
-    import Protool
-    X=Protool.structureIO()
-    X.readpdb('1atp.pdb')
-    res=X.residues.keys()
-    res.sort()
-    aas=X.trueaminoacids.keys()
-    x=[]
-    y=[]
-    import random
-    bettermodel=[]
-    while len(x)<2000:
-        try:
+        #
+        # Test the modelling of PDB files by FFF and compare it to Protool
+        #
+        import Protool
+        X=Protool.structureIO()
+        X.readpdb(options.pdbfile)
+        res=X.residues.keys()
+        res.sort()
+        aas=X.trueaminoacids.keys()
+        x=[]
+        y=[]
+        import random
+        bettermodel=[]
+        while len(x)<2000:
             resi=random.choice(res)
             aa=random.choice(aas)
             mutation='%s:%s:%s' %(resi,X.resname(resi),aa)
@@ -1034,9 +1083,10 @@ def test_function(options):
             oldscore=None
             newscore=None
             for function in ['Model_Mutations','Model_Mutations_old']:
+                import os
                 resultfile=os.path.join(os.getcwd(),'scores/'+mutation+str(function))
                 if not os.path.isfile(resultfile):
-                    M,score=eval(function)('1atp.pdb',[],[mutation],return_score=True)
+                    M,score=eval(function)(options.pdbfile,[],[mutation],return_score=True)
                     fd=open(resultfile,'w')
                     import pickle
                     A=score
@@ -1059,13 +1109,12 @@ def test_function(options):
                 continue
             x.append(oldscore)
             y.append(newscore)
-        except:
-            pass
-    print 'In %d cases FFF was able to construct a model where Protool was not' %len(bettermodel)
-    print bettermodel
-    import pylab
-    pylab.scatter(x,y)
-    pylab.show()
+
+        print 'In %d cases FFF was able to construct a model where Protool was not' %len(bettermodel)
+        print bettermodel
+        import pylab
+        pylab.scatter(x,y)
+        pylab.show()
     return
 
 #
@@ -1103,8 +1152,11 @@ if __name__=='__main__':
                       help='Maximum bump value for a single mutation. Default: %default',default=0.5)
     parser.add_option('-t','--totalbump',type='float',dest='totalbump',action='store',
                       help='Maximum total bump value for all mutations. Default: %default',default=1.0)
+    parser.add_option('--test_modelling',action='store_true',default=False,dest='test_modelling',
+                    help='Test the modelling ability of FFF and compare it to Protool. Default: %default')
+    parser.add_option('--store_ops',action='store_true',default=False,dest='store_operations',
+                    help='Store the mutate operations. Default: %default')
     (options, args) = parser.parse_args()
     test_function(options)
-    #print "Don't run this module directly"
     
     

@@ -994,8 +994,7 @@ class PDBparser:
         #
         atomname=string.strip(line[12:16])
         if not typecheck.containsletter(atomname):
-            print '\nAtom name:'+atomname
-            raise ParseAtomError,'Atomname does not contain a character'
+            raise ParseAtomError,'Atom name does not contain a character: %s,\nLINE: %s' %(atomname,line)
         #
         # Also the residuename must contain a letter
         #
@@ -1442,10 +1441,7 @@ class structureIO(structure):
         # If no write then we simply return the lines
         #
         if nowrite:
-            #fd=open(filename)
             lines=fd.lines
-            #fd.close()
-            #os.unlink(filename)
             return lines
         else:
             return

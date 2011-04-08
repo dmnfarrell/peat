@@ -30,28 +30,38 @@ class access:
 
     def __init__(self,protein):
         """Store the protool instance and calculate boxes"""
-
+        self.PI=protein
+        self.cutoff=6.0
+        #
+        # Count number of atoms within 6A of side chain atoms. Only heavy atoms are counted
+        #
+        self.residues=self.PI.residues.keys()
+        self.residues.sort()
         return
 
     #
     # ----
     #
 
-    def get_residue_number_of_contacts(self,residue):
-        """Get the number of contact for a single residue"""
-
-        return number_of_contacts
-
-    #
-    # ----
-    #
-
-    def calculate_all_contacts(self,residue):
-        """Calculate the number of contacts for all residues"""
-
-        return
-
-    #
-    # -----
-    #
+    def get_access(self,residue):
+        """Get the number of atoms close"""
+        acc=0.0
+        count=0
+        for atom1 in self.PI.residues[residue]:
+            if self.PI.is_backbone(atom1):
+                continue
+            count=count+1
+            for res2 in self.PI.residues.keys():
+                if res2==residue:
+                    continue
+                for atom2 in self.PI.residues[res2]:
+                    if self.PI.dist(atom1,atom2)<self.cutoff:
+                        acc=acc+1.0
+        #
+        # 
+        if count>0:
+            acc=acc#/float(count)
+        return acc
+                        
+                
     

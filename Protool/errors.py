@@ -35,97 +35,73 @@
 
 # Invalid atoms - f.ex. side chain atoms for a phi/psi evaluation
 #
-class ProtoolError(Exception):
-    
+class ProtoolError(Exception):    
     def __init__(self,message='Protool error'):
-
-	Exception.__init__(self, message)
+        Exception.__init__(self, message)
 
 class TypeCheckError(ProtoolError):
-
 	pass
 
 class ParseLineError(ProtoolError):
-
     def __init__(self,message='Error parsing line'):
-
-	ProtoolError.__init__(self, message)
+        ProtoolError.__init__(self, message)
 
 class ParseAtomError(ProtoolError):
-
     def __init__(self,message='Error parsing atom'):
-
-	ProtoolError.__init__(self, message)
+        ProtoolError.__init__(self, message)
         
 class InvalidAtomError(ProtoolError):
-
     def __init__(self,message='Invalid atoms for this operation'):
-
-	ProtoolError.__init__(self, message)
+        ProtoolError.__init__(self, message)
 
 class HydrogenInTorsionError(ProtoolError):
-
     def __init__(self,message='Hydrogen atom in torsion angle'):
-
-	ProtoolError.__init__(self, message)
+        ProtoolError.__init__(self, message)
                         
 class NotAnAminoAcidError(ProtoolError):
-
     def __init__(self,residue=None):
-
-	if residue is None:
-		message = 'Non-amino acid residue'
-	else:
-		message='%s is not an amino acid' %residue
-		
-	ProtoolError.__init__(self, message)
+        if residue is None:
+            message = 'Non-amino acid residue'
+        else:
+            message='%s is not an amino acid' %residue
+        ProtoolError.__init__(self, message)
 
 # 'Not Found' Errors..
 class AtomNotFoundError(ProtoolError):
 
     def __init__(self,uniqueid=None):
-
-	if uniqueid is None:
-		message = 'Atom not found - id not supplied'
-	else:
-		message = 'Atom not found: %s' % uniqueid
-		
-	ProtoolError.__init__(self, message)
+        if uniqueid is None:
+            message = 'Atom not found - id not supplied'
+        else:
+            message = 'Atom not found: %s' % uniqueid
+        ProtoolError.__init__(self, message)
         
 class ResidueNotFoundError(ProtoolError):
 
     def __init__(self,uniqueid=None):
+        if uniqueid is None:
+            message = 'Residue not found - id not supplied'
+        else:
+            message = 'Residue not found: %s' % uniqueid
 
-	if uniqueid is None:
-		message = 'Residue not found - id not supplied'
-	else:
-		message = 'Residue not found: %s' % uniqueid
-
-	print message
-		
-	ProtoolError.__init__(self, message)
+        print message
+        ProtoolError.__init__(self, message)
 
 # N- and C-terminals
 class Nterm(ProtoolError):
-
     def __init__(self,message='N-terminal Residue'):
-
-	ProtoolError.__init__(self, message)
+        ProtoolError.__init__(self, message)
         
 class Cterm(ProtoolError):
-
     def __init__(self,message='C-terminal Residue'):
-
-	ProtoolError.__init__(self, message)
+        ProtoolError.__init__(self, message)
         
 # Incomplete Errors
 #
 
 class IncompletePositionError(ProtoolError):
-
     def __init__(self,message='Not all coordinates were found this atom'):
-
-	ProtoolError.__init__(self, message)
+        ProtoolError.__init__(self, message)
 
 #
 # I/O errors

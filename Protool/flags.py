@@ -299,11 +299,12 @@ class flags:
             #
             import string
             for char in atomname:
-                if char in ['H','C','N','O','S']:
+                if char in ['H','C','N','O','S','P']:
                     return char
             #
             # Unknown amino acid atom??
             #
+            print atom
             return None
         else:
             #
