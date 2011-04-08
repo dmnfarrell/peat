@@ -77,7 +77,7 @@ parse_aadefs::parse_aadefs(vector<string> aadeflines) {
       //
       if (!line.substr(0,2).compare("//") || !line.substr(0,1).compare("#"))  {
 	count++;
-	printf ("Line:%s %d\n",line.c_str(),line.size());
+	//printf ("Line:%s %d\n",line.c_str(),line.size());
 	if (line.size()>25) {
 	  if (line.substr(0,25).compare("#$$$Entering OTHER.DAT$$$")==0) {
 	    aapart=false;

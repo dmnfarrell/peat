@@ -78,8 +78,13 @@ void chain_class::update() {
   for (unsigned int residue=0;residue<residues.size();residue++) {
     residues[residue].number=residue;
     residues[residue].inchain=number;
-      residues[residue].chainname=strip(name);
+    residues[residue].chainname=strip(name);
     residues[residue].update();
   }
+    //
+    // Set Cterm and Nterm flags
+    //
+    residues.front().is_Nterm=true;
+    residues.back().is_Cterm=true;
   return;
 }

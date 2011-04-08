@@ -54,7 +54,7 @@ public:
     //
     virtual double calculate_interaction(const atom_class& atom1,const atom_class& atom2);  
     double get_energy();
-    double get_titgroup_energy(TitGroup& titgroup_number);
+    double get_titgroup_energy(TitGroup_class& titgroup_number);
 };
 
 class Titration_Error {};

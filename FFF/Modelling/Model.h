@@ -149,40 +149,47 @@ class model_class {
     // Public variables
     //
         FFF& _P;
+      crgrad_class* _crgrad;
  private:
-  //
-  // Private functions
-  //
-  void _mutate(int chainnumber,int residuenumber,string newresidue);   // Mutate a single residue
+    //
+    // Private functions
+    //
+    void _mutate(int chainnumber,int residuenumber,string newresidue);   // Mutate a single residue
     vector<double> _optimise1res_exhaustive(int chainnumber,int resnumber,double chistep,double max_clash); // Optimise 1 residue using brute force search
     vector<double> opt_chi(int chainnumber, int resnumber, int chinum, double chistep,double max_clash); // Optimise this chiangle and any subsequent ones
     vector<double> _optimise1res(int chainnumber,int resnumber,double max_clash); // Optimise 1 residue using the rotamer library 
-  void _save_chiangles(int chainnumber,int residuenumber);
-  void _restore_chiangles(int chainnumber,int residuenumber);
-  vector<double> _saved_angles;
-  vector<int> _saved_angles_count;
+    void _save_chiangles(int chainnumber,int residuenumber);
+    void _restore_chiangles(int chainnumber,int residuenumber);
+    vector<double> _saved_angles;
+    vector<int> _saved_angles_count;
 
-  void _calc_all_angles(); // Calculates all angles and stores them locally
+    void _calc_all_angles(); // Calculates all angles and stores them locally
  
   
-  vector<atom_class *> _get_move_atoms(int chainnumber,int residuenumber,string atomname);
-  vector<int> _get_first_last(int chainnumber,int residuenumber);
-  // Calculates all angles for a single residue
-  vector<double> _calc_residue_chiangles(int chainnumber,int residuenumber);   
-  // 
+    vector<atom_class *> _get_move_atoms(int chainnumber,int residuenumber,string atomname);
+    vector<int> _get_first_last(int chainnumber,int residuenumber);
+    // Calculates all angles for a single residue
+    vector<double> _calc_residue_chiangles(int chainnumber,int residuenumber);   
+    // 
+    //
 
-
-  //
-  // For reading the rotamer library
-  //
-  void _read_aa_defs(const std::string);
-  int _get_AA_template(string residuename);
-  //
-  // Variables for parmeters
-  //
-  vector<parse_aadefs> AAsets;
-  vector<vector <vector <double> > > _all_chi_angles; //Holds all chiangles for a protein
-  hydrogens_defclass* _Hydrogen_defs; // Holds information on how to change protonation states by removing/adding hydrogens
+    //
+    // For reading the rotamer library
+    //
+    void _read_aa_defs(const std::string);
+    int _get_AA_template(string residuename);
+    //
+    // Variables for parameters
+    //
+    vector<parse_aadefs> AAsets;
+    vector<vector <vector <double> > > _all_chi_angles; //Holds all chiangles for a protein
+    hydrogens_defclass* _Hydrogen_defs; // Holds information on how to change protonation states by removing/adding hydrogens
+    //
+    // Variables for mutate operations
+    //
+    vector<string> delete_atoms;
+    vector<string> add_atoms;
+ 
   //  
   // Private variables
   //
@@ -190,8 +197,9 @@ class model_class {
   vector<vector<atom_class> > _org_atoms;
   energy_class _ENERGY;
   int iteration_count;
-  crgrad_class* _crgrad;
+
   // Flag controlling hydrogens
+public:
   bool _use_hydrogens;
 };
 

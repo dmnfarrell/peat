@@ -30,36 +30,36 @@
 * ASP
 Residue: ASP
 Grouptype: Acid
-Transition: 1,2,3,4 -> 0
-Model_pKa: 3.6
+Transition: ASHc1,ASHt1,ASHc2,ASHt2 > ASP-
+Model_pKa: 3.6, 3.6, 3.6, 3.6
 END
 
 // Model pKa adjusted for four neutral states
 * GLU
 Residue: GLU
 Grouptype: Acid
-Transition: 1,2,3,4 -> 0
-Model_pKa: 3.8
+Transition: GLHc1,GLHt1,GLHc2,GLHt2 > GLU-
+Model_pKa: 3.8, 3.8, 3.8, 3.8
 END
 
 * ARG
 Residue: ARG
 Grouptype: Base
-Transition: 1+2+3+4 -> 1+2+3+4+5 
+Transition: ARG0 > ARG+ 
 Model_pKa: 13.0
 END
 
 * LYS
 Residue: LYS
 Grouptype: Base
-Transition: 1 -> 0
+Transition: LYS0 > LYS+
 Model_pKa: 10.4
 END 
 
 * TYR
 Residue: TYR
 Grouptype: Acid
-Transition: 1 -> 0
+Transition: TYR0 > TYR-
 Model_pKa: 9.6
 END 
 
@@ -67,25 +67,24 @@ END
 * HIS
 Residue: HIS
 Grouptype: Base
-Transition: 1,2->1+2
-Model_pKa: 6.6
+Transition: HIS0HD1,HIS0HE2 > HIS+
+Model_pKa: 6.6, 6.6
 END 
 
 // Model pKa adjusted for two neutral states
 * NTR
-Residue: All
+Residue: NTERM
 Grouptype: Base
-Transition: 1,2->1+2
-Model_pKa: 8.3
+Transition: NTR0 > NTR+
+Model_pKa: 8.3, 8.3
 END
 
 // Model pKa adjusted for four neutral states
 * CTR
-Residue: All
+Residue: CTERM
 Grouptype: Acid
-Transition: 1,2,3,4 -> 0
-Model_pKa: 3.2
+Transition: CTR0c1,CTR0t1,CTR0c2,CTR0t2 > CTR-
+Model_pKa: 3.2, 3.2, 3.2, 3.2
 END
 
 END OF FILE
-

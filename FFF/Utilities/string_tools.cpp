@@ -42,7 +42,7 @@ vector<string> split(string s) {
   for (int i = 0; i< static_cast<int>(s.size()); i++) {
     if (strncmp(&s[i]," ",1)) {
       string sub_string(" ");
-      while (strncmp(&s[i]," ",1) && strncmp(&s[i],"\n",1)  && i<static_cast<int>(s.size())) {
+      while (strncmp(&s[i]," ",1) && strncmp(&s[i],"\n",1) && i<static_cast<int>(s.size())) {
 	sub_string=sub_string+s[i];
 	i++;
       }
@@ -121,7 +121,7 @@ vector<int> getints(string s) {
   for (int i = 0; i< static_cast<int>(s.size()); i++) {
     if (strncmp(&s[i]," ",1)) {
       string number("   ");
-      while (strncmp(&s[i]," ",1) && i<static_cast<int>(s.size())) {
+      while (strncmp(&s[i]," ",1) && strncmp(&s[i],",",1) && i<static_cast<int>(s.size())) {
 	number=number+s[i];
 	i++;
       }
@@ -132,6 +132,30 @@ vector<int> getints(string s) {
   }
   return numbers;
 }
+//
+// --------------------------------
+//
+vector<float> getfloats(string s) {
+    //
+    // Return all integers from <s> in a vector of ints
+    //
+    vector<float> numbers;
+    char buffer[120];
+    for (int i = 0; i< static_cast<int>(s.size()); i++) {
+        if (strncmp(&s[i]," ",1)) {
+            string number("   ");
+            while (strncmp(&s[i]," ",1) && strncmp(&s[i],",",1) && i<static_cast<int>(s.size())) {
+                number=number+s[i];
+                i++;
+            }
+            strcpy(buffer,"                 ");
+            number.copy(buffer,number.length());
+            numbers.push_back(atof(buffer));   
+        }
+    }
+    return numbers;
+}
+
 //
 // ---------------------------------
 //

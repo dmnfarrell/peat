@@ -58,18 +58,22 @@ class FFF {
     //
     _pH=7.0;
   };
-  void read_pdb(const std::string pdbfilename);
-  void write_pdb(const std::string pdbfilename);
-  void writepdb(const std::string pdbfilename);
-  void write_pqr(const std::string pdbfilename);
-  vector<string> make_pdblines(const std::string type);
-  void parse_lines(const std::vector<std::string> lines);
-  void remove_atoms_with_tag(const std::string);
-  void remove_atom(atom_class& atom);
-  void soup_stat(); // Prints a summary of the soup
-  void check_soup(); // Check the integrety of the soup
+    void read_pdb(const std::string pdbfilename);
+    void write_pdb(const std::string pdbfilename);
+    void writepdb(const std::string pdbfilename);
+    void write_pqr(const std::string pdbfilename);
+    vector<string> make_pdblines(const std::string type);
+    string make_pdbline(atom_class& atom,int atomcounter,string type);
+    void parse_lines(const std::vector<std::string> lines);
+    
+    void remove_atoms_with_tag(const std::string);
+    void remove_atom(atom_class& atom);
+    void remove_atom(int chain,int residue,string atomname);
+    
+    void soup_stat(); // Prints a summary of the soup
+    void check_soup(); // Check the integrety of the soup
     void update_all_atoms(); //Update the all_atoms array
-        void update_BOXLJ(); //Update the boxes for LJ and Steric Clash
+    void update_BOXLJ(); //Update the boxes for LJ and Steric Clash
     //
     // 
     //
@@ -98,7 +102,7 @@ class FFF {
   int atomcounter, rescounter;
   string last_resnum;
   vector<atom_class *> all_atoms;
-    vector <TitGroup> _titratable_groups;
+    vector <TitGroup_class> _titratable_groups;
     //Boxes* BOXB; 
     Boxes* BOXLJ;
     //

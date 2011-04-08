@@ -33,11 +33,12 @@ double Titration_Energy::calculate_interaction(const atom_class& atom1,const ato
     throw Titration_Error();
 }
 
-double Titration_Energy::get_titgroup_energy(TitGroup& thisgroup) {
+double Titration_Energy::get_titgroup_energy(TitGroup_class& thisgroup) {
     //
     // Get the energy of this titgroup at this pH
     //
-    return 2.3*(_P._pH-thisgroup.intpKa)*thisgroup.acidbase;
+    //return 2.3*(_P._pH-thisgroup.intpKa)*thisgroup.acidbase;
+    return 2.0;
 }
 
 double Titration_Energy::get_energy() {

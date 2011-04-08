@@ -89,7 +89,6 @@ void model_class::build_hydrogens() {
 	  Mutate_2(chain,residue,_P.chains[chain].residues[residue].name,1,10.0);
         }
     }
-    assign_all_charges_and_radii();
     return;
 }
 

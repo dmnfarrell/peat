@@ -74,7 +74,6 @@ void FFF::remove_atoms_with_tag(const std::string tag) {
   for (unsigned int atom=0;atom<delete_atoms.size();atom++) {
     remove_atom(delete_atoms[atom]);
   }
-  check_soup();
   update_all_atoms();
   return;
 }
@@ -99,6 +98,18 @@ void FFF::remove_atom(atom_class& atom) {
     }
   }
   return;
+}
+
+
+void FFF::remove_atom(int chain,int residue,string atomname) {
+    // Remove an atom in chain, residue and with the specified name
+    for (unsigned int latom=0;latom<chains[chain].residues[residue].atoms.size();latom++) {
+        if (chains[chain].residues[residue].atoms[latom].name==atomname) {
+            chains[chain].residues[residue].atoms.erase(chains[chain].residues[residue].atoms.begin()+latom);
+            break;
+        }
+    }
+    return;   
 }
 
 //
@@ -186,7 +197,7 @@ void FFF::parse_lines(const std::vector<std::string> lines) {
         chains.push_back(X);
     }
     printf ("PDB file has been parsed\n");
-    check_soup();
+    update_all_atoms();
     return;
 }
 
@@ -248,71 +259,76 @@ void FFF::write_pdb(const std::string filename) {
 }
 
 vector<string> FFF::make_pdblines(string type) {
-  //
-  // Create a vector with all the lines
-  //
-  vector<string> pdblines;
-  //
-  // Loop over all atoms and residues and write
-  //
-  int atomcounter=0;
-  for (unsigned int chain=0;chain<chains.size();chain++) {
-    for (unsigned int resnum=0;resnum<chains[chain].residues.size();resnum++) {
-      for (unsigned int atom=0;atom<chains[chain].residues[resnum].atoms.size();atom++) {
-	char buffer [100];
-	atomcounter++;
-	sprintf(buffer,"ATOM  %4d",atomcounter);
-	string s1(buffer);
-	//
-	// Special checks for the atomname
-	//
-	string atname(strip(chains[chain].residues[resnum].atoms[atom].name),0,1);
-	if (atname=="1" || atname=="2" || atname=="3") {
-	  sprintf(buffer,"  %-4s",strip(chains[chain].residues[resnum].atoms[atom].name).c_str());
-	} else {
-	  sprintf(buffer,"   %-3s",strip(chains[chain].residues[resnum].atoms[atom].name).c_str());
-	}
-	s1=s1+string(buffer);
-	// Chain identifier is missing 
-	// Residue name
-	sprintf(buffer," %3s %1s",strip(chains[chain].residues[resnum].name).c_str(),
-		chains[chain].name.c_str());
-	s1=s1+string(buffer);
-	//
-	// Handle residue numbers > 999
-	//
-	if (strip(chains[chain].residues[resnum].pdbnum).size()==4) {
-	  sprintf(buffer,"%4s ",strip(chains[chain].residues[resnum].pdbnum).c_str());
-	} else {
-	  sprintf(buffer," %3s ",strip(chains[chain].residues[resnum].pdbnum).c_str());
-	}
-	s1=s1+string(buffer);
-	// Coordinates
-	sprintf(buffer,"    %7.3f %7.3f %7.3f",
-		chains[chain].residues[resnum].atoms[atom].x,
-		chains[chain].residues[resnum].atoms[atom].y,
-		chains[chain].residues[resnum].atoms[atom].z);
-	s1=s1+string(buffer);
-	//
-	// Occupancy
-	//
-	if (type=="PDB") {
-	  sprintf(buffer,"  %4.2f %5.2f\n",1.00,chains[chain].residues[resnum].atoms[atom].bfactor);
-	} else if (type=="PQR") {
-	  sprintf(buffer,"  %4.2f %5.2f\n",chains[chain].residues[resnum].atoms[atom].charge,
-		  chains[chain].residues[resnum].atoms[atom].radius);
-	} else {
-	  printf ("Incorrect type for make_pdblines: %s\n",type.c_str());
-	  exit(0);
-	}
-	s1=s1+string(buffer);
-	pdblines.push_back(s1);
-      }
+    //
+    // Create a vector with all the lines
+    //
+    vector<string> pdblines;
+    //
+    // Loop over all atoms and residues and write
+    //
+    int atomcounter=0;
+    for (unsigned int chain=0;chain<chains.size();chain++) {
+        for (unsigned int resnum=0;resnum<chains[chain].residues.size();resnum++) {
+            for (unsigned int atom=0;atom<chains[chain].residues[resnum].atoms.size();atom++) {
+                atomcounter++;
+                pdblines.push_back(make_pdbline(chains[chain].residues[resnum].atoms[atom],atomcounter,type));
+            }
+        }
     }
-  }
-  return pdblines;
+    return pdblines;
 }
 
+string FFF::make_pdbline(atom_class& atom,int atomcounter,string type) {
+    //
+    // Make a line for this atom
+    //
+    char buffer [100];
+    sprintf(buffer,"ATOM  %4d",atomcounter);
+    string s1(buffer);
+    //
+    // Special checks for the atomname
+    //
+    string atname(strip(atom.name),0,1);
+    if (atname=="1" || atname=="2" || atname=="3") {
+        sprintf(buffer,"  %-4s",strip(atom.name).c_str());
+    } else {
+        sprintf(buffer,"   %-3s",strip(atom.name).c_str());
+    }
+    s1=s1+string(buffer);
+
+    // Chain identifier is missing 
+    // Residue name
+    int chain=atom.inchain;
+    int resnum=atom.inresidue;
+    sprintf(buffer," %3s %1s",strip(chains[chain].residues[resnum].name).c_str(),strip(chains[chain].name).c_str());
+    s1=s1+string(buffer);
+            
+    //
+    // Handle residue numbers > 999
+    //
+    if (strip(chains[chain].residues[resnum].pdbnum).size()==4) {
+        sprintf(buffer,"%4s ",strip(chains[chain].residues[resnum].pdbnum).c_str());
+    } else {
+        sprintf(buffer," %3s ",strip(chains[chain].residues[resnum].pdbnum).c_str());
+    }
+            s1=s1+string(buffer);
+    // Coordinates
+    sprintf(buffer,"    %7.3f %7.3f %7.3f",atom.x,atom.y,atom.z);
+    s1=s1+string(buffer);
+    //
+    // Occupancy
+    //
+    if (type=="PDB") {
+        sprintf(buffer,"  %4.2f %5.2f\n",1.00,atom.bfactor);
+    } else if (type=="PQR") {
+        sprintf(buffer,"  %4.2f %5.2f\n",atom.charge,atom.radius);
+    } else {
+        printf ("Incorrect type for make_pdblines: %s\n",type.c_str());
+        exit(0);
+    }
+    s1=s1+string(buffer);
+    return s1;
+}
 //
 // --------------------------------------
 //
@@ -340,6 +356,7 @@ void FFF::update_all_atoms() {
     // Loop over all atoms and do lots of stuff
     //
     //printf ("in update_all atoms\n");
+    check_soup();
     all_atoms.resize(0);
     int count=0;
     unsigned int numchains=chains.size();
@@ -407,12 +424,12 @@ bool FFF::are_bonded(const atom_class& atom1, const atom_class& atom2) {
     //atom2.print_detail();
     //printf ("---");
     //printf ("Bond1\n");
-    //printf ("cov bonds: %d %d\n",atom1.covalent_bonds.size(),
-    //                            atom2.covalent_bonds.size());
+    //printf ("cov bonds: %d %d\n",static_cast<int>(atom1.covalent_bonds.size()),
+    //                            static_cast<int>(atom2.covalent_bonds.size()));
     for (unsigned int j=0;j<atom1.covalent_bonds.size();j++) {
         //printf ("j; %d \n",j);
         //(*(atom1.covalent_bonds[j])).print();
-         //(*(atom1.covalent_bonds[j])).print_detail();
+        //(*(atom1.covalent_bonds[j])).print_detail();
         if ((*(atom1.covalent_bonds[j]))==atom2) {
             bonded=true;
             break;
@@ -421,7 +438,7 @@ bool FFF::are_bonded(const atom_class& atom1, const atom_class& atom2) {
     //printf ("Bond2\n");
     bool bonded2=false;
     for (unsigned int j=0;j<atom2.covalent_bonds.size();j++) {
-        //printf ("j: %d size: %d\n",j,atom2.covalent_bonds.size());
+        //printf ("j: %d size: %d\n",j,static_cast<int>(atom2.covalent_bonds.size()));
         if ((*(atom2.covalent_bonds[j]))==atom1) {
             bonded2=true;
             break;
@@ -433,6 +450,7 @@ bool FFF::are_bonded(const atom_class& atom1, const atom_class& atom2) {
         atom1.print_detail();
         atom2.print_detail();
         printf ("distance; %7.3f \n",Dist(atom1,atom2));
+        printf ("Exiting with error\n");
         exit(0);
     }
     return bonded;

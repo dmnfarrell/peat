@@ -23,7 +23,7 @@
  # SBBS, Conway Institute
  # University College Dublin
  # Dublin 4, Ireland
- */
+*/
 #ifndef OSTOOLS_H
 #define OSTOOLS_H
 
@@ -38,9 +38,7 @@
 #include <iomanip>
 #include <unistd.h>
 #include "string_tools.h"
-
 using namespace std;
-
 vector<string> splitpath(string path);
 bool isdirectory(string dirname);
 #endif

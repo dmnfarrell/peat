@@ -41,6 +41,7 @@ string strip(string s);
 // Get all integers from a string
 //
 vector<int> getints(string s);
+vector<float> getfloats(string s);
 //
 // Split string into substrings.
 // Separator is whitespace

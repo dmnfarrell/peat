@@ -36,6 +36,9 @@ using namespace std;
 //
 //
 residue_class::residue_class(chain_class* C,vector<string> lines): _C(C) {
+    //
+    // Initialize the residue class with a list of PDB lines
+    //
    string resname(lines[0],17,3);
    resname=strip(resname);
    string c_resnum(lines[0],22,5);
@@ -147,16 +150,35 @@ void residue_class::update() {
       atoms[at].pdbchainname=strip(chainname);
       //printf ("Assigning chain name: '%s'\n",strip(chainname).c_str());
       atoms[at].update();
+      //
+      // Reset the Terminal flags
+      //
+      is_Nterm=false;
+      is_Cterm=false;
   }
       
   
   return;
 }
 
+//
+// ---------------
+//
+
 void residue_class::print() {
+    //
+    // Print all the atoms in the residue
+    //
     printf ("Residue C: %d R: %d %s\n",inchain,number,name.c_str());
     for (unsigned int at=0;at<atoms.size();at++) {
         atoms[at].print_detail();
     }
 }
 
+//
+// ----------------
+//
+
+            
+            
+            

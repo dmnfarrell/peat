@@ -32,7 +32,7 @@ vector<double> model_class::Mutate(const std::string chainname,const std::string
     for (unsigned int chain=0;chain<_P.chains.size();chain++) {
       if (strip(chainname)==strip(_P.chains[chain].name)) {
             for (unsigned int residue=0;residue<_P.chains[chain].residues.size();residue++) {
-	      //printf ("prsnumber: %s \n",strip(_P.chains[chain].residues[residue].pdbnum).c_str());
+                //printf ("prsnumber: %s \n",strip(_P.chains[chain].residues[residue].pdbnum).c_str());
                 if (strip(pdbresnumber)==strip(_P.chains[chain].residues[residue].pdbnum)) {
                     return Mutate_2(chain,residue,newresidue,mode,max_clash);
                 }
@@ -98,30 +98,26 @@ vector<double> model_class::Mutate_2(int chainnumber,int resnumber,const std::st
 //
 
 void model_class::_mutate(int chainnumber,int resnumber,string newresidue) {
-  //
-  // Mutate residue <resnumber> to <newresidue> - Takes the coordinates from the general
-  // amino acid definition file
-  //
-  // This is the routine that actually changes the atom names and the coordinates
-  // Don't call this function, but call Mutate instead
-  //
+    //
+    // Mutate residue <resnumber> to <newresidue> - Takes the coordinates from the general
+    // amino acid definition file
+    //
+    // This is the routine that actually changes the atom names and the coordinates
+    // Don't call this function, but call Mutate instead
+    //
   
-  //
-  // Make backup of original 
-  //
-  string oldresiduename=_P.chains[chainnumber].residues[resnumber].name;
-  printf ("chain: %d, residue: %d, oldres: %s, newres: %s\n",
-	  chainnumber,
-	  resnumber,
-	  oldresiduename.c_str(),
-	  newresidue.c_str());
-  
-  vector<atom_class> oldatoms;
-  for (unsigned int oldatom=0;oldatom<_P.chains[chainnumber].residues[resnumber].atoms.size();
-       oldatom++) {
-    oldatoms.push_back(_P.chains[chainnumber].residues[resnumber].atoms[oldatom]);
-  }
-  _org_atoms.push_back(oldatoms);
+    //
+    // Make backup of original residue
+    //
+    string oldresiduename=_P.chains[chainnumber].residues[resnumber].name;
+    //vector<atom_class> oldatoms;
+    //for (unsigned int oldatom=0;oldatom<_P.chains[chainnumber].residues[resnumber].atoms.size();oldatom++) {
+    //    oldatoms.push_back(_P.chains[chainnumber].residues[resnumber].atoms[oldatom]);
+    //    // Put in delete atoms
+    //   delete_atoms.push_back(
+      
+  //}
+  //_org_atoms.push_back(oldatoms);
   //
   // Deal with the simple cases
   // Asp <-> Asn, Gln <-> Glu and so on ..
@@ -133,11 +129,9 @@ void model_class::_mutate(int chainnumber,int resnumber,string newresidue) {
   // Prepare the new coordinates
   //
   int respointer=-1;
-  printf ("Number of AA definitions: %d \n",static_cast<int>(AAsets[0].aadefs.size()));
+  //printf ("Number of AA definitions: %d \n",static_cast<int>(AAsets[0].aadefs.size()));
   for (int tempres=0;tempres<static_cast<int>(AAsets[0].aadefs.size());tempres++) {
-    //printf ("name: %s\n",AAsets[0].aadefs[tempres].name.c_str());
     if (newresidue==AAsets[0].aadefs[tempres].name) {
-      //printf ("newres %s\n",AAsets[0].aadefs[tempres].name.c_str());
       respointer=tempres;
       break;
     }
@@ -1098,7 +1092,6 @@ void model_class::update_bonds() {
     // 
     // Update all the bonding information
     //
-    _P.check_soup();
     _P.update_all_atoms();
     //
     // first assign bonds based on topology

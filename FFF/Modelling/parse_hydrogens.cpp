@@ -57,20 +57,21 @@ hydrogens_defclass::hydrogens_defclass(vector<string> lines) {
       //
       // Catch comments and end of file
       //
-      if (strip(lines[count]).compare("//END OF FILE")==0) { 
-	break;
+      if (strip(lines[count]).compare("END OF FILE")==0) { 
+          break;
       }
       while (lines[count].substr(0,1).compare("*")!=0 && count<lines.size()) {
-	if (!lines[count].substr(0,2).compare("//") || !lines[count].substr(0,1).compare("#"))  {
-	  count++;
-	  if (count>=lines.size()) {
-	    break;
-	  }
-	  continue;
-	}
-	if (strip(lines[count]).compare("//END OF FILE")==0) { 
-	  break;
-	}
+          printf ("LL: %s\n",lines[count].c_str());
+          if (!lines[count].substr(0,2).compare("//") || !lines[count].substr(0,1).compare("#"))  {
+              count++;
+              if (count>=lines.size()) {
+                  break;
+              }
+              continue;
+          }
+          if (strip(lines[count]).compare("END OF FILE")==0) { 
+              break;
+          }
 	//printf ("Adding titgroupline: %s \n",lines[count].c_str());
 	titgrouplines.push_back(lines[count]);
 	count++;

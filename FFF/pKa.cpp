@@ -27,13 +27,48 @@
 
 #include "pKa.h"
 
-
 void pKa_class::find_titratable_groups() {
+    // 
+    // find titratable groups as defined in TITRATION.DAT
+    //
     printf ("Finding titratable groups\n");
+    _TitGroups.resize(0);
+    for (unsigned int chain=0; chain<_P.chains.size();chain++) {
+        for (unsigned int residue=0;residue<_P.chains[chain].residues.size();residue++) {
+            for (unsigned int tg=0;tg<_TitGroupDefs.size();tg++) {
+                if (_P.chains[chain].residues[residue].name==_TitGroupDefs[tg]._residuename) {
+                    _TitGroups.push_back(TitGroup_class(_TitGroupDefs[tg],chain,residue));
+                    printf ("Found: %s in chain: %4d residue: %3d %4s\n",
+                            _TitGroups.back()._TitID.c_str(),
+                            chain,
+                            residue,
+                            _P.chains[chain].residues[residue].name.c_str());
+                } else if (_TitGroupDefs[tg]._residuename=="CTERM" && _P.chains[chain].residues[residue].is_Cterm && _P.chains[chain].residues[residue].is_aa) {
+                    _TitGroups.push_back(TitGroup_class(_TitGroupDefs[tg],chain,residue));
+                    printf ("Found: %s in chain: %4d residue: %3d %4s\n",
+                            _TitGroupDefs[tg]._TitID.c_str(),
+                            chain,
+                            residue,
+                            _P.chains[chain].residues[residue].name.c_str());
+                } else if (_TitGroupDefs[tg]._residuename=="NTERM" && _P.chains[chain].residues[residue].is_Nterm && _P.chains[chain].residues[residue].is_aa) {
+                    _TitGroups.push_back(TitGroup_class(_TitGroupDefs[tg],chain,residue));
+                    printf ("Found: %s in chain: %4d residue: %3d %4s\n",
+                            _TitGroupDefs[tg]._TitID.c_str(),
+                            chain,
+                            residue,
+                            _P.chains[chain].residues[residue].name.c_str());
+                }
+            }
+        }
+    }
     return;
 }
 
-vector<chargestate_class> pKa_class::calculate_titration_curves(unsigned int MCSTEPS) {
+//
+// ----------
+//
+
+vector<protonation_state_class> pKa_class::calculate_titration_curves(unsigned int MCSTEPS) {
     //
     // Calculate pKa values 
     //
@@ -56,7 +91,7 @@ vector<chargestate_class> pKa_class::calculate_titration_curves(unsigned int MCS
 // ---------
 // 
 
-chargestate_class pKa_class::calculate_fractional_charge(unsigned int MCSTEPS) {
+protonation_state_class pKa_class::calculate_fractional_charge(unsigned int MCSTEPS) {
     //
     // Calculate the fractional protonation state at this pH
     //
@@ -92,7 +127,7 @@ chargestate_class pKa_class::calculate_fractional_charge(unsigned int MCSTEPS) {
             //
             // Keep
             //
-            for (int count=0;count<_numtitgroups;count++) {
+            for (unsigned int count=0;count<_numtitgroups;count++) {
                 _current_PSstate[count]=_try_PSstate[count];
             }
             current_energy=try_energy_new;
@@ -121,6 +156,8 @@ chargestate_class pKa_class::calculate_fractional_charge(unsigned int MCSTEPS) {
     // Now calculate the fractional charge from the statistics
     //
     printf ("Write code for calculating fractional charge\n");
+    protonation_state_class PSC;
+    return PSC;
 }
 
 //
@@ -158,17 +195,43 @@ void pKa_class::guess_best_protonation_state() {
     return;    
 }
 
+//
+// --------------
+//
+
 void pKa_class::set_standard_protonation_state(float pH) {
   //
   // Set the standard protonation state for this pH
   //
-  
+    _current_Protonation_state.resize(0);
+    for (unsigned int tg=0;tg<_TitGroups.size();tg++) {
+        _TitGroups[tg].print();
+        if (_TitGroups[tg]._acidbase==-1) {
+            if (pH>_TitGroups[tg]._avg_modelpKa) {
+                _current_Protonation_state.push_back(_TitGroups[tg].charged_states[0]); 
+            } else {
+                _current_Protonation_state.push_back(_TitGroups[tg].neutral_states[0]); 
+            }
+        } else if (_TitGroups[tg]._acidbase==1) {
+            if (pH<=_TitGroups[tg]._avg_modelpKa) {
+                _current_Protonation_state.push_back(_TitGroups[tg].charged_states[0]); 
+            } else {
+                _current_Protonation_state.push_back(_TitGroups[tg].neutral_states[0]); 
+            }
+        } else {
+            printf ("acidbase is not 1 or -1.: %d\n",_TitGroups[tg]._acidbase);
+        }
+    }
+    Build_Protonation_State(_current_Protonation_state);
+    printf ("Set standard protonation state at pH: %5.2f \n",pH);
+    return;
 }
 
-//
-// -----
-//
 
+
+//
+//-------------
+//
 
 void pKa_class::change_prot_or_H_state() {
     //
@@ -190,7 +253,7 @@ void pKa_class::change_protstate() {
     //
     // Copy the current state to trystate
     //
-    for (int count=0;count<_numtitgroups;count++) {
+    for (unsigned int count=0;count<_numtitgroups;count++) {
         _try_PSstate[count]=_current_PSstate[count];
     }
     //
@@ -213,7 +276,7 @@ void pKa_class::record_protstate() {
     //
     // Record the protonation state
     //
-    for (int count=0;count<_numtitgroups;count++) {
+    for (unsigned int count=0;count<_numtitgroups;count++) {
         _sum_PSstate[count]=_sum_PSstate[count]+_current_PSstate[count];
     }
     return;
@@ -231,8 +294,217 @@ void pKa_class::model_current_state(vector<int> PS_state,vector<int> Rotamer_sta
 }
 
 //
+// -----
+//
+
+void pKa_class::Build_Protonation_State(vector<string> ProtonationState) {
+    //
+    // Build the atoms required to construct the protonation state
+    //
+    ReBuild_TitGroup_Hydrogens();
+    for (unsigned int TG=0;TG<_TitGroups.size();TG++) {
+        printf ("==============\n");
+        _TitGroups[TG].print();
+        printf ("Protonation state: %s\n",ProtonationState[TG].c_str());
+        Build_Group_ProtonationState(TG,ProtonationState[TG]);
+    }
+    return;
+}
+
+//
+// ----------
+//
+
+void pKa_class::ReBuild_TitGroup_Hydrogens() {
+    //
+    // Delete all hydrogens in titratable groups
+    //
+    _use_hydrogens=true;
+    int chain, residue;
+    for (unsigned int TG=0;TG<_TitGroups.size();TG++) {
+        chain=_TitGroups[TG]._chain;
+        residue=_TitGroups[TG]._residue;
+        delete_hydrogens(_P.chains[chain].residues[residue]); // Delete
+        Mutate_2(chain,residue,_P.chains[chain].residues[residue].name,1,10.0); //Build
+    }
+    _P.update_all_atoms();
+    return;
+}
+
+void pKa_class::Build_Group_ProtonationState(int TG,string ProtonationState) {
+    //
+    // Build the given protonation state (a string) for the TitGroup in question
+    //
+    // First find the definition
+    //
+    int HA_def=_TitGroups[TG]._HydrogenAmbDef_number;
+    for (unsigned int conf=0;conf<_HydrogenAmbDefs[HA_def]._conformations.size();conf++) {
+        if (_HydrogenAmbDefs[HA_def]._conformations[conf]._name==ProtonationState) {
+            //int chain=_TitGroups[TG]._chain;
+            //int residue=_TitGroups[TG]._residue;
+            // Build others
+            
+            // Delete others
+            //for (unsigned int count=0;count<delete_other_conformations.size()l;count++) {
+                // Get the atom name in the other definition
+                
+              //  remove_atom(chain,residue,atomname);
+            // Build this one
+        }
+            //vector<atom_class> superpos_atoms=_HydrogenAmbDefs[HA_def]._conformations[conf].get_superpos_atoms();
+    }
+return;
+}
+
+//
 // ------------
 //
 
-void pKa_class::read_titgroup_definitions() {
+void pKa_class::read_titgroup_definitions(string parmdir) {
+    //
+    // Read TITRATION.DAT
+    //
+    string titfile=parmdir+"/TITRATION.DAT";
+    printf ("Reading %s\n",titfile.c_str());
+    ifstream file(titfile.c_str());
+    if (!file) {
+        printf ("ERROR: File %s was not found!\n",titfile.c_str());
+        exit(0);
+    }
+    string line;
+    vector<string> lines;
+    while(getline(file,line)) {
+        lines.push_back(line);
+    }
+    file.close();
+    printf ("%s has been read\n",titfile.c_str());
+    //
+    // Parse the lines
+    //
+    bool done=false;
+    unsigned int count=0;
+    string name;
+    //
+    // Define variables
+    //
+    bool record=false;
+    vector<string> thisgroup;
+    //
+    // 
+    while (!done) {
+        line=strip(lines[count]);
+        // Comments
+        if (!line.substr(0,2).compare("//") || !line.substr(0,1).compare("#"))  {
+            count++;
+            continue;
+        }
+        // Start record
+        if (line.substr(0,1).compare("*")==0 && count<=lines.size()-1) {
+            thisgroup.resize(0);
+            thisgroup.push_back(line);
+            record=true;
+            count++;
+            continue;
+        }
+        // End record
+        if (line.substr(0,3).compare("END")==0 && strip(line)!="END OF FILE") { 
+            thisgroup.push_back(line);
+            _TitGroupDefs.push_back(TitGroup_class(thisgroup));
+            printf ("Parsing: %s\n",name.c_str());
+            count++;
+            record=false;
+            continue;
+        }
+        // Normal record
+        if (record) {
+            thisgroup.push_back(line);
+            count++;
+            continue;
+        }
+        // End of file
+        if (count>=lines.size() || strip(line)=="END OF FILE") {
+            done=true;
+        }
+        count++;
+    }
+    printf ("Done parsing TITRATION.DAT\n");
+    return;
+}
+    
+//
+// -----------
+//
+
+void pKa_class::read_hydrogen_definitions(string parmdir) {
+    //
+    // Read HYDROGENS.DAT
+    //
+    string titfile=parmdir+"/HYDROGENS.DAT";
+    printf ("Reading %s\n",titfile.c_str());
+    ifstream file(titfile.c_str());
+    if (!file) {
+        printf ("ERROR: File %s was not found!\n",titfile.c_str());
+        exit(0);
+    }
+    string line;
+    vector<string> lines;
+    while(getline(file,line)) {
+        lines.push_back(line);
+    }
+    file.close();
+    printf ("%s has been read\n",titfile.c_str());
+    //
+    // Parse the lines
+    //
+    bool done=false;
+    unsigned int count=0;
+    string name;
+    //
+    // Define variables
+    //
+    bool record=false;
+    vector<string> thisgroup;
+    //
+    // 
+    while (!done) {
+        line=strip(lines[count]);
+        if (strip(line).size()==0) {
+            count++;
+            continue;
+        }
+        // Comments
+        if (!line.substr(0,2).compare("//") || !line.substr(0,1).compare("#"))  {
+            count++;
+            continue;
+        }
+        // Start record
+        if (line.substr(0,1).compare("*")==0 && count<=lines.size()-1) {
+            thisgroup.resize(0);
+            thisgroup.push_back(line);
+            record=true;
+            count++;
+            continue;
+        }
+        // End record
+        if (line.substr(0,3).compare("END")==0 && strip(line)!="END OF FILE") { 
+            thisgroup.push_back(line);
+            _HydrogenAmbDefs.push_back(HydrogenAmb_class(thisgroup));
+            count++;
+            record=false;
+            continue;
+        }
+        // Normal record
+        if (record) {
+            thisgroup.push_back(line);
+            count++;
+            continue;
+        }
+        // End of file
+        if (count>=lines.size() || strip(line)=="END OF FILE") {
+            done=true;
+        }
+        count++;
+    }
+    printf ("Done parsing HYDROGENS.DAT\n");
+    return;
 }

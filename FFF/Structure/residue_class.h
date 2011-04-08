@@ -53,15 +53,10 @@ public:
       atoms.push_back(atom_class(sp[0],sp[1],sp[2]));
     }
   }
-  
   //
   string correct_resname(string resname);
   int get_atom_number(string atomname);
   atom_class *get_atom(string atomname);
-  //
-  // This initialisation is for putting in instances of atom_class
-  //
-  //residue_class(residue_class* C,vector<atom_class>);
   //
   // Update 
   //
@@ -79,6 +74,7 @@ public:
   string chain;
   atom_class *N,*CA,*C;
   chain_class* _C;
+    bool is_Cterm, is_Nterm;
    
 } ;
 #endif

@@ -27,13 +27,13 @@
 #include "main.h"
 
 int main(int argc, char *argv[]) {
-  //
-  // Do some simple tests
-  //
-  FFF Protein;
+    //
+    // Do some simple tests
+    //
+    FFF Protein;
     Protein.read_pdb("2LZT.pdb");
-  Rotamer_class ROT("parameters/small_lib");
-  pKa_class PKA(Protein,ROT,"parameters");
+    Rotamer_class ROT("parameters/small_lib");
+    pKa_class PKA(Protein,ROT,"parameters");
     //PKA.resolve_clashes();
     //Protein.write_pdb("resolved.pdb");
     exit(0);
