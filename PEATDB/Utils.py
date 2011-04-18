@@ -87,8 +87,8 @@ def createDBonServer(prj, settings={}, callback=None, access=None):
     cmd = "create database " + prj + ";"
     try:
         c.execute(cmd)
-    except Exception as e:
-        print e
+    except:
+        pass
     if access != None:
         cmd = "grant all privileges on " + prj + ".* to " + "'"+access+"'"+ "@'%';"
         c.execute(cmd)
