@@ -80,7 +80,7 @@ vector<float> MC::calc_pKas(float pH_start,float pH_end, float pH_step) {
   vector<float> pKas;
   for (int group=0;group<_groups;group++) {
     int count=0;
-    float pKa=-999.9;
+    float pKa=-99.9;
     float last_crg=charges[count][group];
     //
     for (float pH=pH_start;pH<pH_end;pH=pH+pH_step) {
@@ -126,6 +126,21 @@ vector<float> MC::calc_pKas(float pH_start,float pH_end, float pH_step) {
       last_crg=this_crg;
       count=count+1;
     }
+    //
+    // Don't return -999.9 if the pKa really is very high
+    //
+      if (pKa<-90.0) {
+          pKa=pH_start;
+          if (_acid_base[group]==1.0) {
+              if (last_crg>0.5) {
+                  pKa=pH_end;
+              }
+          } else {
+              if (last_crg>-0.5) { 
+                  pKa=pH_end;
+              }
+          }
+      }
     pKas.push_back(pKa);
   }   
   //

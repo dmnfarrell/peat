@@ -156,7 +156,7 @@ class Monte_Carlo(pKaIO.pKaIO):
     # -----------------
     #
     
-    def calc_pKas(self,mcsteps=2000,phstep=0.1,phstart=2.0,phend=14.0,verbose=1,complete_pka=None):
+    def calc_pKas(self,mcsteps=2000,phstep=0.1,phstart=2.0,phend=14.0,verbose=1,complete_pka=None,exp_pHs=[]):
         """Calculate pKa values for the system"""
         #
         # Init
@@ -213,7 +213,7 @@ class Monte_Carlo(pKaIO.pKaIO):
         #
         # Calculate pKa values
         #
-        return self._calc_pKas(mcsteps,phstep,phstart,phend,verbose,complete_pka)
+        return self._calc_pKas(mcsteps,phstep,phstart,phend,verbose,complete_pka,exp_pHs=exp_pHs)
 
     #
     # ------
@@ -314,6 +314,17 @@ class Monte_Carlo(pKaIO.pKaIO):
                             pka=(last_crg-(-0.5))/(last_crg-crg)*phstep+(ph-phstep)
                             break
                 last_crg=crg
+            if pka<-90.0:
+                if self.acid_base(group)==1:
+                    if last_crg>0.5:
+                        pka=99.9
+                    else:
+                        pka=-99.9
+                else:
+                    if last_crg>-0.5:
+                        pka=99.9
+                    else:
+                        pka=-99.9
             pkavalues[group]=pka
         return pkavalues
     

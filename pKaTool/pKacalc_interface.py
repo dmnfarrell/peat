@@ -480,7 +480,7 @@ class Main:
         self.file_win.geometry('+400+500')
         if self.pdbfilename:
             self.files_included=[[self.pdbfilename,'Protein']]
-        self.files_included=[]
+        #self.files_included=[]
         self.print_included()
         return
 
@@ -510,6 +510,7 @@ class Main:
             row=row+1
         Button(self.file_win,text='Add another file',command=self.add_file).grid(row=row,column=0,columnspan=1,sticky='nws')
         Button(self.file_win,text='Done',command=self.really_getgroups).grid(row=row,column=2,columnspan=1,sticky='nes')
+        self.update()
         return
 
     #
@@ -624,30 +625,34 @@ class Main:
                                 fg='black',
                                 height=height,width=15,
                                 yscrollcommand=yscrollbar.set,
-                                selectmode=SINGLE)
+                                selectmode=MULTIPLE)
         self.all_groups.grid(row=2,column=0,columnspan=2,rowspan=10,sticky='news')
         yscrollbar.config(command=self.all_groups.yview)
+        #
+        # List containing the groups that are selected
+        #
+        self.calc_selected_list=[]
         #
         # Listbox for titratable groups to be included in calculation
         #
         yscrollbar2=Scrollbar(self.initwin,orient='vertical',width=10)
         yscrollbar2.grid(row=2,column=6,rowspan=10,sticky='nws')
         height=10
-        self.groups_selected=Listbox(self.initwin,
+        self.calcgroups_selected=Listbox(self.initwin,
                                 bg='white',
                                 fg='black',
                                 height=height,width=15,
                                 yscrollcommand=yscrollbar2.set,
-                                selectmode=SINGLE)
-        self.groups_selected.grid(row=2,column=4,columnspan=2,rowspan=10,sticky='news')
-        yscrollbar2.config(command=self.groups_selected.yview)
+                                selectmode=MULTIPLE)
+        self.calcgroups_selected.grid(row=2,column=4,columnspan=2,rowspan=10,sticky='news')
+        yscrollbar2.config(command=self.calcgroups_selected.yview)
         #
         # Calculation engine setup
         #
-        self.set_enecalc_engine(win=self.initwin,row=2,column=3,command=self.update_groups_selected)
-        self.update_groups_selected()
-        Button(self.initwin,text='Add -->',command=self.select_group).grid(row=5,column=4)
-        Button(self.initwin,text='<-- Remove',command=self.remove_group).grid(row=6,column=4)
+        self.set_enecalc_engine(win=self.initwin,row=2,column=3,command=self.update_calcIF_selected_groups)
+        self.update_calcIF_selected_groups()
+        Button(self.initwin,text='Add -->',command=self.calcIF_select_group).grid(row=5,column=3)
+        Button(self.initwin,text='<-- Remove',command=self.calcIF_remove_group).grid(row=6,column=3)
         #
         # pH start, stop and step
         #
@@ -657,8 +662,8 @@ class Main:
         #
         # OK and Cancel buttons
         #
-        Button(self.initwin,text='Select these groups',command=self.setup_calc).grid(row=13,column=0,columnspan=2,sticky='news')
-        Button(self.initwin,text='Select all groups',command=self.setup_calc).grid(row=13,column=2,columnspan=2,sticky='news')
+        Button(self.initwin,text='Select these groups',command=self.IFsetup_calc).grid(row=13,column=0,columnspan=2,sticky='news')
+        Button(self.initwin,text='Select all groups',command=self.calcIF_selectall).grid(row=13,column=2,columnspan=2,sticky='news')
         Button(self.initwin,text='Add structure file(PDB/mol2)').grid(row=13,column=4)
         Button(self.initwin,text='Add extra titgroup in loaded structure')
         Button(self.initwin,text='Cancel',command=self.initwin.destroy).grid(row=13,column=5,sticky='news')
@@ -670,28 +675,54 @@ class Main:
         # Button for defining titratable groups
         #
         Button(self.initwin,text='Edit titgroup definitions').grid(row=14,column=0)
+        return
 
+    #
+    # ----
+    #
+    
+    def calcIF_selectall(self):
+        raise Exception("Jens forgot to write this function")
+        return
+    
+    def calcIF_select_group(self):
+        """Add a single or multiple groups to the selected listbox"""
+        for sel in self.all_groups.curselection():
+            group_num=int(sel)
+            sel_group=self.groups[group_num]
+            if not sel_group in self.calc_selected_list:
+                self.calc_selected_list.append(sel_group)
+        self.update_calcIF_selected_groups()
+        return
+        
+    def calcIF_remove_group(self):
+        """Remove a single or multiple groups from the selected listbox"""
+        for sel in self.calcgroups_selected.curselection():
+            group_num=int(sel)
+            sel_group=self.groups[group_num]
+            if sel_group in self.calc_selected_list:
+                self.calc_selected_list.remove(sel_group)
+        self.update_calcIF_selected_groups()
+        return
+    #
+    # -----
+    #
+            
+    def update_calcIF_selected_groups(self):
+        """Update the groups in the listbox with groups selected for the calculation"""
+        self.calc_selected_list.sort()
+        self.calcgroups_selected.delete(0,END)
+        for group in self.calc_selected_list:
+            self.calcgroups_selected.insert(END,group)
+        # Code for selecting calculation engine?
         return
 
     #
     # ----
     #
 
-    def update_groups_selected(self):
-        """Update the list of groups selected"""
-        self.get_titratable_groups()
-        self.all_groups.delete(0, END)
-        for group in self.groups:
-            self.all_groups.insert(END,group)
-        return
-
-    #
-    # ----
-    #
-
-    def setup_calc(self):
+    def IFsetup_calc(self):
         """Set up a new calculation with the present titratable groups
-
         Set all energies to zero
         """
         import os

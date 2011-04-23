@@ -104,6 +104,12 @@ class pKa_system(Frame,pKa_base.pKa_base,pKa_system_help.system_help,
                          'Monte Carlo (C++)':pKa_calc.Monte_Carlo_CPP,
                          'Boltzmann (C++)':pKa_calc.Boltzmann_CPP}
         #
+        # Check if we are called from EnzSim
+        #
+        self.enzsim=False
+        if protein=='__enzsim_application__':
+            self.enzsim=True
+        #
         # Set data
         #
         self.data={'numgroups':numgroups}
@@ -130,6 +136,7 @@ class pKa_system(Frame,pKa_base.pKa_base,pKa_system_help.system_help,
                 self.unpack_all_data(data)
             else:
                 self.convert_titration_data(data)
+
         return
 
     #
@@ -375,7 +382,10 @@ class pKa_system(Frame,pKa_base.pKa_base,pKa_system_help.system_help,
         #
         # Exit button
         #
-        self.exit_bt=Button(self.win,text='Quit',command=self.quit_application)
+        if self.enzsim:
+            self.exit_bt=Button(self.win,text='Data->EnzSim',command=self.quit_application)
+        else:
+            self.exit_bt=Button(self.win,text='Quit',command=self.quit_application)
         self.exit_bt.grid(row=0,column=2,sticky='wens')
         #
         # Snapshot button
@@ -1425,7 +1435,7 @@ class pKa_system(Frame,pKa_base.pKa_base,pKa_system_help.system_help,
         """Copy a titration curve or a population curve to the Ekin facility of EAT_DB"""
         try:
             import os,sys
-            import EAT_DB.Ekin
+            import PEATDB.Ekin
         except:
             import tkMessageBox
             tkMessageBox.showwarning('Cannot find PEAT',
