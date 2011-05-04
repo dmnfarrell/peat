@@ -1039,7 +1039,31 @@ class Environment:
 			completeArray = arrayFragment
 		
 		return completeArray	
+
+	def combineDictionary(self, dictFragment):
+	
+		'''Combines a set of arrayFragments from each processor into one array'''
+
+		if Environment.isParallel:
+			import pypar
+			if self.isRoot():
+				completeDict = dictFragment
+				for i in range(1, pypar.size()):
+					fragment = pypar.receive(i)
+					completeDict.update(fragment)
+				
+				#Send the array
+				for i in range(1, pypar.size()):
+					pypar.send(completeDict, i)
+			else:
+				#Send the fragment
+				pypar.send(dictFragment, 0)
+				#Retrieve the array
+				completeDict = pypar.receive(0)
+		else:
+			completeDict = dictFragment
 		
+		return completeDict			
 																				
 	def output(self, string, stream=None, rootOnly=True):
 	
