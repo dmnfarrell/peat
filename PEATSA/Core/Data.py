@@ -1026,7 +1026,8 @@ class MutantCollection:
 		#Create a protool instance of the pdb
 		self.pdb = Protool.structureIO()
 		self.pdb.readpdb(self.pdbFile)	
-					
+			
+	
 	def __initFromLocation__(self, location, name):
 	
 		'''Called on instantiation when the location of a existing mutant collection is given'''
@@ -1072,10 +1073,19 @@ class MutantCollection:
 		ligandFiles = os.listdir(ligandDir)
 		self.ligands = [os.path.join(ligandDir, file) for file in ligandFiles]
 		
-		#Read in the scores of the mutants if presnet
+		#Read in the scores of the mutants if present
 		filename = os.path.join(self.location, 'Scores.csv')
 		if os.path.isfile(filename):
 			self.mutationScores = Matrix.matrixFromCSVFile(filename)
+			
+		#Read in the mutation operations if present
+		filename = os.path.join(self.location, 'mutationOperations')
+		if os.path.isfile(filename):
+			stream = open(filename)
+			archiver = pickle.Unpickler(stream)
+			self.mutationOperations = archiver.load()
+			stream.close()
+	
 		
 	def __init__(self, location=None, name=None, mutationList=[],  pdbFile=None, ligandFiles=[], 
 			maxOverlap=0.5, clean=True, useReducedNaming=True, temporary=False, overwrite=True):
@@ -1121,6 +1131,7 @@ class MutantCollection:
 		self.isTemporary = temporary
 		self.overwrite = overwrite
 		self.mutationList = []
+		self.mutationOperations = {}
 		self.maxOverlap = maxOverlap
 		self.useReducedNaming = useReducedNaming 
 		self.mutationScores = None
@@ -1198,7 +1209,20 @@ class MutantCollection:
 			archiver.dump(self.mutationList)
 			stream.close()
 		
-		self.environment.wait()	
+		self.environment.wait()
+				
+	def _updateMutationOperations(self):
+	
+		'''Private method - Updates the on-disk pickle of the mutationOperations ivar'''
+		
+		if self.environment.isRoot():
+			stream = open(os.path.join(self.location, 'mutationOperations'), 'w+')
+			archiver = pickle.Pickler(stream)
+			archiver.dump(self.mutationOperations)
+			stream.close()
+		
+		self.environment.wait()			
+		
 		
 	def _createMutant(self, element, location, successes, failures, qualities, standardOut):
 	
@@ -1241,11 +1265,15 @@ class MutantCollection:
 					rootOnly=False)	
 			failures.append(name)
 		else:
-			#Store mutation quality
-			qualities.append([element.codeString(pdb=self.pdb,reduced=True), 'Created', score])			
+			
+			#Store mutation quality & operations
+			qualities.append([name, 'Created', score])	
+			mutationOperations[name] = mutant.mutate_operations 
+					
+			#Get the Protool instance for the mutatn							#
 			mutant = mutant.PI
 			
-			#Remove the ligand
+			#Remove the ligand and write out the pdb file
 			mutant.remove_atoms_with_tag('LIGAND')
 			name = element.defaultFilename(pdb=self.pdb)
 			name = os.path.join(location, name)
@@ -1290,6 +1318,7 @@ class MutantCollection:
 		filenames = []
 		failedMutants = []
 		qualities = []
+		operations = {}
 		
 		location = os.path.join(self.location, 'Mutants')
 		listFragment = self.environment.splitArray(mutationList)
@@ -1300,7 +1329,8 @@ class MutantCollection:
 			self.environment.output('[MUTATE] (%d) Next element %s\n' % (self.environment.rank(), element), 
 				stream=standardOut, rootOnly=False)
 			try:
-				self._createMutant(element, location, filenames, failedMutants, qualities, standardOut)
+				self._createMutant(element, location, filenames, 
+					failedMutants, qualities, operations, standardOut)
 			except KeyboardInterrupt:
 				raise
 			except Exception, data:
@@ -1329,10 +1359,11 @@ class MutantCollection:
 		#above loop due to an exception	
 		self.environment.wait()			
 		
-		#Combine arrays
+		#Combine arrays & dictionaries
 		filenames = self.environment.combineArray(filenames)
 		failedMutants = self.environment.combineArray(failedMutants)	
 		qualities = self.environment.combineArray(qualities)
+		operations = self.environment.combineDictionary(operations)
 		
 		noFailures = len(failedMutants)
 		noSuccesses = len(filenames)
@@ -1346,15 +1377,14 @@ class MutantCollection:
 		sys.stdout = standardOut	
 		self.collection.extend(filenames)
 		
-		#Update the mutationList ivar
-		#Filter out the failed mutants
+		#Update the mutationList ivar - Filter out the failed mutants
 		mutationList = filter(lambda x:  x.codeString(self.pdb, reduced=False) not in failedMutants, mutationList)
 		
 		self.mutationList.extend(copy.deepcopy(mutationList))
 		self._updateMutationList()
 		self.environment.output('[MUTATE] Done: %s' % self.__str__()) 
 		
-		#Update qualities matrix
+		#Update scores matrix
 		if self.mutationScores is None:
 			self.mutationScores = Matrix.PEATSAMatrix(rows=qualities,
 						 headers=['Mutations', 'Score', 'Result'])
@@ -1362,11 +1392,16 @@ class MutantCollection:
 			for row in qualities:
 				self.mutationScores.addRow(row)
 		
+		#Write scores
 		f = open(os.path.join(self.location, 'Scores.csv'), 'w+')		
 		f.write(self.mutationScores.csvRepresentation())
-		f.close()	
+		f.close()
 		
-		
+		#Update the operations dict
+		self.mutationOperations.update(operations)
+		self._updateMutationOperations()
+
+
 	def addMutant(self, mutant, mutationSet):
 	
 		'''Adds a mutant (represented by a Protool instance) to the collection. 
@@ -1479,11 +1514,12 @@ class MutantCollection:
 	
 		'''Returns the Protool operations related to a mutant
 		
-		Can be used to quickly convert the wild-type Protool instance into a mutant instance'''
+		Can be used to quickly convert the wild-type Protool instance into a mutant instance.
 		
-		mutantInstance = self.mutantForMutationSet(mutationSet)
-		return mutantInstance.mutate_operations			       
+		Note: Old MutantCollections stored on disk may not have this information for all mutants'''
 		
+		return self.mutationOperations[mutationSet.codeString(pdb=self.pdb, reduced=False)]
+				       		
 		
 def mutationSetFromFilename(filename):
 
