@@ -176,7 +176,7 @@ def MutantFromRotamerOperations(structure, operations):
 	
 	operations: A list containing information on how to create a mutant relative to structure
 	It is assumed this list was obtained by calling 'rotamerOperationsForMutant:() on a MutantCollection
-	instance whose pdb attributed is equal to structure
+	instance whose pdb attributed is equal to the structure object
 		
 	Exceptions: 
 		Raises an Exceptions.MutantModellingError if an error occurs during mutant creation'''
@@ -1228,7 +1228,8 @@ class MutantCollection:
 					mutationCodes, 
 					max_overlap=self.maxOverlap, 
 					max_totalbump=totalBump,
-					return_score=True)
+					return_score=True
+					store_mutation_operations=True)
 		self.environment.output('[MUTATE] (%d) Done - Score %lf. Total-bump %lf\n' % (self.environment.rank(), score, totalBump), 
 			stream=standardOut, rootOnly=False)
 		
@@ -1240,13 +1241,16 @@ class MutantCollection:
 					rootOnly=False)	
 			failures.append(name)
 		else:
+			#Store mutation quality
 			qualities.append([element.codeString(pdb=self.pdb,reduced=True), 'Created', score])			
 			mutant = mutant.PI
+			
 			#Remove the ligand
 			mutant.remove_atoms_with_tag('LIGAND')
 			name = element.defaultFilename(pdb=self.pdb)
 			name = os.path.join(location, name)
 			mutant.writepdb(name)
+			
 			#Add hydrogens to new residue
 			self.environment.output('[MUTATE] (%d) Starting clean\n' % self.environment.rank(), 
 				stream=standardOut, rootOnly=False)
