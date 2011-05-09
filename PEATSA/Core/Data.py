@@ -1224,7 +1224,7 @@ class MutantCollection:
 		self.environment.wait()			
 		
 		
-	def _createMutant(self, element, location, successes, failures, qualities, standardOut):
+	def _createMutant(self, element, location, successes, failures, qualities, operations, standardOut):
 	
 		'''Private method - creates the mutant represented by mutationCode.
 		
@@ -1236,6 +1236,7 @@ class MutantCollection:
 			successes - A list: If successful the filename of the created mutant is appended to this list
 			failures - A list: If modelling failed the mutants name is appended to this list
 			qualities - A list: The modelling quality is appended to this list
+			operations - A dictionary: The operations for this mutant are added to this dict
 			standardOut - Where to write output'''	
 		
 		import Protool.mutate
@@ -1252,7 +1253,7 @@ class MutantCollection:
 					mutationCodes, 
 					max_overlap=self.maxOverlap, 
 					max_totalbump=totalBump,
-					return_score=True
+					return_score=True,
 					store_mutation_operations=True)
 		self.environment.output('[MUTATE] (%d) Done - Score %lf. Total-bump %lf\n' % (self.environment.rank(), score, totalBump), 
 			stream=standardOut, rootOnly=False)
@@ -1268,9 +1269,7 @@ class MutantCollection:
 			
 			#Store mutation quality & operations
 			qualities.append([name, 'Created', score])	
-			mutationOperations[name] = mutant.mutate_operations 
-					
-			#Get the Protool instance for the mutatn							#
+			operations[name] = mutant.mutate_operations 
 			mutant = mutant.PI
 			
 			#Remove the ligand and write out the pdb file
@@ -2029,6 +2028,8 @@ class MutationSet:
 			res = GetChainResidues(pdb)[id][0]
 			chain, index = Utilities.ParseResidueCode(res)
 			offset = index
+		elif offset is None:
+			offset = -1
 			
 		seq = list(wildTypeSequence)	
 		for code in self.mutationCodes(pdb=pdb):
