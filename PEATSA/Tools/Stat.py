@@ -223,7 +223,7 @@ if __name__ == "__main__":
 
 	#Add leverage info is supplied
 	if options.leverage is not None:
-		leverage = Core.Matrix.matrixFromCSVFIle(options.leverage)
+		leverage = Core.Matrix.matrixFromCSVFile(options.leverage)
 		m.addColumn(leverage.column(0))
 		m.setColumnHeader(m.numberOfColumns() - 1, 'Leverage')
 
@@ -295,9 +295,10 @@ if __name__ == "__main__":
 			f.close()
 
 		if options.leverage is not None:
-			array = zip(errors[:division], leverages[:division])
+			array = zip(error[:division], leverages[:division])
 			mse = rmse*rmse
-			studentized = [el[0]/math.sqrt(mse*(1 - el[1]) for el in array]
+			studentized = [el[0]/math.sqrt(mse*(1 - el[1])) for el in array]
+			studentized = [str(el) for el in studentized]
 			f = open('Studentized%s.csv' % percentage, 'w+')
 			f.write(",\n".join(studentized))
 			f.close()
