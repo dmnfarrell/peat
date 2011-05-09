@@ -2,7 +2,7 @@
 '''Creates a sub-matrix from selected columns of a csv file.
 
 The cvs file can be passed to stdin'''
-from PEAT_SA import Core
+from PEATSA import Core
 import sys, optparse
 
 usage = "usage: %prog [options]"
