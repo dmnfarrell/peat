@@ -1515,9 +1515,16 @@ class MutantCollection:
 		
 		Can be used to quickly convert the wild-type Protool instance into a mutant instance.
 		
-		Note: Old MutantCollections stored on disk may not have this information for all mutants'''
+		Note: Old MutantCollections stored on disk may not have this information for all mutants.
+		In this case this method returns None'''
 		
-		return self.mutationOperations[mutationSet.codeString(pdb=self.pdb, reduced=False)]
+		
+		try: 
+			operations = self.mutationOperations[mutationSet.codeString(pdb=self.pdb, reduced=False)]
+		except KeyError, data:
+			operations = None
+			
+		return operations	
 				       		
 		
 def mutationSetFromFilename(filename):
