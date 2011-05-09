@@ -901,10 +901,14 @@ def mutantCollectionFromRotamerOperations(operationsList, pdbFile, name, locatio
 	
 	collection = MutantCollection(name=name, location=location, pdbFile=pdbFile)
 	protoolStructure = collection.pdb
+	print '[MUTATE] Creating new collection from %d operations' % len(operationsList)
 	for operations in operationsList:
-		mutant = MutantFromRotamerOperations(protoolStructure, operations)
 		mutationSet = mutationSetFromRotamerOperations(operations)
+		print '[MUTATE] Creating mutant %s' % mutationSet.codeString(pdb=protoolStructure)
+		mutant = MutantFromRotamerOperations(protoolStructure, operations)
 		collection.addMutant(mutant, mutationSet, operations=operations)
+
+	print '[MUTATE] %s' % collection
 		
 	return collection		
 		
@@ -1442,7 +1446,7 @@ class MutantCollection:
 		self.mutationList.append(copy.deepcopy(mutationSet))	
 		self._updateMutationList()	
 		
-		#Get the mutationCode used by pKa modules to refer to this entry
+		#Get the mutationCode used to refer to this entry
 		mutationSet.reducedDefault = self.useReducedNaming
 		filename = mutationSet.defaultFilename(pdb=self.pdb)
 		
@@ -1462,7 +1466,7 @@ class MutantCollection:
 			
 		#Update scores matrix
 		if self.mutationScores is None:
-			self.mutationScores = Matrix.PEATSAMatrix(rows=[name, 'Created', quality],
+			self.mutationScores = Matrix.PEATSAMatrix(rows=[[name, 'Created', quality]],
 						 headers=['Mutations', 'Score', 'Result'])
 		else:				 
 			self.mutationScores.addRow([name, 'Created', quality])
