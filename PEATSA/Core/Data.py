@@ -1190,7 +1190,7 @@ class MutantCollection:
 	
 		'''collection[i] returns the i'th mutant file name'''
 	
-		return self.collection(index)
+		return self.collection[index]
 		
 	def __str__(self):
 	
