@@ -1720,7 +1720,8 @@ def mutationSetFromRotamerOperations(operations):
 	mutationSet = MutationSet()	
 	codes = set()
 	for operation, atomCode, atomData in operations:
-		if atomData != {}:
+		#Skip delete operations as the RESAME will be the original residue name
+		if atomData != {} and operation != 'delete':
 			chainId = atomData['CHAINID']
 			residueIndex = atomData['RESNUM']
 			mutation = atomData['RESNAME']
