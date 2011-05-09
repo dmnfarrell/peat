@@ -883,6 +883,31 @@ class DataSet:
 		
 		self.environment.wait()
 
+def mutationCollectionFromRotamerOperations(name, location, pdbFile, operationsList):
+
+	'''Creates a mutant collection using a list of rotamer operations
+	
+	Each element of operationsList describes the operations required
+	to create a single mutant.
+	
+	Note: If a collection already exists at location/name it is overwritten
+	
+	Params:
+		name - The name of the colleciton
+		location - Where it will be created
+		pdbFile - The path to the pdb file representing the structure to be mutated
+		operationsList - List of rotamer operations describing the mutants to create	
+	'''
+	
+	collection = MutantCollection(name=name, location=location, pdbFile=pdbFile)
+	protoolStructure = collection.pdb
+	for operations in operationsList:
+		mutant = MutantFromRotamerOperations(protoolStructure, operations)
+		mutationSet = mutationSetFromRotamerOperations(operations)
+		collection.addMutant(mutant, mutationSet, operations=operations)
+		
+	return collection		
+		
 
 class MutantCollection:
 
@@ -1401,7 +1426,7 @@ class MutantCollection:
 		self._updateMutationOperations()
 
 
-	def addMutant(self, mutant, mutationSet):
+	def addMutant(self, mutant, mutationSet, quality=0.0, operations=None):
 	
 		'''Adds a mutant (represented by a Protool instance) to the collection. 
 		
@@ -1409,10 +1434,9 @@ class MutantCollection:
 		
 		Parameters:
 			mutant - A protool instance representing the mutant pdb.
-			chain - The chain the mutated residue is in
-			residueIndex - The index of the residue that was mutated
-			residueName - The three letter code of the residue
-			mutation - A list of three letter code of the mutant (what the residue was mutated to)'''
+			mutationSet - Describes the mutations in mutant relative the receivers pdb
+			quality - The bump score of the mutant. Defaults to 0.0
+			operations - The operations used to create the mutant'''
 			
 		mutant.remove_atoms_with_tag('LIGAND')
 		self.mutationList.append(copy.deepcopy(mutationSet))	
@@ -1429,6 +1453,25 @@ class MutantCollection:
 		
 		#Add the filename to the collection ivar.
 		self.collection.append(filename)
+		
+		#Update the operations dict
+		name = mutationSet.codeString(pdb=self.pdb, reduced=False)
+		if operations is not None:
+			self.mutationOperations[name] = operations
+			self._updateMutationOperations()
+			
+		#Update scores matrix
+		if self.mutationScores is None:
+			self.mutationScores = Matrix.PEATSAMatrix(rows=[name, 'Created', quality],
+						 headers=['Mutations', 'Score', 'Result'])
+		else:				 
+			self.mutationScores.addRow([name, 'Created', quality])
+		
+		#Write scores
+		f = open(os.path.join(self.location, 'Scores.csv'), 'w+')		
+		f.write(self.mutationScores.csvRepresentation())
+		f.close()
+	
 		
 	def path(self):
 	
@@ -1521,7 +1564,7 @@ class MutantCollection:
 		
 		try: 
 			operations = self.mutationOperations[mutationSet.codeString(pdb=self.pdb, reduced=False)]
-		except KeyError, data:
+		except KeyError:
 			operations = None
 			
 		return operations	
