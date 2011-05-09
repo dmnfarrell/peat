@@ -883,7 +883,7 @@ class DataSet:
 		
 		self.environment.wait()
 
-def mutationCollectionFromRotamerOperations(operationsList, pdbFile, name, location='.'):
+def mutantCollectionFromRotamerOperations(operationsList, pdbFile, name, location='.'):
 
 	'''Creates a mutant collection using a list of rotamer operations
 	
