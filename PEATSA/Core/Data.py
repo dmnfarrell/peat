@@ -883,7 +883,7 @@ class DataSet:
 		
 		self.environment.wait()
 
-def mutationCollectionFromRotamerOperations(name, location='.', pdbFile, operationsList):
+def mutationCollectionFromRotamerOperations(operationsList, pdbFile, name, location='.'):
 
 	'''Creates a mutant collection using a list of rotamer operations
 	
@@ -893,10 +893,10 @@ def mutationCollectionFromRotamerOperations(name, location='.', pdbFile, operati
 	Note: If a collection already exists at location/name it is overwritten
 	
 	Params:
-		name - The name of the colleciton
-		location - Where it will be created
+		operationsList - List of rotamer operations describing the mutants to create
 		pdbFile - The path to the pdb file representing the structure to be mutated
-		operationsList - List of rotamer operations describing the mutants to create	
+		name - The name of the colleciton
+		location - Where it will be created	
 	'''
 	
 	collection = MutantCollection(name=name, location=location, pdbFile=pdbFile)
