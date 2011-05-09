@@ -78,7 +78,7 @@ elif options.calculation == 'Scan':
 if matrix == None:
 	print 'No data for calculation %s present in data directory %s' % (options.calculation, options.data)					
 
-job.addResults(matrix=matrix, name='%sResults' % options.calculation)
+job.addDataSet(matrix=matrix, name='%sResults' % options.calculation)
 
 if options.calculation != 'Scan':
 	points = len(matrix.total)
