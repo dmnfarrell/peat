@@ -18,7 +18,7 @@ class explore_system:
         # -----
         #
         import math
-        self.intpka_range=np.arange(2.0,14.0,self.pka_resolution)
+        self.intpka_range=np.arange(7.0,13.0,self.pka_resolution)
         self.intene_range=np.arange(0,15.0,self.pka_resolution*math.log(10.0)) # in pKa units
         self.acid_base_range=['Acid','Base']
         #
@@ -66,7 +66,7 @@ class explore_system:
         #
         self.pHstep=0.1
         self.pHstart=0.1
-        self.pHend=14.0
+        self.pHend=20.0
         return
 
     #
