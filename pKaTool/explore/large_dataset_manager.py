@@ -13,7 +13,7 @@ class data_manager:
         #
         # We split data into 10000 files per dir
         #
-        self.dir=dir
+        self.basedir=dir
         self.dir_count=100000
         #
         # We store the data as 'name':filename
@@ -23,10 +23,6 @@ class data_manager:
         #
         self.dir_digits=7
         return
-
-    #
-    # -----
-    #
     
  
     def __call__(self,name):
@@ -40,7 +36,7 @@ class data_manager:
         import os
         dir_num=int(float(name)/float(self.dir_count))
         newdir=str(dir_num).zfill(self.dir_digits)
-        new_dir=os.path.join(os.getcwd(),newdir)
+        new_dir=os.path.join(self.basedir,newdir)
         #
         # If the dir does not exist then create it
         #
@@ -61,7 +57,7 @@ class data_manager:
             if os.path.isfile(filename):
                 return filename
             print 'Could not find',filename
-            raise 'Crap routine'
+            raise Exception('Crap routine')
         else:
             return filename
 
@@ -75,7 +71,10 @@ class data_manager:
         #
         # Can we find this file
         #
-        filename=self.find_file(name)
+        try:
+            filename=self.find_file(name)
+        except:
+            return None
         fd=open(filename)
         value=pickle.load(fd)
         fd.close()

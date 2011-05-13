@@ -9,16 +9,17 @@ import numpy as np
 
 class explore_system:
     
-    def __init__(self):
+    def __init__(self,options):
         """Set up the arrays for a full exploration of the behaviour of a system of titratable groups"""
-        self.number_of_groups=3
-        self.pka_resolution=2.0
+        self.options=options
+        self.number_of_groups=options.numgroups
+        self.pka_resolution=options.step 
         #
         # -----
         #
-
+        import math
         self.intpka_range=np.arange(2.0,14.0,self.pka_resolution)
-        self.intene_range=np.arange(0,15.0,self.pka_resolution)
+        self.intene_range=np.arange(0,15.0,self.pka_resolution*math.log(10.0)) # in pKa units
         self.acid_base_range=['Acid','Base']
         #
         perms=[]
@@ -31,7 +32,7 @@ class explore_system:
         self.levels=range(self.num_levels)
         print 'number of parameters',self.num_levels
         #
-        # Add all the permuters (?)
+        # Add all the permuters 
         #
         counters=[]
         self.values=[]
@@ -78,8 +79,10 @@ class explore_system:
         # Make pickled files for each configuration
         #
         import large_dataset_manager, os
-        self.Data=large_dataset_manager.data_manager(os.getcwd())
-        dir_count=10000
+        self.options.dir=os.path.join(os.getcwd(),options.dir)
+        if not os.path.isdir(self.options.dir):
+            os.mkdir(options.dir)
+        self.Data=large_dataset_manager.data_manager(self.options.dir)
         print 'Constructing system permutations'
         print '000.00 perc done',
         perm=0
@@ -227,6 +230,7 @@ class explore_system:
         #print '=========================\n'
         old_data['pKas']=pKa_values
         old_data['titcurvs']=X.prot_states
+        old_data['All_states']=X.all_states
         #
         return old_data
 
@@ -318,7 +322,19 @@ class explore_system:
 
 
 if __name__=="__main__":
-    X=explore_system()
+    print
+    print 'Explore the parameter space for a system of titratable groups'
+    print
+    from optparse import OptionParser
+    parser = OptionParser(usage='%prog [options]',version='%prog 1.0')
+    parser.add_option('-n','--groupnum',dest='numgroups',type='int',action='store',default=3,help='Number of titratable groups. Default: %default')
+    parser.add_option('-s','--step',dest='step',action='store',type='float',default=1.0,help='Stepsize for each parameter in pKa units. Default: %default')
+    parser.add_option('-d','--dir',dest='dir',action='store',type='string',default='resultdir',help='Directory where results will be stored. Default: %default')
+    (options, args) = parser.parse_args()
+    #
+    # Call the class
+    #
+    X=explore_system(options)
     X.construct_permutations()
     #X.calculate_system()
     
