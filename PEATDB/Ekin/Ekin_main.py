@@ -1174,7 +1174,7 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
                 self.fitall_win.update_idletasks()
                 if len(models)==1:
                     try:
-                        fdata = self.E.fitDataset(d, model=models[0],silent=True,noiter=no_itervar.get(),
+                        fdata, X = self.E.fitDataset(d, model=models[0],silent=True,noiter=no_itervar.get(),
                                                 conv=converg_diff.get())#,callback=self.fitall_win.update)
                     except:
                         pass                    

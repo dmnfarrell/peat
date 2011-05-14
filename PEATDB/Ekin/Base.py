@@ -78,7 +78,7 @@ class EkinProject(object):
                          'Chemical Denaturation','diffDenaturation','Unfolding',
                          'Residual Activity','Arrhenius',
                          'DSC2state','DSCindependent','DSC2stateIrreversible','DSC2stateIrreversibleII',
-                         'Amyloid Fibre Formation'],
+                         'Amyloid Fibre Formation','Substrate Depletion'],
                      'Simple enzyme kinetic':['Michaelis-Menten','Michaelis-Menten-competitive-inhibition',
                                               'Competitive inhibition','Non-competitive inhibition'],
                      'Enzyme pH-activity':['Bell-shaped pH-act profile (3 pKas)','Bell-shaped pH-act profile (2 pKas)'],
@@ -573,7 +573,7 @@ class EkinProject(object):
         if update == True:
             self.__datatabs_fits__[dataset] = fitresult
 
-        return fitresult
+        return fitresult, X
 
     def fitDatasets(self, datasets='ALL', update=True, findbest=False, models=None,
                         noiter=300, conv=1e-6, grad=1e-6, silent=False):

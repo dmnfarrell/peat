@@ -64,7 +64,8 @@ class Fitting(object):
               'DSCindependent':'DSCindependent',
               'DSC2stateIrreversible':'DSC2stateIrreversible',
               'Residual Activity':'residualActivity',
-              'Amyloid Fibre Formation':'amyloidFibreFormation' }
+              'Amyloid Fibre Formation':'amyloidFibreFormation',
+              'Substrate Depletion':'subdepletion'}
     conv=1e-9
     grad=1e-9
 
@@ -72,7 +73,8 @@ class Fitting(object):
     def getFitter(cls, model, vrs=None, expdata=None, callback=None):
         """Return the required LM fit object from the model name"""
         
-        #self.__class__
+        funcname = cls.models[model]
+        
         if model == 'Linear':
             return linear(variables=vrs,exp_data=expdata,callback=callback,name=model)
         if model == 'Power':
@@ -121,10 +123,13 @@ class Fitting(object):
         elif model == 'Arrhenius':
             return Arrhenius(variables=vrs,exp_data=expdata,callback=callback,name=model)
         elif model == 'Amyloid Fibre Formation':
-            return amyloidFibreFormation(variables=vrs,exp_data=expdata,callback=callback,name=model)           
+            return amyloidFibreFormation(variables=vrs,exp_data=expdata,callback=callback,name=model)
+        elif model == 'Substrate Depletion':
+            return subdepletion(variables=vrs,exp_data=expdata,callback=callback,name=model)        
         else:
             return None
-
+        
+    
     @classmethod
     def makeFitter(cls, fitdata, expdata=None, callback=None):
         """Return a fit object created from the provided ekin fit data"""
@@ -885,10 +890,8 @@ class gaussian(LM_Fitter):
         except:
             x=data_point
         a=variables[0]; b=variables[1]
-        c=variables[2]        
-       
-        value = a*math.exp(-( pow(x-b,2) / pow(2*c,2) ))
-  
+        c=variables[2]       
+        value = a*math.exp(-( pow(x-b,2) / pow(2*c,2) ))  
         return value
 
 class modifiedHill(LM_Fitter):
@@ -1470,4 +1473,34 @@ class amyloidFibreFormation(LM_Fitter):
         value = yi + mi*x + (yf+mf*x)/(1+math.exp(-(x-x0)/t))
         return value
         
-         
+class subdepletion(LM_Fitter):
+    """hese functions fit the substrate depletion data to the model used by Thomas"""
+
+    def __init__(self, variables, exp_data, callback, name):
+        LM_Fitter.__init__(self,variables,exp_data,callback,name)
+        self.name = name
+        self.names = ['x0','M','D']
+        self.labels = ['x','y']
+        if variables == None:
+            self.variables = [0, 1, 1]
+        else:
+            self.variables = variables
+        self.setChangeVars()
+        return
+
+    def get_equation(self):
+        """Return a text form of the model for printing"""
+        eq = 'M * (1 - math.exp(-D*(x-x0)))'
+        return eq
+
+    def get_value(self, variables, data_point):       
+        try:
+            x=data_point[0]
+        except:
+            x=data_point
+        x0=variables[0]
+        M=variables[1]
+        D=variables[2]
+        value = M * (1 - math.exp(-D*(x-x0)))
+        return value
+                 

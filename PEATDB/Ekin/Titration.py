@@ -411,7 +411,7 @@ class TitrationAnalyser():
                 print name, d
                 if len(models)==1:
                     #we don't do f-test if only one model
-                    fdata = E.fitDataset(d, model=models[0])
+                    fdata, X = E.fitDataset(d, model=models[0])
                 else:
                     fdata, p = E.findBestModel(d, models=models, checkfunc=checkfunc)
                 if fdata==None:
