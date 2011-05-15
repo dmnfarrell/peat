@@ -41,9 +41,49 @@ class Fitting(object):
 
     def __init__(self):
         return
-
-    #add new models here and then create them as a subclass of LM_fitter
-    #dict key is a label and value is the class name
+    
+    presetmodels = {'Linear': {'name':'linear','equation':'a*x+b',
+                             'varnames':['a','b'],   
+                             'guess':{'a':'min(y)','b':'max(y)-min(y)/max(x)-min(x)'}},
+                    'Power': {'name':'power','equation':'(x**a)+b',
+                        'varnames':['a','b']},
+                    'Sigmoid': {'name':'sigmoid',
+                        'equation':'bottom+(top-bottom)/(1+math.exp((tm-x)/slope))',
+                        'varnames':['tm', 'bottom', 'top', 'slope'],
+                        'guess': {'tm':'(max(x)-min(x))/2+min(x)',
+                                   'bottom':'min(y)', 'top':'max(y)',
+                                'slope':'0.5'}},
+                    '1 pKa 2 Chemical shifts': {'name':'HH1pKa2shifts',
+                        'equation':'span/(1+10**(-x+pKa))+offset',
+                        'varnames':['pKa','span','offset'],
+                        'guess':{'pKa':'min(x)+(max(x)-min(x))/2.0',
+                                 'span':'max(y)-min(y)',
+                                 'offset':'min(y)'}},
+                    '2 pKas, 3 Chemical shifts': {'name':'HH2pKa3shifts',
+                        'equation':'span1/(1+10**(pKa1-x))+span2/(1+10**(-x+pKa2))+offset',
+                        'varnames':['pKa1','pKa2','offset','span1','span2'],
+                        'guess': {'pKa1':'min(x)+(max(x)-min(x))*0.25',  
+                            'pKa2':'min(x)+(max(x)-min(x))*0.75',
+                            'offset':'min(y)',
+                            'span1':'(max(y)-min(y))/2',
+                            'span2':'(max(y)-min(y))/2'}},
+                    '3 pKas, 4 Chemical shifts': {'name':'HH3pKa4shifts',
+                        'equation':'span1/(1+10**(pKa1-x))+span2/(1+10**(-x+pKa2))+span3/(1+10**(-x+pKa3))+offset',
+                        'varnames':['pKa1','pKa2','pKa3','offset','span1','span2','span3'],
+                        'guess': {'pKa1':'min(x)+(max(x)-min(x))*0.25',  
+                            'pKa2':'min(x)+(max(x)-min(x))*0.5',
+                            'pKa3':'min(x)+(max(x)-min(x))*0.75',    
+                            'offset':'min(y)',
+                            'span1':'(max(y)-min(y))/3',
+                            'span2':'(max(y)-min(y))/3',
+                            'span3':'(max(y)-min(y))/3' }},
+                    'Michaelis-Menten': {'name':'Michaelis-Menten',
+                        'equation':'(Vmax * x)/(x + Km)',
+                        'varnames':['Km','Vmax'],
+                        'guess':{ 'Km':'max(x)/2','Vmax':'max(y)',                                 
+                        'labels':['[S]','v']}}
+                    }
+    
     models = {'Linear':'linear',
               'Power':'power',
               'sigmoid':'sigmoid',
@@ -70,10 +110,62 @@ class Fitting(object):
     grad=1e-9
 
     @classmethod
+    def createClass(cls, name, equation, varnames,
+                       guess=None,
+                       labels=['x','y']):
+                       
+        """Dynamically create an instance of LM_fitter class using presets"""
+        class tempfitter(LM_Fitter):
+            def __init__(self, variables, exp_data, callback):
+                LM_Fitter.__init__(self,variables,exp_data,callback)
+                self.name = name
+                self.names = varnames
+                self.labels = labels
+                self.equation = equation
+                if variables == None:                    
+                    self.variables = [1.0,1.0]
+                else:
+                    self.variables = variables            
+                self.setChangeVars()    
+
+            def get_value(self, variables, data_point):
+                """Evaluate string equation"""
+                try:
+                    x=data_point[0]
+                except:
+                    x=data_point
+                eq=self.equation                
+                for i in range(len(self.names)):
+                    globals()[self.names[i]] = variables[i]
+                try:   
+                    value = eval(eq)
+                except:
+                    value = 1.0
+                return value
+    
+            def guess_start(self):
+                """Guess start vals using provided strings in guess dict"""
+                if guess==None:
+                    return                
+                x=[i[0] for i in self.exp_data]
+                y=[i[1] for i in self.exp_data]
+                for i in range(len(self.names)):
+                    var = self.names[i]
+                    if var in guess:
+                        self.variables[i] = eval(guess[var])
+                        print  i, var, guess[var],self.variables[i]
+                return
+            
+        return tempfitter
+    
+    @classmethod
     def getFitter(cls, model, vrs=None, expdata=None, callback=None):
         """Return the required LM fit object from the model name"""
-        
-        funcname = cls.models[model]
+              
+        '''data = cls.presetmodels[model]        
+        newclass = cls.createClass(**data)
+        inst = newclass(variables=vrs,exp_data=expdata,callback=callback)
+        return inst'''
         
         if model == 'Linear':
             return linear(variables=vrs,exp_data=expdata,callback=callback,name=model)
@@ -127,8 +219,7 @@ class Fitting(object):
         elif model == 'Substrate Depletion':
             return subdepletion(variables=vrs,exp_data=expdata,callback=callback,name=model)        
         else:
-            return None
-        
+            return None        
     
     @classmethod
     def makeFitter(cls, fitdata, expdata=None, callback=None):
@@ -727,7 +818,7 @@ class pHActivity3pkas(LM_Fitter):
 class linear(LM_Fitter):
     """Fit to a line.
        Construct a class like this for each function you want to fit"""
-    def __init__(self, variables, exp_data, callback, name):
+    def __init__(self, variables, exp_data, callback, name):        
         LM_Fitter.__init__(self,variables,exp_data, callback, name)
         self.name = name
         self.names = ['a','b']
@@ -1075,10 +1166,8 @@ class diffDenaturation(LM_Fitter):
 
         R=8.3144e-3
         K = math.exp((deltaH/R) * (1/Tm - 1/x))
-        f = K / (K+1)
-        #value = A * (deltaH / (R*math.pow(x,2)) ) *f * (1-f)
-        value = A * f * (1-f) * math.pow(x,2)
-        
+        f = K / (K+1)        
+        value = A * f * (1-f) * math.pow(x,2)        
         return value
 
 class elwellschellman(LM_Fitter):
@@ -1504,3 +1593,10 @@ class subdepletion(LM_Fitter):
         value = M * (1 - math.exp(-D*(x-x0)))
         return value
                  
+if __name__=='__main__':
+    x=range(1,100); y=range(2,101)
+    f=Fitting.getFitter('Linear',vrs=[2,1.5],expdata=[x,y])
+    print f
+    f.fit()
+        
+    

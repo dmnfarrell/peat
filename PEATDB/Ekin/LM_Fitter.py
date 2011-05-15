@@ -34,14 +34,15 @@ class LM_Fitter:
         The get_difference function must be overwritten in the derived class
         with a function that calculates the difference to be minimized in the fit
         when given two sets of variable dictionaries"""
-        self.variables = variables
-
+        
+        self.variables = variables        
         if not change_vars:
             self.setChangeVars()
         else:
             self.change_vars=change_vars
 
         # Store the rest of the data
+        self.equation = ''
         self.exp_data=exp_data
         self.callback_function=callback
         self.name = name
@@ -54,6 +55,8 @@ class LM_Fitter:
         """Change vars is a mask array of 1's and 0's that specifies which
             variables should be fitted if change_vars[varnum] is None,
             then it is not optimised """
+
+        if self.variables==None: return
         self.change_vars=[]
         if changevars == None:
             self.change_vars=[True for v in self.variables]
@@ -77,8 +80,7 @@ class LM_Fitter:
 
     def getEquation(self):
         """Return a text form of the model - optional override"""
-        eq = ''
-        return eq
+        return self.equation
 
     def getName(self):
         """Return model name"""
@@ -245,7 +247,7 @@ class LM_Fitter:
         count=0
         #print 'Step    Diff   LM_damper'
         for x in range(1,rounds):
-            self.fit_LM()
+            self.fit_LM()            
             # check for singluar matrix
             if self.singular_matrix == 1:
                 status = 'Stopped - singular matrix'
@@ -269,7 +271,6 @@ class LM_Fitter:
                 self.LM_damper = self.LM_damper * damper_adjustment_factor
 
             #print '%5d  %6.4f  %6.4e' %(x, now_diff, self.LM_damper), self.variables, s
-
 
             # check error criterium
             #print 'Diff: %5.3e, error_crit: %5.3e,| gradient: %5.3e, grad_crit: %5.3e' %(now_diff,error_crit,self.error_gradient,gradient_crit)
@@ -323,13 +324,12 @@ class LM_Fitter:
                 return
 
         invJTJd = numpy.linalg.inv(JTJd)
-        self.q = -numpy.dot(JTE,invJTJd)
+        self.q = -numpy.dot(JTE,invJTJd)        
         for varnum in range(len(self.variables)):
             if self.change_vars[varnum]:
                 self.variables[varnum]=self.variables[varnum]+self.q[varnum]
         self.error_gradient = numpy.linalg.norm(JTE)
         return
-
 
     def cancel_step(self):
         """Cancel a step"""
@@ -338,19 +338,16 @@ class LM_Fitter:
                 self.variables[varnum]=self.variables[varnum]-self.q[varnum]
         return
 
-
     def get_jacobian(self,silent=0):
         """Get the Jacobian matrix and errors of the data points"""
-        #
-        # Get the number of data points
-        #
+        
+        # Get the number of data points        
         no_data_points = len(self.exp_data)
 
         errors = numpy.resize(numpy.array(0,float),[no_data_points])
         jacobian = numpy.resize(numpy.array(0,float),[no_data_points,len(self.variables)])
-        #
+        
         # calculate the variation of all parameters
-        #
         variations=[]
         step =self.step
         for var in range(len(self.variables)):
@@ -359,32 +356,28 @@ class LM_Fitter:
             variations.append(self.variables[:])
             if self.change_vars[var]:
                 self.variables[var]=self.variables[var]-step
-        #
-        # construct jacobian
-        #
+        
+        # construct jacobian        
         data_id=0
         for datapoint_num in range(len(self.exp_data)):
             if datapoint_num%100==0:
                 pass
             data_point = self.exp_data[datapoint_num]
-            exp_value=float(data_point[-1]) # The value to fit is always the last one
-
+            # The value to fit is always the last one
+            exp_value=float(data_point[-1])
             errors[datapoint_num] = exp_value-self.get_value(self.variables,data_point)
-            #
-            # Find the derivative for this variable for this data point
-            #
+            
+            # Find the derivative for this variable for this data point            
             diff=numpy.resize(numpy.array(0,float),[len(self.variables)])
             count=0
             for variation in variations:
-                diff[count]=(self.get_value(self.variables,data_point)-self.get_value(variation,data_point))/step
+                diff[count]=(self.get_value(self.variables,data_point)-
+                             self.get_value(variation,data_point))/step
                 count=count+1
             jacobian[data_id]=diff
             data_id=data_id+1
 
         return jacobian,errors
-    #
-    # ------
-    #
 
     def do_statistics(self):
         residualsT = numpy.transpose(self.residuals)
@@ -410,11 +403,9 @@ class LM_Fitter:
         residualsTdiagonal = numpy.dot(residualsT, diagonal)
         residualsTdiagonalresiduals = numpy.dot(residualsTdiagonal,self.residuals)
         Z = (m-n) *JTdiagonalJ/ (n*residualsTdiagonalresiduals)
-
         #print 'Z',Z
         #((m-n)*jac'*Qinv*jac)/(n*resid'*Qinv*resid);
         return
-
 
 
 class myfitter(LM_Fitter):
