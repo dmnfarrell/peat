@@ -1199,7 +1199,7 @@ class TitrationAnalyser():
             
             #call CSP analysis
             if calculatespans==True:
-                import pKaTool.Ghost.maps.Chemical_shift as ChemShift
+                import pKaTool.Ghosts.Chemical_shift as ChemShift
                 C = ChemShift.CSP(pdbname, method='Coulomb', pKaDict=titrpkas, nucleus=nucleus)
                 calcspans = C.getSpanDict()
                 self.savePickle(calcspans, os.path.join(path,fname+'_'+nucleus+'_spans.pickle'))
@@ -1219,12 +1219,12 @@ class TitrationAnalyser():
         return 
   
     def assignGhosts(self, pkainfo, calculatedspans, titrpkas, pdbfile):
-        """Rough attempt to assign titrations from using calculated
+        """Rough attempt to assign titrations using calculated
            spans for all titr grps and exp fits"""
         ghosts = {}
         
-        from pKaTool.Ghost.maps.CSP_explicit import CSP_coulomb
-        import pKaTool.Ghost.maps.utilities_CSP as CSPutils
+        from pKaTool.Ghosts.CSP_explicit import CSP_coulomb
+        import pKaTool.Ghosts.utilities_CSP as CSPutils
         CC = CSP_coulomb(None, None)
         coordmol, chargemol = CC.parseCoordCharges(pdbfile, pdb=True)
         
@@ -1252,7 +1252,7 @@ class TitrationAnalyser():
             atom='N'
             coord = coordmol[ch][resnum][atom]
 
-            #find exp fits for this residue            
+            #find exp fits for this residue
             for d in pkainfo:
                 F = pkainfo[d]
                 r = int(F['resnum'])                
@@ -1268,10 +1268,10 @@ class TitrationAnalyser():
                     expspan=F[p]['span']
                     assignedspan=0
                     for t in calcspans:
-                        cspan = calcspans[t]             
+                        cspan = calcspans[t]
                         if abs(cspan) < assignedspan:
                             continue
-                        if not titrcoords.has_key(t): continue                            
+                        if not titrcoords.has_key(t): continue             
                         titrpka = titrpkas[t]                        
                         xx,distance = CSPutils.getDistance(coord, titrcoords[t])
                         if self.filterGhost(cspan, expspan, titrpka, pka, distance) == True:
