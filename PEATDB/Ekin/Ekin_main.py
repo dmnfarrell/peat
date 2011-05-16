@@ -303,7 +303,8 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
         # Fit menu
         self.fit_menu=Menu(self.menu,tearoff=0)
         self.fit_menu={ '01Find best model':{'cmd':self.fitframe.showBestModelDialog},
-                        '02Fit all datasets':{'cmd':self.fitAll} }
+                        '02Fit all datasets':{'cmd':self.fitAll},
+                        '03Create new fit model':{'cmd':self.createFitModel}}
         self.fit_menu=self.create_pulldown(self.menu,self.fit_menu)
         self.menu.add_cascade(label='Fit',menu=self.fit_menu['var'])
 
@@ -1267,6 +1268,15 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
         self.redrawGraph()        
         return        
 
+    def createFitModel(self):
+        from PEATDB.DictEdit import DictEditor
+        app = DictEditor(self.ekin_win)
+        app.loadDict('models.dict')
+        #self.ekin_win.wait_window(app)
+        #update models
+        Fitting.presetmodels = pickle.load(open('models.dict','r'))  
+        return
+    
     #
     # Import and export functions, most should use the Importer class to do the actual
     # importing stuff and get the returned dataset that we simply insert

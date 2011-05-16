@@ -106,12 +106,12 @@ class LM_Fitter:
 
     def getVarNames(self):
         """Get variable names"""
-        return self.names
+        return self.varnames
 
     def getFitDict(self):
         """Return the fitted variables formatted in a dict"""
         fitdict={}
-        names = self.names; vrs = self.variables
+        names = self.varnames; vrs = self.variables
         i=0
         for i in range(len(names)):
             fitdict[names[i]] = vrs[i]
@@ -175,7 +175,7 @@ class LM_Fitter:
         
     def getRMSR(self):
         """Reduced chi squared for fit"""        
-        v = len(self.exp_data) - len(self.names) - 1
+        v = len(self.exp_data) - len(self.varnames) - 1
         if v<=0:
             v=len(self.exp_data)
         if v<1:

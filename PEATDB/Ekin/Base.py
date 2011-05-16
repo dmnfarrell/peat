@@ -55,36 +55,26 @@ class EkinProject(object):
        a GUI.
        Usage: E = EkinProject(data=ekindata)
     """
-
+    
+    fitmodels = sorted(Fitting.presetmodels.keys())
     ekinfields = ['__datatabs_fits__', '__fit_matches__', '__Exp_Meta_Dat__',
                   '__distance_matches__', '__datatab_structmapping__', '__meta_data__',
                   '__plotopts__', '__currentdataset__', '__displaymultiple__']
 
-    modes =['General',
+    modes =['General', 
                 'Simple enzyme kinetic',
                 'Enzyme pH-activity',
                 'pH-stability',
                 'NMR titration',
                 'Protein Stability',
                 'Amyloid formation']
-    mode_definition = {'General':
-                        ['Michaelis-Menten',#'Michaelis-Menten-competitive-inhibition',
-                         'Linear','Power','Gaussian',
-                         '1 pKa 2 Chemical shifts','3 pKas, 2 Chemical shifts',
-                         '2 pKas, 3 Chemical shifts','3 pKas, 4 Chemical shifts',
-                         'Bell-shaped pH-act profile (3 pKas)',
-                         'Bell-shaped pH-act profile (2 pKas)',
-                         'Sigmoid', 'Modified Hill', 'schellman',
-                         'Chemical Denaturation','diffDenaturation','Unfolding',
-                         'Residual Activity','Arrhenius',
-                         'DSC2state','DSCindependent','DSC2stateIrreversible','DSC2stateIrreversibleII',
-                         'Amyloid Fibre Formation','Substrate Depletion'],
+    mode_definition = {'General': fitmodels,
                      'Simple enzyme kinetic':['Michaelis-Menten','Michaelis-Menten-competitive-inhibition',
                                               'Competitive inhibition','Non-competitive inhibition'],
                      'Enzyme pH-activity':['Bell-shaped pH-act profile (3 pKas)','Bell-shaped pH-act profile (2 pKas)'],
                      'pH-stability':['Bell-shaped pH-act profile (3 pKas)','Bell-shaped pH-act profile (2 pKas)'],
                      'NMR titration':[ 'Linear', '1 pKa 2 Chemical shifts','3 pKas, 2 Chemical shifts','2 pKas, 3 Chemical shifts',
-                                      '3 pKas, 4 Chemical shifts'],#,'4 pKas, 5 Chemical shifts'],
+                                      '3 pKas, 4 Chemical shifts'],
                      'Protein Stability':['Sigmoid'],
                      'Amyloid formation':['Linear','Amyloid Fibre Formation']}
 
