@@ -604,15 +604,15 @@ class TitrationAnalyser():
             if not DB[prot].has_key(col):
                 continue
             if silent == False:
-                print 'processing %s' %name
-                print '------------------------------------'            
+                print 'processing %s' %name                         
             E = DB[prot][col]
             pkainfo[name] = cls.findpKas(E, titratable=titratable,
                                          reliable=reliable, minspan=minspan)
             
-            if silent == False: print 'found %s' %len(pkainfo[name])
+            #if silent == False: print 'found %s' %len(pkainfo[name])
             total+=len(pkainfo[name])
-        print 'found %s total pKa values' %total
+        print 'extracted %s total pKa values' %total
+        print '------------------------------------'
         return pkainfo
 
     def analysepKas(cls, pkainfo, satoms='all', path=None, exclude=[],
@@ -1191,7 +1191,7 @@ class TitrationAnalyser():
             #actual titr grp pKa values we get from labbook
             try:
                 titrpkas = DB.getLabbookSheet(name+'.pKas').data
-                print 'got pka values for %s' %name
+                print 'got experimental pKa values for %s' %name
             except:
                 print 'failed to get pKa values for %s' %name
             titrpkas = self.convertpkadict(titrpkas)
@@ -1209,7 +1209,7 @@ class TitrationAnalyser():
             #assign ghosts - we use the spans dict to match our exp fits
             G = self.assignGhosts(pkainfo[name], calcspans, titrpkas, pdbname)            
             self.savePickle(G, fname+'_'+nucleus+'_ghosts.pickle')
-            self.ghostStats(G)            
+            self.ghostStats(G)
             '''#save csp curves to an ekinproject
             Ecsp = self.dict2Ekin(csps)
             Ecsp.saveProject('csps')

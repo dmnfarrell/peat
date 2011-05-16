@@ -241,11 +241,7 @@ class NMRTitration(Plugin, GUI_help):
         #p=t.extractpKas(DB, col, names=names, titratable=False, reliable=False, minspan=0.06)
         #t.analysepKas(p)        
         t.compareNuclei(DB, '15N NMR', '1H NMR', names=names, titratable=True)
-        
-        #ghost mapping..
-        #t.mappKas(DB,col,p,names=['Protein G B1'],nucleus=nuclnames[col],calculatespans=False)       
-        #t.mappKas(DB,col,p,names=['Xylanase (Bacillus subtilus)'],nucleus=nuclnames[col],calculatespans=False)
-        
+               
         return
         
     def save(self, DB, col, prot, E):

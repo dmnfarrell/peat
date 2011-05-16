@@ -26,7 +26,7 @@
 # 
 
 from LM_Fitter import *
-import numpy, math, random, types
+import os, numpy, math, random, types
 import Utils, pickle
 
 class Fitting(object):
@@ -44,7 +44,9 @@ class Fitting(object):
    
     conv=1e-9
     grad=1e-9
-    presetmodels = pickle.load(open('models.dict','r')) 
+    path = os.path.split(__file__)[0]
+    path = os.path.join(path,'models.dict')
+    presetmodels = pickle.load(open(path,'r')) 
 
     @classmethod
     def createClass(cls, equation, varnames,
