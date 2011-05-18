@@ -1271,10 +1271,11 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
     def createFitModel(self):
         from PEATDB.DictEdit import DictEditor
         app = DictEditor(self.ekin_win)
-        app.loadDict('models.dict')
+        app.loadDict(Fitting.modelsfile)
         #self.ekin_win.wait_window(app)
         #update models
-        Fitting.presetmodels = pickle.load(open('models.dict','r'))  
+        print 'model file',Fitting.modelsfile
+        Fitting.presetmodels = pickle.load(open(Fitting.modelsfile,'r'))  
         return
     
     #
@@ -1835,7 +1836,7 @@ class FitterPanel(Frame):
 
         def updatenow(diff, vrs, fitvals, c, X):
             """callback for fit update"""
-            fdata=Fitting.makeFitData(model, vrs, diff) #get ekin fitdata from vars
+            fdata=Fitting.makeFitData(model, vrs, diff) #get ekin fitdata from vars            
             self.update(fitdata=fdata, startvars=False)
             self.update_idletasks()
             self.plotter.updateFit(X)
@@ -1973,7 +1974,8 @@ class FitterPanel(Frame):
         if fitdata != None and fitdata.has_key('model'):
             model = fitdata['model']
             X = Fitting.getFitter(model)
-
+            
+            print X.variables, X.varnames
             self.model_type.set(model)
             if fitdata.has_key('error'):
                 self.sqdiff.set('%9.4e' %float(fitdata['error']))

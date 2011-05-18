@@ -44,9 +44,9 @@ class Fitting(object):
    
     conv=1e-9
     grad=1e-9
-    path = os.path.split(__file__)[0]
-    path = os.path.join(path,'models.dict')
-    presetmodels = pickle.load(open(path,'r')) 
+    path = os.path.abspath(os.path.split(__file__)[0])
+    modelsfile = os.path.join(path,'models.dict')    
+    presetmodels = pickle.load(open(modelsfile,'r')) 
 
     @classmethod
     def createClass(cls, equation, varnames,
@@ -67,7 +67,7 @@ class Fitting(object):
                 self.equation = equation
                 self.guess = guess
                 if variables == None:
-                    self.variables = [1.0,1.0]
+                    self.variables = [1.0 for i in self.varnames]
                 else:
                     self.variables = variables            
                 self.setChangeVars()
@@ -96,12 +96,12 @@ class Fitting(object):
                 if type(guess) is not types.DictType:
                     guess = eval(guess)
                 x=[i[0] for i in self.exp_data]
-                y=[i[1] for i in self.exp_data]
+                y=[i[1] for i in self.exp_data]                
                 for i in range(len(self.varnames)):
-                    var = self.varnames[i]
+                    var = self.varnames[i]                    
                     if var in guess:
                         self.variables[i] = eval(guess[var])
-                        print  i, var, guess[var],self.variables[i]
+                        #print  i, var, guess[var],self.variables[i]
                 return
             
         return tempfitter
