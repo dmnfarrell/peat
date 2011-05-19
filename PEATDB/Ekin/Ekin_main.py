@@ -1836,7 +1836,7 @@ class FitterPanel(Frame):
             fdata=Fitting.makeFitData(model, vrs, diff) #get ekin fitdata from vars            
             self.update(fitdata=fdata, startvars=False, X=X)
             self.update_idletasks()
-            self.plotter.updateFitX)
+            self.plotter.updateFit(X)
             self.count.set(c)
             self.count_win.update()
             if self.stopfit == True:
