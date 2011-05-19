@@ -694,7 +694,7 @@ class Importer:
         
         # Delete all the other tabs first if needed        
         if self.removecurrent.get()==1:
-            self.parent.delete_all()
+            self.parent.deleteAll()
 
         
         # Insert the data if it's not already there, but ask to overwrite if it is!        

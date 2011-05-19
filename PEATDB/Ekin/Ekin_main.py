@@ -1752,10 +1752,7 @@ class FitterPanel(Frame):
         # Radio button to select fitting method
         self.fitting_method = IntVar()
         row=row+1
-        '''b2 = Radiobutton(self, text="Levenberg-Marquardt",
-                         variable=self.fitting_method, value=2,padx=2,pady=2)
-        b2.grid(row=row,column=0)
-        b2.select()'''
+ 
         n=Frame(self)
         Label(n,text='Rounds:').pack(side=LEFT)
         Entry(n,textvariable=self.no_iter,width=6).pack(side=LEFT)
@@ -1837,9 +1834,9 @@ class FitterPanel(Frame):
         def updatenow(diff, vrs, fitvals, c, X):
             """callback for fit update"""
             fdata=Fitting.makeFitData(model, vrs, diff) #get ekin fitdata from vars            
-            self.update(fitdata=fdata, startvars=False)
+            self.update(fitdata=fdata, startvars=False, X=X)
             self.update_idletasks()
-            self.plotter.updateFit(X)
+            self.plotter.updateFitX)
             self.count.set(c)
             self.count_win.update()
             if self.stopfit == True:
@@ -1910,8 +1907,7 @@ class FitterPanel(Frame):
         for m in models:
             self.tempmodelvars[m]=IntVar(); self.tempmodelvars[m].set(0)
             Label(frame1,text=m).grid(row=r,column=0)
-            X = Fitting.getFitter(model=m)
-            print X, m
+            X = Fitting.getFitter(model=m)            
             n = len(X.variables)
             Label(frame1,text=n).grid(row=r,column=1)
             Checkbutton(frame1,variable=self.tempmodelvars[m],
@@ -1945,21 +1941,22 @@ class FitterPanel(Frame):
                             onvalue=1,offvalue=0).pack(side=LEFT)
         return
 
-    def update(self, reset=False, fitdata=None, data=None, startvars=True):
+    def update(self, reset=False, fitdata=None, data=None,
+                   startvars=True, X=None):
         """Reset the current model and/or set new data, if provided.
            reset=True resets all vars, ie. a new model has been selected"""
 
         if reset == True:
             model = self.model_type.get()
             #resets current fitdata to generic start values for that model
-            #print 'Calling makefitdata'
+            print 'Calling makefitdata'
             self.fitdata = Fitting.makeFitData(model=model)
 
         if fitdata != None:
             self.fitdata = fitdata
         if data != None:
             self.setData(data)
-        self.updateVars(self.fitdata, reset=reset)
+        self.updateVars(self.fitdata, reset=reset, X=X)
         if startvars == True and self.fitdata!=None:
             self.setStartVars()
         return
@@ -1969,14 +1966,12 @@ class FitterPanel(Frame):
         self.doModelButton()
         return
 
-    def updateVars(self, fitdata, reset=True):
+    def updateVars(self, fitdata, reset=True, X=None):
         """Update with current fitdata, only done when we load the dataset"""
         if fitdata != None and fitdata.has_key('model'):
-            model = fitdata['model']
-            X = Fitting.getFitter(model)
-            
-            print X.variables, X.varnames
+            model = fitdata['model']            
             self.model_type.set(model)
+            if X==None: X = Fitting.getFitter(model=model)
             if fitdata.has_key('error'):
                 self.sqdiff.set('%9.4e' %float(fitdata['error']))
             else:
@@ -1996,7 +1991,7 @@ class FitterPanel(Frame):
             #param labels
             for i in range(len(self.fvars)):
                 try:
-                    val = X.names[i]
+                    val = X.varnames[i]
                     self.fvars[i][1].set(val)
                 except:
                     self.fvars[i][1].set('')
@@ -2012,14 +2007,7 @@ class FitterPanel(Frame):
         if usefitted == True:
             for i in range(len(self.fvars)):
                 self.fvars[i][2].set(self.fvars[i][3].get())
-            '''fitdata = self.fitdata
-            if fitdata != None and fitdata.has_key('model'):
-                for i in range(len(self.fvars)):
-                    if fitdata.has_key(i):
-                        val=fitdata[i]
-                        self.fvars[i][2].set(val)
-                    else:
-                        self.fvars[i][2].set(0.0)'''
+
         else:
             #otherwise get default start vars
             model = self.model_type.get()
@@ -2031,12 +2019,6 @@ class FitterPanel(Frame):
                     self.fvars[i][2].set(vrs[i])
                 except:
                     self.fvars[i][2].set(0)
-
-
-        return
-
-    def send_fit_to_comments(self):
-
         return
 
     def showExpUncertaintyDialog(self):
@@ -2174,6 +2156,9 @@ class FitterPanel(Frame):
             vrs.append(self.fvars[i][2].get())
         return vrs
 
+    def send_fit_to_comments(self):
+        return
+    
 class PlotPanel(Frame):
     """Plotter for ekin data using pylab - resuable"""
     def __init__(self, parent=None, width=400, height=100, side=TOP, tools=False):
@@ -2365,6 +2350,7 @@ class PlotPanel(Frame):
                                                     x=x.getvalue(),y=y.getvalue())).pack()
         return
 
+    
 class DataPanel(Frame):
     """Display ekin data"""
     def __init__(self, parent):
