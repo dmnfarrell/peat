@@ -6,14 +6,15 @@ import PEATSA.Core as Core
 import PEATSA.Core.Matrix
 import matplotlib.pyplot as plt
 import numpy as np
+import Environment
 
 
 class ProteinComplexTool:
     def __init__(self):
         return
 
-    def DeltaStability(self,inputFile, mutationList, configurationFile, workingDirectory, outputDirectory):
-
+    def DeltaStability(self,inputFile, mutationList, configurationFile, workingDirectory, outputDirectory, environment):
+             
             '''Calculates the stability difference between a protein and set of mutants
 
             Parameters:
@@ -26,6 +27,32 @@ class ProteinComplexTool:
             Returns
                     A Data.DataSet instance containing one matrix, stabilityResults.
                     Each row of this matrix corresponds to a mutant defined in the mutationList argument.'''
+            """
+            import pypar
+  
+            proc = pypar.size()                                  # Number of processes as specified by mpirun
+            myid = pypar.rank()                                  # Id of of this process (myid in [0, proc-1]) 
+            node = pypar.get_processor_name()                    # Host name on which current process is running
+            print 'I am proc %d of %d on node %s' % (myid, proc, node)
+
+            if myid == 0:                                        # Actions for process 0:
+                msg = 'P0'  
+                pypar.send(msg, destination=1)                   # Send message to proces 1 (right hand neighbour)
+                msg = pypar.receive(source=proc-1)               # Receive message from last process
+
+                print 'Processor 0 received message "%s" from processor %d' % (msg, proc-1)
+
+            else:                                                # Actions for all other processes:
+
+                source = myid-1                                  # Source is the process to the left
+                destination = (myid+1)%proc                      # Destination is process to the right
+                                                                 # wrapped so that last processor will 
+                                                                 # send back to proces 0  
+
+                msg = pypar.receive(source)                      # Receive message from source 
+                msg = msg + 'P' + str(myid)                      # Update message     
+                pypar.send(msg, destination)                     # Send message to destinatio
+            """
 
             #Create the ProteinDesignTool instance
             tool = Core.ProteinDesignTool.ProteinDesignTool(configurationFile, 
@@ -48,19 +75,20 @@ class ProteinComplexTool:
 
             #Clean up - Deletes files copied to the working directory for Uffbaps
             tool.cleanUp()
-
+            environment.wait()
             return tool.dataDirectory
 
-    def remALT(self,pdbfile): 
+    def remALT(self,pdbfile,environment): 
         import Protool
 
         x = Protool.structureIO()
         x.readpdb('%s.pdb' % (pdbfile))
         x.RemoveALT()
         x.writepdb('%s.pdb' % (pdbfile), dont_write_HETATMS=1)
-        print 'Removed alternate residues'
+        environment.wait()
+        environment.output('Removed alternate residues')
 
-    def splitter(self,pdbDir,pdb,reactions_list,cur,db):
+    def splitter(self,pdbDir,pdb,reactions_list,cur,db,environment):
         import string
 
         if reactions_list == ['']:
@@ -87,10 +115,11 @@ class ProteinComplexTool:
                     expr1.append(s)
                 else:
                     expr1.append(["segid "+c])
-            self.do_split(pdbDir,pdb, expr1, reactions_list)
+            environment.wait()
+            self.do_split(pdbDir,pdb, expr1, reactions_list, environment)
             return reactions_list
 
-    def do_split(self,pdbDir,pdb, expr, e):
+    def do_split(self,pdbDir,pdb, expr, e,environment):
         import MDAnalysis
 
         u = MDAnalysis.Universe(pdbDir, permissive=False)
@@ -98,7 +127,7 @@ class ProteinComplexTool:
             print expr[i]
             Z = u.selectAtoms(*expr[i])
             Z.write('%s_%s.pdb' % (pdb,e[i]))
-            print 'Extracted chain(s)', e[i],'from', pdb
+            environment.output('Extracted chain(s) %s from %s' % (e[i], pdb))
 
 
     def createMutlist(self,pdb):
@@ -106,7 +135,7 @@ class ProteinComplexTool:
 
         return mutList
 
-    def displayResults(self,pdb,split_list,comp_list,cur,db):
+    def displayResults(self,pdb,split_list,comp_list,cur,db, environment):
         
         width=0.5
         cur.execute("SELECT * FROM results_%s;" % (split_list[0]))
@@ -127,14 +156,14 @@ class ProteinComplexTool:
             for i in range(len(complexScores)):
                 ddG.append(complexScores[i] - chainScores[i])
             for i in range(len(mutations)):
-                 print "ddG", mutations[i], ddG[i]
+                 environment.output("ddG %s %s" % (mutations[i], ddG[i]))
                  cur.execute("insert into ddG_%s_%s (mutation, ddG) VALUES (%s%s%s, %s%s%s);" % (pdb,comp_list, '"', mutations[i], '"', '"',ddG[i],'"'))
             plt.plot(ind+(width/2), ddG, 'o-')
             plt.axhline(linewidth=2, color='r')
             plt.title("ddG Binding calculations for ALA scan of %s" % (split_list[0]))
         else:
             for i in range(len(mutations)):
-                print mutations[i], complexScores[i]
+                environment.output("%s, %s" % (mutations[i], complexScores[i]))
             plt.bar(ind,complexScores,width,color='r')
             plt.title("dG Stability calculations for ALA scan of %s" % (split_list[0]))
 
@@ -145,21 +174,21 @@ class ProteinComplexTool:
 def main():
     
     # Run program
-
+    environment = Environment.Environment()
     # Connect to local database containing info about BMP pdbs
     db = MySQLdb.connect(host="localhost", user = "root", passwd = "samsung", db = "sat")
     cur = db.cursor()
     cur.execute("SELECT VERSION()")
     ver = cur.fetchone()
-    print "MySQLdb connection successful"
-    print "MySQL server version:", ver[0]
+    environment.output( "MySQLdb connection successful")
+    environment.output("MySQL server version: %s" % ver[0])
 
     # Show pdbs in database
     cur.execute("SELECT distinct PDB_ID from pdb;")
-    print "PDBs in database:"
     a = cur.fetchall()
     b = ','.join([i[0] for i in a])
-    print b 
+    environment.output("PDBs in database:")
+    environment.output(b) 
 
 
     # Option to select pdb, config file, working dir etc.. 
@@ -190,7 +219,7 @@ def main():
     pdb = opts.pdb
     pdbFile = ''.join((pdb,'.pdb'))
     pdbDir = os.path.join(opts.outputDir,pdbFile)
-    print pdbDir 
+    environment.output(pdbDir) 
 
     # Checking if user selected PDB is in the database
     if opts.pdb != None:
@@ -198,8 +227,8 @@ def main():
             raise sys.exit('PDB not in Database, choose one from list')
 
     if opts.pdb in b:
-        print 'PDB in Database'
-        print 'Checking what calculations can be performed'
+        environment.output('PDB in Database')
+        environment.output('Checking what calculations can be performed')
 
 
     # Check what calcs can be done with user defined PDB
@@ -209,7 +238,7 @@ def main():
 
 
     for i in cur.fetchall():
-        print "Entity:",i[0], "Chain Name:",i[2], "Type:",i[3] , "Chain ID:", i[1]    
+        environment.output("Entity: %s, Chain Name: %s, Type: %s, Chain ID: %s" % (i[0], i[2], i[3], i[1]))    
         entity.append(i[0])
         chains.append(i[1])               
 
@@ -219,22 +248,23 @@ def main():
     if opts.deleteResults == 'True':
         cur.execute("SHOW tables like 'results_%s%s';" % (pdb, '%'))
         drop_tables=cur.fetchall()
-        print drop_tables
+        environment.output(drop_tables)
         for i in drop_tables:
             cur.execute("DROP TABLE '%s';" % (i))
-            print "Results for",i,"deleted"
+            environment.output("Results for %s deleted" % i)
     else:
         pass
 
     # Remove Alternate Residues from pdb, will overwrite the file
-    run.remALT(pdb)    
+    run.remALT(pdb,environment)    
 
     # User defined splitting of chains from PDB, can be left 
     # blank and the PDB will be split to individual chains
     reactions_list = ['']
+    
     if opts.userCalcOpt != 'False':
-        reactants = raw_input("What reactants are consumed (enter chain IDs in the form AB+C+D):")
-        products = raw_input("What products are produces (enter chain IDs in the form ABC+D):")
+        reactants = '' #raw_input("What reactants are consumed (enter chain IDs in the form AB+C+D):")
+        products = '' #raw_input("What products are produces (enter chain IDs in the form ABC+D):")
     else:
         pass
     
@@ -254,8 +284,8 @@ def main():
     products_list = products.split('+')
                  
     # Split the pdb into chains, returns chains that have been split (A,B etc)
-    split_reactants = run.splitter(pdbDir,pdb,reactants_list,cur,db)
-    split_products = run.splitter(pdbDir,pdb,products_list,cur,db)
+    split_reactants = run.splitter(pdbDir,pdb,reactants_list,cur,db,environment)
+    split_products = run.splitter(pdbDir,pdb,products_list,cur,db,environment)
     comp_list =  split_products + split_reactants
     comp_list = '_'.join(comp_list)
     
@@ -278,7 +308,7 @@ def main():
 
     # Split_list is a list of the pdb and the individual pdbs 
     # that have been split
-    print split_list
+    environment.output(split_list)
         
     # Show results
     if opts.showResults == 'True':
@@ -291,7 +321,7 @@ def main():
                 if y.startswith(resTable):
                    count +=1
         if count != 0:
-            run.displayResults(pdb,split_list,comp_list,cur,db)
+            run.displayResults(pdb,split_list,comp_list,cur,db,environment)
     else:
         pass
 
@@ -323,12 +353,14 @@ def main():
         cur.execute("create table if not exists results_%s(mutation VARCHAR(10), score FLOAT);" % (i))
         for mutant in range(results.stabilityResults.numberOfRows()):
             cur.execute("insert into results_%s (mutation, score) VALUES (%s%s%s, %s%s%s);" % (i, '"', results.stabilityResults[mutant][0], '"', '"', results.stabilityResults[mutant][-1],'"'))
-        print "Calculated ", i, "stability and results added to database"
+        environment.output("Calculated %s stability and results added to database" % i)
 	 
     # Display results
-    run.displayResults(pdb,split_list,comp_list,cur,db)
-    
- 
+    environment.wait()
+    run.displayResults(pdb,split_list,comp_list,cur,db,environment)
+
+    pypar.finalize()                                   # Stop MPI 
+     
 if __name__=='__main__':
     main()
 
