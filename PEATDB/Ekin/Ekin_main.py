@@ -471,10 +471,11 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
             self.fitframe.destroy()
         return
         
-    def updateAll(self):
+    def updateAll(self, d=None):
         """Update all elements to reflect current dataset"""
         if len(self.E.datasets) == 0:
             return
+        if d!=None: self.currentdataset.set(d)
         self.update_dataset()
         self.fitframe.setData(self.E, self.currentdataset.get())
         self.fitframe.update()
@@ -1665,9 +1666,7 @@ class FitterPanel(Frame):
         for f in self.fvars:
             f[0].set(1)
             f[2].set(0.0)
-
         return
-
 
     def doModelButton(self):
         """Mode drop down menu"""
@@ -1869,26 +1868,31 @@ class FitterPanel(Frame):
         self.stopFit()
         return
 
-    def findBestModel(self, doall=False):
+    def findBestModel(self, doall=False, callback=None):
         """Use fitting class to determine best fit model using f-testing"""
         models=[]
+        E = self.parentapp.E
         for m in self.tempmodelvars:
             if self.tempmodelvars[m].get() == 1:
                 models.append(m)
         if len(models)==0:
-            return None
-        print doall 
-        if doall == False:   
-            res = Fitting.findBestModel(self.data, models)
-        else: 
-            E = self.parentapp.E
-            E.fitDatasets(datasets='ALL', update=True, findbest=True, models=models) 
-            res = None
-        return res
+            return None        
+        if doall == False:
+            d = self.parentapp.currentdataset.get()
+            res, p = E.findBestModel(d, models=models, silent=True)
+            callback(res, d)
+        else:             
+            for d in E.datasets:
+                if self.stopvar.get()==1:
+                    break
+                res, p = E.findBestModel(d, models=models, silent=True)
+                callback(res, d)            
+        return 
 
     def showBestModelDialog(self):
         """Find the best model using f-test criteria"""
-        
+
+        self.stopvar=IntVar(); self.stopvar.set(0)
         models = EkinProject.mode_definition[self.mode]
         self.fbm_win = Toplevel(self.parent.master)
         self.parentapp.set_geometry(self.parentapp.ekin_win, self.fbm_win)
@@ -1916,26 +1920,38 @@ class FitterPanel(Frame):
 
         self.fbresults=Text(self.fbm_win,width=50,background='white')
         self.fbresults.grid(row=0,column=1,sticky='news')
-
         # buttons
         frame3 = Frame(self.fbm_win)
         frame3.grid(row=1,column=0,columnspan=2)
-        def go():            
-            res = self.findBestModel(doall=doallvar.get())
+        
+        def update(res, d):
+            print 'res',res
             if res == None:
-                self.fbresults.insert(END, 'No models selected\n')
+                self.fbresults.insert(END, 'No models selected?\n')
             else:
-                fit = res[0]
-                print res
-                self.fbresults.insert(END, 'Best model is %s' %fit['model'])
-                self.fbresults.insert(END, '\n')
+                self.fbresults.insert(END, '%s: %s' %(d,res['model']))
+                self.fbresults.insert(END, '\n')               
+            self.parentapp.updateAll(d)    
+            self.update_idletasks()
+            frame1.update()
+            
+        def go():
+            self.stopvar.set(0)
+            self.findBestModel(doall=doallvar.get(), callback=update)             
+
+        def stop():
+            self.stopvar.set(1)
+            
         Button(frame3, text='Go', relief=GROOVE, bg='#B0C4DE',
                command=go).pack(side=LEFT)
         def close():
             self.fbm_win.destroy()
         Button(frame3,text='Close', relief=GROOVE, bg='#B0C4DE',
                command=close).pack(side=LEFT)
-        doallvar = IntVar(); doallvar.set(0)  
+        
+        Button(frame3,text='Stop', relief=GROOVE, bg='red',
+               command=stop).pack(side=LEFT)
+        doallvar = IntVar(); doallvar.set(0)
         Label(frame3,text='do all').pack(side=LEFT)
         Checkbutton(frame3,variable=doallvar,
                             onvalue=1,offvalue=0).pack(side=LEFT)

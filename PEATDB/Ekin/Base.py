@@ -57,6 +57,7 @@ class EkinProject(object):
     """
     
     fitmodels = sorted(Fitting.presetmodels.keys())
+    Fitting.createFitters()
     ekinfields = ['__datatabs_fits__', '__fit_matches__', '__Exp_Meta_Dat__',
                   '__distance_matches__', '__datatab_structmapping__', '__meta_data__',
                   '__plotopts__', '__currentdataset__', '__displaymultiple__']
@@ -591,7 +592,7 @@ class EkinProject(object):
         """Finds the best fit model using f-testing"""
       
         thisdata = self.data[dataset]
-        print 'models', models
+        #print 'models', models
         if models == None:
             import copy
             models = copy.deepcopy(self.mode_definition[self.currentmode])
@@ -816,7 +817,7 @@ class EkinProject(object):
             if prms.xlim!=0:
                 l = min(x)-prms.xlim; u=max(y)+prms.xlim
                 ax.set_xlim((l,u))
-                print l,u
+                #print l,u
             if prms.ylim!=0: 
                 l = min(y)-prms.ylim; u=max(y)+prms.ylim
                 ax.set_ylim((l,u))

@@ -39,14 +39,16 @@ class Fitting(object):
        ekin fit data.
        : no tkvars here please!"""
 
-    def __init__(self):        
+    def __init__(self):
+        self.createFitters()
         return
    
     conv=1e-9
     grad=1e-9
     path = os.path.abspath(os.path.split(__file__)[0])
     modelsfile = os.path.join(path,'models.dict')    
-    presetmodels = pickle.load(open(modelsfile,'r')) 
+    presetmodels = pickle.load(open(modelsfile,'r'))
+    fitterClasses = {}
 
     @classmethod
     def createClass(cls, equation, varnames,
@@ -105,14 +107,28 @@ class Fitting(object):
                 return
             
         return tempfitter
+
+    @classmethod
+    def createFitters(cls):
+        """Create pre-defined fitter classes"""
+        for m in cls.presetmodels:
+            data = cls.presetmodels[m]
+            cls.fitterClasses[m] = cls.createClass(**data)
+        #print cls.fitterClasses
+        return
     
     @classmethod
     def getFitter(cls, model, vrs=None, expdata=None, callback=None):
         """Return the required LM fit object from the model name"""
-              
-        data = cls.presetmodels[model]        
-        newclass = cls.createClass(**data)
-        inst = newclass(variables=vrs,exp_data=expdata,callback=callback)
+        if model not in cls.fitterClasses:
+            cls.createFitters()
+        try:    
+            fitclass =  cls.fitterClasses[model]
+        except:
+            print 'model not found, please check name'
+            print 'current available models are: %s' %cls.fitterClasses.keys()
+            return
+        inst = fitclass(variables=vrs,exp_data=expdata,callback=callback)
         return inst         
     
     @classmethod
@@ -413,8 +429,8 @@ class Fitting(object):
                  
 if __name__=='__main__':
     x=range(1,100); y=range(2,101)
-    f=Fitting.getFitter('Linear',vrs=[2,1.5],expdata=[x,y])
-    print f
+    f=Fitting.getFitter('Linear',vrs=[2,1.5],expdata=[x,y])    
     f.fit()
+    print f.getFitDict()
         
     
