@@ -117,8 +117,7 @@ class Options(object):
         self.pltgrid = IntVar()
         self.pltgrid.set(self.grid)
         self.pltlegend = IntVar()
-        self.pltsymbol = StringVar()
-        print self.shape
+        self.pltsymbol = StringVar()        
         self.pltsymbol.set(self.shape)
         self.markersizevar = IntVar()
         self.markersizevar.set(self.markersize)

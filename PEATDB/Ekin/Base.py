@@ -40,7 +40,6 @@ try:
 except:
     pass
 try:
-    from matplotlib.figure import Figure
     import matplotlib.pyplot as plt
     from matplotlib.font_manager import FontProperties
 except:
@@ -661,7 +660,7 @@ class EkinProject(object):
            Note: errorbars are drawn +/- value supplied"""
         status = self.setPylab(size)
         prms = Params(**kwargs)
-        self.current = datasets        
+        self.current = datasets
         shapes = Options.shapes
 
         plt.rc('font', family=prms.font)
@@ -676,7 +675,9 @@ class EkinProject(object):
         if figure != None:
             fig = figure
         else:
-            fig = plt.figure(figsize=size, dpi=80)
+            #fig = plt.figure(figsize=size, dpi=80)
+            from matplotlib import figure
+            fig = figure.Figure(figsize=size, dpi=80)
         fig.clf()
         datasets = self.checkDatasetParam(datasets)
         if plotoption == 2:
@@ -990,6 +991,8 @@ class Params(object):
         self.markersize = 25
         self.normalise = False
         self.showerrorbars = False
+        self.xlim = 0
+        self.ylim = 0
         self.logx = False
         self.logy = False
         self.title = None

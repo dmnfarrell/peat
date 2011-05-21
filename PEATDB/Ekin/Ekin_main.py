@@ -442,7 +442,7 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
                                indicatoron=1,
                                command=self.updateMode)            
             count=count+1
-        print self.E.currentmode, self.E.mode
+        #print self.E.currentmode, self.E.mode
         if self.E.currentmode == None:
             self.E.currentmode = self.E.mode
         self.mode_var.set(self.modes.index(self.E.currentmode))
@@ -1233,10 +1233,6 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
                             indicatoron=1)
         model_button.grid(row=3,column=1,sticky='news',padx=2,pady=3)
 
-        findbestvar = IntVar(); findbestvar.set(0)
-        Label(self.fitall_win,text='Find best model').grid(row=4,column=0,sticky='news')
-        Checkbutton(self.fitall_win,variable=findbestvar).grid(row=4,column=1,sticky='news')
-
         doallfitsbutton = Button(self.fitall_win, text="Go", width=20, command=go)
         doallfitsbutton.grid(row=5,column=0,padx=3,pady=2)
         cancelbutton = Button(self.fitall_win, text="Cancel", width=20, command=stop)
@@ -1687,7 +1683,6 @@ class FitterPanel(Frame):
         self.model_button.grid(row=0,column=0,
                                 sticky='nes',columnspan=2,
                                 padx=2,pady=3)
-
         return
 
     def doFrame(self):
@@ -1931,7 +1926,7 @@ class FitterPanel(Frame):
             else:
                 self.fbresults.insert(END, '%s: %s' %(d,res['model']))
                 self.fbresults.insert(END, '\n')               
-            self.parentapp.updateAll(d)    
+            #self.parentapp.updateAll(d)
             self.update_idletasks()
             frame1.update()
             
@@ -1964,8 +1959,7 @@ class FitterPanel(Frame):
 
         if reset == True:
             model = self.model_type.get()
-            #resets current fitdata to generic start values for that model
-            print 'Calling makefitdata'
+            #resets current fitdata to generic start values for that model            
             self.fitdata = Fitting.makeFitData(model=model)
 
         if fitdata != None:
@@ -2029,7 +2023,7 @@ class FitterPanel(Frame):
             model = self.model_type.get()
             X = Fitting.getFitter(model)
             vrs = X.variables
-            print vrs
+            #print vrs
             for i in range(len(self.fvars)):
                 try:
                     self.fvars[i][2].set(vrs[i])
@@ -2041,8 +2035,7 @@ class FitterPanel(Frame):
         """Show dialog for doing Exp Uncertainty"""
         data = self.data; fitdata = self.fitdata
         model = fitdata['model']
-        X = Fitting.getFitter(model)
-        print model
+        X = Fitting.getFitter(model)        
         vrs = X.variables
         names = X.getVarNames()
         self.eeu_win = Toplevel(self.parent.master)
@@ -2193,11 +2186,13 @@ class PlotPanel(Frame):
         self.selection = None
         self.m = None
         self.plotoption = 2
-        self.datasets = None        
+        self.datasets = None
         return
 
     def setupCanvas(self, side, tools):
-        self.fig = plt.figure(figsize=(5,4), dpi=80)
+        plt.close()
+        from matplotlib import figure
+        self.fig = figure.Figure(figsize=(5,4), dpi=80)       
         # create a tk.DrawingArea
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.parent)
         #self.canvas.show()
@@ -2241,7 +2236,8 @@ class PlotPanel(Frame):
     def plotCurrent(self, datasets=None, cols=0,
                     plotoption=None, options=None):
         """Plot current datapoints and fits"""
-        if options==None:            
+        
+        if options==None:
             options = self.Opts.opts
 
         #remember for next time if we plot multiple - hacky  
@@ -2254,17 +2250,18 @@ class PlotPanel(Frame):
         else:
             self.plotoption = plotoption
         if datasets == None: return
+           
         self.fig.clear()
-        if type(datasets) is types.ListType and len(datasets) > 1:    
-            self.ax = self.E.plotDatasets(datasets, figure=self.fig, plotoption=plotoption, cols=cols,
-                                #legend=self.show_legend.get(),
+        plt.close(self.fig)
+        
+        if type(datasets) is types.ListType and len(datasets) > 1:
+            self.ax = self.E.plotDatasets(datasets, figure=self.fig, plotoption=plotoption, cols=cols,                               
                                 **options)
         else:
-            self.ax = self.E.plotDatasets(datasets, figure=self.fig,
-                                #legend=self.show_legend.get(),
-                                **options)
+            self.ax = self.E.plotDatasets(datasets, figure=self.fig, **options)
             self.addSelectionHandler()
         self.canvas.draw()
+        self.ax.hold(False)
         return
 
     def plotData(self, ekindata, fitdata):
@@ -2508,7 +2505,7 @@ class MultipleValDialog(tkSimpleDialog.Dialog):
         self.results = []
         for i in range(len(self.labels)):
             self.results.append(self.vrs[i].get())
-        print self.vrs
+        #print self.vrs
         return
 
 
