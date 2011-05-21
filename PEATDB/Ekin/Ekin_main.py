@@ -2252,7 +2252,7 @@ class PlotPanel(Frame):
         if datasets == None: return
            
         self.fig.clear()
-        plt.close(self.fig)
+        #plt.close(self.fig)
         
         if type(datasets) is types.ListType and len(datasets) > 1:
             self.ax = self.E.plotDatasets(datasets, figure=self.fig, plotoption=plotoption, cols=cols,                               
@@ -2261,7 +2261,7 @@ class PlotPanel(Frame):
             self.ax = self.E.plotDatasets(datasets, figure=self.fig, **options)
             self.addSelectionHandler()
         self.canvas.draw()
-        self.ax.hold(False)
+        #self.ax.hold(False)
         return
 
     def plotData(self, ekindata, fitdata):
