@@ -1913,7 +1913,11 @@ class FitterPanel(Frame):
                                 onvalue=1,offvalue=0).grid(row=r,column=2)
             r+=1
 
-        self.fbresults=Text(self.fbm_win,width=50,background='white')
+        self.fbresults=Pmw.ScrolledText(self.fbm_win,
+                                labelpos = 'n',
+                                usehullsize = 1,
+                                hull_width = 400,
+                                hull_height = 400)
         self.fbresults.grid(row=0,column=1,sticky='news')
         # buttons
         frame3 = Frame(self.fbm_win)
@@ -1925,7 +1929,9 @@ class FitterPanel(Frame):
                 self.fbresults.insert(END, 'No models selected?\n')
             else:
                 self.fbresults.insert(END, '%s: %s' %(d,res['model']))
-                self.fbresults.insert(END, '\n')               
+                self.fbresults.insert(END, '\n')
+            self.fbresults.yview("moveto",1.0)   
+            #we dont update atm because of memory leak    
             #self.parentapp.updateAll(d)
             self.update_idletasks()
             frame1.update()
