@@ -51,7 +51,7 @@ class ProteinComplexTool:
             tool.cleanUp()
             return tool.dataDirectory
 
-    def remALT(self,pdbfile,environment): 
+    def remALT(self,pdbfile, environment): 
         import Protool
 
         x = Protool.structureIO()
@@ -60,7 +60,7 @@ class ProteinComplexTool:
         x.writepdb('%s.pdb' % (pdbfile), dont_write_HETATMS=1)
         environment.output('Removed alternate residues')
 
-    def splitter(self,pdbDir,pdb,reactions_list,cur,db,environment):
+    def splitter(self,pdbDir,pdb,reactions_list,cur,db, environment):
         import string
 
         if reactions_list == ['']:
@@ -77,7 +77,7 @@ class ProteinComplexTool:
             exclude = set(string.punctuation) # set of punctutation characters
             b = ''.join(ch for ch in b if ch not in exclude) # remove punctuation from b
             e = ''.join(b.split(' '))
-            self.do_split(pdbDir, pdb, expr, e)
+            self.do_split(pdbDir, pdb, expr, e, environment)
             return e
         else:
             expr1=[]
@@ -87,18 +87,17 @@ class ProteinComplexTool:
                     expr1.append(s)
                 else:
                     expr1.append(["segid "+c])
-            environment.wait()
             self.do_split(pdbDir,pdb, expr1, reactions_list, environment)
             return reactions_list
 
-    def do_split(self,pdbDir,pdb, expr, e,environment):
+    def do_split(self,pdbDir,pdb, expr, e, environment):
         import MDAnalysis
 
         u = MDAnalysis.Universe(pdbDir, permissive=False)
         for i in range(len(expr)):
-            environment.output(expr[i])
             Z = u.selectAtoms(*expr[i])
             Z.write('%s_%s.pdb' % (pdb,e[i]))
+            #print 'Extracted chain(s) %s from %s' % (e[i], pdb)
             environment.output('Extracted chain(s) %s from %s' % (e[i], pdb))
 
     def createMutlist(self,pdb):
@@ -146,6 +145,7 @@ def main():
     
     # Run program
     environment = Environment.Environment()
+
     # Connect to local database containing info about BMP pdbs
     db = MySQLdb.connect(host="localhost", user = "root", passwd = "samsung", db = "sat")
     cur = db.cursor()
@@ -153,6 +153,7 @@ def main():
     ver = cur.fetchone()
     environment.output( "MySQLdb connection successful")
     environment.output("MySQL server version: %s" % ver[0])
+    #print "MySQL server version: %s" % ver[0]
 
     # Show pdbs in database
     cur.execute("SELECT distinct PDB_ID from pdb;")
@@ -210,7 +211,7 @@ def main():
 
 
     for i in cur.fetchall():
-        environment.output("Entity: %s, Chain Name: %s, Type: %s, Chain ID: %s" % (i[0], i[2], i[3], i[1]))    
+        environment.output("Entity: %s, Chain Name: %s, Type: %s, Chain ID: %s" % (i[0], i[2], i[3], i[1]))  
         entity.append(i[0])
         chains.append(i[1])               
 
@@ -220,16 +221,16 @@ def main():
     if opts.deleteResults == 'True':
         cur.execute("SHOW tables like 'results_%s%s';" % (pdb, '%'))
         drop_tables=cur.fetchall()
-        environment.output(drop_tables)
+        #environment.output(drop_tables)
         for i in drop_tables:
             cur.execute("DROP TABLE '%s';" % (i))
-            environment.output("Results for %s deleted" % i)
+            #environment.output("Results for %s deleted" % i)
     else:
         pass
 
     # Remove Alternate Residues from pdb, will overwrite the file
-    run.remALT(pdb,environment)    
-
+    run.remALT(pdb, environment)    
+    environment.wait()
     # User defined splitting of chains from PDB, can be left 
     # blank and the PDB will be split to individual chains
     reactions_list = ['']
@@ -241,8 +242,6 @@ def main():
         environment.output("What products are produced (enter chain IDs in the form ABC+D):")
         products = sys.stdin.readline()
         products = products.rstrip("\n")
-        #reactants = raw_input("What components are consumed (enter chain IDs in the form AB+C+D):")
-        #products = raw_input("What products are produced (enter chain IDs in the form ABC+D):")
     else:
         pass
     
@@ -260,11 +259,12 @@ def main():
     
     reactants_list = reactants.split('+')
     products_list = products.split('+')
-                 
+
     # Split the pdb into chains, returns chains that have been split (A,B etc)
-    split_reactants = run.splitter(pdbDir,pdb,reactants_list,cur,db,environment)
-    split_products = run.splitter(pdbDir,pdb,products_list,cur,db,environment)
-    comp_list =  split_products + split_reactants
+    environment.wait()
+    split_reactants = run.splitter(pdbDir,pdb,reactants_list,cur,db, environment)
+    split_products = run.splitter(pdbDir,pdb,products_list,cur,db, environment)
+    comp_list = split_products + split_reactants
     comp_list = '_'.join(comp_list)
     
     split_list = []
@@ -287,7 +287,8 @@ def main():
     # Split_list is a list of the pdb and the individual pdbs 
     # that have been split
     environment.output(split_list)
-        
+    #print split_list
+   
     # Show results
     if opts.showResults == 'True':
         count = 0
@@ -304,9 +305,12 @@ def main():
         pass
 
     comp_list = comp_list +'_'+os.path.split(opts.mutList)[1]
+ 
+    #environment.output(comp_list)
     # Run the calculations
     # Load and check mutant list given by user, else do ALA scan
     
+    """
     if opts.mutList != "ALA":
         mfile = Core.Data.MutationListFile(filename=opts.mutList,create=True)
         mfile.removeDuplicates(autoUpdate=False)
@@ -315,25 +319,25 @@ def main():
         for i in split_list:
             w_pdb = os.path.join(opts.outputDir,'%s.pdb' % (i))
             mutList = Core.Data.CreateScanList(pdbFile=w_pdb, mutation='ALA', skipResidueTypes=['ALA', 'GLY'])
-        
+    """    
     muts = []
     score = []
+    
     for i in split_list:
         w_pdb = os.path.join(opts.outputDir,'%s.pdb' % (i))
-        #mutList = Core.Data.CreateScanList(pdbFile=w_pdb, mutation='ALA', skipResidueTypes=['ALA', 'GLY'])
+        mutList = Core.Data.CreateScanList(pdbFile=w_pdb, mutation='ALA', skipResidueTypes=['ALA', 'GLY'])
         results = run.DeltaStability(inputFile=w_pdb, 
                   mutationList=mutList, 
                   configurationFile=opts.configFile, 
                   workingDirectory=opts.workingDir, 
-                  outputDirectory=opts.outputDir) 
+                  outputDirectory=opts.outputDir)
+        environment.wait()
         for mutant in range(results.stabilityResults.numberOfRows()):
-            #j = results.stabilityResults[mutant][0]
-            #k = results.stabilityResults[mutant][-1]
-            #cur.execute("insert into results (PDB_ID, mutation, score) VALUES (%s,%s,%s);", (i,j,k))")
-            environment.output(cur.execute("insert into results (PDB_ID, mutation, score) VALUES (%s,%s,%s);", (i,results.stabilityResults[mutant][0],results.stabilityResults[mutant][-1])))
-            print "keep going"
-        #environment.wait()
+            cur.execute("insert into results (PDB_ID, mutation, score) VALUES (%s,%s,%s);", (i,results.stabilityResults[mutant][0],results.stabilityResults[mutant][-1]))
         environment.output("Calculated %s stability and results added to database" % (i))
+        environment.wait()
+
+
     # Display results
     #run.displayResults(pdb,split_list,comp_list,cur,db,environment)
     
