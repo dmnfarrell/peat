@@ -251,6 +251,8 @@ class Importer:
         Radiobutton(f1,text='Data in rows',variable=self.column_row,
                                     command=do_preview,value=1).pack()
         f1.grid(column=0,row=0,rowspan=2,padx=4,pady=4)
+        
+        
         #add a frame for row options
         inrowsframe=Frame(self.ask_csv, borderwidth=2, relief=GROOVE)
         inrowsframe.grid(column=2,row=0,rowspan=3,padx=2,pady=2)
@@ -292,6 +294,8 @@ class Importer:
         self.name_column=0
         self.names_in_sheet=IntVar()
         self.names_in_sheet.set(1)
+        self.geterrorcols=IntVar()
+        self.geterrorcols.set(0)
 
         # Counter field
         self.linenum = Pmw.Counter(genoptsframe,
@@ -315,6 +319,9 @@ class Importer:
         impmultbutton = Checkbutton(genoptsframe, text='Import into multiple datatabs',variable=self.multiple_tabs)
         impmultbutton.pack(fill=X,padx=2,pady=2)
         self.balloon.bind(impmultbutton, 'Import each column into a separate dataset \nUses the fist row as dataset names')
+
+        Checkbutton(genoptsframe,text='Use extra columns as error vals',
+                    variable=self.geterrorcols, command=do_preview).pack(fill=X,padx=2,pady=2)
 
         def cancel_import():
             self.do_import=None
@@ -376,8 +383,8 @@ class Importer:
                showname=os.path.splitext(showname)[0]
                lines = self.get_lines(filename)
                importdata = []
-               x=[]
-               y=[]
+               x=[]; y=[]
+               xerrs=[]; yerrs=[]
                self.numrows = len(lines)
                for row in range(self.startnum, self.numrows):
                     line = string.strip(lines[row])
@@ -422,8 +429,22 @@ class Importer:
                            x.append(xval)
                            y.append(yval)
                        except:
-                           pass              
-		   datasets[showname] = EkinDataset(xy=[x,y])
+                           pass
+                  
+                   if self.geterrorcols.get()==1:
+                       for i in range(len(importdata)):                           
+                           if len(importdata[i])>2:
+                               xerr=float(importdata[i][2])
+                               xerrs.append(xerr)
+                           if len(importdata[i])>3: 
+                               yerr=float(importdata[i][3])                       
+                               yerrs.append(yerr)
+                       if len(xerrs)!=x: xerrs=[]        
+                   else:
+                       xerrs=[]; yerrs=[]
+                   print xerrs, yerrs
+		   datasets[showname] = EkinDataset(xy=[x,y],
+                                                    xerrs=xerrs, yerrs=yerrs)
         #print 'datasets', datasets
         return datasets
 
