@@ -537,8 +537,8 @@ class EkinProject(object):
             return None
 
     def fitDataset(self, dataset, model=None, update=True,
-                    noiter=300, conv=None, grad=None, silent=False,
-                    guess=True, callback=None):
+                    noiter=300, conv=None, grad=None, damper=None,
+                    silent=False, guess=True, callback=None):
         """Calculate the fit for this current dataset, if a model
            is given we use that instead of the current one.
            update=True means that the dataset fit info will be overwritten"""
@@ -553,8 +553,8 @@ class EkinProject(object):
         else:
             currfitdata = None
         fitresult, X = Fitting.doFit(datatofit, fitdata=currfitdata, model=model,
-                                     noiter=noiter, conv=conv, grad=grad, silent=silent,
-                                     guess=guess, callback=callback)
+                                     noiter=noiter, conv=conv, grad=grad, LM_damper=damper,
+                                     silent=silent, guess=guess, callback=callback)
                
         if fitresult == None:
             print 'Fitter returned None..'
@@ -841,7 +841,7 @@ class EkinProject(object):
         else:
             fig.subplots_adjust(hspace=0.4,wspace=0.4)
 
-        if filename != None:
+        if filename != None:           
             fig.savefig(filename, dpi=dpi)
             plt.close(fig)
 

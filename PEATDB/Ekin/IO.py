@@ -432,7 +432,7 @@ class Importer:
                            pass
                   
                    if self.geterrorcols.get()==1:
-                       for i in range(len(importdata)):                           
+                       for i in range(len(importdata)):          
                            if len(importdata[i])>2:
                                xerr=float(importdata[i][2])
                                xerrs.append(xerr)
