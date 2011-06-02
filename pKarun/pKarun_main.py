@@ -81,14 +81,14 @@ def do_main(action=None,new_cutoff=None,selection_rounds=2):
         fd.close()
     
     if len(argv)<=1:
-	print 'Usage:'
-	print 'pKarun.py <pdbfile> [-noopt] [-opth <x>] [-super] [-dessoup] [-pair] [-indi <xx>] [-pairene <xx>] '
+        print 'Usage:'
+        print 'pKarun.py <pdbfile> [-noopt] [-opth <x>] [-super] [-dessoup] [-pair] [-indi <xx>] [-pairene <xx>] '
         print '---------------Hydrogen bond optimisation-------------'
         print '-opth 0: No hydrogen bond optimisation.'
         print '-opth 1: Hydrogen bond optimisation level 1 (only initial optimisation of the H-bond network).'
         print '-opth 2: Hydrogen bond optimisation level 2 (dynamic H-bond optimisation for every protonation state).)'
-	print '-dessoup: Force WHAT IF to skip optimisation of the H-bond network when calculating desolvation energies.'
-	print '-pair: Calculate also neutral-charged, charged-neutral, and neutral-neutral interaction energies for strongly interacting pairs of titratable groups. (default)'
+        print '-dessoup: Force WHAT IF to skip optimisation of the H-bond network when calculating desolvation energies.'
+        print '-pair: Calculate also neutral-charged, charged-neutral, and neutral-neutral interaction energies for strongly interacting pairs of titratable groups. (default)'
         print '-pairene <xx>: The energy cut-off (in kT) for strongly interacting pairs of titratable groups (default: 1kT)'
         print '-bumps: Include a simple bump score in the Hbond energy. (disabled by default).'
         print '-----------------Focussing--------------------------'
@@ -108,9 +108,9 @@ def do_main(action=None,new_cutoff=None,selection_rounds=2):
         #
         # Done - raise and error
         #
-	error='Too few arguments'
+        error='Too few arguments'
         print argv
-	raise Exception('Too few arguments')
+        raise Exception('Too few arguments')
     pdbfile=argv[1]
     x=pKamisc()
     params=x.parse_parameterlist(argv)
