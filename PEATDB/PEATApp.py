@@ -593,7 +593,7 @@ class App(Frame, GUI_help):
         self.DB = DB
         self.removeBlankCanvas()
         self.createSidePane()
-        self.tablemodel = PEATTableModel(DB)
+        self.tablemodel = PEATTableModel(DB)     
         self.tableframe = Frame(self.masterframe, bd=1,relief=RAISED)
         self.table = PEATTable(self.tableframe, self.tablemodel, parentapp=self)
         self.table.loadPrefs(self.preferences)

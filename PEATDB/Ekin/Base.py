@@ -674,8 +674,7 @@ class EkinProject(object):
             return
         if figure != None:
             fig = figure
-        else:
-            #fig = plt.figure(figsize=size, dpi=80)
+        else:           
             from matplotlib import figure
             fig = figure.Figure(figsize=size, dpi=80)
         fig.clf()

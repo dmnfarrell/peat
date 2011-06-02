@@ -2256,7 +2256,8 @@ class PlotPanel(Frame):
         else:
             self.plotoption = plotoption
         if datasets == None: return
-           
+
+        #Note: TkAgg backend causes memory leak with repeated calls to plot
         self.fig.clear()
         #plt.close(self.fig)
         

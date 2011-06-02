@@ -148,7 +148,7 @@ class Fitting(object):
     def getFitVars(cls, fitdata):
         """Returns list of fit variables"""
         fitvars = []
-        for var in fitdata.keys():
+        for var in sorted(fitdata.keys()):
             if var != 'model' and var != 'error':
                 fitvars.append(fitdata[var])
         return fitvars
