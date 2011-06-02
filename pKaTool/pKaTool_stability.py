@@ -297,23 +297,6 @@ class pKaTool_stability(pKarun):
         lastpH=pHvalues[0]
         lastval=intcurve2[0]
         #
-        # Electrostatic contribution
-        #
-        # THIS IS WRONG!!
-        ## count=1
-##         for pH in pHvalues[1:]:
-##             lastx=self.get_x(lastpH)
-##             lasty=pKa_system.get_y_fromstab(lastval,span)
-##             val=intcurve2[count]
-##             count=count+1
-##             x=self.get_x(pH)
-##             y=pKa_system.get_y_fromstab(val,span)
-##             self.stab_lines[self.stab_tc.create_line(lastx,lasty,float(x),float(y),
-##                                                   fill='red',
-##                                                   width=self.linewidth)]=1
-##             lastval=val
-##             lastpH=pH
-        #
         # Set focus to the stability window
         #
         self.stab_window.focus_set()
@@ -345,11 +328,6 @@ class pKaTool_stability(pKarun):
                         text='contributions from pKa shifts',
                         variable=self.contrib_type,value=1,
                         command=self.update_display_calc).grid(row=0,column=1)
-            #Radiobutton(self.stab_window,
-            #            text='charge-charge contributions',
-            #            variable=self.contrib_type,value=2,
-            #            command=self.update_display_calc).grid(row=0,column=2)
-            
             #
             # Button for showing detailed contributions
             #

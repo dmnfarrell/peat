@@ -1,14 +1,86 @@
 #!/usr/bin/env python
+#!/usr/bin/env python
+#
+# pKa - various programs and scripts for pKa value analysis, calculation and redesign
+# Copyright (C) 2010 Jens Erik Nielsen
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Contact information: 
+# Email: Jens.Nielsen_at_gmail.com
+# Normal mail:
+# Jens Nielsen
+# SBBS, Conway Institute
+# University College Dublin
+# Dublin 4, Ireland
+
+#
 
 class double_mutant:
 
     def doublemuts(self,stabdata,pKa_values):
         """Find all double mutant cycles and analyze them as a function of pH"""
+        #
+        # Standardize the names
+        #
+
+        for key in stabdata.keys():
+            muts=key.split('+')
+            import string
+            muts=string.join(sorted(muts),'+')
+            stabdata[muts]=stabdata[key]
+        #
         dbl_cycles=self.find_double_mutants(stabdata.keys())
         for cycle in dbl_cycles:
-            print cycle
-        stop
+            self.get_coupling(cycle,stabdata)
         return
+        
+    #
+    # ------
+    #
+    
+    def get_coupling(self,cycle,stabdata):
+        """Get the coupling energy as a function of pH for this cycle"""
+        print stabdata.keys()
+        print 'Looking at cycle ',cycle
+        count=0
+        xs=[]
+        ys=[]
+        for ph in stabdata['ph']:
+            Ewt=stabdata[cycle[0]][count]
+            Emut1=stabdata[cycle[1]][count]
+            Emut2=stabdata[cycle[2]][count]
+            Edbl=stabdata[cycle[3]][count]
+            cpl1=(Edbl-Emut1)-(Emut2-Ewt)
+            cpl2=(Edbl-Emut2)-(Emut1-Ewt)
+            print 'Coupling energy at pH %5.1f is %5.1f and %5.1f kJ/mol' %(float(ph),cpl1,cpl2)
+            xs.append(float(ph))
+            ys.append(cpl1)
+            count=count+1
+        import pylab
+        pylab.plot(xs,ys,'ro-',label=str(cycle[4]))
+        pylab.xlabel('pH')
+        pylab.ylabel('interaction energy (kJ/mol)')
+        pylab.legend()
+        pylab.savefig('IEs/%s' %str(cycle[4]),dpi=300)
+        pylab.clf()
+        return
+        
+        
+    #
+    # ------
+    #
 
     def addmuts(self,mutlist):
         """Add mutations"""
@@ -16,7 +88,6 @@ class double_mutant:
         muttxt=string.join(mutlist,'+')
         wt=False
         mutdef=[]
-        print muttxt
         for mut in muttxt.split('+'):
             if mut=='wt':
                 wt=True
@@ -27,8 +98,6 @@ class double_mutant:
         import string
         txt=sorted(mutdef)
         txt=string.join(txt,'+')
-        print txt
-        print '-=-=--=--=-'
         return txt
     
     #
@@ -78,16 +147,14 @@ class double_mutant:
                     #
                     allfound=True
                     for mut in cycle:
-                        print mut
                         if not mut in sorted_muts:
                             allfound=False
                     #
                     # Everything is ok. Now which interaction are we measuring?
                     #
-                    print 'Measuring %s - %s' %(mut2,mut3)
                     if allfound:
-                        dbl_muts.append([wt,leg1,leg2,dbl,sorted([mut2.replace('+wt',''),mut3.replace('+wt',''),'Context: %s' %mut1])])
-                    print '============='
+                        dbl_muts.append([wt.replace('+wt',''),leg1.replace('+wt',''),leg2.replace('+wt',''),dbl.replace('+wt',''),
+                                        sorted([mut2.replace('+wt',''),mut3.replace('+wt',''),'Context: %s' %mut1])])
         return dbl_muts
         
         

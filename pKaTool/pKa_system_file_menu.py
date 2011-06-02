@@ -359,6 +359,52 @@ class file_menu:
                                          parent=parent)
 
         return
+        
+    #
+    # -----
+    #
+    
+    def load_pH_stability_profile(self, filename=None,parent=None):
+        """Read pH stability profile from a text file"""
+        if not parent:
+            parent=self.win
+        import tkFileDialog, os
+        if not filename:
+            savedir=os.getcwd()
+            filename=tkFileDialog.askopenfilename(defaultextension="*.txt",
+                                                  initialdir=savedir,
+                                                  filetypes=[("Text file","*.txt"),
+                                                             ("Comma separated","*.csv"),
+                                                             ("All files","*.*")],
+                                                  parent=parent)
+
+        if filename:
+            if os.path.isfile(filename):
+                if filename[-4:]=='.csv':
+                    splitter=','
+                else:
+                    splitter=None
+                #
+                # Read the file
+                #
+                fd=open(filename)
+                self.exp_stab_curve=[]
+                header=fd.readline()
+                header=header.split()
+
+                line = fd.readline()
+                while len(line)>2 and not line =='END':
+                    words = line.split(splitter)
+                    print words
+                    self.exp_stab_curve.append([float(words[0]),float(words[1])])
+                    line = fd.readline()
+                fd.close()
+            else:
+                import tkMessageBox
+                tkMessageBox.showwarning('File does not exist',
+                                         'Could not find %s.' %filename,
+                                         parent=parent)
+        return
 
     #
     # ----

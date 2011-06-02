@@ -16,13 +16,14 @@ class analyze_explore:
         count=0
         data=self.DM(count)
         while data:
-            #print count,
-            #print'-----------'
             count=count+1
             data=self.DM(count)
             if count>1000:
                 data=None
-            print count,
+            print '\b.',
+            import sys
+            sys.stdout.flush()
+            #
             if data:
                 sum_intpkadiff,sum_intene,tit_fit,pHact_fit=self.analyze_point(data)
                 if not matrix.has_key(sum_intpkadiff):
@@ -53,10 +54,8 @@ class analyze_explore:
             if not matrix.has_key(ip):
                 matrix[ip]={}
             for ie in range(minS,maxS+1,1):
-                print ie
                 if not matrix[ip].has_key(ie):
                     matrix[ip][ie]=0.0
-        print matrix
         import TwoDplots
         TwoDplots.heatmap(matrix,firstkey='sum intpka diff',secondkey='sum intene (kT)')
                 
@@ -74,7 +73,6 @@ class analyze_explore:
         intenes=[]
         grptypes=[]
         config=data['configuration']
-        print config
         count=0
         for group in range(numgroups):
             intpkas.append(config[count+1])
@@ -87,9 +85,6 @@ class analyze_explore:
         IPdiff=0.0
         for IP in intpkas[1:]:
             IPdiff=IPdiff+abs(intpkas[0]-IP)/(float(len(intpkas[1:])))
-        #print grptypes
-        #print intpkas
-        #print intenes
         sum_IE=sum(intenes)
         # Get the fit to HH for the titration curves
         titcurvs=data['titcurvs']

@@ -88,6 +88,7 @@ class pKa_system(Frame,pKa_base.pKa_base,pKa_system_help.system_help,
         self.stab_window=None
         self.U_control=None
         self.old_stab_status=''
+        self.exp_stab_curve=False
         #
         # Set the pKa calculation parameters
         #
@@ -260,6 +261,7 @@ class pKa_system(Frame,pKa_base.pKa_base,pKa_system_help.system_help,
         self.file_menu.add_command(label='Save titration curves',command=self.save_curves)
         self.file_menu.add_command(label='Load titration_DB data',command=self.load_titdb)
         self.file_menu.add_command(label='Load pH activity profile',command=self.load_pH_activity_profile)
+        self.file_menu.add_command(label='Load pH stability profile',command=self.load_pH_stability_profile)
         self.file_menu.add_command(label='Load FTIR data',command=self.load_FTIR_data)
         self.file_menu.add_command(label='Print population table',command=self.print_table)
         self.file_menu.add_command(label='Add group',command=self.add_group)
@@ -1210,9 +1212,6 @@ class pKa_system(Frame,pKa_base.pKa_base,pKa_system_help.system_help,
                                                   x_axis,endy-10,fill='black',
                                                   width=self.linewidth)]=1
         self.stab_lines[canvas.create_text(x_axis+10,endy-35,text='delta G of folding (kT)',fill='black',anchor='w')]=1
-        #self.stab_lines[canvas.create_text(x_axis+10,endy-55,text='Net Electrostatic interactions (folded - unfolded) (kT)',
-        #                                   fill='red',
-        #                                   anchor='w')]=1
         #
         # Tick marks and tick labels
         #
@@ -1288,10 +1287,6 @@ class pKa_system(Frame,pKa_base.pKa_base,pKa_system_help.system_help,
                             endy=get_y_fromstab(stab,span)-null_y
                             summed_contributions[group]=endy
                         #
-                        # Add it
-                        #
-
-                        #
                         # Draw the box
                         #
                         endy=summed_contributions[group]
@@ -1345,26 +1340,7 @@ class pKa_system(Frame,pKa_base.pKa_base,pKa_system_help.system_help,
                     colour_count=colour_count+1
                     if colour_count==len(self.colour_order):
                         colour_count=0
-        #
-        # Now for the electrostatic contribution
-        #
-        ## count=1
-##         lastpH=X.pHvalues[0]
-##         lastval=intcurve2[0]
-##         count=1
-##         for pH in X.pHvalues[1:]:
-##             lastx=self.get_x(lastpH)
-##             lasty=get_y_fromstab(lastval,span)
-##             val=intcurve2[count]
 
-##             x=self.get_x(pH)
-##             y=get_y_fromstab(val,span)
-##             self.stab_lines[self.stab_tc.create_line(lastx,lasty,float(x),float(y),
-##                                                   fill='red',
-##                                                   width=self.linewidth)]=1
-##             lastval=val
-##             lastpH=pH
-##             count=count+1
         #
         # Put in labels for min and max stabilisation
         #
@@ -1373,6 +1349,14 @@ class pKa_system(Frame,pKa_base.pKa_base,pKa_system_help.system_help,
             obj2=canvas.create_text(850,180,text='MAX stab: %5.2f kT' %min_stabilisation,fill='blue',anchor='w')
             self.stab_lines[obj1]=1
             self.stab_lines[obj2]=1
+        #
+        # Do we have an experimental stability curve?
+        #
+        if self.exp_stab_curve:
+            for pH,ddG in self.exp_stab_curve:
+                x=self.get_x(pH)
+                y=get_y_fromstab(ddG,span)
+                self.stab_lines[canvas.create_oval(x-5,y-5,x+5,y+5)]=1
         return stability
 
     #
