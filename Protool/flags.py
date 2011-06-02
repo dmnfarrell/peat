@@ -31,15 +31,14 @@ class flags:
     def bound(self,atom1,atom2):
         #
         # Two atoms are covalently bound if they are closer than
-        # 1.8 A. This is not true for hydrogens....
+        # 2.0 A. This is not true for hydrogens....
         #
-        try:
-            if self.dist(atom1,atom2)<1.8:
-                return 1
-            else:
-                return None
-        except:
-            return None
+        #print self.dist(atom1,atom2)
+        if self.dist(atom1,atom2)<2.0:
+            return True
+        else:
+            return False
+
 
     #
     # ----
@@ -352,11 +351,13 @@ class flags:
     def is_SSbonded(self,uniqueid):
         """Is this residue or atom in a residue that's SS-bonded"""
         if self.resname(uniqueid)=='CYS':
-            SG1='%s:%s' %(self.resnum(uniqueid),'SG')
+            SG1='%s:%s' %(self.resid(uniqueid),'SG')
             for residue in self.residues.keys():
+                if residue==self.resid(uniqueid):
+                    continue
                 if self.resname(residue)=='CYS':
-                    SG2='%s:%s' %(self.resnum(residue),'SG')
-                    if self.bound(SG1,SG2):
+                    SG2='%s:%s' %(residue,'SG')
+                    if self.dist(SG1,SG2)<2.5:
                         return residue
         return None
     

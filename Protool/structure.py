@@ -31,7 +31,7 @@ import electrostatics
 from geometry import *
 from paths import *
 from Modify import *
-import flags, analyse_structure, energy
+import flags, analyse_structure, energy, contact_order
 
 try:
     import numpy as Numeric
@@ -84,10 +84,10 @@ class display:
 #
 # --------------------------------------------------------------------------------------
 #
-    
+
 class structure(geometry,flags.flags,sequence,analyse_structure.find_pattern,
                 display,modify,analyse_structure.distances,
-                electrostatics.electrostatics,energy.energy):
+                electrostatics.electrostatics,energy.energy,contact_order.contact_order):
 
     def __init__(self):
         self.aminoacids={'ALA':[],'CYS':[],'ASP':[],'GLU':[],'PHE':[],'GLY':[],'HIS':[],'ILE':[],'LYS':[],'LEU':[],'MET':[],'ASN':[],'PRO':[],'GLN':[],'ARG':[],'SER':[],'THR':[],'VAL':[],'TRP':[],'TYR':[],'TPO':[],'SEP':[]}
@@ -409,6 +409,10 @@ class structure(geometry,flags.flags,sequence,analyse_structure.find_pattern,
             raise Exception('ProTool: Trying to add an atom that is already present!: %s %s' %(uniqueid,str(self.atoms[uniqueid])))
         return None
         
+    #
+    # -----
+    #
+        
     def renumber_residues(self,residues,start_num=1):
         """Renumber the given residues"""
         residues.sort()
@@ -438,6 +442,9 @@ class structure(geometry,flags.flags,sequence,analyse_structure.find_pattern,
         if update:
             self.Update()
         return
+        
+    def Delete_residue(self,residue,update=True):
+        return self.remove_residue(residue,update)
 
     def remove_atom(self,unique_identifier,update=True):
         """
@@ -470,13 +477,7 @@ class structure(geometry,flags.flags,sequence,analyse_structure.find_pattern,
         self.Update()
         return
 
-    def Delete_residue(self,residue,update=True):
-        """Delete a residue"""
-        for atom in self.residues[residue]:
-            del self.atoms[atom]
-        if update:
-            self.Update()
-        return
+
         
     def remove_atoms_with_tag(self,tag=''):
         """Remove all atoms with the specified tag"""

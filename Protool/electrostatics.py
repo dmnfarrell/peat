@@ -327,7 +327,7 @@ class electrostatics:
                             self.matrix[name2]={}
                             self.matrix[name2]={}
                         self.matrix[name2][name1]=[ene,0.0,0.0,0.0]
-                        self.matrix[name2][name1]=dist
+                        self.distmatrix[name2][name1]=dist
         #
         # Write the matrix file
         #
@@ -337,6 +337,37 @@ class electrostatics:
             X.matrix=self.matrix
             X.write_matrix(filename+'.MATRIX.DAT')
         return self.matrix
+        
+    #
+    # -----
+    #
+    
+    def Gaussian_chain_matrix(self,ss=False):
+        """Calculate electrostatic interactions between residues based on a Gaussian-chain
+        defined unfolded state"""
+        #
+        # Check if we have the titratable groups
+        #
+        if not getattr(self,'titratable_groups',None):
+            self.get_titratable_groups()
+        #
+        self.matrix={}
+        self.distmatrix={}
+        titgrps=self.titratable_groups
+        residues=titgrps.keys()
+        residues.sort()
+        #
+        for grp1 in titgrps:
+            self.matrix[grp1]={}
+            for grp2 in titgrps:
+                res_dist=self.res_reparation(self.resid(grp1),self.resid(grp2),ss=ss)
+                effective_dist=7.5*math.sqrt(float(res_dist))+5
+                d=effective_dist
+                import numpy as np
+                import math
+                for probe_dist in np.arange(0,20,0.1):
+                    p=math.pow(4*math.pi,2)*probe_dist*(3/(2*math.pi*d**2))**(3.0/2.0)*math.exp(-3*probe_dist**2/(2.0*d**2))                
+        return matrix
 
     #
     # -----
