@@ -32,10 +32,13 @@ convert={'A':'ALA','C':'CYS','D':'ASP','E':'GLU','F':'PHE','G':'GLY','H':'HIS','
 def main(options,args):
     """Extract mutations from a multiple sequence alignment"""
     import PEATDB.sequence_alignment as SA
-    alignment=SA.read_clustal_aln_file(args[0])
+    if not options.fasta:
+        alignment=SA.read_clustal_aln_file(args[0])
+    else:
+        alignment=SA.read_fasta_aln_file(args[0])
+    print sorted(alignment.keys())
 
-    HEWL=options.wt
-    HEWL_seq=alignment[HEWL]
+    HEWL_seq=alignment[options.wt]
 
 
     fd=open('mutations.txt','w')
@@ -48,6 +51,8 @@ def main(options,args):
     #
     real_pos=0
     lines = []
+    PDB_mutations={}
+    #
     for position in range(0,len(HEWL_seq)):
         res_observed={}
         if HEWL_seq[position]=='-':
@@ -71,17 +76,16 @@ def main(options,args):
             else:
                 text=text+',%5.1f' %(0)
         fd2.write(text+'\n')
-
         #
-        #print '%3d   %d' %(real_pos,len(res_observed.keys()))
+        # -----
+        #
         lines += ['%3d   %d\n' %(real_pos,len(res_observed.keys()))]
         for mut in res_observed.keys():
             if mut=='-':
                 continue
             if mut==HEWL_seq[position]:
                 continue
-            #if mut=='Y':
-            #    continue
+            #
             org_res=HEWL_seq[position]
             new_res=mut
             import string
@@ -93,11 +97,39 @@ def main(options,args):
             if real_pos<options.start_aa or real_pos>options.end_aa:
                 pass
             else:
+                PDB_residue='%s:%s' %(options.CID,string.zfill(real_pos+options.offset-options.noffset,4))
+                if not PDB_mutations.has_key(PDB_residue):
+                    PDB_mutations[PDB_residue]=[]
+                PDB_mutations[PDB_residue].append(convert[new_res])
                 muttext='%s:%s:%s:%s' %(options.CID,string.zfill(real_pos+options.offset-options.noffset,4),convert[org_res],convert[new_res])
                 fd.write('%s,%s\n' %(muttext,muttext))
-                print muttext
+                #print muttext
     fd.close()
     fd2.close()
+    #
+    # Read PDB file?
+    #
+    if options.pdbfile:
+        import Protool
+        PI=Protool.structureIO()
+        PI.readpdb(options.pdbfile)
+    #
+    # Plot the figure?
+    #
+    if options.plotfigure:
+        xs=[]
+        ys=[]
+        zs=[]
+        for residue in sorted(PDB_mutations.keys()):
+            resnum=int(residue.split(':')[1])
+            xs.append(resnum)
+            ys.append(len(PDB_mutations[residue]))
+            zs.append(PI.dist(options.atom,residue+':CA'))
+        import pylab
+        pylab.plot(zs,ys,'ro')
+        pylab.xlabel('Distance from %s' %(options.atom))
+        pylab.ylabel('Number of mutations')
+        pylab.show()
     return
 
 if __name__=='__main__':
@@ -120,6 +152,14 @@ if __name__=='__main__':
                       help='Offset. This number will be added to the alignment residue number. Default: %default',default=0)
     parser.add_option('-n','--negative_offset',type='int',dest='noffset',action='store',
                       help='Offset. This number will be subtracted from the alignment residue number. Default: %default',default=0)
+    parser.add_option('-a','--atom',type='string',dest='atom',action='store',
+                        help='Atom used for calculating distances. Default: %default',default=':0035:CG')
+    parser.add_option('-p','--plotfigure',action='store_true',dest='plotfigure',
+                        help='Plot figure of distance vs. frequency. Default: %default',default=False)
+    parser.add_option('--fasta',action='store_true',dest='fasta',
+                        help='Read a FASTA alignment file. Default: %default',default=False)
+    parser.add_option("--pdb",type='string',dest='pdbfile',action='store',default='2lzt.pdb',
+                      help='PDB file. Default: %default')
     (options, args) = parser.parse_args()
     if len(args)!=1:
         parser.error('You must specify the name of a clustal .aln file')
