@@ -52,7 +52,7 @@ class PEATSAPlugin(Plugin):
                    'help':'Help',
                    'quit':'Close Window'}
     buttonorder = ['createJobDialog','fetchJob','editConfigFile','help','quit']
-    about = 'This plugin allows you to call PEATSA'    
+    about = 'This plugin allows you to call PEATSA'
 
     calctypes = ['stability','binding','pka']
     
@@ -66,12 +66,11 @@ class PEATSAPlugin(Plugin):
         else:
             self.parent = parent
             self.DB = parent.DB
-            self.parentframe = None            
             self._doFrame()
             self.setupConnection()
             print 'Updating jobs table..'
-            self.updateJobs()            
-        return
+            self.updateJobs()
+        return self
 
     def setupConnection(self):
         """Set up connection"""
@@ -79,7 +78,7 @@ class PEATSAPlugin(Plugin):
         self.confpath = os.path.join(homepath, 'peatsa.conf')
         if os.path.exists(self.confpath):    
             configuration = Core.Environment.Configuration(filename=self.confpath)
-        else:          
+        else:
             configuration = Core.Environment.Configuration(searchDefaultLocations=False)
             configuration.add_section('DATABASE')
             configuration.set('DATABASE', 'database', 'DBSAInterface')
@@ -597,7 +596,8 @@ class PEATSAPlugin(Plugin):
         webbrowser.open(link,autoraise=1)
         return
     
-    def quit(self):      
+    def quit(self):
+        print 'closing plugin'
         self.mainwin.destroy()
         self.jobManager.stopLogging()
         self.log2Stdout()
@@ -796,13 +796,23 @@ class PEATSAPlugin(Plugin):
         self.matrices = job.data.allMatrices()
         #print self.matrices['ModellingResults'].csvRepresentation()
         jobmeta = job.metadata()
+        cols = self.DB.getSimpleFields()
+        expcol = None
         if jobmeta.has_key('expcol'):
             expcol = jobmeta['expcol']
-        else:
-            expcol=''
-        if expcol == '' or expcol==None:
+        if expcol not in cols and jobmeta.has_key('project'):
+            #we may have stored the exp data in another project
+            prjdata = jobmeta['project']
+            print 'trying to loading exp data from external project(s)'
+            from PEATDB.Base import PDatabase
+            tmpdb = PDatabase(**prjdata)
+            S = PEATTableModel(tmpdb)
+            M = S.simpleCopy(include=['Mutations'])
+            
+            
+        if expcol == '' or expcol == None:
             #if exp column not known then ask user
-            cols = self.DB.getSimpleFields()            
+            
             mpDlg = MultipleValDialog(title='Select Experimental Data',
                                         initialvalues=[cols],
                                         labels=['exp data column:'],
@@ -812,24 +822,30 @@ class PEATSAPlugin(Plugin):
                 expcol = mpDlg.results[0]
             else:
                 return        
-     
-        from Correlation import CorrelationAnalyser  
-        C = CorrelationAnalyser()        
-        
+
         for m in self.matrices:
-            matrix = self.matrices[m]          
-            if matrix == None: continue
-            M = self.parent.tablemodel.simpleCopy(include=['Mutations'])           
-            M = self.mergeMatrix(matrix, M)
-            x,y,names,muts = M.getColumns(['Total',expcol,'name','Mutations'],allowempty=False)
-            muts = ['mutation: '+i for i in muts]
-            labels = zip(names, muts)
-            ax,frame,mh = C.plotCorrelation(x,y,labels,title=m,ylabel=expcol)
-            table = self.showTable(frame, M)
-            mh.table = table
+            matrix = self.matrices[m]
+            if matrix == None or not 'Total' in matrix.columnHeaders():
+                continue
             
+            self.plotMerged(matrix, expcol, m)
+
         return
-    
+
+    def plotMerged(self, matrix, expcol, title):
+        """Merge a set of exp vals with predictions and plot"""
+        M = self.parent.tablemodel.simpleCopy(include=['Mutations'])
+        M = self.mergeMatrix(matrix, M)
+        x,y,names,muts = M.getColumns(['Total',expcol,'name','Mutations'],allowempty=False)
+        from Correlation import CorrelationAnalyser  
+        C = CorrelationAnalyser()
+        muts = ['mutation: '+i for i in muts]
+        labels = zip(names, muts)        
+        ax,frame,mh = C.plotCorrelation(x,y,labels,title=title,ylabel=expcol)
+        table = self.showTable(frame, M)
+        mh.table = table        
+        return
+        
     def test(self):
         job, name = self.getJob('myjob')
         if job.error() != None or job.state() != 'Finished':

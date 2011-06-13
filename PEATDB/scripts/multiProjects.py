@@ -60,17 +60,17 @@ dbnames = [os.path.splitext(i)[0] for i in csvfiles]
 print dbnames
 
 
-def PEATSAJobs(prjs):
+def PEATSAJobs(prjs, resubmit=False):
     """Submit PEATSA runs for all projects or merge results if done"""
     for name in prjs:
         print name
         DB = PDatabase(local=os.path.join(savepath,name))
         pdb = DB['wt'].Structure
         PS = PEATSAPlugin()
-        PS.main(DB=DB)        
-        if hasattr(DB.meta,'peatsa_jobs'):
+        PS.main(DB=DB)
+        if hasattr(DB.meta,'peatsa_jobs') and resubmit == False:
             if 'mycalc' in DB.meta.peatsa_jobs:
-                print 'job already present'
+                print 'job is present'
                 #try to merge results
                 S = PEATTableModel(DB)
                 job,n = PS.getJob('mycalc')
@@ -83,8 +83,11 @@ def PEATSAJobs(prjs):
                 mutlist.append(DB.get(p).Mutations)
             #print mutlist
             pdbfile = PS.writetempPDB()
+            prjdata = {'server':'peat.ucd.ie','username':'guest',
+                              'project':p,'password':'123','port':'8080'}
             PS.submitJob(name='mycalc', pdbname=DB.meta.refprotein, pdbfile=pdbfile, 
-                         mutations=mutlist, calcs=['stability'], meta={'protein':name})
+                         mutations=mutlist, calcs=['stability'],
+                         meta={'protein':name,'expcol':'Exp','project':prjdata})
         #required to end process
         PS.jobManager.stopLogging()
         DB.close()
@@ -129,12 +132,11 @@ def summarise(projects):
         DB = PDatabase(local=os.path.join(savepath,p))
         S = PEATTableModel(DB)
         #add link to proj
-        try:
-            summDB[p]['project'] = {'server':'peat.ucd.ie','username':'guest',
+        
+        summDB[p]['project'] = {'server':'peat.ucd.ie','username':'guest',
                               'project':p,'password':'123','port':'8080'}
-        except:
-            pass
-        #print DB.meta.info
+     
+        print DB.meta.info
         try:
             exp,pre = S.getColumns(['Exp','prediction'],allowempty=False)
             errs = [j[0]-j[1] for j in zip(exp,pre)]
@@ -164,12 +166,35 @@ def summarise(projects):
         x.update(descr)
         data.append(x)
         i+=1
+        DB.close()
     
     summDB.importDict(data)
     summDB.commit()
-    for i in range(len(figs)):
-        figs[i].savefig('fig%s.png' %i)
+
+    #add all peatsa jobs to summary proj also
+    print 'adding peatsa job info'
+    PS = PEATSAPlugin()
+    PS.main(DB=summDB)
+    #summDB.meta.peatsa_jobs = None
+    #from ZODB.PersistentMapping import PersistentMapping
+    #summDB.meta.peatsa_jobs = PersistentMapping()    
+    PS.checkJobsDict()
+    PS.jobManager.stopLogging()
+    for p in projects:
+        print summDB.meta
+        DB = PDatabase(local=os.path.join(savepath,p))
+        job = DB.meta.peatsa_jobs['mycalc']
+        summDB.meta.peatsa_jobs[p] = job
+        print job
+        #DB.close()
+    print summDB.isChanged()
+    print summDB.meta.peatsa_jobs
+    summDB.commit()
+
+    #for i in range(len(figs)):
+    #    figs[i].savefig('fig%s.png' %i)
     #plt.show()
+        
     return
 
 def findOutliers(data):
@@ -201,7 +226,7 @@ if __name__ == '__main__':
     parser.add_option("-i", "--importcsv", dest="importcsv", action='store_true',
                        help="create/import", default=False)
     parser.add_option("-j", "--jobs", dest="jobs", action='store_true',
-                       help="do/merge jobs", default=False)
+                       help="submit/merge jobs", default=False)
     parser.add_option("-s", "--summary", dest="summary", action='store_true',
                        help="do summary/stats", default=False)  
     parser.add_option("-p", "--path", dest="path",
@@ -215,9 +240,11 @@ if __name__ == '__main__':
     if opts.importcsv == True:
         createProjects(csvfiles)
     if opts.jobs == True:    
-        PEATSAJobs(dbnames)
+        PEATSAJobs(['1ypc'], resubmit=True)
+        #PEATSAJobs(dbnames)
     if opts.summary == True:
-        summarise(dbnames)     
+        #summarise(dbnames)
+        summarise(['1ypc'])
     if opts.copy == True:
         send2Server(dbnames)
   

@@ -1374,6 +1374,9 @@ class TableCanvas(Canvas):
         model = self.model
         if len(rows)<1 or len(cols)<1:
             return None
+        #if only one row selected we plot whole col
+        if len(rows) == 1:
+            rows = self.rowrange
         lists = []
 
         for c in cols:
@@ -1405,7 +1408,12 @@ class TableCanvas(Canvas):
 
         pltlabels = self.getplotlabels()
         #print pltlabels, plotdata
-        self.pyplot.setDataSeries(pltlabels)
+        if len(pltlabels) > 2:
+            self.pyplot.setDataSeries(pltlabels)
+            self.pyplot.showlegend = 1
+        else:
+            self.pyplot.setxlabel(pltlabels[0])
+            self.pyplot.setylabel(pltlabels[1])
         self.pyplot.plotCurrent(data=plotdata)
         return
 

@@ -39,6 +39,11 @@ class Plugin(object):
         if local != None:
             self.DB = PDatabase(local=local)
         return
+
+    def quit(self):
+        if hasattr(self, 'mainwin'):
+            self.mainwin.destroy()  
+        return
     
 def load_plugins(plugins):
     #import traceback

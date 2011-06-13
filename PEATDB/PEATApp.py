@@ -169,7 +169,7 @@ class App(Frame, GUI_help):
             #print name
             db = self.currentDBs[name]
             def func(db):
-                def new():
+                def new():                    
                     self.removeTable()
                     self.loadDB(db)
                 return new
@@ -252,7 +252,13 @@ class App(Frame, GUI_help):
         img = PEAT_images.magnifier()
         hlptxt="Search"
         self.toolbar.add_button('Filter Records', self.showFilteringBar, img, hlptxt)
-        #img=PEAT_images.DNAtool()
+        img = Table_images.plot()
+        hlptxt="Plot selected cells"
+        self.toolbar.add_button('Plot', self.plot, img, hlptxt)
+        img = Table_images.plotprefs()
+        hlptxt="Plot options"
+        self.toolbar.add_button('Plot Preferences', self.plotSetup, img, hlptxt)
+
         img = None
         hlptxt="DNAtool: sequence design"
         self.toolbar.add_button('DNAtool', self.startDNAtool, img, hlptxt)
@@ -328,6 +334,11 @@ class App(Frame, GUI_help):
             self.masterframe.paneconfigure(self.sidepane, before=self.tableframe)
         return
 
+    def closeSidePane(self):
+        if hasattr(self, 'sidepane'):
+            self.sidepane.destroy()
+        return
+    
     def createMenuBar(self):
         """Create the menu bar for the application. """
         self.menu=Menu(self.main)
@@ -1230,6 +1241,8 @@ class App(Frame, GUI_help):
         return
 
     def removeTable(self):
+        """Remove the main table"""
+        self.closeSidePane()
         if hasattr(self.table, 'filterframe') and self.filterframe != None:
             self.table.filterframe.destroy()
         self.table = None
@@ -1501,6 +1514,11 @@ class App(Frame, GUI_help):
         answer = self.closeDB()
         if answer == 'cancel':
             return
+        #check is plugin running?
+        #if hasattr(self,'runningplugin'):
+        #    print self.runningplugin
+        
+        self.closeSidePane()        
         self.main.destroy()
         self.preferences.save_prefs()
         if not self.parent:
@@ -2424,6 +2442,14 @@ class App(Frame, GUI_help):
         self.recordEvent('Project successfully created on %s' %server)
         self.connect(self, server=self.server, port=self.port,
                 project=dbname)
+        return
+
+    def plot(self, event=None):
+        self.table.plot_Selected()
+        return
+
+    def plotSetup(self, event=None):
+        self.table.plotSetup()
         return
     
     def set_geometry(self,pwidget,widget):

@@ -48,11 +48,10 @@ class pylabPlotter(object):
     fonts = ['serif', 'sans-serif', 'cursive', 'fantasy', 'monospace']
 
 
-
     def __init__(self):
         #Setup variables
         self.shape = 'o'
-        self.grid = 1
+        self.grid = 0
         self.xscale = 0
         self.yscale = 0
         self.showlegend = 0
