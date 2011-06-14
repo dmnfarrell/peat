@@ -53,6 +53,13 @@ class zDatabase(object):
         self.project = project
         self.backend = backend
         self.errormessage = None
+        #print server, project, port, username
+        if type(port) is types.StringType:
+            try:
+                port = int(port)
+            except:
+                print 'port number invalid'
+                
         if blob_dir==None:
             self.setBlobdir(relstorage=True)
         else:
@@ -440,7 +447,7 @@ class zDatabase(object):
     def isChanged(self):
         """Check if DB has been changed"""
         persisted = [self.meta, self.data, self.meta.info]
-        for p in persisted:
+        for p in persisted:            
             if p._p_state == 1:
                 return True
         for k in self.meta.keys():                    

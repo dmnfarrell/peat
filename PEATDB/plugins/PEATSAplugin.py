@@ -798,6 +798,7 @@ class PEATSAPlugin(Plugin):
         jobmeta = job.metadata()
         cols = self.DB.getSimpleFields()
         expcol = None
+        print jobmeta
         if jobmeta.has_key('expcol'):
             expcol = jobmeta['expcol']
         if expcol not in cols and jobmeta.has_key('project'):
@@ -805,6 +806,8 @@ class PEATSAPlugin(Plugin):
             prjdata = jobmeta['project']
             print 'trying to loading exp data from external project(s)'
             from PEATDB.Base import PDatabase
+            from PEATTables import PEATTableModel
+            print prjdata
             tmpdb = PDatabase(**prjdata)
             S = PEATTableModel(tmpdb)
             M = S.simpleCopy(include=['Mutations'])

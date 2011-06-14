@@ -52,7 +52,8 @@ plt.rc('axes',linewidth=.5)
 
 settings={'server':'peat.ucd.ie','username':'guest',
            'password':'123'}
-path = '/home/people/farrell/Desktop/SADBPaperData'
+#path = '/home/people/farrell/Desktop/SADBPaperData'
+path = os.getcwd()
 savepath = os.path.join(path,'projects')
 cpath = os.path.join(path,'data')
 csvfiles = os.listdir(cpath)#[:4]
@@ -83,8 +84,9 @@ def PEATSAJobs(prjs, resubmit=False):
                 mutlist.append(DB.get(p).Mutations)
             #print mutlist
             pdbfile = PS.writetempPDB()
+            #we add source project data so exp data can be read from summary
             prjdata = {'server':'peat.ucd.ie','username':'guest',
-                              'project':p,'password':'123','port':'8080'}
+                              'project':name,'password':'123','port':'8080'}
             PS.submitJob(name='mycalc', pdbname=DB.meta.refprotein, pdbfile=pdbfile, 
                          mutations=mutlist, calcs=['stability'],
                          meta={'protein':name,'expcol':'Exp','project':prjdata})
@@ -127,16 +129,17 @@ def summarise(projects):
     i=0
     data=[]
     summDB.addField('project',fieldtype='Project')
+    print summDB.getFields()
     for p in projects:
         print 'structure:',p
         DB = PDatabase(local=os.path.join(savepath,p))
         S = PEATTableModel(DB)
         #add link to proj
-        
+        summDB.add(p)
         summDB[p]['project'] = {'server':'peat.ucd.ie','username':'guest',
                               'project':p,'password':'123','port':'8080'}
-     
-        print DB.meta.info
+        #print summDB[p]                              
+        
         try:
             exp,pre = S.getColumns(['Exp','prediction'],allowempty=False)
             errs = [j[0]-j[1] for j in zip(exp,pre)]
@@ -160,7 +163,7 @@ def summarise(projects):
         C.QQplot(errs,title=p,ax=ax)
         x={'name':p,'mutants':len(pre),'rmse':rmse,'corrcoef':cc,'meanerr':meanerr,
            'ttest':ttp,'shapirowilk':swp}
-        print x
+        #print x
         parser = PDBParser()
         descr = parser.getDescription(p)        
         x.update(descr)
@@ -168,7 +171,8 @@ def summarise(projects):
         i+=1
         DB.close()
     
-    summDB.importDict(data)
+    print summDB.isChanged()
+    #summDB.importDict(data)
     summDB.commit()
 
     #add all peatsa jobs to summary proj also
@@ -181,7 +185,7 @@ def summarise(projects):
     PS.checkJobsDict()
     PS.jobManager.stopLogging()
     for p in projects:
-        print summDB.meta
+        #print summDB.meta
         DB = PDatabase(local=os.path.join(savepath,p))
         job = DB.meta.peatsa_jobs['mycalc']
         summDB.meta.peatsa_jobs[p] = job
