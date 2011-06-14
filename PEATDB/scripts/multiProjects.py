@@ -119,6 +119,7 @@ def createProjects(files):
     return
 
 def summarise(projects):
+    
     summDB = PDatabase(local='summary.fs')
     C = CorrelationAnalyser()
     figs = []
@@ -127,18 +128,12 @@ def summarise(projects):
     
     gs = gridspec.GridSpec(5, 5, wspace=0.3, hspace=0.5)    
     i=0
-    data=[]
-    summDB.addField('project',fieldtype='Project')
-    print summDB.getFields()
+    data=[]    
+
     for p in projects:
         print 'structure:',p
         DB = PDatabase(local=os.path.join(savepath,p))
-        S = PEATTableModel(DB)
-        #add link to proj
-        summDB.add(p)
-        summDB[p]['project'] = {'server':'peat.ucd.ie','username':'guest',
-                              'project':p,'password':'123','port':'8080'}
-        #print summDB[p]                              
+        S = PEATTableModel(DB)           
         
         try:
             exp,pre = S.getColumns(['Exp','prediction'],allowempty=False)
@@ -146,13 +141,19 @@ def summarise(projects):
         except:
             print 'no results'
             continue
+            
+        DB.close()
+        #add link to proj
+        summDB.add(p)
+        summDB[p]['project'] = {'server':'peat.ucd.ie','username':'guest',
+                              'project':p,'password':'123','port':'8080'}              
         #stats
         cc,rmse,meanerr = C.getStats(pre,exp)
         #ttest for mean errs 0        
         ttp = round(stats.ttest_1samp(errs, 0)[1],2)
         #normality of errs
         w,swp = C.ShapiroWilk(errs)
-        ax = figs[0].add_subplot(gs[0, i])
+        '''ax = figs[0].add_subplot(gs[0, i])
         C.plotCorrelation(pre,exp,title=p,ms=2,axeslabels=False,ax=ax)
         ax = figs[1].add_subplot(gs[0, i])
         C.showHistogram([pre,exp],title=p,labels=['pre','exp'],ax=ax)                
@@ -160,7 +161,7 @@ def summarise(projects):
         C.plotNorm(errs,title=p,lw=1,ax=ax)
         #qqplot
         ax = figs[3].add_subplot(gs[0, i])
-        C.QQplot(errs,title=p,ax=ax)
+        C.QQplot(errs,title=p,ax=ax)'''
         x={'name':p,'mutants':len(pre),'rmse':rmse,'corrcoef':cc,'meanerr':meanerr,
            'ttest':ttp,'shapirowilk':swp}
         #print x
@@ -169,10 +170,10 @@ def summarise(projects):
         x.update(descr)
         data.append(x)
         i+=1
-        DB.close()
-    
-    print summDB.isChanged()
-    #summDB.importDict(data)
+        print summDB.isChanged()
+        
+    summDB.importDict(data)
+    summDB.addField('project',fieldtype='Project')
     summDB.commit()
 
     #add all peatsa jobs to summary proj also
@@ -244,11 +245,11 @@ if __name__ == '__main__':
     if opts.importcsv == True:
         createProjects(csvfiles)
     if opts.jobs == True:    
-        PEATSAJobs(['1ypc'], resubmit=True)
+        PEATSAJobs(['2lzm'], resubmit=True)
         #PEATSAJobs(dbnames)
     if opts.summary == True:
         #summarise(dbnames)
-        summarise(['1ypc'])
+        summarise(['2lzm'])
     if opts.copy == True:
         send2Server(dbnames)
   

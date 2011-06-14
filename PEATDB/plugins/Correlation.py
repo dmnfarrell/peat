@@ -218,7 +218,7 @@ class CorrelationAnalyser(Plugin):
         if len(x) ==0:
             return
         errs = [i - j for i, j in zip(x, y)]
-        line = ax.plot(x, y, 'o', color='b', mew=0, ms=ms, alpha=0.6, picker=3)  
+        line = ax.plot(x, y, 'o', mew=0, ms=ms, alpha=0.6, picker=3)  
 
         #draw expected correlation line with slope x
         slope=1

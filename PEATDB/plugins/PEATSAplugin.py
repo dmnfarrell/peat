@@ -147,7 +147,7 @@ class PEATSAPlugin(Plugin):
 
     def manageJobsButtons(self, parent):
         fr1 = Frame(parent)
-        Button(fr1,text='View Results',command=self.showResults,bg='#ccFFFF').pack(side=TOP,fill=BOTH,expand=1)
+        Button(fr1,text='View Results',command=self.showAllResults,bg='#ccFFFF').pack(side=TOP,fill=BOTH,expand=1)
         fr1.pack(fill=BOTH)
         Button(fr1,text='Merge Results',command=self.mergeCurrent).pack(side=TOP,fill=BOTH,expand=1)
         fr1.pack(fill=BOTH)        
@@ -783,9 +783,25 @@ class PEATSAPlugin(Plugin):
                             model.data[row][col] = M.data[rec][f]
         return model
         
-    def showResults(self):
+    def showAllResults(self):
+        """Show results for single or multiple jobs together"""
+        
+        names = self.jobstable.get_selectedRecordNames()
+        if len(names)==1:            
+            self.showResults()
+        else:
+            import pylab as plt
+            f=plt.figure(figsize=(8,8))
+            ax=f.add_subplot(111)
+            for n in names:
+                self.showResults(n,showtable=False, ax=ax)
+            f.show()    
+        return
+        
+    def showResults(self, name=None, showtable=True, ax=None):
         """Show results with correlation plot from selected job"""
-        job, name = self.getJob()
+        job, name = self.getJob(name)
+        
         if job == None:
             print 'job not in DB'
             return
@@ -798,6 +814,7 @@ class PEATSAPlugin(Plugin):
         jobmeta = job.metadata()
         cols = self.DB.getSimpleFields()
         expcol = None
+        expdata = None
         print jobmeta
         if jobmeta.has_key('expcol'):
             expcol = jobmeta['expcol']
@@ -807,15 +824,15 @@ class PEATSAPlugin(Plugin):
             print 'trying to loading exp data from external project(s)'
             from PEATDB.Base import PDatabase
             from PEATTables import PEATTableModel
-            print prjdata
+            
             tmpdb = PDatabase(**prjdata)
+            print tmpdb
             S = PEATTableModel(tmpdb)
-            M = S.simpleCopy(include=['Mutations'])
+            expdata = S.simpleCopy(include=['Mutations'])
+            print expdata  
             
-            
-        if expcol == '' or expcol == None:
-            #if exp column not known then ask user
-            
+        #if exp column not known then ask user              
+        if expcol == '' or expcol == None:                      
             mpDlg = MultipleValDialog(title='Select Experimental Data',
                                         initialvalues=[cols],
                                         labels=['exp data column:'],
@@ -831,23 +848,27 @@ class PEATSAPlugin(Plugin):
             if matrix == None or not 'Total' in matrix.columnHeaders():
                 continue
             
-            self.plotMerged(matrix, expcol, m)
+            ax = self.plotMerged(matrix, expcol, expdata, m,
+                                    showtable, ax)
 
-        return
+        return ax
 
-    def plotMerged(self, matrix, expcol, title):
+    def plotMerged(self, matrix, expcol, expdata=None,
+                    title='', showtable=True, ax=None):
         """Merge a set of exp vals with predictions and plot"""
-        M = self.parent.tablemodel.simpleCopy(include=['Mutations'])
-        M = self.mergeMatrix(matrix, M)
-        x,y,names,muts = M.getColumns(['Total',expcol,'name','Mutations'],allowempty=False)
+        if expdata==None:
+            expdata = self.parent.tablemodel.simpleCopy(include=['Mutations'])
+        merged = self.mergeMatrix(matrix, expdata)
+        x,y,names,muts = merged.getColumns(['Total',expcol,'name','Mutations'],allowempty=False)
         from Correlation import CorrelationAnalyser  
         C = CorrelationAnalyser()
         muts = ['mutation: '+i for i in muts]
         labels = zip(names, muts)        
-        ax,frame,mh = C.plotCorrelation(x,y,labels,title=title,ylabel=expcol)
-        table = self.showTable(frame, M)
-        mh.table = table        
-        return
+        ax,frame,mh = C.plotCorrelation(x,y,labels,title=title,ylabel=expcol,ax=ax)
+        if showtable == True:
+            table = self.showTable(frame, merged)
+            mh.table = table        
+        return ax
         
     def test(self):
         job, name = self.getJob('myjob')
@@ -877,7 +898,6 @@ def main():
         P = PEATSAPlugin()
         P.main(DB=DB)
         P.test()        
-    
          
 if __name__ == '__main__':
     main()
