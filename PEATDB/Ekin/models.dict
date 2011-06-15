@@ -193,154 +193,174 @@ sg9
 g62
 sg10
 g62
-ssS'3 pKas, 2 Chemical shifts'
+ssS'Exponential Growth'
 p66
 (dp67
+g18
+S"{'p':'max(y)'}"
+p68
+sg7
+S'Exponential Association'
+p69
+sg5
+S'p*(1-math.exp(-K*x))'
+p70
+sg10
+g66
+sg3
+S'K,p'
+p71
+sg9
+S'Exponential Growth'
+p72
+ssS'3 pKas, 2 Chemical shifts'
+p73
+(dp74
 g3
 S'pKa1,pKa2,pKa3,offset,span1'
-p68
+p75
 sg5
 S'span1*(x/pKa3 + 1)/(1+x/pKa2+x/pKa3+x*x/(pKa1*pKa3))+offset'
-p69
+p76
 sg7
 S'titration curve with 3 independent pkas'
-p70
+p77
 sg9
-g66
+g73
 sg10
-g66
+g73
 ssS'3 pKas, 4 Chemical shifts'
-p71
-(dp72
+p78
+(dp79
 g18
 S"{'pKa1': 'min(x)+(max(x)-min(x))*0.25', 'pKa2': 'min(x)+(max(x)-min(x))*0.5', 'pKa3': 'min(x)+(max(x)-min(x))*0.75', 'span2': '(max(y)-min(y))/3', 'span1': '(max(y)-min(y))/3', 'span3': '(max(y)-min(y))/3', 'offset': 'min(y)'}"
-p73
-sg7
-S''
-p74
-sg5
-S'span1/(1+10**(pKa1-x))+span2/(1+10**(-x+pKa2))+span3/(1+10**(-x+pKa3))+offset'
-p75
-sg10
-g71
-sg3
-S'pKa1,pKa2,pKa3,offset,span1,span2,span3'
-p76
-sg9
-g71
-ssS'DSC2state'
-p77
-(dp78
-g3
-S'Tm,deltaH'
-p79
-sg5
-S'deltaH / (R*math.pow(x,2)) * f * (1-f)'
 p80
 sg7
-S'fit simple two state model to DSC data'
+S''
 p81
-sg9
-g77
-sg10
-g77
-ssS'Arrhenius'
+sg5
+S'span1/(1+10**(pKa1-x))+span2/(1+10**(-x+pKa2))+span3/(1+10**(-x+pKa3))+offset'
 p82
-(dp83
+sg10
+g78
+sg3
+S'pKa1,pKa2,pKa3,offset,span1,span2,span3'
+p83
+sg9
+g78
+ssS'DSC2state'
+p84
+(dp85
+g3
+S'Tm,deltaH'
+p86
+sg5
+S'deltaH / (R*math.pow(x,2)) * f * (1-f)'
+p87
+sg7
+S'fit simple two state model to DSC data'
+p88
+sg9
+g84
+sg10
+g84
+ssS'Arrhenius'
+p89
+(dp90
 g3
 S'A,Ea'
-p84
+p91
 sg5
 S'A*exp(-Ea/RT)'
-p85
+p92
 sg7
 S'arrhenius equation'
-p86
+p93
 sg9
-g82
+g89
 sg10
-g82
+g89
 ssS'Substrate Depletion'
-p87
-(dp88
+p94
+(dp95
 g3
 S'x0,M,D'
-p89
+p96
 sg5
 S'M * (1 - math.exp(-D*(x-x0)))'
-p90
+p97
 sg7
 S'fit substrate depletion data'
-p91
+p98
 sg9
-g87
+g94
 sg10
-g87
+g94
 ssS'Modified Hill'
-p92
-(dp93
+p99
+(dp100
 g18
 S"{'pKa':'min(x)+(max(x)-min(x))/2.0'}"
-p94
-sg7
-S'fit to a single titration curve with 1 pka and a hill parameter'
-p95
-sg5
-S'span/(1+10**(n*(- x + pKa)))+offset'
-p96
-sg10
-g92
-sg3
-S'pKa,span,offset,n'
-p97
-sg9
-g92
-ssS'Residual Activity'
-p98
-(dp99
-g3
-S't50,slope,top'
-p100
-sg5
-S'top/((1+(T/T50)^slope))'
 p101
 sg7
-S'fits thermal denaturation data (basic sigmoid)'
+S'fit to a single titration curve with 1 pka and a hill parameter'
 p102
-sg9
-g98
-sg10
-g98
-ssS'DSCindependent'
+sg5
+S'span/(1+10**(n*(- x + pKa)))+offset'
 p103
-(dp104
+sg10
+g99
+sg3
+S'pKa,span,offset,n'
+p104
+sg9
+g99
+ssS'Residual Activity'
+p105
+(dp106
+g3
+S't50,slope,top'
+p107
+sg5
+S'top/((1+(T/T50)^slope))'
+p108
+sg7
+S'fits thermal denaturation data (basic sigmoid)'
+p109
+sg9
+g105
+sg10
+g105
+ssS'DSCindependent'
+p110
+(dp111
 g3
 S'A,Tm,deltaH'
-p105
+p112
 sg5
 S'A* (math.pow(deltaH,2) / (R*math.pow(x,2)) ) *f * (1-f)'
-p106
+p113
 sg7
 S'Fit to a 3 parameter DSC curve'
-p107
+p114
 sg9
-g103
+g110
 sg10
-g103
+g110
 ssS'diffDenaturation'
-p108
-(dp109
+p115
+(dp116
 g3
 S'A,Tm,deltaH'
-p110
+p117
 sg5
 S'A* (deltaH / (R*math.pow(x,2)) ) *f * (1-f)'
-p111
+p118
 sg7
 S'Fit to a 3 parameter differential denaturation curve,\n        ref. John/Weeks Protein Science 2000'
-p112
+p119
 sg9
-g108
+g115
 sg10
-g108
+g115
 ss.
