@@ -182,7 +182,11 @@ def matrixFromCSVRepresentation(string, readHeaders=True, dialect=None):
 	reader = csv.reader(csvFile, dialect=dialect)
 	
 	#Read all the rows
-	rows = [row for row in reader]
+	#Remove any elements that are just blanks
+	rows = []
+	for row in reader:
+		row = [el for el in row if el != '']
+		rows.append(row)
 	
 	#Get the column headers if specified
 	if readHeaders:
