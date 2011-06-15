@@ -304,7 +304,7 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
         self.fit_menu=Menu(self.menu,tearoff=0)
         self.fit_menu={ '01Find best model':{'cmd':self.fitframe.showBestModelDialog},
                         '02Fit all datasets':{'cmd':self.fitAll},
-                        '03Create new fit model':{'cmd':self.createFitModel}}
+                        '03Edit/create models':{'cmd':self.createFitModel}}
         self.fit_menu=self.create_pulldown(self.menu,self.fit_menu)
         self.menu.add_cascade(label='Fit',menu=self.fit_menu['var'])
 
