@@ -50,7 +50,7 @@ plt.rc('legend',fontsize=6)
 plt.rc('savefig',dpi=300)
 plt.rc('axes',linewidth=.5)
 
-settings={'server':'peat.ucd.ie','username':'guest',
+settings={'server':'enzyme.ucd.ie','username':'guest',
            'password':'123'}
 #path = '/home/people/farrell/Desktop/SADBPaperData'
 path = os.getcwd()
@@ -85,7 +85,7 @@ def PEATSAJobs(prjs, resubmit=False):
             #print mutlist
             pdbfile = PS.writetempPDB()
             #we add source project data so exp data can be read from summary
-            prjdata = {'server':'peat.ucd.ie','username':'guest',
+            prjdata = {'server':'enzyme.ucd.ie','username':'guest',
                               'project':name,'password':'123','port':'8080'}
             PS.submitJob(name='mycalc', pdbname=DB.meta.refprotein, pdbfile=pdbfile, 
                          mutations=mutlist, calcs=['stability'],
@@ -145,7 +145,7 @@ def summarise(projects):
         DB.close()
         #add link to proj
         summDB.add(p)
-        summDB[p]['project'] = {'server':'peat.ucd.ie','username':'guest',
+        summDB[p]['project'] = {'server':'enzyme.ucd.ie','username':'guest',
                               'project':p,'password':'123','port':'8080'}              
         #stats
         cc,rmse,meanerr = C.getStats(pre,exp)
@@ -210,7 +210,7 @@ def findOutliers(data):
 
 def send2Server(projects):
     """Send all projects to remote versions"""
-    settings={'server':'peat.ucd.ie','username':'guest',
+    settings={'server':'enzyme.ucd.ie','username':'guest',
                'password':'123','port':8080}
     adminsettings={'host':'localhost','user':'peatadmin',
                'passwd':'123','port':8080}    
@@ -219,10 +219,10 @@ def send2Server(projects):
         DB = PDatabase(local=os.path.join(savepath,p))        
         #Utils.createDBonServer(prj=p,settings=adminsettings,
         #                       access='guest')
-        #Utils.copyDBtoServer(DB,p,settings)
+        Utils.copyDBtoServer(DB,p,settings)
         
     DB = PDatabase(local='summary.fs')
-    Utils.copyDBtoServer(DB,'PEATSAmultiprojects',settings)
+    Utils.copyDBtoServer(DB,'PotapovDataset',settings)
     return
     
 if __name__ == '__main__':
@@ -246,10 +246,10 @@ if __name__ == '__main__':
         createProjects(csvfiles)
     if opts.jobs == True:    
         PEATSAJobs(['2lzm'], resubmit=True)
-        #PEATSAJobs(dbnames)
+        #PEATSAJobs(dbnames, resubmit=True)
     if opts.summary == True:
-        #summarise(dbnames)
-        summarise(['2lzm'])
+        summarise(dbnames)
+        #summarise(['2lzm'])
     if opts.copy == True:
         send2Server(dbnames)
   

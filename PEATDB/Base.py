@@ -422,7 +422,9 @@ class zDatabase(object):
         for d in importdata:
             name = d[namefield]
             self.add(name)
+            kys = d.keys()
             for f in fields:
+                if not f in kys: continue
                 try:
                     self.data[name][f] = float(d[f])
                 except:
