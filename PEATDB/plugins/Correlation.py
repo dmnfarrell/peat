@@ -191,6 +191,7 @@ class CorrelationAnalyser(Plugin):
                           xlabel='Predicted',
                           ylabel='Experimental', ms=5,
                           err=None, axeslabels=True,
+                          plotname=None,
                           side=LEFT, ax=None):
         """Show exp vs pred. for a set of x-y values """
         
@@ -218,7 +219,9 @@ class CorrelationAnalyser(Plugin):
         if len(x) ==0:
             return
         errs = [i - j for i, j in zip(x, y)]
-        line = ax.plot(x, y, 'o', mew=0, ms=ms, alpha=0.6, picker=3)  
+        line = ax.plot(x, y, 'o', mew=0, ms=ms,
+                       alpha=0.6, label=plotname,
+                       picker=3)  
 
         #draw expected correlation line with slope x
         slope=1

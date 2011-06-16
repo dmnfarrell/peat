@@ -795,7 +795,9 @@ class PEATSAPlugin(Plugin):
             ax=f.add_subplot(111)
             for n in names:
                 self.showResults(n,showtable=False, ax=ax)
-            f.show()    
+            
+            ax.legend()
+            f.show()
         return
         
     def showResults(self, name=None, showtable=True, ax=None):
@@ -849,12 +851,12 @@ class PEATSAPlugin(Plugin):
                 continue
             
             ax = self.plotMerged(matrix, expcol, expdata, m,
-                                    showtable, ax)
+                                    showtable, ax, name)
 
         return ax
 
     def plotMerged(self, matrix, expcol, expdata=None,
-                    title='', showtable=True, ax=None):
+                    title='', showtable=True, ax=None, name=None):
         """Merge a set of exp vals with predictions and plot"""
         if expdata==None:
             expdata = self.parent.tablemodel.simpleCopy(include=['Mutations'])
@@ -864,7 +866,8 @@ class PEATSAPlugin(Plugin):
         C = CorrelationAnalyser()
         muts = ['mutation: '+i for i in muts]
         labels = zip(names, muts)        
-        ax,frame,mh = C.plotCorrelation(x,y,labels,title=title,ylabel=expcol,ax=ax)
+        ax,frame,mh = C.plotCorrelation(x,y,labels,title=title,ylabel=expcol,
+                                        ax=ax,plotname=name)        
         if showtable == True:
             table = self.showTable(frame, merged)
             mh.table = table        

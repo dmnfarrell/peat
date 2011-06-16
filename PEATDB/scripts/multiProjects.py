@@ -145,6 +145,7 @@ def summarise(projects):
         DB.close()
         #add link to proj
         summDB.add(p)
+        summDB.addField('project',fieldtype='Project')
         summDB[p]['project'] = {'server':'enzyme.ucd.ie','username':'guest',
                               'project':p,'password':'123','port':'8080'}              
         #stats
@@ -166,14 +167,15 @@ def summarise(projects):
            'ttest':ttp,'shapirowilk':swp}
         #print x
         parser = PDBParser()
-        descr = parser.getDescription(p)        
+        descr = parser.getDescription(p)
         x.update(descr)
         data.append(x)
         i+=1
         print summDB.isChanged()
+        print summDB[p]['project']
         
     summDB.importDict(data)
-    summDB.addField('project',fieldtype='Project')
+    
     summDB.commit()
 
     #add all peatsa jobs to summary proj also
@@ -245,8 +247,8 @@ if __name__ == '__main__':
     if opts.importcsv == True:
         createProjects(csvfiles)
     if opts.jobs == True:    
-        PEATSAJobs(['2lzm'], resubmit=True)
-        #PEATSAJobs(dbnames, resubmit=True)
+        #PEATSAJobs(['2lzm'], resubmit=True)
+        PEATSAJobs(dbnames, resubmit=True)
     if opts.summary == True:
         summarise(dbnames)
         #summarise(['2lzm'])
