@@ -230,6 +230,12 @@ class flags:
         atomname=self.atoms[uniqueid]['ATNAME']
         return self.atomname_is_hydrogen(atomname)
 
+    def is_water(self,uniqueid):
+        """Is this a water molecule?"""
+        if self.resname(uniqueid) in ['WAT','HOH','H2O']:
+            return True
+        return False
+
     #
     # ----
     #
