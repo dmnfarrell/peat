@@ -143,7 +143,7 @@ class runAPBS:
         # Load the molecules using Valist_load routine
 
         self.alist = new_valist(NOSH_MAXMOL)
-        self.atoms = protein.atoms
+        self.atoms = protein.atoms.keys()
         self.protsize = len(self.atoms)
         self.protein=protein
         # SETUP CALCULATIONS
@@ -158,7 +158,7 @@ class runAPBS:
         #
         # Load charges etc
         #
-        all_atoms=self.atoms.keys()
+        all_atoms=self.atoms[:]
         all_atoms.sort()
         self.atom_index={}
         count=0
