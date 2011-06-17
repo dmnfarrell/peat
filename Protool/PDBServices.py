@@ -44,6 +44,42 @@ class PDBServices:
     def getChains(self,PDBID):
         return self.server.getChains(PDBID)
 
+    def BLAST(self,sequence,Ecutoff=1E-10):
+        print 'Blasting sequence against PDB'
+        blastoutput=self.server.blastPDB(sequence,Ecutoff,'BLOSUM62','TXT')
+        lines=blastoutput.split('\n')
+        pdbids=[]
+        done=False
+        count=0
+        while not done:
+            line=lines[count]
+            count=count+1
+            if line[:8]=='><a name':
+                #
+                # Get hte PDB ID and the chains
+                #
+                sp=line.split('</a>')
+                pdbid=sp[1].split('|')[0]
+                sp=pdbid.split(':')
+                pdbid=sp[0]
+                num=int(sp[1])
+                chains=sp[2].split(',')
+                #
+                # Get the e-value
+                #
+                evalue=lines[count+2].split(',')[1].split('=')[1].strip()
+                #
+                # Get the number of identities
+                #
+                scoreline=lines[count+3]
+                score=scoreline.split('=')[1].split(',')[0]
+                score=score.strip().split()[0]
+                scores=score.split('/')
+                pdbids.append({'PDBID':pdbid,'numchains':num,'chains':chains,'matches':int(scores[0]),'length':int(scores[1]),'perc':float(scores[0])/float(scores[1])*100.0,'e':evalue})
+            if count>len(lines)-1:
+                done=True                
+        return pdbids
+
     def getPDB(self,pdbID):
         """Get a PDB file"""
         import urllib
