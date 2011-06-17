@@ -40,10 +40,8 @@ except:
     
 try:
     from PEATDB.DNA_sequence import *
-    #print 'Using PEATDB sequence module'
 except:
     from dummy_sequence import *
-    #print 'Cannot find PEATDB'
                              
 ##############
 
@@ -422,15 +420,44 @@ class structure(geometry,flags.flags,sequence,analyse_structure.find_pattern,
                 new_number=string.zfill(number,self.length_of_residue_numbers)
                 oldname=atom.split(':')
                 new_name='%s:%s:%s' %(oldname[0],new_number,oldname[2])
-                self.atoms[new_name]=self.atoms[atom].copy()
-                self.atoms[new_name]['RESNUM']=new_number
-                del self.atoms[atom]
+                if atom==new_name:
+                    pass
+                else:
+                    self.atoms[new_name]=self.atoms[atom].copy()
+                    self.atoms[new_name]['RESNUM']=new_number
+                    del self.atoms[atom]
             number=number+1
         self.Update()
         return
 
+    def setcha(self,residues,chainID):
+        """Change the chainID of the given residues"""
+        for residue in residues:
+            for atom in self.residues[residue]:
+                atname=atom.split(':')
+                new_name='%s:%s:%s' %(chainID,atname[1],atname[2])
+                self.atoms[new_name]=self.atoms[atom].copy()
+                self.atoms[new_name]['CHAINID']=chainID
+                if new_name!=atom:
+                    del self.atoms[atom]
+        self.Update()
+        return
+
+
     #
     # ----
+    #
+
+    def remove_chain(self,chainID,update=True):
+        """Remove a chain"""
+        if self.chains.has_key(chainID):
+            for residue in self.chains[chainID]:
+                self.remove_residue(residue,update=False)
+            if update:
+                self.Update()
+        else:
+            raise Exception('Chain not found: %s' %chainID)
+
     #
     
     def remove_residue(self,unique_identifier,update=True):
@@ -492,6 +519,14 @@ class structure(geometry,flags.flags,sequence,analyse_structure.find_pattern,
         for atom in self.atoms.keys():
             if self.is_hydrogen(atom):
                 self.remove_atom(atom,update=False)
+        self.Update()
+        return
+
+    def remove_waters(self):
+        """Remove all water molecules"""
+        for residue in self.residues.keys():
+            if self.is_water(residue):
+                self.Delete_residue(residue,update=False)
         self.Update()
         return
 
@@ -717,7 +752,6 @@ class structure(geometry,flags.flags,sequence,analyse_structure.find_pattern,
         for residue in self.residues.keys():
             if not self.isaa(residue):
                 continue
-            #print self.residues[residue]
             for atom in ['O','C','CA','N']:
                 if not '%s:%s' %(residue,atom) in self.residues[residue]:
                     missing.append('%s:%s' %(residue,atom))
@@ -790,6 +824,7 @@ class PDBparser:
         self.NMRmodel=False
         self.readmodel=True
         self.readmodels=1
+        self.models_already_read=0
         #
         # Parse TER records and assign new chain IDs?
         #
@@ -819,10 +854,10 @@ class PDBparser:
         # (for now only ATOM lines are parsed)
         #
         for line in self.lines:
-            try:
-                self.parseline(line)
-            except ParseLineError:
-                ok=None
+            #try:
+            self.parseline(line)
+            #except ParseLineError:
+            #    ok=None
         #
         # Check for name clashes and atoms with identical positons.
         #
@@ -834,14 +869,14 @@ class PDBparser:
         return
 
     def nameclash(self):
-        #
+        """
         # This routine checks for atom/residue name clashes in self.atomlinedefs
         # and gives later entries the key 'ALT'
         # So 'A:231:CD' would become 'A:231:CD,ALT' if there was a 'A:231:CD' earlier
         # in the pdb file. Identical atom names in different molecules (separated by a 'TER')
         # are not affected since Protool does not allow identical chain identifiers.
         # If there is already an '*,ALT' then the name becomes '*,ALT:ALT' and so forth...
-        #
+        """
         clashdict={}
         lines=self.atomlinedefs.keys()
         lines.sort()
@@ -889,11 +924,13 @@ class PDBparser:
     
 
     def parseline(self,line):
-        import string
-        #
+        """
         # This function calls other routines to parse the line
-        #
+        """
+        import string
         type=string.strip(string.upper(line[:6]))
+        if len(type)==0:
+            return
         #
         # There are so many junk headers, so we simplify a bit
         #
@@ -931,6 +968,8 @@ class PDBparser:
             self.parsesheet(line)
         elif type=='TURN':
             self.parseturn(line)
+        elif type=='MDLTYP':
+            pass
         elif type=='SSBOND':
             self.parsessbond(line)
         elif type=='CRYST1':
@@ -972,9 +1011,10 @@ class PDBparser:
     #
         
     def parseatom(self,line,hetatm=None):
+        """
         #
         # Parse a single ATOM line
-        #
+        #"""
         import typecheck, string
         G=structure()
         #
@@ -1084,7 +1124,6 @@ class PDBparser:
         # Get and check the coordinates
         #
         if len(line)<54:
-            print line
             xcoord=None
             ycoord=None
             zcoord=None
@@ -1248,10 +1287,11 @@ class PDBparser:
 
     def parsemodel(self,line):
         self.NMRmodel=int(line.strip().split()[1])
-        if self.NMRmodel>self.readmodels:
+        if self.models_already_read>=self.readmodels:
             self.readmodel=False
         else:
             self.readmodel=True
+            self.models_already_read=self.models_already_read+1
         return
 
     def parseendmodel(self,line):
@@ -1498,7 +1538,6 @@ class structureIO(structure):
         file=open(filename)
 	while 1:
             line=file.readline()
-            #print line
             if not line:
                 file.close()
                 raise EOFError,' not enough lines'
