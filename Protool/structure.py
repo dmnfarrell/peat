@@ -256,8 +256,10 @@ class structure(geometry,flags.flags,sequence,analyse_structure.find_pattern,
         # Given an uniqueid or a residue number, this function returns 1 if the residue/atom is
         # a non-ALT entity, and None if it is an 'ALT' entity
         if uniqueid[-3:]=='ALT':
-            return None
-        return 1
+            return False
+        if not self.atoms.has_key(uniqueid) and not self.residues.has_key(uniqueid):
+            return False
+        return True
 
     def ispresent(self,uniqueid):
         # Given an uniqueid or a residue number, this function returns 1 if the residue/atom is
@@ -310,10 +312,10 @@ class structure(geometry,flags.flags,sequence,analyse_structure.find_pattern,
     #
 
     def NextResidue(self,resid,checkforbound=1):
-        #
+        """
         # This function returns the residue one after resid in the sequence in the same molecule
-        # No checking for that the two are connected!!
-        #
+        # This function only works for amino acids
+        """
         if not self.isaa(resid):
             raise NotAnAminoAcidError('%s %s' %(resid,self.resname(resid)))
         residues=self.residues.keys()
@@ -321,7 +323,7 @@ class structure(geometry,flags.flags,sequence,analyse_structure.find_pattern,
         for x in range(len(residues)):
             if residues[x]==resid:
                 if x!=len(residues)-1:
-                    if self.chainid(resid)==self.chainid(residues[x+1]) and self.isnormal(resid)==self.isnormal(residues[x+1]):
+                    if self.chainid(resid)==self.chainid(residues[x+1]) and self.isaa(resid)==self.isaa(residues[x+1]):
                         # Check that the C of resid is bound to the N of the residues[x+1]
                         C=resid+':C'
                         N=residues[x+1]+':N'
