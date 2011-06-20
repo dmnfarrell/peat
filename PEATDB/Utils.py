@@ -55,8 +55,8 @@ def mergeDBs(DB1, DB2):
 def copyDB(DB1, DB2, overwrite=True):
     """Copy one db to another"""
     count=0
-    for r in DB1.getRecs():
-        rec = copy.deepcopy(DB1.data[r])
+    for r in DB1.getRecs():        
+        rec = copy.deepcopy(DB1.data[r])        
         DB2.add(r, record=rec)
         count+=1
     for m in DB1.meta.keys():

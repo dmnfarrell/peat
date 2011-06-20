@@ -142,7 +142,7 @@ def summarise(projects):
             print 'no results'
             continue
             
-        DB.close()
+        #DB.close()
         #add link to proj
         summDB.add(p)
         summDB.addField('project',fieldtype='Project')
@@ -174,12 +174,11 @@ def summarise(projects):
         print summDB.isChanged()
         print summDB[p]['project']
         
-    summDB.importDict(data)
-    
+    summDB.importDict(data)    
     summDB.commit()
 
     #add all peatsa jobs to summary proj also
-    print 'adding peatsa job info'
+    '''print 'adding peatsa job info'
     PS = PEATSAPlugin()
     PS.main(DB=summDB)
     #summDB.meta.peatsa_jobs = None
@@ -196,7 +195,7 @@ def summarise(projects):
         #DB.close()
     print summDB.isChanged()
     print summDB.meta.peatsa_jobs
-    summDB.commit()
+    summDB.commit()'''
 
     #for i in range(len(figs)):
     #    figs[i].savefig('fig%s.png' %i)
@@ -216,12 +215,12 @@ def send2Server(projects):
                'password':'123','port':8080}
     adminsettings={'host':'localhost','user':'peatadmin',
                'passwd':'123','port':8080}    
-    for p in projects:
+    '''for p in projects:
         print p
         DB = PDatabase(local=os.path.join(savepath,p))        
         #Utils.createDBonServer(prj=p,settings=adminsettings,
         #                       access='guest')
-        Utils.copyDBtoServer(DB,p,settings)
+        Utils.copyDBtoServer(DB,p,settings)'''
         
     DB = PDatabase(local='summary.fs')
     Utils.copyDBtoServer(DB,'PotapovDataset',settings)

@@ -258,14 +258,16 @@ class zDatabase(object):
     def getSize(self):
         return round(self.db.getSize()/1024.0,1)
 
-    def add(self, key, record=None):
-        if key in self.data.keys():
+    def add(self, key, record=None, overwrite=True):
+        """Add a record"""
+        if key in self.data.keys() and overwrite==False:
             #print 'key %s is already present' %key
             return False
         if record == None:
             record = Record(name=key)
-        self._checkMemCache()    
+        self._checkMemCache()
         self.data[key] = record
+        print record, self.data[key]
         self.data._p_changed = 1
         return
 
@@ -515,8 +517,9 @@ class PDatabase(zDatabase):
         self.refprotein = None
         return
 
-    def add(self, key, record=None):
-        if key in self.data.keys():
+    def add(self, key, record=None, overwrite=True):
+        """Add a record"""
+        if key in self.data.keys() and overwrite==False:
             #print 'key %s is already present' %key
             return False
         if record == None:
