@@ -82,9 +82,28 @@ class Hydrogens(Protool.mutate.Mutate):
         self.PI.Update()
         return
 
+    def build_all_HAs(self):
+        """Build all HAs"""
+        residues=self.PI.residues.keys()
+        residues.sort()
+        for residue in residues:
+            if self.PI.is_residue(residue):
+                self.build_HA(residue)
+        self.PI.Update()
+        return
+
     #
     # ----
     #
+
+    def build_HA(self,residue):
+        """Build all or some hydrogens for this residue"""
+        coords={'N':numpy.array([2.967,4.770,13.995]),
+                'CA':numpy.array([2.755,5.653,12.837]),
+                'C':numpy.array([3.345,7.017,13.183]),
+                'HA':numpy.array([3.210,5.226,12.056])}
+        buildname='HA'
+        return self.build_hydrogen(residue,buildname,coords)
 
     def build_HN(self,residue):
         """Build the HN"""
@@ -95,26 +114,34 @@ class Hydrogens(Protool.mutate.Mutate):
         #
         # Definition of position
         #
-        coords={'C':numpy.array([8.8,4.4,14.1]),
+        coords={'C-1':numpy.array([8.8,4.4,14.1]),
                 'N':numpy.array([8.9,3.1,14.4]),
                 'CA':numpy.array([8.9,2.1,13.3]),
                 'H':numpy.array([9.0,2.8,15.3])}
+        buildname='H'
+        return self.build_hydrogen(residue,buildname,coords)
+        
+
+    def build_hydrogen(self,residue,buildH,coords):
+        """Build a hydrogen in the structure when given coordinates, the Hname and the residue"""
         fit_coords=[]
-        for atom in ['C','N','CA']:
-            fit_coords.append(coords[atom])
-        #
-        # Now find the corresponding atoms in the structure
-        #
-        try:
-            prevres=self.PI.PreviousResidue(residue)
-            C_name='%s:C' %prevres
-        except ResidueNotFoundError:
-            print 'prev not found'
-            return None
+        findatoms=sorted(coords.keys())
+        findatoms.remove(buildH)
         ref_coords=[]
-        ref_coords.append(self.PI.GetPosition(C_name))
-        ref_coords.append(self.PI.GetPosition('%s:N' %residue))
-        ref_coords.append(self.PI.GetPosition('%s:CA' %residue))
+        for atom in findatoms:
+            fit_coords.append(coords[atom])
+            #
+            # Now find the corresponding atom in the structure
+            #
+            struct_res=residue
+            if atom[-2:]=='-1':
+                try:
+                    struct_res=self.PI.PreviousResidue(residue)
+                    atom=atom[:-2]
+                except ResidueNotFoundError:
+                    print 'prev not found'
+                    return None
+            ref_coords.append(self.PI.GetPosition('%s:%s' %(struct_res,atom)))
         #
         # Get rotation and translation for bb -> bb
         #
@@ -123,8 +150,7 @@ class Hydrogens(Protool.mutate.Mutate):
         #
         # Get the atoms that should be transformed
         #
-        trans_atoms=['H','H2']
-        trans_coords=[coords['H'],coords['H']]
+        trans_coords=[coords[buildH],coords[buildH]]
         #
         # Apply rotation and translation to trans_coords
         #
@@ -137,11 +163,11 @@ class Hydrogens(Protool.mutate.Mutate):
         restype=struct_atom['RESNAME']
         chainid=struct_atom['CHAINID']
         atomnumber=struct_atom['NUMBER']
-        uniqueid='%s:%s:%s' %(chainid,resnumber,'H')
+        uniqueid='%s:%s:%s' %(chainid,resnumber,buildH)
         count=0
         if not self.PI.atoms.has_key(uniqueid):
             self.PI.add_atom(uniqueid,atomnumber=atomnumber,
-                             atomname='H',chainid=chainid,residuename=restype,
+                             atomname=buildH,chainid=chainid,residuename=restype,
                              residuenumber=resnumber,
                              xcoord=newcoords[count][0],ycoord=newcoords[count][1],zcoord=newcoords[count][2],update=None)
         #
