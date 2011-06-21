@@ -89,6 +89,7 @@ class assign_parameters:
                 self.PI.atoms[atom]['RADIUS']=self.PI.vdwr[element]
             else:
                 print 'Cannot find',atom,element
+                raise Exception('Cannot assign parameters. Values missing for %s %s' %(atom,element))
         return
 
     #

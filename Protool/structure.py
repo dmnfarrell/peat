@@ -318,18 +318,35 @@ class structure(geometry,flags.flags,sequence,analyse_structure.find_pattern,
         """
         if not self.isaa(resid):
             raise NotAnAminoAcidError('%s %s' %(resid,self.resname(resid)))
+        #
+        # Make sure we get rid of all ',ALT' records in the name when skipping residues
+        #
+        resid=resid.replace(',ALT','')
         residues=self.residues.keys()
         residues.sort()
         for x in range(len(residues)):
             if residues[x]==resid:
                 if x!=len(residues)-1:
-                    if self.chainid(resid)==self.chainid(residues[x+1]) and self.isaa(resid)==self.isaa(residues[x+1]):
+                    addthis=None
+                    for addvalue in range(1,15):
+                        #
+                        # We have to look beyond the next residue since this could be an ALT record
+                        #
+                        if self.isnormal(residues[x+addvalue]):
+                            addthis=addvalue
+                            break
+                    if not addthis:
+                        raise Exception('More than 15 alternative conformations for %s' %resid)
+                    #
+                    # we found a normal residue
+                    #
+                    if self.chainid(resid)==self.chainid(residues[x+addthis]) and self.isaa(resid)==self.isaa(residues[x+addthis]):
                         # Check that the C of resid is bound to the N of the residues[x+1]
                         C=resid+':C'
-                        N=residues[x+1]+':N'
+                        N=residues[x+addthis]+':N'
                         if not self.bound(N,C) and checkforbound:
                             raise Cterm
-                        return residues[x+1]
+                        return residues[x+addthis]
                     else:
                         raise Cterm
                 else:
@@ -505,8 +522,6 @@ class structure(geometry,flags.flags,sequence,analyse_structure.find_pattern,
                     del self.atoms[atom]
         self.Update()
         return
-
-
         
     def remove_atoms_with_tag(self,tag=''):
         """Remove all atoms with the specified tag"""

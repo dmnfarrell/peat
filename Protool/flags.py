@@ -147,15 +147,15 @@ class flags:
     
     def Cterminal(self,residue):
         #
-        # Returns 1 if residue is an C-terminal residue
+        # Returns True if residue is an C-terminal residue
         #
         try:
             x=self.NextResidue(residue)
         except Cterm:
             return 1
         except NotAnAminoAcidError:
-            return 1
-        return None
+            return True
+        return False
 
     def is_backbone(self,atom):
         return self.is_mainchain(atom)
@@ -221,8 +221,8 @@ class flags:
         # None if it is not
         import string
         if self.aminoacids.has_key(string.upper(self.resname(uniqueid))):
-            return 1
-        return None
+            return True
+        return False
 
     def is_hydrogen(self,uniqueid):
         # Get the atom name
