@@ -147,7 +147,8 @@ def summarise(projects):
         summDB.add(p)
         summDB.addField('project',fieldtype='Project')
         summDB[p]['project'] = {'server':'enzyme.ucd.ie','username':'guest',
-                              'project':p,'password':'123','port':'8080'}              
+                              'project':p,'password':'123','port':'8080'}
+        print summDB.isChanged()
         #stats
         cc,rmse,meanerr = C.getStats(pre,exp)
         #ttest for mean errs 0        
@@ -165,18 +166,17 @@ def summarise(projects):
         C.QQplot(errs,title=p,ax=ax)'''
         x={'name':p,'mutants':len(pre),'rmse':rmse,'corrcoef':cc,'meanerr':meanerr,
            'ttest':ttp,'shapirowilk':swp}
-        #print x
+        
         parser = PDBParser()
         descr = parser.getDescription(p)
         x.update(descr)
-        data.append(x)
-        i+=1
-        print summDB.isChanged()
-        print summDB[p]['project']
+        data.append(x)       
+        i+=1              
         
-    summDB.importDict(data)    
-    summDB.commit()
-
+    summDB.importDict(data)
+    print summDB.isChanged()
+    summDB.commit()    
+    
     #add all peatsa jobs to summary proj also
     '''print 'adding peatsa job info'
     PS = PEATSAPlugin()

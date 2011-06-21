@@ -423,7 +423,7 @@ class zDatabase(object):
                 self.addField(f, 'text')
         for d in importdata:
             name = d[namefield]
-            self.add(name)
+            self.add(name, overwrite=False)
             kys = d.keys()
             for f in fields:
                 if not f in kys: continue

@@ -265,7 +265,7 @@ class CorrelationAnalyser(Plugin):
         x=[round(float(i),2) for i in x]
         y=[round(float(i),2) for i in y]
         errs = [i[0]-i[1] for i in zip(x,y)]
-        cc = round(numpy.corrcoef(x,y)[0][1],2)
+        cc = round(math.pow(numpy.corrcoef(x,y)[0][1],2),2)
         rmse = round(self.rmse(x,y),2)
         meanerr = round(numpy.mean(errs),2)
         return cc, rmse, meanerr
