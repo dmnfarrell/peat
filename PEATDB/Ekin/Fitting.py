@@ -214,7 +214,7 @@ class Fitting(object):
         if expdata == None or len(expdata)<=1:
             print 'Not enough data to fit'
             return None, None
-
+       
         if fitdata != None and len(fitdata) > 1:
             X = cls.makeFitter(fitdata, expdata=expdata, callback=callback)
         else:

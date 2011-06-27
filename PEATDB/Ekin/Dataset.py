@@ -48,7 +48,7 @@ class EkinDataset(object):
             else:    
                 self.x=x
                 self.y=y
-            self.data = [self.x,self.y]                        
+            self.data = [self.x,self.y]
             if len(active)==0:
                 active = [1 for i in self.x]
             self.active=active
@@ -206,8 +206,8 @@ class EkinDataset(object):
     def adjust(self, column=0, op='+', val=0):
         """Perform some arithmetic on pts"""
         lst=self.data[column]
-        for i in range(0,self.length()):            
-            lst[i]=eval(str(lst[i]) + op + str(val))      
+        for i in range(0,self.length()):
+            lst[i]=eval(str(lst[i]) + op + str(val))
         return
         
     def setError(self, col, i, e):       

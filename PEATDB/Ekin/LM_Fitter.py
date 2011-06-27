@@ -247,7 +247,7 @@ class LM_Fitter:
         count=0
         #print 'Step    Diff   LM_damper'
         for x in range(1,rounds):
-            self.fit_LM()            
+            self.fit_LM()
             # check for singluar matrix
             if self.singular_matrix == 1:
                 status = 'Stopped - singular matrix'

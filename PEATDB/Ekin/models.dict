@@ -1,18 +1,18 @@
 (dp0
-S'Bell-shaped pH-act profile (2 pKas)'
+S'schellman'
 p1
 (dp2
 S'varnames'
 p3
-S'pka1,pka2,scale'
+S'Tm,deltaH,deltacp'
 p4
 sS'equation'
 p5
-S'scale*(1.0/(math.pow(10,-pH)/math.pow(10,-pKa2)+1+math.pow(10,-pKa1)/math.pow(10,-pH)))'
+S'deltaH * (1- (t/tm)) - deltacp( (tm-t)+ (t*ln(t/tm)) )'
 p6
 sS'description'
 p7
-S'pH activity profile'
+S'Fit data to all thermodynamic params at same time\n       Elwell/Schellman, Biochim Biophys Acta 1977'
 p8
 sS'Name'
 p9
@@ -20,347 +20,367 @@ g1
 sS'name'
 p10
 g1
-ssS'Unfolding'
+ssS'Thermal Inactivation'
 p11
 (dp12
-g3
-S'an,bn,ad,bd,m,d50'
+S'guess'
 p13
-sg5
-S'((an + bn * x) + (ad + bd * x) * math.exp(m * (x-d50))) / (1+math.exp(m * (x-d50)))'
+S"{'A':'1','Ea':'5000','t':'900'}"
 p14
 sg7
-S'fit to a denaturation curve. with 6 parameters, including baseline slopes'
+S'Fit unfolding activation energy directly to thermal inactivation data (Vriend et al. 98).'
 p15
-sg9
-g11
-sg10
-g11
-ssS'2 pKas, 3 Chemical shifts'
+sg5
+S'math.exp(-A*math,exp(-Ea/(8.3145*x))*t)'
 p16
-(dp17
-S'guess'
+sg10
+g11
+sg3
+S'A,t,Ea'
+p17
+sg9
+S'Thermal Inactivation'
 p18
-S"{'offset': 'min(y)', 'span1': '(max(y)-min(y))/2', 'pKa1': 'min(x)+(max(x)-min(x))*0.25', 'pKa2': 'min(x)+(max(x)-min(x))*0.75', 'span2': '(max(y)-min(y))/2'}"
-p19
-sg7
-S'titration curve with 2 independent pkas'
-p20
-sg5
-S'span1/(1+10**(pKa1-x))+span2/(1+10**(-x+pKa2))+offset'
-p21
-sg10
-g16
-sg3
-S'pKa1,pKa2,offset,span1,span2'
-p22
-sg9
-g16
-ssS'Linear'
-p23
-(dp24
-g18
-S"{'a': 'min(y)', 'b': 'max(y)-min(y)/max(x)-min(x)'}"
-p25
-sg7
-S'straight line'
-p26
-sg5
-S'a*x+b'
-p27
-sg10
-g23
-sg3
-S'a,b'
-p28
-sg9
-g23
-ssS'Power'
-p29
-(dp30
-g3
-S'a,b'
-p31
-sg5
-S'(x**a)+b'
-p32
-sg7
-S'fit to data that obeys a power law'
-p33
-sg9
-g29
-sg10
-g29
-ssS'Sigmoid'
-p34
-(dp35
-g18
-S"{'slope': '1', 'top': 'max(y)', 'tm': '(max(x)-min(x))/2+min(x)', 'bottom': 'min(y)'}"
-p36
-sg7
-S'simple sigmoid'
-p37
-sg5
-S'bottom+(top-bottom)/(1+math.exp((tm-x)/slope))'
-p38
-sg10
-g34
-sg3
-S'tm,bottom,top,slope'
-p39
-sg9
-g34
-ssS'Michaelis-Menten'
-p40
-(dp41
-g18
-S"{'Vmax': 'max(y)', 'labels': ['[S]', 'v'], 'Km': 'max(x)/2'}"
-p42
-sg7
-S'fits enzyme kinetic data'
-p43
-sg5
-S'(Vmax * x)/(x + Km)'
-p44
-sg10
-g40
-sg3
-S'Km, Vmax'
-p45
-sg9
-g40
-ssS'1 pKa 2 Chemical shifts'
-p46
-(dp47
-g18
-S"{'pKa': 'min(x)+(max(x)-min(x))/2.0', 'span': 'max(y)-min(y)', 'offset': 'min(y)'}"
-p48
-sg7
-S'titration curve with 1 independent pka'
-p49
-sg5
-S'span/(1+10**(-x+pKa))+offset'
-p50
-sg10
-g46
-sg3
-S'pKa,span,offset'
-p51
-sg9
-g46
-ssS'schellman'
-p52
-(dp53
-g3
-S'Tm,deltaH,deltacp'
-p54
-sg5
-S'deltaH * (1- (t/tm)) - deltacp( (tm-t)+ (t*ln(t/tm)) )'
-p55
-sg7
-S'Fit data to all thermodynamic params at same time\n       Elwell/Schellman, Biochim Biophys Acta 1977'
-p56
-sg9
-g52
-sg10
-g52
-ssS'Gaussian'
-p57
-(dp58
-g3
-S'a,b,c'
-p59
-sg5
-S'a*exp(-(pow(x-b),2)/(pow(2*c,2)))'
-p60
-sg7
-S'gaussian function, a bell-shaped curve'
-p61
-sg9
-g57
-sg10
-g57
-ssS'Amyloid Fibre Formation'
-p62
-(dp63
-g3
-S'yi,yf,mi,mf,x0,t'
-p64
-sg5
-S'yi + mi*x + (yf+mf*x)/(1+math.exp((-x-x0)/t))'
-p65
-sg9
-g62
-sg10
-g62
-ssS'Exponential Growth'
-p66
-(dp67
-g18
-S"{'p':'max(y)'}"
-p68
-sg7
-S'Exponential Association'
-p69
-sg5
-S'p*(1-math.exp(-K*x))'
-p70
-sg10
-g66
-sg3
-S'K,p'
-p71
-sg9
-S'Exponential Growth'
-p72
 ssS'3 pKas, 2 Chemical shifts'
-p73
-(dp74
+p19
+(dp20
 g3
 S'pKa1,pKa2,pKa3,offset,span1'
-p75
+p21
 sg5
 S'span1*(x/pKa3 + 1)/(1+x/pKa2+x/pKa3+x*x/(pKa1*pKa3))+offset'
-p76
+p22
 sg7
 S'titration curve with 3 independent pkas'
-p77
+p23
 sg9
-g73
+g19
 sg10
-g73
+g19
 ssS'3 pKas, 4 Chemical shifts'
-p78
-(dp79
-g18
+p24
+(dp25
+g13
 S"{'pKa1': 'min(x)+(max(x)-min(x))*0.25', 'pKa2': 'min(x)+(max(x)-min(x))*0.5', 'pKa3': 'min(x)+(max(x)-min(x))*0.75', 'span2': '(max(y)-min(y))/3', 'span1': '(max(y)-min(y))/3', 'span3': '(max(y)-min(y))/3', 'offset': 'min(y)'}"
-p80
+p26
 sg7
 S''
-p81
+p27
 sg5
 S'span1/(1+10**(pKa1-x))+span2/(1+10**(-x+pKa2))+span3/(1+10**(-x+pKa3))+offset'
-p82
+p28
 sg10
-g78
+g24
 sg3
 S'pKa1,pKa2,pKa3,offset,span1,span2,span3'
-p83
+p29
 sg9
-g78
-ssS'DSC2state'
-p84
-(dp85
-g3
-S'Tm,deltaH'
-p86
-sg5
-S'deltaH / (R*math.pow(x,2)) * f * (1-f)'
-p87
-sg7
-S'fit simple two state model to DSC data'
-p88
-sg9
-g84
-sg10
-g84
-ssS'Arrhenius'
-p89
-(dp90
-g3
-S'A,Ea'
-p91
-sg5
-S'A*exp(-Ea/RT)'
-p92
-sg7
-S'arrhenius equation'
-p93
-sg9
-g89
-sg10
-g89
-ssS'Substrate Depletion'
-p94
-(dp95
-g3
-S'x0,M,D'
-p96
-sg5
-S'M * (1 - math.exp(-D*(x-x0)))'
-p97
-sg7
-S'fit substrate depletion data'
-p98
-sg9
-g94
-sg10
-g94
-ssS'Modified Hill'
-p99
-(dp100
-g18
-S"{'pKa':'min(x)+(max(x)-min(x))/2.0'}"
-p101
-sg7
-S'fit to a single titration curve with 1 pka and a hill parameter'
-p102
-sg5
-S'span/(1+10**(n*(- x + pKa)))+offset'
-p103
-sg10
-g99
-sg3
-S'pKa,span,offset,n'
-p104
-sg9
-g99
+g24
 ssS'Residual Activity'
-p105
-(dp106
+p30
+(dp31
 g3
 S't50,slope,top'
-p107
+p32
 sg5
 S'top/((1+(T/T50)^slope))'
-p108
+p33
 sg7
 S'fits thermal denaturation data (basic sigmoid)'
-p109
+p34
 sg9
-g105
+g30
 sg10
-g105
+g30
+ssS'2 pKas, 3 Chemical shifts'
+p35
+(dp36
+g13
+S"{'offset': 'min(y)', 'span1': '(max(y)-min(y))/2', 'pKa1': 'min(x)+(max(x)-min(x))*0.25', 'pKa2': 'min(x)+(max(x)-min(x))*0.75', 'span2': '(max(y)-min(y))/2'}"
+p37
+sg7
+S'titration curve with 2 independent pkas'
+p38
+sg5
+S'span1/(1+10**(pKa1-x))+span2/(1+10**(-x+pKa2))+offset'
+p39
+sg10
+g35
+sg3
+S'pKa1,pKa2,offset,span1,span2'
+p40
+sg9
+g35
+ssS'Linear'
+p41
+(dp42
+g13
+S"{'a': 'min(y)', 'b': 'max(y)-min(y)/max(x)-min(x)'}"
+p43
+sg7
+S'straight line'
+p44
+sg5
+S'a*x+b'
+p45
+sg10
+g41
+sg3
+S'a,b'
+p46
+sg9
+g41
+ssS'Power'
+p47
+(dp48
+g3
+S'a,b'
+p49
+sg5
+S'(x**a)+b'
+p50
+sg7
+S'fit to data that obeys a power law'
+p51
+sg9
+g47
+sg10
+g47
+ssS'1 pKa 2 Chemical shifts'
+p52
+(dp53
+g13
+S"{'pKa': 'min(x)+(max(x)-min(x))/2.0', 'span': 'max(y)-min(y)', 'offset': 'min(y)'}"
+p54
+sg7
+S'titration curve with 1 independent pka'
+p55
+sg5
+S'span/(1+10**(-x+pKa))+offset'
+p56
+sg10
+g52
+sg3
+S'pKa,span,offset'
+p57
+sg9
+g52
+ssS'Exponential Growth'
+p58
+(dp59
+g13
+S"{'p':'max(y)'}"
+p60
+sg7
+S'Exponential Association'
+p61
+sg5
+S'p*(1-math.exp(-K*x))'
+p62
+sg10
+g58
+sg3
+S'K,p'
+p63
+sg9
+S'Exponential Growth'
+p64
+ssS'Substrate Depletion'
+p65
+(dp66
+g3
+S'x0,M,D'
+p67
+sg5
+S'M * (1 - math.exp(-D*(x-x0)))'
+p68
+sg7
+S'fit substrate depletion data'
+p69
+sg9
+g65
+sg10
+g65
+ssS'Modified Hill'
+p70
+(dp71
+g13
+S"{'pKa':'min(x)+(max(x)-min(x))/2.0'}"
+p72
+sg7
+S'fit to a single titration curve with 1 pka and a hill parameter'
+p73
+sg5
+S'span/(1+10**(n*(- x + pKa)))+offset'
+p74
+sg10
+g70
+sg3
+S'pKa,span,offset,n'
+p75
+sg9
+g70
+ssS'Bell-shaped pH-act profile (2 pKas)'
+p76
+(dp77
+g3
+S'pka1,pka2,scale'
+p78
+sg5
+S'scale*(1.0/(math.pow(10,-pH)/math.pow(10,-pKa2)+1+math.pow(10,-pKa1)/math.pow(10,-pH)))'
+p79
+sg7
+S'pH activity profile'
+p80
+sg9
+g76
+sg10
+g76
+ssS'Michaelis-Menten'
+p81
+(dp82
+g13
+S"{'Vmax': 'max(y)', 'labels': ['[S]', 'v'], 'Km': 'max(x)/2'}"
+p83
+sg7
+S'fits enzyme kinetic data'
+p84
+sg5
+S'(Vmax * x)/(x + Km)'
+p85
+sg10
+g81
+sg3
+S'Km, Vmax'
+p86
+sg9
+g81
+ssS'Amyloid Fibre Formation'
+p87
+(dp88
+g3
+S'yi,yf,mi,mf,x0,t'
+p89
+sg5
+S'yi + mi*x + (yf+mf*x)/(1+math.exp((-x-x0)/t))'
+p90
+sg9
+g87
+sg10
+g87
 ssS'DSCindependent'
-p110
-(dp111
+p91
+(dp92
 g3
 S'A,Tm,deltaH'
-p112
+p93
 sg5
 S'A* (math.pow(deltaH,2) / (R*math.pow(x,2)) ) *f * (1-f)'
-p113
+p94
 sg7
 S'Fit to a 3 parameter DSC curve'
-p114
+p95
 sg9
-g110
+g91
 sg10
-g110
+g91
+ssS'Unfolding'
+p96
+(dp97
+g3
+S'an,bn,ad,bd,m,d50'
+p98
+sg5
+S'((an + bn * x) + (ad + bd * x) * math.exp(m * (x-d50))) / (1+math.exp(m * (x-d50)))'
+p99
+sg7
+S'fit to a denaturation curve. with 6 parameters, including baseline slopes'
+p100
+sg9
+g96
+sg10
+g96
+ssS'DSC2state'
+p101
+(dp102
+g3
+S'Tm,deltaH'
+p103
+sg5
+S'deltaH / (R*math.pow(x,2)) * f * (1-f)'
+p104
+sg7
+S'fit simple two state model to DSC data'
+p105
+sg9
+g101
+sg10
+g101
+ssS'Sigmoid'
+p106
+(dp107
+g13
+S"{'slope': '1', 'top': 'max(y)', 'tm': '(max(x)-min(x))/2+min(x)', 'bottom': 'min(y)'}"
+p108
+sg7
+S'simple sigmoid'
+p109
+sg5
+S'bottom+(top-bottom)/(1+math.exp((tm-x)/slope))'
+p110
+sg10
+g106
+sg3
+S'tm,bottom,top,slope'
+p111
+sg9
+g106
 ssS'diffDenaturation'
-p115
-(dp116
+p112
+(dp113
 g3
 S'A,Tm,deltaH'
-p117
+p114
 sg5
 S'A* (deltaH / (R*math.pow(x,2)) ) *f * (1-f)'
-p118
+p115
 sg7
 S'Fit to a 3 parameter differential denaturation curve,\n        ref. John/Weeks Protein Science 2000'
-p119
+p116
 sg9
-g115
+g112
 sg10
-g115
+g112
+ssS'Gaussian'
+p117
+(dp118
+g3
+S'a,b,c'
+p119
+sg5
+S'a*exp(-(pow(x-b),2)/(pow(2*c,2)))'
+p120
+sg7
+S'gaussian function, a bell-shaped curve'
+p121
+sg9
+g117
+sg10
+g117
+ssS'Arrhenius'
+p122
+(dp123
+g3
+S'A,Ea'
+p124
+sg5
+S'A*exp(-Ea/RT)'
+p125
+sg7
+S'arrhenius equation'
+p126
+sg9
+g122
+sg10
+g122
 ss.

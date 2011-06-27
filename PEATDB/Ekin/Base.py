@@ -537,8 +537,9 @@ class EkinProject(object):
             return None
 
     def fitDataset(self, dataset, model=None, update=True,
-                    noiter=300, conv=None, grad=None, damper=None,
-                    silent=False, guess=True, callback=None):
+                    noiter=300, conv=None, grad=None, damper=1.0,
+                    silent=False, guess=True, startvalues=None, changevars=None,
+                    callback=None):
         """Calculate the fit for this current dataset, if a model
            is given we use that instead of the current one.
            update=True means that the dataset fit info will be overwritten"""
@@ -552,9 +553,11 @@ class EkinProject(object):
                 model = self.defaultmodel
         else:
             currfitdata = None
-        fitresult, X = Fitting.doFit(datatofit, fitdata=currfitdata, model=model,
+       
+        fitresult, X = Fitting.doFit(ekindata=datatofit, fitdata=currfitdata, model=model,
                                      noiter=noiter, conv=conv, grad=grad, LM_damper=damper,
-                                     silent=silent, guess=guess, callback=callback)
+                                     silent=silent, guess=guess, startvalues=startvalues,
+                                     changevars=changevars, callback=callback)
                
         if fitresult == None:
             print 'Fitter returned None..'
@@ -676,7 +679,7 @@ class EkinProject(object):
             fig = figure
         else:           
             from matplotlib import figure
-            fig = figure.Figure(figsize=size, dpi=80)
+            fig = figure.Figure(figsize=size, dpi=80)            
         fig.clf()
         datasets = self.checkDatasetParam(datasets)
         if plotoption == 2:
