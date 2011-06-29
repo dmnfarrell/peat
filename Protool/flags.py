@@ -157,24 +157,9 @@ class flags:
             return True
         return False
 
-    def is_backbone(self,atom):
-        return self.is_mainchain(atom)
 
-    #
-    # ---
-    #
 
-    def is_mainchain(self,atom):
-        #
-        # Returns 1 if the atom is a mainchain (backbone) atom
-        #
-        import string
-        atomname=string.split(atom,':')[-1]
-        if atomname=='CA' or atomname=='N' or atomname=='C' \
-           or atomname=='O' or atomname=='H':
-            return 1
-        else:
-            return None
+  
 
     #
     # ----
@@ -333,6 +318,22 @@ class flags:
         #
         return None
 
+    
+    #
+    # ---
+    #
+    
+    def is_sidechain(self,atom):
+        if self.is_backbone(atom):
+            return False
+        return True
+
+    def is_mainchain(self,atom):
+        return self.is_backbone(atom)
+        
+    #
+    # -----
+    #
     
     def is_backbone(self,uniqueid):
         # Get the atom name

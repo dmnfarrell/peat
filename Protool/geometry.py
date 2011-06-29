@@ -59,6 +59,14 @@ def normalise (vector):
 class geometry:
     """Geometry class"""
 
+    def length(self,vector):
+        # This function returns the length of vector
+        import math
+        sum=0.0
+        for value in vector:
+            sum=sum+math.pow(value,2)
+        return math.sqrt(sum)
+
     def distance(self,atom1,atom2):
         """Return the distance between two atoms"""
         return self.dist(atom1,atom2)
@@ -116,6 +124,47 @@ class geometry:
     #
     # ---
     #
+    
+    def get_CA_RMSD(self,PI_other):
+        """Get the CA RMSD between this molecule and the other instance"""
+        CAs1=[]
+        CAs2=[]
+        for residue in self.residues:
+            CA='%s:CA' %residue
+            if (PI_other.atoms.has_key(CA) or PI_other.atoms.has_key('A'+CA)) and self.atoms.has_key(CA):
+                CAs1.append(self.GetPosition(CA))
+                if PI_other.atoms.has_key(CA):
+                    CAs2.append(PI_other.GetPosition(CA))
+                else:
+                    CAs2.append(PI_other.GetPosition('A'+CA))
+        return self.superpose(CAs2,CAs1)
+    
+    #
+    # -----
+    #
+    
+    def apply_current_transformation(self,fit_atoms):
+        """Apply the last transformation to fit_atoms"""
+        #
+        # Check that we have a rotation matrix
+        #
+        for varname in ['refcenter','fitcenter','rotation']:
+            if not hasattr(self,varname):
+                raise Exception('No transformation defined. Call "superpose" first')
+        #
+        fit_coords=[]
+        for atom in fit_atoms:
+            fit_coords.append(self.GetPosition(atom))
+        newcoords=quatfit.qtransform(len(fit_atoms),fit_coords,self.refcenter,self.fitcenter,self.rotation)
+        #
+        # Change the coordinates
+        #
+        count=0
+        for atom in fit_atoms:
+            self.SetPosition(atom,newcoords[count])
+            count=count+1
+        return
+            
 
     def superpose(self,reference_coords,fit_coords,return_pdbs=False):
         """Superpose the fit_coords on the reference_coords"""

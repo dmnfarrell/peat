@@ -26,7 +26,7 @@
 
 class contact_order:
 
-    def calculate_RCO(self,ss=False):
+    def calculate_RCO(self,ss=False,elec_CO=False):
         """Calculate the relative contact order for the soup. Setting ss to True will lead to the sequence distance being determine using SS bridges"""
         cutoff=6.0
         contacts={}
@@ -36,7 +36,11 @@ class contact_order:
         for residue1 in sorted(self.residues.keys()):
             print residue1, 
             import sys
-            contacts[residue1]=self.calculate_residue_CO(residue1,ss=ss)
+            if elec_CO:
+                contacts[residue1]=self.calculate_residue_Elec_CO(residue1,ss=ss)
+            else:
+                contacts[residue1]=self.calculate_residue_CO(residue1,ss=ss)
+            #
             sys.stdout.flush()
         #
         # Calculate the contact order
@@ -45,7 +49,7 @@ class contact_order:
         sum_cont=[]
         RCOs={}
         for res in contacts.keys():
-            RCO=sum(contacts[res])/float(len(contacts[res]))
+            RCO=sum(contacts[res])#/float(len(contacts[res]))
             sum_cont=sum_cont+contacts[res]
             RCOs[res]=RCO
             
@@ -147,25 +151,25 @@ class contact_order:
     # ------
     #
         
-    def calculate_Elec_CO(self,residue1):
+    def calculate_residue_Elec_CO(self,residue1):
         """Calculate the Electrostatic contact order"""
+        contacts=[]
         for residue2 in sorted(self.residues.keys()):
             if residue1==residue2:
                 continue
             if self.dist('%s:CA' %(residue1),'%s:CA' %(residue2))>25.0:
                 continue
             for atom1 in self.residues[residue1]:
-                for atom2 in self.residues[residue2]:
-                    if self.dist(atom1,atom2)<=cutoff:
-                        contacts.append(self.res_separation(atom1,atom2,ss=ss))    
-                        
-
-        return
+                if self.is_sidechain(atom1):
+                    if self.is_oxygen(atom1) or self.is_nitrogen(atom1):
+                        for atom2 in self.residues[residue2]:
+                            if self.dist(atom1,atom2)<=cutoff:
+                                contacts.append(self.res_separation(atom1,atom2,ss=ss))    
+        return contacts
 
     #
     # -----
     #
-
         
     def calculate_residue_CO(self,residue1,ss=False):
         """Calculate the contact order for a single residue"""
@@ -174,12 +178,16 @@ class contact_order:
         for residue2 in sorted(self.residues.keys()):
             if residue1==residue2:
                 continue
-            if self.dist('%s:CA' %(residue1),'%s:CA' %(residue2))>25.0:
-                continue
+            try:
+                if self.dist('%s:CA' %(residue1),'%s:CA' %(residue2))>25.0:
+                    continue
+            except:
+                pass
             for atom1 in self.residues[residue1]:
                 for atom2 in self.residues[residue2]:
                     if self.dist(atom1,atom2)<=cutoff:
-                        contacts.append(self.res_separation(atom1,atom2,ss=ss))                       
+                        contacts.append(self.res_separation(atom1,atom2,ss=ss))   
+
         #
         # Calculate the contact order
         #

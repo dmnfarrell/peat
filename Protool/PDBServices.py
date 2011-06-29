@@ -84,5 +84,8 @@ class PDBServices:
         """Get a PDB file"""
         import urllib
         data = urllib.urlopen('http://www.pdb.org/pdb/files/%s.pdb' %pdbID.lower()).read()
-        return data.split('\n')
+        lines=data.split('\n')
+        if lines[0].strip().lower()=='<div>':
+            raise Exception('PDBID not found: %s' %pdbID)
+        return lines
         
