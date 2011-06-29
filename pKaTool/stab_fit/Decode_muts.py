@@ -1,5 +1,7 @@
 #!/usr/bin/env python
-
+#
+# This script is for deducing the the effect of single mutations from multiple mutations
+#
 class muts:
 
     def __init__(self,mutfile):

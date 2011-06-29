@@ -17,13 +17,14 @@ class pKa_contact_order:
             RCOs=[PI.calculate_RCO(ss=False),PI.calculate_RCO(ss=True)]
             residues=sorted(RCOs[0].keys())
             residues.remove('all')
-            print '%10s %7s %7s %7s' %('Residue','CO_noss','CO_w_ss','diff')
-            for residue in residues:
-                print '%10s %4s %7.2f %7.2f %7.2f' %(residue,PI.resname(residue),RCOs[0][residue],RCOs[1][residue],RCOs[1][residue]-RCOs[0][residue])
-            print '------------------'
-            print '%10s %4s %7.2f %7.2f %7.2f' %('All',' ',RCOs[0]['all'],RCOs[1]['all'],RCOs[1]['all']-RCOs[0]['all'])
-            
-        return
+            #print '%10s %7s %7s %7s' %('Residue','CO_noss','CO_w_ss','diff')
+            #for residue in residues:
+            #    print '%10s %4s %7.2f %7.2f %7.2f' %(residue,PI.resname(residue),RCOs[0][residue],RCOs[1][residue],RCOs[1][residue]-RCOs[0][residue])
+            #print '------------------'
+            #print '%10s %4s %7.2f %7.2f %7.2f' %('All',' ',RCOs[0]['all'],RCOs[1]['all'],RCOs[1]['all']-RCOs[0]['all'])
+            self.RCOss=RCOs[1]
+            self.RCO=RCOs[0]
+        return 
         
     #
     # -----
@@ -33,23 +34,29 @@ class pKa_contact_order:
         """Get a PDB chain given as <PDBID><chainname>"""
         import Protool
         X=Protool.structureIO()
-        CID=name[-1]
-        name=name[:-1]
-        #
         import os
-        pdbfile=os.path.join(PDBdir,name+'.pdb')
-        if not os.path.isfile(pdbfile):
-            print 'Getting %s from the PDB' %(os.path.split(pdbfile)[-1])
-            import Protool.PDBServices as PS
-            PDB=PS.PDBServices()
-            lines=PDB.getPDB(name)
-            if len(lines)<100:
-                import string
-                raise Exception('PDB file not found: %s' %(string.join(lines)))
-            X.parsepdb(lines)
-            X.writepdb(pdbfile)
+        #
+        # If this is a local file that exists, then we use that
+        #
+        if os.path.isfile(name):
+            X.readpdb(name)
+            return X
         else:
-            X.readpdb(pdbfile)
+            CID=name[-1]
+            name=name[:-1]
+            pdbfile=os.path.join(PDBdir,name+'.pdb')
+            if not os.path.isfile(pdbfile):
+                print 'Getting %s from the PDB' %(os.path.split(pdbfile)[-1])
+                import Protool.PDBServices as PS
+                PDB=PS.PDBServices()
+                lines=PDB.getPDB(name)
+                if len(lines)<100:
+                    import string
+                    raise Exception('PDB file not found: %s' %(string.join(lines)))
+                X.parsepdb(lines)
+                X.writepdb(pdbfile)
+            else:
+                X.readpdb(pdbfile)
         X.RemoveALT() # Removes alternative atoms
         X.Remove_All_NonAminoAcids() # Deletes all ligands and waters
         #
@@ -65,6 +72,10 @@ class pKa_contact_order:
                 X.remove_residue(residue)
         X.Update()
         return X
+        
+#
+# ------
+#
         
 class unfolded_pkas(pKa_contact_order):
     
@@ -148,7 +159,103 @@ class unfolded_pkas(pKa_contact_order):
             #    score=score-0.2*gamma/(dist**6)
         return score
             
+#
+# ----
+# 
+import sys
+sys.path.append('/Users/nielsen/lib/development/')
+import Experimental_data.DataHandler
+class myExpdata(Experimental_data.DataHandler.benchmark):
+
+    def calculate_contact_order(self):
+        xs=[]
+        ys=[]
+        RCOdir=os.path.join(self.rundir,'RCOs')
+        if self.options.init:
+            if os.path.isdir(RCOdir):
+                import shutil
+                shutil.rmtree(RCOdir)
+        if not os.path.isdir(RCOdir):
+            os.mkdir(RCOdir)
+        #
+        for test in self.datasets:
+            calc_spec=self.get_calculation_spec(os.path.join(self.expdir,test))
+            datapoints=self.setup_calculation(calc_spec)
+            for dp in datapoints['Calculations']:
+                if calc_spec['Calctype']=='dpKa':
+                    #
+                    # Get the contact order if we don't have it already
+                    #
+                    print dp.keys()
+                    self.struct_key='PDBchain'
+                    if dp.has_key('PDBchain'):  
+                        pdbfilename=dp['PDBchain']
+                    else:
+                        pdbfilename=dp['PDB']
+                        self.struct_key='PDB'
+                    RCOfile=os.path.join(RCOdir,pdbfilename)
+                    if os.path.isfile(RCOfile):
+                        fd=open(RCOfile)
+                        import pickle
+                        RCO=pickle.load(fd)
+                        fd.close()
+                    else:
+                        pdbfile=calc_spec['Files'][pdbfilename]
+                        CO=pKa_contact_order([pdbfile])
+                        RCO=CO.RCO
+                        fd=open(RCOfile,'w')
+                        import pickle
+                        pickle.dump(RCO.copy(),fd)
+                        fd.close()
+                    #
+                    # Get the dpKa
+                    #
+                    import pKaTool.pKadata
+                    titgroup=dp['titgroup'].upper()
+                    if not pKaTool.pKadata.modelpKas.has_key(titgroup):
+                        print 'Could not parse %s' %titgroup
+                        continue
+                    modelpKa=pKaTool.pKadata.modelpKas[titgroup]
+                    acibas=pKaTool.pKadata.acidbase[titgroup]
+                    dpKa=float(dp['expval'])-modelpKa
+                    #
+                    # Find the chain ID
+                    #
+                    if dp.has_key('ChainID'):
+                        ChainID=dp['ChainID']
+                    else:
+                        chainID=self.find_chainID(pdbfilename,dp['resnum'])
+                    #
+                    # Add the data
+                    #
+                    import string
+                    resid='%s:%s' %(ChainID,string.zfill(int(dp['resnum']),4))
+                    print pdbfilename,resid
+                    if RCO.has_key(resid):
+                        xs.append(RCO[resid])
+                        ys.append(dpKa)
+        import pylab
+        pylab.plot(xs,ys,'ro')
+        pylab.xlabel('Contact order')
+        pylab.ylabel('dpKa')
+        pylab.show()
+                    
+            
+        return
         
+            
 if __name__=='__main__':
+    print
+    print 'Calculation of contact order for titratable groups'
+    print
+    from optparse import OptionParser
+    parser = OptionParser(usage='%prog [options]',version='%prog 1.0')
+    parser.add_option('-d','--dataset',dest='datasets',action='append',help='Datasets to examine. Default: %default',default=[])
+    parser.add_option('--init',dest='init',action='store_true',default=False,help='Initialize all data files anew and reperform all calculations')
+    parser.add_option('--plot',dest='plot',action='store_true',default=True,help='Plot data and results. Default: %default')
+    (options, args) = parser.parse_args()
+    #
+    EXP=myExpdata(options.datasets,options)
+    EXP.calculate_contact_order()
     #Y=unfolded_pkas(['2LZTA'])
-    X=pKa_contact_order(['2LZTA'])
+    #X=pKa_contact_order(['2LZTA'])
