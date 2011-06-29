@@ -79,308 +79,311 @@ g24
 ssS'Residual Activity'
 p30
 (dp31
-g3
-S't50,slope,top'
+g13
+S"{'t50':'min(x)+(max(x)-min(x))/2.0','slope':'0.5','top':'max(y)'}"
 p32
-sg5
-S'top/((1+(T/T50)^slope))'
-p33
 sg7
 S'fits thermal denaturation data (basic sigmoid)'
+p33
+sg5
+S'top/(1+math.pow(T/T50,slope))'
 p34
-sg9
-g30
 sg10
+g30
+sg3
+S't50,slope,top'
+p35
+sg9
 g30
 ssS'2 pKas, 3 Chemical shifts'
-p35
-(dp36
+p36
+(dp37
 g13
 S"{'offset': 'min(y)', 'span1': '(max(y)-min(y))/2', 'pKa1': 'min(x)+(max(x)-min(x))*0.25', 'pKa2': 'min(x)+(max(x)-min(x))*0.75', 'span2': '(max(y)-min(y))/2'}"
-p37
+p38
 sg7
 S'titration curve with 2 independent pkas'
-p38
+p39
 sg5
 S'span1/(1+10**(pKa1-x))+span2/(1+10**(-x+pKa2))+offset'
-p39
+p40
 sg10
-g35
+g36
 sg3
 S'pKa1,pKa2,offset,span1,span2'
-p40
-sg9
-g35
-ssS'Linear'
 p41
-(dp42
+sg9
+g36
+ssS'Linear'
+p42
+(dp43
 g13
 S"{'a': 'min(y)', 'b': 'max(y)-min(y)/max(x)-min(x)'}"
-p43
+p44
 sg7
 S'straight line'
-p44
+p45
 sg5
 S'a*x+b'
-p45
+p46
 sg10
-g41
+g42
 sg3
 S'a,b'
-p46
-sg9
-g41
-ssS'Power'
 p47
-(dp48
+sg9
+g42
+ssS'Power'
+p48
+(dp49
 g3
 S'a,b'
-p49
+p50
 sg5
 S'(x**a)+b'
-p50
+p51
 sg7
 S'fit to data that obeys a power law'
-p51
-sg9
-g47
-sg10
-g47
-ssS'1 pKa 2 Chemical shifts'
 p52
-(dp53
+sg9
+g48
+sg10
+g48
+ssS'1 pKa 2 Chemical shifts'
+p53
+(dp54
 g13
 S"{'pKa': 'min(x)+(max(x)-min(x))/2.0', 'span': 'max(y)-min(y)', 'offset': 'min(y)'}"
-p54
+p55
 sg7
 S'titration curve with 1 independent pka'
-p55
+p56
 sg5
 S'span/(1+10**(-x+pKa))+offset'
-p56
+p57
 sg10
-g52
+g53
 sg3
 S'pKa,span,offset'
-p57
-sg9
-g52
-ssS'Exponential Growth'
 p58
-(dp59
+sg9
+g53
+ssS'Exponential Growth'
+p59
+(dp60
 g13
 S"{'p':'max(y)'}"
-p60
+p61
 sg7
 S'Exponential Association'
-p61
+p62
 sg5
 S'p*(1-math.exp(-K*x))'
-p62
+p63
 sg10
-g58
+g59
 sg3
 S'K,p'
-p63
+p64
 sg9
 S'Exponential Growth'
-p64
-ssS'Substrate Depletion'
 p65
-(dp66
+ssS'Substrate Depletion'
+p66
+(dp67
 g3
 S'x0,M,D'
-p67
+p68
 sg5
 S'M * (1 - math.exp(-D*(x-x0)))'
-p68
+p69
 sg7
 S'fit substrate depletion data'
-p69
-sg9
-g65
-sg10
-g65
-ssS'Modified Hill'
 p70
-(dp71
+sg9
+g66
+sg10
+g66
+ssS'Modified Hill'
+p71
+(dp72
 g13
 S"{'pKa':'min(x)+(max(x)-min(x))/2.0'}"
-p72
+p73
 sg7
 S'fit to a single titration curve with 1 pka and a hill parameter'
-p73
+p74
 sg5
 S'span/(1+10**(n*(- x + pKa)))+offset'
-p74
+p75
 sg10
-g70
+g71
 sg3
 S'pKa,span,offset,n'
-p75
-sg9
-g70
-ssS'Bell-shaped pH-act profile (2 pKas)'
 p76
-(dp77
+sg9
+g71
+ssS'Bell-shaped pH-act profile (2 pKas)'
+p77
+(dp78
 g3
 S'pka1,pka2,scale'
-p78
+p79
 sg5
 S'scale*(1.0/(math.pow(10,-pH)/math.pow(10,-pKa2)+1+math.pow(10,-pKa1)/math.pow(10,-pH)))'
-p79
+p80
 sg7
 S'pH activity profile'
-p80
-sg9
-g76
-sg10
-g76
-ssS'Michaelis-Menten'
 p81
-(dp82
+sg9
+g77
+sg10
+g77
+ssS'Michaelis-Menten'
+p82
+(dp83
 g13
 S"{'Vmax': 'max(y)', 'labels': ['[S]', 'v'], 'Km': 'max(x)/2'}"
-p83
+p84
 sg7
 S'fits enzyme kinetic data'
-p84
+p85
 sg5
 S'(Vmax * x)/(x + Km)'
-p85
+p86
 sg10
-g81
+g82
 sg3
 S'Km, Vmax'
-p86
-sg9
-g81
-ssS'Amyloid Fibre Formation'
 p87
-(dp88
+sg9
+g82
+ssS'Amyloid Fibre Formation'
+p88
+(dp89
 g3
 S'yi,yf,mi,mf,x0,t'
-p89
+p90
 sg5
 S'yi + mi*x + (yf+mf*x)/(1+math.exp((-x-x0)/t))'
-p90
-sg9
-g87
-sg10
-g87
-ssS'DSCindependent'
 p91
-(dp92
+sg9
+g88
+sg10
+g88
+ssS'DSCindependent'
+p92
+(dp93
 g3
 S'A,Tm,deltaH'
-p93
+p94
 sg5
 S'A* (math.pow(deltaH,2) / (R*math.pow(x,2)) ) *f * (1-f)'
-p94
+p95
 sg7
 S'Fit to a 3 parameter DSC curve'
-p95
-sg9
-g91
-sg10
-g91
-ssS'Unfolding'
 p96
-(dp97
+sg9
+g92
+sg10
+g92
+ssS'Unfolding'
+p97
+(dp98
 g3
 S'an,bn,ad,bd,m,d50'
-p98
+p99
 sg5
 S'((an + bn * x) + (ad + bd * x) * math.exp(m * (x-d50))) / (1+math.exp(m * (x-d50)))'
-p99
+p100
 sg7
 S'fit to a denaturation curve. with 6 parameters, including baseline slopes'
-p100
-sg9
-g96
-sg10
-g96
-ssS'DSC2state'
 p101
-(dp102
+sg9
+g97
+sg10
+g97
+ssS'DSC2state'
+p102
+(dp103
 g3
 S'Tm,deltaH'
-p103
+p104
 sg5
 S'deltaH / (R*math.pow(x,2)) * f * (1-f)'
-p104
+p105
 sg7
 S'fit simple two state model to DSC data'
-p105
-sg9
-g101
-sg10
-g101
-ssS'Sigmoid'
 p106
-(dp107
+sg9
+g102
+sg10
+g102
+ssS'Sigmoid'
+p107
+(dp108
 g13
 S"{'slope': '1', 'top': 'max(y)', 'tm': '(max(x)-min(x))/2+min(x)', 'bottom': 'min(y)'}"
-p108
+p109
 sg7
 S'simple sigmoid'
-p109
+p110
 sg5
 S'bottom+(top-bottom)/(1+math.exp((tm-x)/slope))'
-p110
+p111
 sg10
-g106
+g107
 sg3
 S'tm,bottom,top,slope'
-p111
-sg9
-g106
-ssS'diffDenaturation'
 p112
-(dp113
+sg9
+g107
+ssS'diffDenaturation'
+p113
+(dp114
 g3
 S'A,Tm,deltaH'
-p114
+p115
 sg5
 S'A* (deltaH / (R*math.pow(x,2)) ) *f * (1-f)'
-p115
+p116
 sg7
 S'Fit to a 3 parameter differential denaturation curve,\n        ref. John/Weeks Protein Science 2000'
-p116
-sg9
-g112
-sg10
-g112
-ssS'Gaussian'
 p117
-(dp118
+sg9
+g113
+sg10
+g113
+ssS'Gaussian'
+p118
+(dp119
 g3
 S'a,b,c'
-p119
+p120
 sg5
 S'a*exp(-(pow(x-b),2)/(pow(2*c,2)))'
-p120
+p121
 sg7
 S'gaussian function, a bell-shaped curve'
-p121
-sg9
-g117
-sg10
-g117
-ssS'Arrhenius'
 p122
-(dp123
+sg9
+g118
+sg10
+g118
+ssS'Arrhenius'
+p123
+(dp124
 g3
 S'A,Ea'
-p124
+p125
 sg5
 S'A*exp(-Ea/RT)'
-p125
+p126
 sg7
 S'arrhenius equation'
-p126
+p127
 sg9
-g122
+g123
 sg10
-g122
+g123
 ss.
