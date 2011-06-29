@@ -607,7 +607,14 @@
 			isa = PBXProject;
 			buildConfigurationList = 4C083BC70DF6D1D900325A83 /* Build configuration list for PBXProject "ProteinDesignTool" */;
 			compatibilityVersion = "Xcode 2.4";
+			developmentRegion = English;
 			hasScannedForEncodings = 0;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
 			mainGroup = 4C083BC20DF6D1D900325A83;
 			projectDirPath = "";
 			projectRoot = ..;

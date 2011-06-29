@@ -561,7 +561,7 @@ def CleanPDB(inputFile, outputFile, removeWater=True, removeLigand=True, removeA
 		makeMoleculeCommand, whatIfOutputFile = WhatIfMakeMoleculeCommand(inputFile)
 		command = command + makeMoleculeCommand
 		
-		#RunWhatIF - Different command needed if hydrogens we're added
+		#RunWhatIF - Different command needed if hydrogens are to be added
 		if addHydrogens:
 			logfile, newPDB = pKarun.WI_tools.RunWI(command,[whatIfOutputFile],None,[inputFile,'HTOP'])
 		else:	

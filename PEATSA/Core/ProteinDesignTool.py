@@ -1,4 +1,4 @@
-#! /bin/env python
+#!/usr/bin/env python
 #
 # Protein Engineering Analysis Tool Structure Analysis (PEATSA)
 # Copyright (C) 2010 Michael Johnston & Jens Erik Nielsen
