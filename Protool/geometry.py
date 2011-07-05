@@ -164,7 +164,6 @@ class geometry:
             self.SetPosition(atom,newcoords[count])
             count=count+1
         return
-            
 
     def superpose(self,reference_coords,fit_coords,return_pdbs=False):
         """Superpose the fit_coords on the reference_coords"""
