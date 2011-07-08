@@ -191,7 +191,7 @@ class CorrelationAnalyser(Plugin):
                           xlabel='Predicted',
                           ylabel='Experimental', ms=5,
                           err=None, axeslabels=True,
-                          plotname=None,
+                          plotname=None, stats=True,
                           side=LEFT, ax=None):
         """Show exp vs pred. for a set of x-y values """
         
@@ -232,12 +232,17 @@ class CorrelationAnalyser(Plugin):
             ax.plot((a,b),(a+err,b+err),'--',color='g')
             ax.plot((a,b),(a-err,b-err),'--',color='g')
         ax.axhline(y=0, color='grey'); ax.axvline(x=0,color='grey')
-        ax.set_xlim(a,b); ax.set_ylim(a,b)        
-  
+        ax.set_xlim(a,b); ax.set_ylim(a,b)  
         ax.set_title(title)
-        cc = math.pow(numpy.corrcoef(x,y)[0][1],2)
+        if stats==True:
+            cc = math.pow(numpy.corrcoef(x,y)[0][1],2)
+            rmse = self.rmse(x,y)
+            ax.text(0.1,0.9,'$r^2=%s$' %round(cc,3),
+                transform=ax.transAxes,fontsize=18)
+            ax.text(0.1,0.85,'$rmse=%s$' %round(rmse,3),
+                transform=ax.transAxes,fontsize=18)
         if fig!=None:
-            fig.suptitle(r'Predicted vs Experimental $r^2= %s$' %round(cc,3))
+            fig.suptitle('Predicted vs Experimental')            
             from PEATDB.Actions import DBActions
             frame = DBActions.showTkFigure(fig, side=side)
             mh = MouseHandler(ax, self, labels, key)

@@ -794,13 +794,13 @@ class PEATSAPlugin(Plugin):
             f=plt.figure(figsize=(8,8))
             ax=f.add_subplot(111)
             for n in names:
-                self.showResults(n,showtable=False, ax=ax)
+                self.showResults(n,showtable=False, ax=ax,stats=False)
             
             ax.legend()
             f.show()
         return
         
-    def showResults(self, name=None, showtable=True, ax=None):
+    def showResults(self, name=None, showtable=True, ax=None, stats=True):
         """Show results with correlation plot from selected job"""
         job, name = self.getJob(name)
         
@@ -817,7 +817,7 @@ class PEATSAPlugin(Plugin):
         cols = self.DB.getSimpleFields()
         expcol = None
         expdata = None
-        print jobmeta
+        #print jobmeta
         if jobmeta.has_key('expcol'):
             expcol = jobmeta['expcol']
         if expcol not in cols and jobmeta.has_key('project'):
@@ -851,12 +851,13 @@ class PEATSAPlugin(Plugin):
                 continue
             
             ax = self.plotMerged(matrix, expcol, expdata, m,
-                                    showtable, ax, name)
+                                    showtable, ax, name, stats)
 
         return ax
 
     def plotMerged(self, matrix, expcol, expdata=None,
-                    title='', showtable=True, ax=None, name=None):
+                    title='', showtable=True, ax=None, name=None,
+                    stats=True):
         """Merge a set of exp vals with predictions and plot"""
         if expdata==None:
             expdata = self.parent.tablemodel.simpleCopy(include=['Mutations'])
@@ -867,10 +868,11 @@ class PEATSAPlugin(Plugin):
         muts = ['mutation: '+i for i in muts]
         labels = zip(names, muts)        
         ax,frame,mh = C.plotCorrelation(x,y,labels,title=title,ylabel=expcol,
-                                        ax=ax,plotname=name)        
+                                        ax=ax,plotname=name,stats=stats)        
         if showtable == True:
             table = self.showTable(frame, merged)
-            mh.table = table        
+            mh.table = table            
+            
         return ax
         
     def test(self):
