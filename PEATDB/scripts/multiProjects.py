@@ -129,7 +129,7 @@ def summarise(projects):
     gs = gridspec.GridSpec(5, 5, wspace=0.3, hspace=0.5)    
     i=0
     data=[]    
-
+    print 'processing %s projects' %len(projects)
     for p in projects:
         print 'structure:',p
         DB = PDatabase(local=os.path.join(savepath,p))
@@ -155,6 +155,9 @@ def summarise(projects):
         ttp = round(stats.ttest_1samp(errs, 0)[1],2)
         #normality of errs
         w,swp = C.ShapiroWilk(errs)
+        x={'name':p,'mutants':len(pre),'rmse':rmse,'corrcoef':cc,'meanerr':meanerr,
+           'ttest':ttp,'shapirowilk':swp}
+           
         '''ax = figs[0].add_subplot(gs[0, i])
         C.plotCorrelation(pre,exp,title=p,ms=2,axeslabels=False,ax=ax)
         ax = figs[1].add_subplot(gs[0, i])
@@ -164,9 +167,8 @@ def summarise(projects):
         #qqplot
         ax = figs[3].add_subplot(gs[0, i])
         C.QQplot(errs,title=p,ax=ax)'''
-        x={'name':p,'mutants':len(pre),'rmse':rmse,'corrcoef':cc,'meanerr':meanerr,
-           'ttest':ttp,'shapirowilk':swp}
         
+        #get PDB info
         parser = PDBParser()
         descr = parser.getDescription(p)
         x.update(descr)
@@ -205,7 +207,7 @@ def summarise(projects):
 
 def findOutliers(data):
     """Outliers in all corr data"""
-    C = CorrelationAnalyser()   
+    C = CorrelationAnalyser()
     
     return ax
 
@@ -213,19 +215,25 @@ def send2Server(projects):
     """Send all projects to remote versions"""
     settings={'server':'enzyme.ucd.ie','username':'guest',
                'password':'123','port':8080}
-    adminsettings={'host':'localhost','user':'peatadmin',
-               'passwd':'123','port':8080}    
+    adminsettings={'host':'enzyme.ucd.ie','user':'peatadmin',
+               'passwd':'nielsen','port':8080}    
     '''for p in projects:
         print p
-        DB = PDatabase(local=os.path.join(savepath,p))        
-        #Utils.createDBonServer(prj=p,settings=adminsettings,
-        #                       access='guest')
+        DB = PDatabase(local=os.path.join(savepath,p))
+        Utils.createDBonServer(prj=p,settings=adminsettings,
+                               access='guest')
         Utils.copyDBtoServer(DB,p,settings)'''
         
     DB = PDatabase(local='summary.fs')
     Utils.copyDBtoServer(DB,'PotapovDataset',settings)
     return
     
+def summarystats(projects):
+    """summary stats"""
+    for p in projects:
+        DB = PDatabase(local=os.path.join(savepath,p))
+        #c=len(DB.recs()
+            
 if __name__ == '__main__':
     from optparse import OptionParser
     parser = OptionParser()    
@@ -245,12 +253,12 @@ if __name__ == '__main__':
         print path
     if opts.importcsv == True:
         createProjects(csvfiles)
-    if opts.jobs == True:    
-        #PEATSAJobs(['2lzm'], resubmit=True)
-        PEATSAJobs(dbnames, resubmit=True)
+    if opts.jobs == True:
+        PEATSAJobs(['1bvc'])
+        #PEATSAJobs(dbnames, resubmit=False)
     if opts.summary == True:
         summarise(dbnames)
-        #summarise(['2lzm'])
+        #summarise(['1bvc'])
     if opts.copy == True:
         send2Server(dbnames)
-  
+        

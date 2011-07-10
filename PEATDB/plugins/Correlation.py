@@ -191,10 +191,10 @@ class CorrelationAnalyser(Plugin):
                           xlabel='Predicted',
                           ylabel='Experimental', ms=5,
                           err=None, axeslabels=True,
-                          plotname=None, stats=True,
+                          plotname=None, stats=True,        
                           side=LEFT, ax=None):
         """Show exp vs pred. for a set of x-y values """
-        
+               
         #check if x and y are number cols and round
         x=[round(float(i),2) for i in x]
         y=[round(float(i),2) for i in y]
@@ -206,10 +206,11 @@ class CorrelationAnalyser(Plugin):
        
         colors = ['b','g','r','y','m','c']        
         if ax==None:
-            fig = plt.figure(figsize=(6,6)) 
+            fig = plt.figure(figsize=(6,6))
             ax = fig.add_subplot(111)
-        else:
-            fig=None
+        else:       
+            #fig = ax.get_figure()
+            fig = None
         if axeslabels==True:    
             ax.set_xlabel(xlabel)
             ax.set_ylabel(ylabel)
@@ -226,14 +227,14 @@ class CorrelationAnalyser(Plugin):
         #draw expected correlation line with slope x
         slope=1
         #set range of axes
-        ax.plot((a,b),(a,b),'g')
-        
-        if err!=None:
-            ax.plot((a,b),(a+err,b+err),'--',color='g')
-            ax.plot((a,b),(a-err,b-err),'--',color='g')
+        ax.plot((a,b),(a,b),'g')            
         ax.axhline(y=0, color='grey'); ax.axvline(x=0,color='grey')
         ax.set_xlim(a,b); ax.set_ylim(a,b)  
         ax.set_title(title)
+           
+        if err!=None:
+            ax.plot((a,b),(a+err,b+err),'--',color='g')
+            ax.plot((a,b),(a-err,b-err),'--',color='g')         
         if stats==True:
             cc = math.pow(numpy.corrcoef(x,y)[0][1],2)
             rmse = self.rmse(x,y)
@@ -245,18 +246,17 @@ class CorrelationAnalyser(Plugin):
             fig.suptitle('Predicted vs Experimental')            
             from PEATDB.Actions import DBActions
             frame = DBActions.showTkFigure(fig, side=side)
-            mh = MouseHandler(ax, self, labels, key)
-            mh.connect()
+            mh = self.addMouseHandler(ax, labels, key)
         else:
             mh = frame = None
         return ax, frame, mh
 
-    def addMouseHandler(self, ax, labels):
+    def addMouseHandler(self, ax, labels, key):
         """Add mouse event picker to plot so users can
         get info on each point, such as mutation name"""
-        m = MouseHandler(ax, labels, self)
+        m = MouseHandler(ax, self, labels, key)
         m.connect()
-        return
+        return m
 
     def rmse(self, ar1, ar2):
         """Mean squared error"""
@@ -421,7 +421,7 @@ class MouseHandler:
         self.circle = None
         return
 
-    def connect(self):
+    def connect(self):        
         self.cidpress = self.ax.figure.canvas.mpl_connect(
             'button_press_event', self.on_press)
         self.cidrelease = self.ax.figure.canvas.mpl_connect(
@@ -432,11 +432,12 @@ class MouseHandler:
 
     def on_pick(self, event): 
         """Handle pick event, picking on points"""
+
         obj = event.artist
         ind = event.ind       
         xd = obj.get_xdata()[ind[0]]
-        yd = obj.get_ydata()[ind[0]]            
-        info = self.labels[ind[0]]
+        yd = obj.get_ydata()[ind[0]]
+        info = self.labels[ind[0]]        
         if type(info) is types.TupleType and not None in info:
             labels = '\n'.join(info)
         elif type(info) is types.DictType:

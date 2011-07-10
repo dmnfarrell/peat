@@ -788,14 +788,13 @@ class PEATSAPlugin(Plugin):
         
         names = self.jobstable.get_selectedRecordNames()
         if len(names)==1:            
-            self.showResults()
+            ax,mh = self.showResults()            
         else:
             import pylab as plt
             f=plt.figure(figsize=(8,8))
             ax=f.add_subplot(111)
             for n in names:
-                self.showResults(n,showtable=False, ax=ax,stats=False)
-            
+                self.showResults(n,showtable=False, ax=ax,stats=False)            
             ax.legend()
             f.show()
         return
@@ -843,17 +842,20 @@ class PEATSAPlugin(Plugin):
             if mpDlg.result == True:
                 expcol = mpDlg.results[0]
             else:
-                return        
+                return
 
         for m in self.matrices:
             matrix = self.matrices[m]
             if matrix == None or not 'Total' in matrix.columnHeaders():
                 continue
             
-            ax = self.plotMerged(matrix, expcol, expdata, m,
+            ax,mh = self.plotMerged(matrix, expcol, expdata, m,
                                     showtable, ax, name, stats)
-
-        return ax
+            #need to add this again.. temp fix
+            from Correlation import MouseHandler
+            mh = MouseHandler(ax, labels=expcol, key='Mutations')
+            mh.connect()
+        return ax,mh
 
     def plotMerged(self, matrix, expcol, expdata=None,
                     title='', showtable=True, ax=None, name=None,
@@ -863,17 +865,18 @@ class PEATSAPlugin(Plugin):
             expdata = self.parent.tablemodel.simpleCopy(include=['Mutations'])
         merged = self.mergeMatrix(matrix, expdata)
         x,y,names,muts = merged.getColumns(['Total',expcol,'name','Mutations'],allowempty=False)
-        from Correlation import CorrelationAnalyser  
+        from Correlation import CorrelationAnalyser
         C = CorrelationAnalyser()
         muts = ['mutation: '+i for i in muts]
-        labels = zip(names, muts)        
+        labels = zip(names, muts)
         ax,frame,mh = C.plotCorrelation(x,y,labels,title=title,ylabel=expcol,
-                                        ax=ax,plotname=name,stats=stats)        
+                                        ax=ax,plotname=name,stats=stats,err=4)
+        
         if showtable == True:
             table = self.showTable(frame, merged)
-            mh.table = table            
+            mh.table = table
             
-        return ax
+        return ax, mh
         
     def test(self):
         job, name = self.getJob('myjob')
