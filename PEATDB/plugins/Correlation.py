@@ -245,7 +245,9 @@ class CorrelationAnalyser(Plugin):
         if fig!=None:
             fig.suptitle('Predicted vs Experimental')            
             from PEATDB.Actions import DBActions
-            frame = DBActions.showTkFigure(fig, side=side)
+            frame = DBActions.showTkFigure(fig, side=side)            
+            #mh = MouseHandler(ax, self, labels, key)
+            #mh.connect()
             mh = self.addMouseHandler(ax, labels, key)
         else:
             mh = frame = None

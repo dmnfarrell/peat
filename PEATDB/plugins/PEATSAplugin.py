@@ -788,7 +788,8 @@ class PEATSAPlugin(Plugin):
         
         names = self.jobstable.get_selectedRecordNames()
         if len(names)==1:            
-            ax,mh = self.showResults()            
+            ax,mh=self.showResults()
+
         else:
             import pylab as plt
             f=plt.figure(figsize=(8,8))
@@ -851,10 +852,12 @@ class PEATSAPlugin(Plugin):
             
             ax,mh = self.plotMerged(matrix, expcol, expdata, m,
                                     showtable, ax, name, stats)
-            #need to add this again.. temp fix
-            from Correlation import MouseHandler
+            
+            #need to add this.. temp fix          
+            '''from Correlation import MouseHandler
             mh = MouseHandler(ax, labels=expcol, key='Mutations')
-            mh.connect()
+            mh.connect()'''
+
         return ax,mh
 
     def plotMerged(self, matrix, expcol, expdata=None,
@@ -876,7 +879,7 @@ class PEATSAPlugin(Plugin):
             table = self.showTable(frame, merged)
             mh.table = table
             
-        return ax, mh
+        return ax,mh
         
     def test(self):
         job, name = self.getJob('myjob')
