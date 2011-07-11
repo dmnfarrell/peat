@@ -229,19 +229,14 @@ class CorrelationAnalyser(Plugin):
         #set range of axes
         ax.plot((a,b),(a,b),'g')            
         ax.axhline(y=0, color='grey'); ax.axvline(x=0,color='grey')
-        ax.set_xlim(a,b); ax.set_ylim(a,b)  
+        ax.set_xlim(a,b); ax.set_ylim(a,b)
         ax.set_title(title)
            
         if err!=None:
             ax.plot((a,b),(a+err,b+err),'--',color='g')
             ax.plot((a,b),(a-err,b-err),'--',color='g')         
         if stats==True:
-            cc = math.pow(numpy.corrcoef(x,y)[0][1],2)
-            rmse = self.rmse(x,y)
-            ax.text(0.1,0.9,'$r^2=%s$' %round(cc,3),
-                transform=ax.transAxes,fontsize=18)
-            ax.text(0.1,0.85,'$rmse=%s$' %round(rmse,3),
-                transform=ax.transAxes,fontsize=18)
+            self.addStats(ax,x,y)
         if fig!=None:
             fig.suptitle('Predicted vs Experimental')            
             from PEATDB.Actions import DBActions
@@ -260,6 +255,15 @@ class CorrelationAnalyser(Plugin):
         m.connect()
         return m
 
+    def addStats(self, ax, x, y):
+        cc = math.pow(numpy.corrcoef(x,y)[0][1],2)
+        rmse = self.rmse(x,y)
+        ax.text(0.1,0.9,'$r^2=%s$' %round(cc,3),
+            transform=ax.transAxes,fontsize=18)
+        ax.text(0.1,0.85,'$rmse=%s$' %round(rmse,3),
+            transform=ax.transAxes,fontsize=18)        
+        return
+    
     def rmse(self, ar1, ar2):
         """Mean squared error"""
         ar1 = numpy.asarray(ar1)
@@ -273,10 +277,31 @@ class CorrelationAnalyser(Plugin):
         y=[round(float(i),2) for i in y]
         errs = [i[0]-i[1] for i in zip(x,y)]
         cc = round(math.pow(numpy.corrcoef(x,y)[0][1],2),2)
+        
         rmse = round(self.rmse(x,y),2)
         meanerr = round(numpy.mean(errs),2)
         return cc, rmse, meanerr
-        
+
+    def pearsonr(self,x,y):
+        """pearson correl coeff"""
+        n=len(x)
+        vals=range(n)         
+        #regular sums
+        sumx=sum([float(x[i]) for i in vals])
+        sumy=sum([float(y[i]) for i in vals])         
+        #sum of the squares
+        sumxSq=sum([x[i]**2.0 for i in vals])
+        sumySq=sum([y[i]**2.0 for i in vals])         
+        #sum of the products
+        pSum=sum([x[i]*y[i] for i in vals])         
+        #do pearson score
+        num=pSum-(sumx*sumy/n)
+        den=((sumxSq-pow(sumx,2)/n)*(sumySq-pow(sumy,2))**.5)
+        if den==0: 
+            return 1
+        r=num/den
+        return r
+  
     def markOutliers(self,x,y):
         labels = model.getColumnData(columnName=labelcol,filterby=filterby)      
         #user peat_sa stats tools to get outliers here

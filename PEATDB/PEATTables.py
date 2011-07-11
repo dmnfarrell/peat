@@ -372,7 +372,7 @@ class PEATTableModel(TableModel):
         self.DB = DB
         self.data = DB.data    #holds the data
         self.meta = DB.meta    #holds table formatting
-
+                
         self.colors = {}
         self.colors['fg']={}
         self.colors['bg']={}
@@ -387,9 +387,9 @@ class PEATTableModel(TableModel):
         self.ekinfields = EkinProject.ekinfields + ['mode']
 
         if self.data != None:           
-            self.userfields = self.meta.userfields          
+            self.userfields = self.meta.userfields
             self.columnNames = self.meta.staticfields.keys()
-            self.columnOrder = None
+            #self.columnOrder = None
             for key in self.userfields:
                 if not self.userfields[key].has_key('show'):
                     self.userfields[key]['show'] = True
@@ -399,7 +399,7 @@ class PEATTableModel(TableModel):
             #add or get colors dict
             self.update_colors()
 
-            #finally set up column types dict
+            #set up column types dict
             self.columntypes=copy.deepcopy(self.meta.staticfields)
             for key in self.userfields:
                self.columntypes[key]=self.userfields[key]['field_type']               
@@ -410,12 +410,8 @@ class PEATTableModel(TableModel):
         self.filteredrecs = None
         #sort by name
         #self.setSortOrder(0)
-        #restore col order
-        if self.columnOrder:
-            self.columnNames=[]
-            for i in self.columnOrder.keys():
-                self.columnNames.append(self.columnOrder[i] )
-                i=i+1
+     
+        self.setColumnOrder()
         self.defaulttypes = ['text', 'number','Structure', 'Mutations']
         return
 
@@ -450,36 +446,51 @@ class PEATTableModel(TableModel):
         return
 
     def update_colors(self):
+        """Update from table from DB metadata"""
+
         if self.meta.has_key('table') and self.meta['table'].has_key('colors'):
             self.colors = self.meta['table']['colors']
             self.columnlabels = self.meta['table']['columnlabels']
             if self.meta['table'].has_key('columnorder'):
-                self.columnOrder = self.meta['table']['columnorder']
+                self.columnOrder = self.meta['table']['columnorder']               
         else:
             self.meta['table']={}
             self.meta['table']['colors'] = self.colors
             for colname in self.columnNames:
                 self.columnlabels[colname]=colname
             self.meta['table']['columnlabels'] = self.columnlabels
-
-    def save_columnOrder(self):
-        """Save the column order, done before peat db saved"""
-        #save current col order
-        data['columnorder']={}
-        i=0
-        for name in self.columnNames:
-            data['columnorder'][i] = name
-            i=i+1
+            self.meta['table']['columnorder'] = self.getColOrder()  
         return
 
+    def getColOrder(self):
+        d={}
+        i=0
+        for name in self.columnNames:
+            d[i] = name
+            i=i+1
+        return d
+        
+    def setColumnOrder(self):
+        """set column names from order"""
+        if hasattr(self, 'columnOrder') and self.columnOrder != None:
+            self.columnNames=[]
+            for i in self.columnOrder.keys():
+                self.columnNames.append(self.columnOrder[i] )
+                i=i+1        
+        return        
+        
+    def moveColumn(self, oldcolumnIndex, newcolumnIndex):
+        TableModel.moveColumn(self, oldcolumnIndex, newcolumnIndex)        
+        self.meta['table']['columnorder'] = self.columnOrder = self.getColOrder()
+        self.meta._p_changed = 1     
+        return
+        
     def getData(self):
-        """Return the current data for saving, overrides base method"""
+        """Return the current data for saving - unused in PEAT"""
         import copy
         data = copy.deepcopy(self.data)
         data['colors'] = self.colors
         data['columnlabels'] = self.columnlabels
-        #save current col order
-        self.save_columnOrder()
         return data
 
     def setValueAt(self, value, rowIndex, columnIndex):
@@ -584,8 +595,7 @@ class PEATTableModel(TableModel):
         return
 
     def addColumn(self, colname=None, coltype='text'):
-        """Add a column"""
-       
+        """Add a column"""       
         self.DB.addField(colname, coltype)
         self.update_columnNames()
         return

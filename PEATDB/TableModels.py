@@ -368,7 +368,7 @@ class TableModel(object):
             #self.columnOrder.append(moved)
 
         print self.columnNames
-        #print self.columnOrder
+  
         return
 
     def addRow(self, name=None, **kwargs):

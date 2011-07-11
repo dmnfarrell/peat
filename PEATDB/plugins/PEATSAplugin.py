@@ -787,17 +787,25 @@ class PEATSAPlugin(Plugin):
         """Show results for single or multiple jobs together"""
         
         names = self.jobstable.get_selectedRecordNames()
-        if len(names)==1:            
-            ax,mh=self.showResults()
+        if len(names)==1:
+            ax,mh,x,y=self.showResults()
 
         else:
+            tx=[]; ty=[]
             import pylab as plt
             f=plt.figure(figsize=(8,8))
             ax=f.add_subplot(111)
             for n in names:
-                self.showResults(n,showtable=False, ax=ax,stats=False)            
+                a,mh,x,y = self.showResults(n,showtable=False, ax=ax,stats=False)
+                tx.extend(x)
+                ty.extend(y)                
             ax.legend()
+            #add stats for summary
+            from Correlation import CorrelationAnalyser
+            C = CorrelationAnalyser()           
+            C.addStats(ax,tx,ty)
             f.show()
+            
         return
         
     def showResults(self, name=None, showtable=True, ax=None, stats=True):
@@ -850,15 +858,15 @@ class PEATSAPlugin(Plugin):
             if matrix == None or not 'Total' in matrix.columnHeaders():
                 continue
             
-            ax,mh = self.plotMerged(matrix, expcol, expdata, m,
+            ax,mh,x,y = self.plotMerged(matrix, expcol, expdata, m,
                                     showtable, ax, name, stats)
             
-            #need to add this.. temp fix          
+            #need to add this for mousehandler to work.. hack       
             '''from Correlation import MouseHandler
             mh = MouseHandler(ax, labels=expcol, key='Mutations')
             mh.connect()'''
 
-        return ax,mh
+        return ax,mh,x,y
 
     def plotMerged(self, matrix, expcol, expdata=None,
                     title='', showtable=True, ax=None, name=None,
@@ -874,12 +882,13 @@ class PEATSAPlugin(Plugin):
         labels = zip(names, muts)
         ax,frame,mh = C.plotCorrelation(x,y,labels,title=title,ylabel=expcol,
                                         ax=ax,plotname=name,stats=stats,err=4)
-        
+        x=[round(float(i),2) for i in x]
+        y=[round(float(i),2) for i in y]       
         if showtable == True:
             table = self.showTable(frame, merged)
             mh.table = table
             
-        return ax,mh
+        return ax,mh,x,y
         
     def test(self):
         job, name = self.getJob('myjob')

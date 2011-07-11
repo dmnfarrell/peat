@@ -685,9 +685,8 @@ class App(Frame, GUI_help):
 
         if self.DB.isChanged() == False:
             return
-        #cache changed objects in case of conflict
+        #cache changed objects in case of conflict?
         import copy
-        #saved = copy.deepcopy(self.DB.getChanged())
         
         if self.username == '':
             tkMessageBox.showwarning("Set a user name",
@@ -713,7 +712,6 @@ class App(Frame, GUI_help):
                 #result = self.DB.commit(user=self.username, note=comment)
                 #if result == False:
                     #failed.. give up
-
             return
 
         askcomment = self.preferences.get('promptforlogcomments')
@@ -745,8 +743,6 @@ class App(Frame, GUI_help):
                 w.pack(expand=1, fill=BOTH, padx=2, pady=2)
                 dialog.activate(geometry='centerscreenalways')
         else:
-            #update any synced changes if using remote zeo
-            #self.DB.connection.sync()
             self.updateTable()
         self.updateStatusPane()
         self.updateChangelog()
@@ -1228,8 +1224,8 @@ class App(Frame, GUI_help):
         DB=self.DB
 
         if hasattr(self, 'table') and self.table != None:
-            model = self.tablemodel            
-            #Update the model to reflect changes in DB and redraw the table
+            #Update the table model to reflect changes in DB and redraw the table
+            model = self.tablemodel           
             if self.table.rows < 10000:
                 sortcol = self.table.sortcol
             else:
