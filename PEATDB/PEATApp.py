@@ -165,16 +165,20 @@ class App(Frame, GUI_help):
         
         menu = self.curr_menu['var']
         menu.delete(1, menu.index(END))       
-        for name in self.currentDBs:
-            #print name
-            db = self.currentDBs[name]
-            def func(db):
-                def new():                    
-                    self.removeTable()
+        for name in self.currentDBs:            
+            data = self.currentDBs[name]
+            def func(data):
+                def new():  
+                    #self.removeTable()
+                    self.hideDB()
+                    db = data['db']
+                    f = self.filename = data['filename']
+                    if f==None:
+                        self.project = data['project']
                     self.loadDB(db)
                 return new
             menu.add_command(label=name,
-                                command=func(db))
+                                command=func(data))
         return
     
     def setupVars(self):
@@ -624,15 +628,29 @@ class App(Frame, GUI_help):
             if self.project!='':
                 self.DB.meta.info['project'] = self.project
         name = self.DB.meta.info['project']
-        if not name in self.currentDBs.keys(): 
-            self.currentDBs[name] = self.DB
+        if not name in self.currentDBs.keys():
+            self.addDB(name, self.DB)           
             
         self.updateStatusPane()
         self.updateMenus(load=True)
         return True
 
+    def addDB(self, name, DB):
+        """Add DB to current dbs dict"""
+        d = {'db':DB}
+        if DB.storagetype == 'local':
+            d['filename'] = self.filename
+        else:
+            d['filename'] = None
+            d['project'] = self.project
+            
+        self.currentDBs[name] = d 
+        return
+    
     def setTitle(self):
-        """set title of window"""
+        """set title of window"""       
+        if self.DB!=None:
+            print self.DB.storagetype
         if self.DB != None:
             if self.filename != None:
                 self.main.title(self.title+': '+self.filename)
@@ -796,6 +814,7 @@ class App(Frame, GUI_help):
         """Hide the open DB"""
         if hasattr(self, 'table'):
             self.removeTable()
+        self.filename = None    
         self.setTitle()
         return
     
@@ -823,7 +842,7 @@ class App(Frame, GUI_help):
         self.welcomeLogo()
         self.updateStatusPane()
         name = self.project
-        #print self.currentDBs
+       
         if name in self.currentDBs:
             del self.currentDBs[name]
         return True
@@ -835,10 +854,10 @@ class App(Frame, GUI_help):
                 #self.closeDB()
                 pass
             else:    
-                db = self.currentDBs[name]
+                db = self.currentDBs[name]['db']
                 db.close()
                 del self.currentDBs[name]
-        print self.currentDBs
+        #print self.currentDBs
         self.updateCurrentMenu()
         return
 
