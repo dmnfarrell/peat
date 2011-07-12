@@ -86,7 +86,7 @@ sg7
 S'fits thermal denaturation data (basic sigmoid)'
 p33
 sg5
-S'top/(1+math.pow(T/T50,slope))'
+S'top/(1+math.pow(x/t50,slope))'
 p34
 sg10
 g30
