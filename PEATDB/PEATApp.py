@@ -321,9 +321,7 @@ class App(Frame, GUI_help):
 
     def createSidePane(self, width=20):
         """Side panel for various dialogs"""
-        if hasattr(self, 'sidepane'):
-            self.masterframe.forget(self.sidepane)
-            self.sidepane.destroy()
+        self.closeSidePane()
         self.sidepane = Frame(self.masterframe, height=self.MAIN_height,
                               bd=1,relief=RAISED)
         self.masterframe.paneconfigure(self.sidepane,
@@ -333,16 +331,32 @@ class App(Frame, GUI_help):
         return self.sidepane
 
     def resetSidePane(self, width=20):
+        """Create a new sidepane"""        
         self.createSidePane(width=width)
         if hasattr(self,'tableframe'):
             self.masterframe.paneconfigure(self.sidepane, before=self.tableframe)
         return
 
     def closeSidePane(self):
+        """Destroy sidepine"""
         if hasattr(self, 'sidepane'):
+            self.masterframe.forget(self.sidepane)
             self.sidepane.destroy()
-        return
-    
+        return    
+
+    def createChildFrame(self, width=400, title=''):
+        """Create a child frame in sidepane or as toplevel"""
+        if self.showDialogsinSidePane == True:
+            self.resetSidePane(width=width)
+            #cframe = Frame(master=self.sidepane)
+            #cframe.pack(fill=BOTH,expand=1)
+            cframe = self.sidepane
+        else:
+            cframe = Toplevel()
+            cframe.geometry('+100+450')
+            cframe.title(title)
+        return cframe
+
     def createMenuBar(self):
         """Create the menu bar for the application. """
         self.menu=Menu(self.main)
@@ -648,9 +662,7 @@ class App(Frame, GUI_help):
         return
     
     def setTitle(self):
-        """set title of window"""       
-        if self.DB!=None:
-            print self.DB.storagetype
+        """set title of window"""
         if self.DB != None:
             if self.filename != None:
                 self.main.title(self.title+': '+self.filename)
@@ -869,7 +881,7 @@ class App(Frame, GUI_help):
         if not D[protein].has_key(field_name):
             return       
         settings = D[protein][field_name]       
-        print settings
+        #print settings
         self.connect(**settings)
         return
     
@@ -1100,17 +1112,6 @@ class App(Frame, GUI_help):
         self.DB.abort()
         self.updateTable()
         return
-
-    def createChildFrame(self, width=400, title=''):
-        if self.showDialogsinSidePane == True:
-            self.resetSidePane(width=width)
-            cframe = Frame(master=self.sidepane)
-            cframe.pack(fill=BOTH,expand=1)
-        else:
-            cframe = Toplevel()
-            cframe.geometry('+100+450')
-            cframe.title(title)
-        return cframe
 
     def showChanged(self):
         """Show list of changed records"""
@@ -1686,7 +1687,7 @@ class App(Frame, GUI_help):
         D = self.DB.data
         try:
             link = D[protein_name][field_name]['link']
-            print link
+            #print link
             import webbrowser
             webbrowser.open(link,autoraise=1)
         except:

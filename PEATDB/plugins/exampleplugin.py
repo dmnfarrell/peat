@@ -43,7 +43,7 @@ class ExamplePlugin(Plugin, GUI_help):
         #self._createButtons(methods)
         l=Label(self.mainwin, text='This is a template plugin')
         l.pack(side=TOP,fill=BOTH)
-        
+        self.mainwin.bind("<Destroy>", self.quit)
         return
   
     def _createButtons(self, methods):
@@ -70,8 +70,8 @@ class ExamplePlugin(Plugin, GUI_help):
             self.DB = PDatabase(local=local)
         return     
         
-    def quit(self):
-        self.mainwin.destroy()
+    def quit(self, evt=None):
+        """Override this to handle pane closing"""
         return
     
     

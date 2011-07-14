@@ -94,7 +94,8 @@ class PEATSAPlugin(Plugin):
         return
     
     def _doFrame(self):
-        self.mainwin = self.parent.createChildFrame(width=460,title='PEATSA Plugin')        
+        self.mainwin = self.parent.createChildFrame(width=460,title='PEATSA Plugin')
+        #self.mainwin = self.parent.create
         methods = self._getmethods()
         methods = [m for m in methods if m[0] in self.gui_methods.keys()]        
         l=Label(self.mainwin, text='PEATSA Interface')
@@ -104,8 +105,10 @@ class PEATSAPlugin(Plugin):
         self.manageJobsButtons(self.mainwin)
         self._createButtons(methods)
         self.log = self.createLogWin(self.mainwin)
-        self.log.pack(side=TOP,fill=BOTH,expand=1)         
+        self.log.pack(side=TOP,fill=BOTH,expand=1)
         self.stdout2Log()
+        self.mainwin.bind("<Destroy>", self.quit)
+        #self.parent.sidepane.bind("<Destroy>", self.test1)
         return
 
     def _createButtons(self, methods):
@@ -126,7 +129,7 @@ class PEATSAPlugin(Plugin):
         return
 
     def updateJobsTable(self):
-        """Show table for current jobs list"""        
+        """Show table for current jobs list"""
         self.checkJobsDict()
         jobdict = self.DB.meta.peatsa_jobs      
         M = TableModel()
@@ -590,19 +593,6 @@ class PEATSAPlugin(Plugin):
         self.connect(configuration)
         return
     
-    def help(self):
-        import webbrowser
-        link='http://enzyme.ucd.ie/main/index.php/PEAT_SA'
-        webbrowser.open(link,autoraise=1)
-        return
-    
-    def quit(self):
-        print 'closing plugin'
-        self.mainwin.destroy()
-        self.jobManager.stopLogging()
-        self.log2Stdout()
-        return  
-
     def showPEATSAResultsDialog(self, job, name):
         resdlg = Toplevel()
         resdlg.geometry('600x450+300+200')
@@ -899,9 +889,22 @@ class PEATSAPlugin(Plugin):
         L = self.mergeMatrix(stabmatrix, L, fields=['name'])
         print L.columnNames
         #L1 = self.DB.getLabbookSheet('myjob3')
-        #L.merge(L1)
- 
+        #L.merge(L1) 
         return        
+
+    def help(self):
+        import webbrowser
+        link='http://enzyme.ucd.ie/main/index.php/PEAT_SA'
+        webbrowser.open(link,autoraise=1)
+        return
+        
+    def quit(self, evt=None):
+        """We MUST stop the jobManager"""
+        self.log2Stdout()
+        self.jobManager.stopLogging()        
+        self.mainwin.destroy()
+        print 'closing plugin'
+        return  
         
 def main():
     import os
