@@ -45,8 +45,12 @@ class Fitting(object):
    
     conv=1e-9
     grad=1e-9
-    path = os.path.abspath(os.path.split(__file__)[0])
-    modelsfile = os.path.join(path,'models.dict')    
+    path = os.path.abspath(os.path.split(__file__)[0])    
+    peatpath = os.getcwd()
+    modelsfile = os.path.join(path,'models.dict')
+    if not os.path.exists(modelsfile):
+        modelsfile = os.path.join(peatpath,'models.dict')
+
     presetmodels = pickle.load(open(modelsfile,'r'))
     fitterClasses = {}
 
