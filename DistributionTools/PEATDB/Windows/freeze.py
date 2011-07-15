@@ -41,6 +41,7 @@ resources = ['PEATDB/DNAtool/restriction_enzymes.DAT',
              'PEATDB/data/AA_masses.txt',
              'PEATDB/App.ico',
              'PEATDB/DNAtool/DNAtool.ico',
+             'PEATDB/Ekin/models.dict',
              'Protool/AA.DAT',
              'Protool/bbdep02.May.sortlib']
 for r in resources:
