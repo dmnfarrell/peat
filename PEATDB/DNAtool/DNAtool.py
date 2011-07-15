@@ -131,14 +131,14 @@ class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
             for key in data_passed.keys():
                 self.data[key]=copy.deepcopy(data_passed[key])
 
-        self.check_primers()
-        self.init_tkvars()
+        self.check_primers()        
         
         if openwin:
             self.do_window()            
             #load display preferences if they are there
             self.load_preferences()             
             self.main_pulldown()
+            self.init_tkvars()
             self.init_bindings()
 
         # Open the window
