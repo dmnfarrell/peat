@@ -2454,10 +2454,14 @@ class App(Frame, GUI_help):
             c.execute('flush privileges;')
         except mysql.OperationalError, e:
             tkMessageBox.showinfo('Error',e)
+            self.recordEvent('Failed to create project, check settings')
+            return
             
-        self.recordEvent('Project successfully created on %s' %server)
-        self.connect(self, server=self.server, port=self.port,
-                project=dbname)
+        self.recordEvent('Project %s successfully created on %s' %(dbname,server))
+        tkMessageBox.showinfo("Project created",
+                              'Project %s successfully created on %s. '
+                              'With access for users %s. '
+                              'You may connect to this project now.' %(dbname,server,access))
         return
 
     def plot(self, event=None):
