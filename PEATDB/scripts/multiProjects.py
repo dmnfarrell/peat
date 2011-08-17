@@ -56,9 +56,11 @@ settings={'server':'enzyme.ucd.ie','username':'guest',
 path = os.getcwd()
 savepath = os.path.join(path,'projects')
 cpath = os.path.join(path,'data')
-csvfiles = os.listdir(cpath)#[:4]
+if not os.path.exists(cpath):
+    print 'we need a folder called data in the current path'
+    
+csvfiles = os.listdir(cpath)
 dbnames = [os.path.splitext(i)[0] for i in csvfiles]
-print dbnames
 
 
 def PEATSAJobs(prjs, resubmit=False):
@@ -205,6 +207,23 @@ def summarise(projects):
         
     return
 
+def info(projects):
+    """Just return info in current projects"""    
+    total=0
+    summDB = PDatabase(local='summary.fs')
+    for p in projects:        
+        DB = PDatabase(local=os.path.join(savepath,p))
+        l = DB.length()
+        total += l
+        print '%s has %s records' %(p,l)
+        if p not in summDB.getRecs():
+            print 'not present in summary project'
+    print '-----------------------'
+    print 'info on %s projects' %len(projects)
+    print 'with total of %s records' %total
+    print '%s mutants' %(total-len(projects))
+    return
+    
 def findOutliers(data):
     """Outliers in all corr data"""
     C = CorrelationAnalyser()
@@ -246,7 +265,9 @@ if __name__ == '__main__':
     parser.add_option("-p", "--path", dest="path",
                         help="Path with csv files")
     parser.add_option("-c", "--copy", dest="copy",action='store_true',
-                        help="copy to server", default=False)    
+                        help="copy to server", default=False)  
+    parser.add_option("-o", "--info", dest="info",action='store_true',
+                        help="get info", default=False)     
     opts, remainder = parser.parse_args()
 
     if opts.path != None:
@@ -258,7 +279,9 @@ if __name__ == '__main__':
         #PEATSAJobs(dbnames, resubmit=False)
     if opts.summary == True:
         summarise(dbnames)
-        #summarise(['1bvc'])
+        #summarise(['1wq5'])
     if opts.copy == True:
         send2Server(dbnames)
+    if opts.info == True:
+        info(dbnames)        
         
