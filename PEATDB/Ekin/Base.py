@@ -706,7 +706,7 @@ class EkinProject(object):
         for name in datasets: 
             self.fitline = None
             ek = self.data[name]            
-            xd,yd = xdata[name],ydata[name] = ek.getxy()
+            xd,yd = xdata[name],ydata[name] = ek.getxy()      
             adata[name] = ek.active
             xerrors[name], yerrors[name] = ek.getErrors()
             #if no error stored for points, try using global error if present
