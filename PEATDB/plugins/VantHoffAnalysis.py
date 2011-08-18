@@ -156,7 +156,7 @@ class VantHoff(Plugin):
         self.plotframe.setProject(self.E)
         d = self.dmenu.getcurselection()
         self.plotframe.plotCurrent(d)
-        plt.close(1)
+        #plt.close(1)
         return
         
     def getCSV(self):
@@ -224,13 +224,27 @@ class VantHoff(Plugin):
                 
         return
 
-
+    def guessMidpoint(self,x,y):
+        """guess midpoint for unfolding model"""
+        midy=min(y)+(max(y)-min(y))/2.0
+        midx=0
+        closest=1e4
+        for i in range(len(x)):
+            c=abs(y[i]-midy)
+            if c<closest:
+                midx=x[i]
+                closest=c
+        return midx
+        
     def transformCD(self,x,y,transwidth=None,ax=None):
         """Transform raw data into fraction unfolded per temp value, by fitting to
             a general unfolding equation that extracts baseline/slopes"""
         #fit baseline slopes and get intercepts
+        d50 = self.guessMidpoint(x,y)
         print 'fitting to get baseline slopes and intercepts..'
-        A,X=Fitting.doFit(expdata=zip(x,y),model='Unfolding',conv=1e-2,noiter=40,silent=True)
+        print 'midpoint is %s' %d50
+        A,X=Fitting.doFit(expdata=zip(x,y),model='Unfolding',noiter=50,silent=True,
+                           guess=False,startvalues=[1,1,1,1,1,d50])
         fity = X.getFitLine(x)        
         fd=X.getFitDict()
         if ax!=None:
