@@ -92,6 +92,12 @@ class VantHoff(Plugin):
                 labelpos = 'w')
         self.doall.add('Process All')
         self.doall.pack()
+        self.conversions = Pmw.RadioSelect(fr,
+                buttontype = 'checkbutton',
+                orient = 'horizontal',
+                labelpos = 'w')
+        self.conversions.add('Convert Celsius-Kelvin')
+        self.conversions.pack()        
         self.methods = Pmw.RadioSelect(fr,
                 buttontype = 'checkbutton',
                 orient = 'horizontal',
@@ -209,7 +215,7 @@ class VantHoff(Plugin):
         if self.E == None:            
             return        
         methods = self.methods.getcurselection()
-        if  'Process All' in self.doall.getcurselection():        
+        if 'Process All' in self.doall.getcurselection():        
             self.doAll(methods=methods)
         else:            
             if 'method 1' in methods:
@@ -221,7 +227,6 @@ class VantHoff(Plugin):
             if 'method 3' in methods:              
                 self.fitElwellSchellman(E=self.E,d=self.dmenu.getcurselection(),
                                             transwidth=int(self.tw.getvalue()))
-                
         return
 
     def guessMidpoint(self,x,y):
@@ -245,6 +250,7 @@ class VantHoff(Plugin):
         print 'midpoint is %s' %d50
         A,X=Fitting.doFit(expdata=zip(x,y),model='Unfolding',noiter=50,silent=True,
                            guess=False,startvalues=[1,1,1,1,1,d50])
+        #print X.getResult()
         fity = X.getFitLine(x)        
         fd=X.getFitDict()
         if ax!=None:
@@ -266,15 +272,17 @@ class VantHoff(Plugin):
             t.append(T)
 
         #try to take useful transition region of data
-        at,af=t,f
+        at,af=t,f        
+        diff=1e5
         if transwidth != None:
             for i in t:
-                if i>d50: 
+                d=abs(i-d50)
+                if d<diff:
                     mid = t.index(i)
-                    break
-            L=int(mid-transwidth); U=int(mid+transwidth)        
-            t,f = t[L:U], f[L:U]
-            
+                    diff=d                    
+            L=int(mid-transwidth); U=int(mid+transwidth)            
+            t,f = t[L:U], f[L:U]        
+        
         return at,af,t,f
     
     def fitVantHoff(self, E=None, d=None, xy=None, transwidth=80, invert=False,
@@ -289,9 +297,12 @@ class VantHoff(Plugin):
                 print 'available datasets:', E.datasets
                 return            
             ek = E.getDataset(d)          
-            x,y,a, xerr,yerr = ek.getAll()
+            x,y = ek.getxySorted()
         elif xy!=None:
-            x,y = xy            
+            x,y = xy
+        
+        if 'Convert Celsius-Kelvin' in self.conversions.getcurselection():
+            x = [i+273 for i in x]
         if invert == True:
             y = [max(y)-i for i in y[:]] 
             
@@ -309,13 +320,15 @@ class VantHoff(Plugin):
             
         #derive lnK vs 1/T
         t=[]; k=[]
+        
         for T,fu in zip(x,y):
             if fu>=1 or fu<=0:
-                continue 
+                continue
             K = fu/(1-fu)
             klog = math.log(K)
             k.append(klog)
             t.append(1/T)
+        
         if len(t)<2: return None, None, None
          
         ax=f.add_subplot(132)

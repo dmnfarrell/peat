@@ -177,11 +177,19 @@ class EkinDataset(object):
         return x,y
   
     def getAll(self):
-	"""Get all data, including error vals"""
-	x,y,a = self.getxya()	
-	xerrs = [self.errors[0][i] for i in range(len(self.x)) if self.x[i]!=None and self.y[i]!=None]
-	yerrs = [self.errors[1][i] for i in range(len(self.x)) if self.x[i]!=None and self.y[i]!=None]	
-	return x,y,a,xerrs,yerrs
+        """Get all data, including error vals"""
+        x,y,a = self.getxya()	
+        xerrs = [self.errors[0][i] for i in range(len(self.x)) if self.x[i]!=None and self.y[i]!=None]
+        yerrs = [self.errors[1][i] for i in range(len(self.x)) if self.x[i]!=None and self.y[i]!=None]	
+        return x,y,a,xerrs,yerrs
+        
+    def getxySorted(self):
+        """Get sorted version of lists"""
+        from operator import itemgetter
+        x,y=self.getxy()
+        s=sorted(zip(x,y), key=itemgetter(0))
+        x,y = zip(*s)
+        return x,y
         
     def setActive(self, i, a=1):
         """Set a point as active"""
