@@ -272,9 +272,9 @@ class VantHoff(Plugin):
             t.append(T)
 
         #try to take useful transition region of data
-        at,af=t,f        
+        at,af=t,f
         diff=1e5
-        if transwidth != None:
+        if transwidth != None:            
             for i in t:
                 d=abs(i-d50)
                 if d<diff:
@@ -606,7 +606,9 @@ class VantHoff(Plugin):
             vals[d]={}
             name = d
             if 'method 1' in methods:
-                vals[d]['dH1'], vals[d]['dS1'], ax = self.fitVantHoff(E,d,show=False,figname=name)
+                vals[d]['dH1'], vals[d]['dS1'], ax = self.fitVantHoff(E,d,
+                                                         transwidth=int(self.tw.getvalue()),
+                                                         show=False,figname=name)
             if 'method 2' in methods:
                 vals[d]['dH2'], vals[d]['dTm2'], vals[d]['dCp2'] = self.fitElwellSchellman(E,d,show=False,figname=name)                                
             if 'method 3' in methods:
