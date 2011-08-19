@@ -452,9 +452,7 @@ class Importer:
         """Import a single or multiple files"""
 
         # populate file list here
-        filelist = self.open_filelist(default_extension=default_extension)        
-        if type(filelist) is not types.TupleType:
-            filelist = [str(i) for i in filelist.split(' ')]
+        filelist = self.open_filelist(default_extension=default_extension)      
         self.filename = filelist[0]        
         self.file_list = filelist
         
@@ -795,6 +793,8 @@ class Importer:
                                                             ("txt files","*.txt"),
                                                            ("All files","*.*")],
                                                 parent=self.ekin_win)
+        #require on some windows versions
+        filelist = self.ekin_win.tk.splitlist(filelist)
         return filelist
 
 
