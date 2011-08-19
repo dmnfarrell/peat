@@ -25,7 +25,7 @@
 # Dublin 4, Ireland
 # 
 
-import os, sys
+import os, sys, types
 from Tkinter import *
 import Pmw
 import csv
@@ -50,7 +50,7 @@ class Importer:
         return
 
     def get_lines(self, filename):
-        """Get file into list"""
+        """Get file into list"""        
         if os.path.isfile(filename):
             fd=open(filename)
             lines = fd.readlines()
@@ -451,16 +451,13 @@ class Importer:
     def import_multiple(self,event=None, default_extension='.txt'):
         """Import a single or multiple files"""
 
-        # a list with the current sequences loaded for display
-        self.file_list=[]
         # populate file list here
-        self.file_list=self.open_filelist(default_extension=default_extension)
-        #if self.filename == None:
-        if len(self.file_list) > 0:
-            self.filename = self.file_list[0]
-        else:
-            return
-
+        filelist = self.open_filelist(default_extension=default_extension)        
+        if type(filelist) is not types.ListType:
+            filelist = [str(i) for i in filelist.split(' ')]
+        self.filename = filelist[0]        
+        self.file_list = filelist
+        
         #get all lines from file and put in variable
         self.lines = self.get_lines(self.filename)
         #get options for import and then do import
