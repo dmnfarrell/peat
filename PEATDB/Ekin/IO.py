@@ -453,7 +453,7 @@ class Importer:
 
         # populate file list here
         filelist = self.open_filelist(default_extension=default_extension)        
-        if type(filelist) is not types.ListType:
+        if type(filelist) is not types.TupleType:
             filelist = [str(i) for i in filelist.split(' ')]
         self.filename = filelist[0]        
         self.file_list = filelist
@@ -467,7 +467,6 @@ class Importer:
             return None
         datasets = self.do_import_data()
         return datasets
-
 
     def import_ccpnmr(self, event=None):
         """Import ccpnmr data"""
