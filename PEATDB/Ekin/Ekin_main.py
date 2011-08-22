@@ -248,10 +248,10 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
         self.menu.add_cascade(label='Data',menu=self.data_menu['var'])
 
         self.IE_menu={  '01Import from CSV file':{'cmd':self.import_csv},
-                        '02Export tab to CSV file':{'cmd':self.export_csv},
+                        '02Export as CSV file':{'cmd':self.export_csv},
                         '03Import Sparky peak files':{'cmd':self.import_chem_shift},
                         #'04Import from chem. shift file':{'cmd':self.import_chem_shift},
-                        '05Import from CcpNmr file':{'cmd':self.import_ccpnmr},
+                        '05Import CcpNmr file':{'cmd':self.import_ccpnmr},
                         #'06Transfer peaks to pKaSystem':{'cmd':self.open_pKaSystem_dialog},
                         '07sep':{None:None},
                         '08Import CD temperature scan':{'cmd':self.import_CD_tempscan},
@@ -270,7 +270,7 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
         #
         self.annotate_menu={'01Edit meta data':{'cmd':self.editMetaData},
                             #'02View all meta data':{'cmd':self.viewMetaData},
-                            '02Map datatab to structure':{'cmd':self.map_datatab2structure}}
+                            '02Map dataset to structure':{'cmd':self.map_datatab2structure}}
         self.annotate_menu=self.create_pulldown(self.menu,self.annotate_menu)
         self.menu.add_cascade(label='Annotate/Map',menu=self.annotate_menu['var'])
 
@@ -1290,7 +1290,7 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
     def export_csv(self, event=None):
         """Will allow export of multiple or single csv files"""
         name = self.currentdataset.get()
-        self.exporter.export_csv(self.data[name], self.__datatabs_fits__[name])
+        self.exporter.export_csv(self.data[name], self.E.__datatabs_fits__[name])
         return
 
     def import_chem_shift(self):

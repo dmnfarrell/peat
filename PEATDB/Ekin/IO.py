@@ -931,10 +931,10 @@ class Exporter:
                                               parent=self.ekin_win)
         if not filename:
             return
-        labels=data[0]['label'],data[1]['label']
-        #x,y,a = EkinConvert.ekin2xy(data)
-	x,y = data.getxy()
-        #print filename
+        labels = data.labels    
+        #labels=data[0]['label'],data[1]['label']        
+        x,y = data.getxy()
+       
         try:
             import csv
             csvwriter = csv.writer(open(filename, "wb"))
