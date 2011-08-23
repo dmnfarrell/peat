@@ -678,8 +678,9 @@ class EkinProject(object):
         if figure != None:
             fig = figure
         else:           
-            from matplotlib import figure
-            fig = figure.Figure(figsize=size, dpi=80)            
+            #from matplotlib import figure
+            #fig = figure.Figure(figsize=size, dpi=80)        
+            fig = plt.figure(figsize=size, dpi=80)
         fig.clf()
         datasets = self.checkDatasetParam(datasets)
         if plotoption == 2:
