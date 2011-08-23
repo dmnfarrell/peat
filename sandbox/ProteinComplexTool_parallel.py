@@ -6,11 +6,31 @@ import PEATSA.Core as Core
 import PEATSA.Core.Matrix
 import matplotlib.pyplot as plt
 import numpy as np
+import pypar
 import Environment
 
 
 class ProteinComplexTool:
     def __init__(self):
+
+        self.proc = pypar.size()
+        self.myid = pypar.rank()
+        self.node = pypar.get_processor_name()
+
+        return
+        
+    def allProc(self):
+        if self.myid in range(self.proc):
+            return True
+        else:
+            return False
+
+    def isSlave(self):
+        if self.myid in range(1,self.proc):
+            return True
+        else:
+            return False
+
         return
 
     def DeltaStability(self,inputFile, mutationList, configurationFile, workingDirectory, outputDirectory):
@@ -87,10 +107,10 @@ class ProteinComplexTool:
                     expr1.append(s)
                 else:
                     expr1.append(["segid "+c])
-            self.do_split(pdbDir,pdb, expr1, reactions_list, environment)
+            self._do_split(pdbDir,pdb, expr1, reactions_list, environment)
             return reactions_list
 
-    def do_split(self,pdbDir,pdb, expr, e, environment):
+    def _do_split(self,pdbDir,pdb, expr, e, environment):
         import MDAnalysis
 
         u = MDAnalysis.Universe(pdbDir, permissive=False)
@@ -145,7 +165,8 @@ def main():
     
     # Run program
     environment = Environment.Environment()
-
+    
+    
     # Connect to local database containing info about BMP pdbs
     db = MySQLdb.connect(host="localhost", user = "root", passwd = "samsung", db = "sat")
     cur = db.cursor()
@@ -184,159 +205,170 @@ def main():
 
     (opts, args) = parser.parse_args()
 
+    
     # Instantiate the class
     run = ProteinComplexTool()
     
-    # pdb name/file handling
-    pdb = opts.pdb
-    pdbFile = ''.join((pdb,'.pdb'))
-    pdbDir = os.path.join(opts.outputDir,pdbFile)
-    environment.output(pdbDir) 
-
-    # Checking if user selected PDB is in the database
-    """
-    if opts.pdb != None:
-        if opts.pdb not in b:
-            raise sys.exit('PDB not in Database, choose one from list')
-            """
-    if opts.pdb in b:
-        environment.output('PDB in Database')
-        environment.output('Checking what calculations can be performed')
-
-
-    # Check what calcs can be done with user defined PDB
-    cur.execute("SELECT distinct Entity_ID, Chain_ID, Chain_name, type from pdb where PDB_ID = %s%s%s;" % ('"',pdb,'"'))
-    entity = [] # entities in the pdbfile
-    chains = []
-
-
-    for i in cur.fetchall():
-        environment.output("Entity: %s, Chain Name: %s, Type: %s, Chain ID: %s" % (i[0], i[2], i[3], i[1]))  
-        entity.append(i[0])
-        chains.append(i[1])               
-
-    entity.sort()
-    
-    # Delete results
-    if opts.deleteResults == 'True':
-        cur.execute("SHOW tables like 'results_%s%s';" % (pdb, '%'))
-        drop_tables=cur.fetchall()
-        #environment.output(drop_tables)
-        for i in drop_tables:
-            cur.execute("DROP TABLE '%s';" % (i))
-            #environment.output("Results for %s deleted" % i)
-    else:
-        pass
-
-    # Remove Alternate Residues from pdb, will overwrite the file
-    run.remALT(pdb, environment)    
-    environment.wait()
-    # User defined splitting of chains from PDB, can be left 
-    # blank and the PDB will be split to individual chains
-    reactions_list = ['']
-    
-    if opts.userCalcOpt != 'False':
-        environment.output("What components are consumed (enter chain IDs in the form AB+C+D):")
-        reactants = sys.stdin.readline()
-        reactants = reactants.rstrip("\n")
-        environment.output("What products are produced (enter chain IDs in the form ABC+D):")
-        products = sys.stdin.readline()
-        products = products.rstrip("\n")
-    else:
-        pass
-    
-    # If user leaves input blank, then the default is to calculate 
-    # every chain individually vs complex  
-    if reactants == '':
-        reactants = '+'.join(chains)
-    else:
-        pass
-    
-    if products == '':
-        products = ''.join(chains)
-    else:
-        pass
-    
-    reactants_list = reactants.split('+')
-    products_list = products.split('+')
-
-    # Split the pdb into chains, returns chains that have been split (A,B etc)
-    environment.wait()
-    split_reactants = run.splitter(pdbDir,pdb,reactants_list,cur,db, environment)
-    split_products = run.splitter(pdbDir,pdb,products_list,cur,db, environment)
-    comp_list = split_products + split_reactants
-    comp_list = '_'.join(comp_list)
-    
-    split_list = []
-    split_list_products = []
-    split_list_reactants = []
-
-    for i in split_reactants:
-        s = pdb+'_'+i
-        split_list_reactants.append(s)
-
-    for i in split_products:
-        s = pdb+'_'+i
-        split_list_products.append(s)
-    
-    splitlist = split_list_products + split_list_reactants
-    for i in splitlist:
-        if i not in split_list:
-            split_list.append(i)
-
-    # Split_list is a list of the pdb and the individual pdbs 
-    # that have been split
-    environment.output(split_list)
-    #print split_list
    
-    # Show results
-    if opts.showResults == 'True':
-        count = 0
-        environment.output(cur.execute("show tables;"))
-        tables = cur.fetchall()
-        resTable = "".join(("results_",pdb))
-        for i in tables:
-            for y in i:
-                if y.startswith(resTable):
-                   count +=1
-        if count != 0:
-            run.displayResults(pdb,split_list,comp_list,cur,db,environment)
-    else:
-        pass
+    # pdb name/file handling
+    if environment.isRoot():
 
-    comp_list = comp_list +'_'+os.path.split(opts.mutList)[1]
- 
-    #environment.output(comp_list)
-    # Run the calculations
-    # Load and check mutant list given by user, else do ALA scan
+        pdb = opts.pdb
+        pdbFile = ''.join((pdb,'.pdb'))
+        pdbDir = os.path.join(opts.outputDir,pdbFile)
+        environment.output(pdbDir) 
+        
+
+        # Checking if user selected PDB is in the database
     
-    """
-    if opts.mutList != "ALA":
-        mfile = Core.Data.MutationListFile(filename=opts.mutList,create=True)
-        mfile.removeDuplicates(autoUpdate=False)
-        mutList = mfile.mutantList()    
+        if opts.pdb != None:
+            if opts.pdb not in b:
+                raise sys.exit('PDB not in Database, choose one from list')
+            
+        if opts.pdb in b:
+            environment.output('PDB in Database')
+            environment.output('Checking what calculations can be performed')
+
+
+        # Check what calcs can be done with user defined PDB
+        cur.execute("SELECT distinct Entity_ID, Chain_ID, Chain_name, type from pdb where PDB_ID = %s%s%s;" % ('"',pdb,'"'))
+        entity = [] # entities in the pdbfile
+        chains = []
+
+        for i in cur.fetchall():
+            environment.output("Entity: %s, Chain Name: %s, Type: %s, Chain ID: %s" % (i[0], i[2], i[3], i[1]))  
+            entity.append(i[0])
+            chains.append(i[1])               
+        entity.sort()
+
+        # Delete results
+
+        if opts.deleteResults == 'True':
+            cur.execute("SHOW tables like 'results_%s%s';" % (pdb, '%'))
+            drop_tables=cur.fetchall()
+            #environment.output(drop_tables)
+            for i in drop_tables:
+                cur.execute("DROP TABLE '%s';" % (i))
+                environment.output("Results for %s deleted" % i)
+            else:
+                pass
+
+        # Remove Alternate Residues from pdb, will overwrite the file
+        run.remALT(pdb, environment)    
+
+        # User defined splitting of chains from PDB, can be left 
+        # blank and the PDB will be split to individual chains
+
+        reactions_list = ['']
+
+        if opts.userCalcOpt != 'False':
+            environment.output("What components are consumed (enter chain IDs in the form AB+C+D):")
+            reactants = sys.stdin.readline()
+            reactants = reactants.rstrip("\n")
+            environment.output("What products are produced (enter chain IDs in the form ABC+D):")
+            products = sys.stdin.readline()
+            products = products.rstrip("\n")
+        else:
+            pass 
+
+        # If user leaves input blank, then the default is to calculate 
+        # every chain individually vs complex  
+        if reactants == '':
+            reactants = '+'.join(chains)
+        else:
+            pass
+
+        if products == '':
+            products = ''.join(chains)
+        else:
+            pass
+    
+        reactants_list = reactants.split('+')
+        products_list = products.split('+')
+
+        # Split the pdb into chains, returns chains that have been split (A,B etc)
+        split_reactants = run.splitter(pdbDir,pdb,reactants_list,cur,db, environment)
+        split_products = run.splitter(pdbDir,pdb,products_list,cur,db, environment)
+        comp_list = split_products + split_reactants
+        comp_list = '_'.join(comp_list)
+    
+        split_list = []
+        split_list_products = []
+        split_list_reactants = []
+
+        for i in split_reactants:
+            s = pdb+'_'+i
+            split_list_reactants.append(s)
+
+        for i in split_products:
+            s = pdb+'_'+i
+            split_list_products.append(s)
+
+        splitlist = split_list_products + split_list_reactants
+        for i in splitlist:
+            if i not in split_list:
+                split_list.append(i)
+
+        # Split_list is a list of the pdb and the individual pdbs 
+        # that have been split
+        environment.output(split_list)
+        #print split_list
+
+        # Show results
+        if opts.showResults == 'True':
+            count = 0
+            environment.output(cur.execute("show tables;"))
+            tables = cur.fetchall()
+            resTable = "".join(("results_",pdb))
+            for i in tables:
+                for y in i:
+                    if y.startswith(resTable):
+                       count +=1
+            if count != 0:
+                run.displayResults(pdb,split_list,comp_list,cur,db,environment)
+        else:
+            pass
+
+        comp_list = comp_list +'_'+os.path.split(opts.mutList)[1]
+    
+        #environment.output(comp_list)
+        # Run the calculations
+        # Load and check mutant list given by user, else do ALA scan
+
+    
+        if opts.mutList != "ALA":
+            mfile = Core.Data.MutationListFile(filename=opts.mutList,create=True)
+            mfile.removeDuplicates(autoUpdate=False)
+            mutList = mfile.mutantList()    
+        else:
+            for i in split_list:
+                w_pdb = os.path.join(opts.outputDir,'%s.pdb' % (i))
+                mutList = Core.Data.CreateScanList(pdbFile=w_pdb, mutation='ALA', skipResidueTypes=['ALA', 'GLY'])
+    
     else:
-        for i in split_list:
+        print 'i, processor %d, am waiting' %(run.myid)
+    
+    
+
+    #split_list=['2H62_ABCD','2H62_AB','26H2_CD']
+
+
+        
+    for i in split_list:
+        if run.allProc():
             w_pdb = os.path.join(opts.outputDir,'%s.pdb' % (i))
             mutList = Core.Data.CreateScanList(pdbFile=w_pdb, mutation='ALA', skipResidueTypes=['ALA', 'GLY'])
-    """    
-    muts = []
-    score = []
-    
-    for i in split_list:
-        w_pdb = os.path.join(opts.outputDir,'%s.pdb' % (i))
-        mutList = Core.Data.CreateScanList(pdbFile=w_pdb, mutation='ALA', skipResidueTypes=['ALA', 'GLY'])
-        results = run.DeltaStability(inputFile=w_pdb, 
-                  mutationList=mutList, 
-                  configurationFile=opts.configFile, 
-                  workingDirectory=opts.workingDir, 
-                  outputDirectory=opts.outputDir)
-        environment.wait()
-        for mutant in range(results.stabilityResults.numberOfRows()):
-            cur.execute("insert into results (PDB_ID, mutation, score) VALUES (%s,%s,%s);", (i,results.stabilityResults[mutant][0],results.stabilityResults[mutant][-1]))
-        environment.output("Calculated %s stability and results added to database" % (i))
-        environment.wait()
+            results = run.DeltaStability(inputFile=w_pdb, 
+                                         mutationList=mutList, 
+                                         configurationFile=opts.configFile, 
+                                         workingDirectory=opts.workingDir, 
+                                         outputDirectory=opts.outputDir)
+            if environment.isRoot():
+                for mutant in range(results.stabilityResults.numberOfRows()):
+                    cur.execute("insert into results (PDB_ID, mutation, score) VALUES (%s,%s,%s);", (i,results.stabilityResults[mutant][0],results.stabilityResults[mutant][-1]))
+                environment.output("Calculated %s stability and results added to database" % (i))
 
+            
 
     # Display results
     #run.displayResults(pdb,split_list,comp_list,cur,db,environment)
