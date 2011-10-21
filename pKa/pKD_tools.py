@@ -117,17 +117,61 @@ def get_restype_from_titgroup(group):
     else:
         return ptype
 
+def check_mutation_syntax(operations,sequence=None):
+    """Check the syntax of an operation string and check that the residue is present in the sequence"""
+    single=get_single_operations(operations)
+    for op in single:
+        resid=get_resid_from_mut(op)
+        new=get_newrestyp_from_mut(op)
+        old=get_oldrestyp_from_mut(op)
+        import Protool
+        X=Protool.structureIO()
+        if not X.aminoacids.has_key(old) or not X.aminoacids.has_key(new):
+            raise Exception('New or old residue is not an amino acid: %s' %op)
+        if sequence:
+            if not [resid,old] in sequence:
+                raise Exception('Original sequence does not contain this residue: %s:%s' %(resid,old))
+    return combine_operations(single)
+
+def get_single_operations(operations):
+    """Get the single mutations/operations from a combined expression"""
+    single=[]
+    sp=operations.split('+')
+    for s in sp:
+        single.append(s.strip())
+    return single
+
+def combine_operations(operations):
+    """Combine single operations into a single operation string"""
+    operations.sort()
+    import string
+    return string.join(operations,'+')
+
 def convert_classic_to_PEAT(operations):
     """Convert a set of classic mutations to a set of PEAT operations
     The classic operations are in the format: A12G+R45V etc."""
+    #
+    # Do a quick sanity check
+    #
+    for junk in ['?','unknown','empty']:
+        if operations.lower().find(junk)!=-1:
+            return False
+    #
+    # Deal with the operations
+    #
     sp=operations.split('+')
     import Protool, string
     P=Protool.structureIO()
     POP=[]
     for op in sp:
+        if op=='wt':
+            continue
         old=op[0]
         new=op[-1]
         number=int(op[1:-1])
-        POP.append('%s:%s:%s:%s' %('',string.zfill(number,P.length_of_residue_numbers),P.one_to_three[old],P.one_to_three[new]))
+        try:
+            POP.append('%s:%s:%s:%s' %('',string.zfill(number,P.length_of_residue_numbers),P.one_to_three[old],P.one_to_three[new]))
+        except KeyError:
+            return False
     return string.join(POP,'+')
         
