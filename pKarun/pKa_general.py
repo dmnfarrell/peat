@@ -210,12 +210,6 @@ class pKanalyse:
                 logcurve[pH]=math.log10(1.0/abs(curve[pH])-1.0)
                 weights[pH]=1.0
         for pH in logcurve.keys():
-            #if string.strip(str(pH))[0] not in string.digits:
-            #    raise "Wrong key: ",pH
-
-
-            #
-            #
             matrix.append([pH,weights[pH]])
             vector.append(logcurve[pH])
         matrix=array((matrix))

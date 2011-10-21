@@ -388,6 +388,11 @@ def get_titratable_residues(pdbfile):
     return titratable_groups
 
 #
+# -----
+#
+
+
+#
 #  ----------------------
 #
 
@@ -643,6 +648,7 @@ def relative_accessibility(pdbfile):
     # This option runs DELLIG, INIACC, SETACC and VACACC
     """
     import os
+    pdbfile=os.path.join(os.getcwd(),pdbfile)
     pdb=os.path.split(pdbfile)[1]
     command='getmol '+pdb+' \n X \n dellig \nset1 \n access \n setacc \n tot 0\n \n vacacc \n N \n tot \n'
     logfile=RunWI(command,None,None,[pdbfile])

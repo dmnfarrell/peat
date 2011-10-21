@@ -24,26 +24,54 @@
 # University College Dublin
 # Dublin 4, Ireland
 
-import pKarun_base 
+import pKarun_base
+import sys
+sys.path.append('/home/people/nielsen/lib/development/python')
+
+def corall(pdbfile):
+    """Do Corall on the PDBfile"""
+    print 'Performing CORALL on %s' %pdbfile
+    import pKarun.WI_tools
+    log,files=pKarun.WI_tools.corall(pdbfile)
+    #for line in log:
+    #    print line,
+    filename=files.keys()[0]
+    fd=open(pdbfile,'w')
+    for line in files[filename]:
+        fd.write(line)
+    fd.close()
+    print 'CORALL done'
+    print
+
+#
+# ----
+#
 
 def main(options,args):
     """Start the calculations"""
+    import os, shutil
+    top=os.getcwd()
     #
     # Read the filelist
     #
-    fd=open(args[0])
-    files=fd.readlines()
-    fd.close()
+    if args[0]!='all':
+        fd=open(args[0])
+        files=fd.readlines()
+        fd.close()
+    else:
+        files=os.listdir(top)
+    #
+    # -------------------------------------
     #
     # Loop over all files and do the task
     #
-    import os, shutil
-    top=os.getcwd()
-    for filename in files:
+    for filename in sorted(files):
         #
         # clean filename
         #
         if filename[0]=='#':
+            continue
+        if filename[-4:]!='.pdb':
             continue
         import string
         filename=string.strip(filename)
@@ -58,7 +86,7 @@ def main(options,args):
                 dirname=filename[:-4]
             else:
                 dirname=filename+'_dir'
-            if not os.isdir(dirname):
+            if not os.path.isdir(dirname):
                 os.mkdir(dirname)
             #
             # copy the pdb file to the dir
@@ -74,7 +102,6 @@ def main(options,args):
         # Change dir to the calc dir
         #
         os.chdir(dirname)
-        
         #
         # Delete TOPOLOGY.H and DELRAD.DAT + DELCRG.DAT if they exist
         #
@@ -83,7 +110,6 @@ def main(options,args):
         for copyfile in copyfiles:
             if os.path.lexists(os.path.join(dirname,copyfile)):
                 os.unlink(os.path.join(dirname,copyfile))
-
         #
         # Find the pdb file
         #
@@ -97,19 +123,35 @@ def main(options,args):
         if not pdbfile:
             raise Exception('Could not find PDB file in %s' %os.getcwd())
         #
+        # EM + MD?
+        #
+        if options.EM:
+            #corall(pdbfile)
+            class options:
+
+                def __init__(otherself):
+                    otherself.type='pKa'
+                    otherself.pdbfile=pdbfile
+                    otherself.clean=False
+                    return
+            Goptions=options()
+            #
+            import GromacsEM
+            pdblines=GromacsEM.EMone(Goptions)
+            import Protool
+            PI=Protool.structureIO()
+            PI.parsepdb(pdblines)
+            PI.Remove_All_NonAminoAcids() # Make sure all waters are removed
+            pdbfile=pdbfile+'test'
+            PI.writepdb(pdbfile)
+            corall(pdbfile) # Do final corall
+            stop
+            
+        #
         # Should we do a corall?
         #
         if options.corall:
-            print 'Performing CORALL'
-            import pKarun.WI_tools
-            log,files=pKarun.WI_tools.corall(pdbfile)
-            filename=files.keys()[0]
-            fd=open(pdbfile,'w')
-            for line in files[filename]:
-                fd.write(line)
-            fd.close()
-            print 'CORALL done'
-            print
+            corall(pdbfile)
         #
         # Copy the DEL* files and TOPOLOGY.H
         #       
@@ -157,11 +199,12 @@ if __name__=='__main__':
     from optparse import OptionParser
     parser = OptionParser(usage='%prog [options] <filelist>',version='%prog 1.0')
     parser.add_option('-t',"--tasks", dest='tasks',type='string',action='store',
-                        help="Specify which tasks to perform: all, desolv, backgr, matrix, titration",
+                        help="Specify which tasks to perform: all, desolv, backgr, matrix, titration. Default; %default",
                         default='all')
     parser.add_option('-f',"--filestructure",type='string',dest='filestructure',default='dirs',action='store',
                       help='Are the PDB files in individual dirs (dirs) or in the same dir (files)? Default: %default')
     parser.add_option('-c','--corall',dest='corall',action='store_true',help='Perform WHAT IF corall call before calculating pKa values. Default=%default',default=False)
+    parser.add_option('--EM',dest='EM',action='store',help='Energy mimimize each snapshot with Gromacs before doing pKa calc',default='None')
     (options, args) = parser.parse_args()
     if len(args)!=1:
         parser.error('You must specify a file holding the PDB files/directories')
