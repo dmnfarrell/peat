@@ -2,7 +2,8 @@
 # %Id$
 """Routines for exploring the electrostatic sub-space of a particular system"""
 #
-# Copyright (C) Jens Erik Nielsen 2005 University College Dublin
+# Copyright (C) Jens Erik Nielsen 2005-2011 University College Dublin
+# Copyright (C) Jens Erik Nielsen 2011 Novozymes A/S
 #
 import sys
 import numpy as np

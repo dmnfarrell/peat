@@ -87,17 +87,17 @@ class pKaIO:
         #
         import os
         self.file_status={}
-        self.calculation_completed=1
+        self.calculation_completed=True
         for file in self.allfiles:
             if not file:
-                self.calculation_completed=None
-                self.file_status[file]=None
+                self.calculation_completed=False
+                self.file_status[file]=False
                 continue
             if os.path.isfile(file):
                 self.file_status[file]=1
             else:
-                self.calculation_completed=None
-                self.file_status[file]=None
+                self.calculation_completed=False
+                self.file_status[file]=False
         return self.calculation_completed
 
     #
