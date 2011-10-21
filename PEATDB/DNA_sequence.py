@@ -124,6 +124,28 @@ class sequence:
         if self.sequence[-1]=='*':
             self.sequence=self.sequence[:-1]
         return self.sequence
+
+    #
+    # ------
+    #
+
+    def writepir(self,sequence,filename,name='Sequence'):
+        """Save the sequence as a PIR file"""
+        import os
+        topdir=os.getcwd()
+        fd=open(os.path.join(topdir,filename),'w')
+        fd.write('>%s;\n\n' %name)
+        buffer=''
+        for char in sequence:
+            buffer=buffer+char
+            if len(buffer)==80:
+                fd.write(buffer+'\n')
+                buffer=''
+        fd.write(buffer+'\n')
+        fd.close()
+        return
+        
+        
     #
     # ---------
     #
