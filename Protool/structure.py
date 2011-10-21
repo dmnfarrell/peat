@@ -95,7 +95,7 @@ class structure(geometry,flags.flags,sequence,analyse_structure.find_pattern,
         #
         # The attribute dictionary
         #
-        self.attribute={'G':{'size':0,'class':{'flexible':1,'small':1}},
+        self.all_attribute={'G':{'size':0,'class':{'flexible':1,'small':1}},
                         'A':{'size':1,'class':{'small':1,'aliphatic':1,'hydrophobic':1}},
                         'V':{'size':3,'class':{'hydrophobic':1,'betasub':1,'aliphatic':1}},
                         'L':{'size':4,'class':{'hydrophobic':1,'aliphatic':1}},

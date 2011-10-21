@@ -34,9 +34,12 @@ class flags:
         # 2.0 A. This is not true for hydrogens....
         #
         #print self.dist(atom1,atom2)
-        if self.dist(atom1,atom2)<2.0:
-            return True
-        else:
+        try:
+            if self.dist(atom1,atom2)<2.0:
+                return True
+            else:
+                return False
+        except AtomNotFoundError:
             return False
 
 

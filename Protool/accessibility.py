@@ -47,20 +47,33 @@ class access:
         """Get the number of atoms close"""
         acc=0.0
         count=0
-        for atom1 in self.PI.residues[residue]:
-            if self.PI.is_backbone(atom1):
+        for res2 in self.PI.residues.keys():
+            if res2==residue:
                 continue
-            count=count+1
-            for res2 in self.PI.residues.keys():
-                if res2==residue:
-                    continue
-                for atom2 in self.PI.residues[res2]:
-                    if self.PI.dist(atom1,atom2)<self.cutoff:
-                        acc=acc+1.0
+            if self.PI.dist(residue+':CA',res2+':CA')<25:
+                counted={}
+                for atom1 in self.PI.residues[residue]:
+                    if self.PI.is_backbone(atom1) and atom1.split(':')[-1]!='CA':
+                        continue
+                    for atom2 in self.PI.residues[res2]:
+                        if not counted.has_key(atom2):
+                            if self.PI.dist(atom1,atom2)<self.cutoff:
+                                acc=acc+1.0
+                                counted[atom2]=1
         #
-        # 
-        if count>0:
-            acc=acc#/float(count)
+        #
+        numatoms=float(len(self.PI.residues[residue])-4) #Subtract backbone atoms
+        #
+        # Correct for compactness of aromatics
+        #
+        if self.PI.resname(residue) in ['PHE','TYR','HIS']:
+            numatoms=numatoms-3
+        if self.PI.resname(residue) in ['TRP']:
+            numatoms=numatoms-6
+        if numatoms>0.0:
+            acc=acc/numatoms
+        else:
+            acc=0
         return acc
                         
                 

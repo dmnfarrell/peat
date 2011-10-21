@@ -153,7 +153,7 @@ class PDBparser:
         #
         
         if self.readmodel is False and type!='ENDMDL':
-            print 'Skipping model no: %d' %self.NMRmodel
+            #print 'Skipping model no: %d' %self.NMRmodel
             return
         #
         # Now call the appropritate function
@@ -215,6 +215,8 @@ class PDBparser:
         elif type=='EXPDTA':
             self.parseexpdta(line)
         elif type=='JUNK':
+            pass
+        elif type=='NUMMDL':
             pass
         else:
             raise ParseLineError, 'Unknown Header type: %s' %type

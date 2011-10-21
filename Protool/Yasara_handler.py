@@ -30,8 +30,10 @@ class yasara_handler:
         return
 
     def load_mol(self,pdbfile,center=None):
+        """LOad a molecule"""
         #self.yasara.run('DelAll')
-        obj=self.yasara.LoadPDB(pdbfile,center=center)
+        import os
+        obj=self.yasara.run('LOADPDB %s' %os.path.join(os.getcwd(),pdbfile))
         self.yasara.run('Style Stick')
         self.yasara.run('HideRes Hoh')
         res=self.yasara.ColorObj(obj,'Grey')
