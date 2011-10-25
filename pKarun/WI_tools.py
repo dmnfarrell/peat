@@ -1098,7 +1098,7 @@ def mutate(pdbfile,mutations,quality=1,silent=None,qualitycheck=None,wiffile=Non
                             rotamer_quality=score
             else:
                 rotamer_quality=9999.9 # Simple mutation always get perfect rotamer score
-            if not rotamer_quality:
+            if not rotamer_quality and not silent:
                 print '\n\n\nWarning: No rotamer quality score for %s\n\n\n' %(str(mutations))
                 rotamer_quality=-5.0
             #
@@ -1193,7 +1193,7 @@ def RunWI(command,returnfiles=None,debug=None,neededfiles=None,wiffile=None):
     #
     # Run normal WHAT IF
     #
-    print 'Using normal WHAT IF'
+    #print 'Using normal WHAT IF'
     x=WHAT_IF.Whatif(wiffile)
     #
     # Do we need the hydrogen topology file
