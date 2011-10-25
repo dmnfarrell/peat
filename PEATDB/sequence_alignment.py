@@ -325,7 +325,7 @@ def print_pir_alignment(seq1,seq2):
     #
     # Print it
     #
-    x=seq1   # new seq which will be aligned with the old one
+    x=seq1   # new seq which was  aligned with the old one
     m=seq2   # old original seq
     #
     id=''
