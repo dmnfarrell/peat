@@ -28,7 +28,7 @@ pyFFF:	compile_subdirs pKa.o FFFcontrol.o
 	swig -python -c++ FFFcontrol.i
 	$(CPP) $(FLAGS) -c FFFcontrol_wrap.cxx -I/usr/include/python2.6/
 	
-ifeq ($(PLATFORM),linux)
+ifeq ($(OSTYPE),linux)
 	$(CPP)  -export-dynamic -shared **/*.o pKa.o FFFcontrol.o FFFcontrol_wrap.o -o _FFFcontrol.so
 else
 	$(CPP) -u _PyMac_Error -framework Python  -flat_namespace -shared pKa.o FFFcontrol.o **/*.o FFFcontrol_wrap.o -o _FFFcontrol.so

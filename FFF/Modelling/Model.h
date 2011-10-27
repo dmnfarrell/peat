@@ -140,16 +140,16 @@ class model_class {
   //
   vector<double> get_energy(const std::string chain,const std::string residue);
   vector<double> get_soup_energy();
-//
-    // Parameters
-    //
-    void assign_all_charges_and_radii();
-
-    //
-    // Public variables
-    //
-        FFF& _P;
-      crgrad_class* _crgrad;
+  double get_accessibility(int chainnumber, int residuenumber);
+  //
+  // Parameters
+  //
+  void assign_all_charges_and_radii();
+  //
+  // Public variables
+  //
+  FFF& _P;
+  crgrad_class* _crgrad;
  private:
     //
     // Private functions

@@ -4,7 +4,7 @@ PLATFORM ?= linux
 
 all:	Energies  
 
-Energies:	energy.o Boxes.o Lennard_Jones.o Coulomb.o Titration.o
+Energies:	energy.o Boxes.o Lennard_Jones.o Coulomb.o Titration.o Access.o
 
 .SUFFIXES:	.o .cpp
 .cpp.o:	

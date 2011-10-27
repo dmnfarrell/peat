@@ -24,33 +24,20 @@
  # University College Dublin
  # Dublin 4, Ireland
  */
-#ifndef ENERGY_CLASS_H
-#define ENERGY_CLASS_H
-#include "fff.h"
-#include "matrix.h"
-#include "Lennard_Jones.h"
-#include "Coulomb.h"
-#include "energy_base_class.h"
-#include "Titration.h"
 #include "Access.h"
 
-class energy_class {
- public:
-  energy_class(FFF &P): _P(P) {
-    init_all();
-  }
-  // Functions
-  void init_all();
-  vector<double> get_energy();
-  vector<double> get_energy(int chainnumber, int resnumber);
-  vector<double> get_external_energy(int chainnumber,int resnumber);
-  vector<double> get_external_energy();
-  vector<double> return_energies(vector<double> energies);
-  double get_accessibility(int chainnumber,int resnumber);
-  // Variables
-  FFF& _P;
-  //Distances _dists(_P);
-  vector<energy_base_class*> _energy_components;
-};
 
-#endif
+double Access::get_energy(int chainnumber,int resnumber) {
+  // Count the number of atoms within 6A
+  double interactions=0;
+  for (unsigned int atom=0;atom<_P.chains[chainnumber].residues[resnumber].atoms.size();atom++) {
+    vector<atom_class*> close_atoms=(*(_P.BOXLJ)).get_close_atoms(_P.chains[chainnumber].residues[resnumber].atoms[atom]);
+    for (unsigned int count2=0;count2<close_atoms.size();count2++) {
+      interactions=interactions+1.0;
+    }
+  }
+  return interactions;
+}
+
+
+

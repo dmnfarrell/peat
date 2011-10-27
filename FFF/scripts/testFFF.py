@@ -28,20 +28,26 @@ class FFF:
     def __init__(self):
         import Protool
         X=Protool.structureIO()
-        aas=X.trueaminoacids.keys()
+        self.aas=X.trueaminoacids.keys()
         #
         import FFF.FFFcontrol as FFFC
-            
-        Rotamerlib=FFFC.Rotamer_class('parameters/small_lib')
+        import os, sys
+        scriptdir=os.path.split(os.path.abspath(__file__))[0]
+        FFFdir=os.path.split(scriptdir)[0]
+        Rotamerlib=FFFC.Rotamer_class(os.path.join(FFFdir,'parameters/small_lib'))
         self.FFF=FFFC.FFF()
         self.FFF.read_pdb('2lzt.pdb')
-        self.Model=FFFC.pKa_class(self.FFF,Rotamerlib,'parameters')
+        self.Model=FFFC.pKa_class(self.FFF,Rotamerlib,os.path.join(FFFdir,'parameters'))
+        #
+        # Test mutations
+        #
+        self.mutate_test()
         #self.Model.repair_all()
         #
         # Build all hydrogens - standard protonation state
         #
-        self.Model.build_hydrogens()
-        self.FFF.write_pqr('2lzt.pqr.pdb')
+        #self.Model.build_hydrogens()
+        #self.FFF.write_pqr('2lzt.pqr.pdb')
         return
         
 
@@ -49,16 +55,20 @@ class FFF:
     def mutate_test(self):
         """Full mutation scan test"""
         energies={}
-        for count in range(15,350):
+        import os
+        if not os.path.isdir('alascan'):
+            os.mkdir('alascan')
+        for count in range(1,129):
             if not energies.has_key(count):
                 energies[count]={}
-            for aa in aas:
+            for aa in self.aas:
                 print 'Mutating residue %d to %s' %(count,aa)
                 max_clash=1.0
-                energy=self.Model.Mutate('E',str(count),aa,3,max_clash)
+                energy=self.Model.Mutate('',str(count),aa,3,max_clash)
                 energies[count][aa]=energy
+                print self.Model._ENERGY.get_accessibility(1,count)
                 #print 'Mutate done'
-                self.FFF.write_pdb('alascan/1atp_%d_%s.pdb' %(count+15,aa))
+                #self.FFF.write_pdb('alascan/2lzt_%d_%s.pdb' %(count,aa))
                 #print 'PDB file written'
                 self.Model.undo_mutation()
                 #print 'Undid mutation'

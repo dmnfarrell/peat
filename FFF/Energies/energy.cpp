@@ -33,7 +33,7 @@ void energy_class::init_all() {
   //
   // Get the number of atoms
   //
-  int num_atoms=_P.all_atoms.size();
+  //int num_atoms=_P.all_atoms.size();
   //
   // Construct a matrix
   //
@@ -120,6 +120,13 @@ vector<double> energy_class::return_energies(vector<double> energies) {
   }
   results[1]=total;
   return results;
+}
+
+double energy_class::get_accessibility(int chainnumber, int resnumber) {
+  // Get a quick accessibility for this residue
+  Access ACC(_P);
+  double interactions=ACC.get_energy(chainnumber,resnumber);
+  return interactions;
 }
     
 

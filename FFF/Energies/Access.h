@@ -24,33 +24,41 @@
  # University College Dublin
  # Dublin 4, Ireland
  */
-#ifndef ENERGY_CLASS_H
-#define ENERGY_CLASS_H
-#include "fff.h"
-#include "matrix.h"
-#include "Lennard_Jones.h"
-#include "Coulomb.h"
-#include "energy_base_class.h"
-#include "Titration.h"
-#include "Access.h"
+#ifndef Access_H
+#define Access_H
+#include <math.h>
+#include <vector>
+#include <string>
+#include <iostream>
+#include <exception>
 
-class energy_class {
- public:
-  energy_class(FFF &P): _P(P) {
-    init_all();
-  }
-  // Functions
-  void init_all();
-  vector<double> get_energy();
-  vector<double> get_energy(int chainnumber, int resnumber);
-  vector<double> get_external_energy(int chainnumber,int resnumber);
-  vector<double> get_external_energy();
-  vector<double> return_energies(vector<double> energies);
-  double get_accessibility(int chainnumber,int resnumber);
-  // Variables
-  FFF& _P;
-  //Distances _dists(_P);
-  vector<energy_base_class*> _energy_components;
+#include "matrix.h"
+#include "energy_base_class.h"
+#include "Boxes.h"
+#include "fff.h"
+#include "atom_class.h"
+#include "vector3d.h"
+
+//
+// Accessibility
+//
+class Access : public energy_base_class {
+public:
+  //
+  // Constructor
+  //
+ Access(FFF& P) : energy_base_class(P) {};
+  //
+  // Function for calculating Accessibility
+  //
+  virtual double calculate_interaction(const atom_class& atom1,const atom_class& atom2) {
+    return 0.0;
+  };  
+  //double get_energy();
+  //double get_energy(int chainnumber, int resnumber);
+  //double get_external_energy(int chainnumber, int resnumber);
+  //static const double pi=3.14159265;
 };
 
 #endif
+

@@ -110,14 +110,14 @@ void model_class::_mutate(int chainnumber,int resnumber,string newresidue) {
     // Make backup of original residue
     //
     string oldresiduename=_P.chains[chainnumber].residues[resnumber].name;
-    //vector<atom_class> oldatoms;
-    //for (unsigned int oldatom=0;oldatom<_P.chains[chainnumber].residues[resnumber].atoms.size();oldatom++) {
-    //    oldatoms.push_back(_P.chains[chainnumber].residues[resnumber].atoms[oldatom]);
-    //    // Put in delete atoms
-    //   delete_atoms.push_back(
+    vector<atom_class> oldatoms;
+    for (unsigned int oldatom=0;oldatom<_P.chains[chainnumber].residues[resnumber].atoms.size();oldatom++) {
+        oldatoms.push_back(_P.chains[chainnumber].residues[resnumber].atoms[oldatom]);
+        // Put in delete atoms
+	//delete_atoms.push_back(
       
-  //}
-  //_org_atoms.push_back(oldatoms);
+    }
+  _org_atoms.push_back(oldatoms);
   //
   // Deal with the simple cases
   // Asp <-> Asn, Gln <-> Glu and so on ..
@@ -230,7 +230,13 @@ void model_class::_mutate(int chainnumber,int resnumber,string newresidue) {
 	    // No, it is not a backbone atom, so we want the new coordinates
 	    //
 	    atom_class newatom(NEWATOM.name,NEWATOM.x,NEWATOM.y,NEWATOM.z);
-	    newcoords.push_back(newatom);
+	    if (_use_hydrogens) {
+	      if (not NEWATOM.is_hydrogen()) {
+		newcoords.push_back(newatom);
+	      }
+	    } else {
+	      newcoords.push_back(newatom);
+	    }
 	  }
 	}
       }   
@@ -343,7 +349,7 @@ void model_class::undo_mutation() {
     // change the residue name
     _P.chains[chainnumber].residues[resnumber].name=restore_atoms[atom].inresiduename;
   }
-    printf ("----end---\n");
+  //printf ("----end---\n");
   //
   // Update all the residues
   //
