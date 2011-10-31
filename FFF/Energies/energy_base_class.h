@@ -63,6 +63,19 @@ public:
         return energy;
         
     };
+
+    bool check_indexes(int chainnumber,int resnumber) {
+      // Check that we're not outside the number of chain and residues
+      if (chainnumber>=static_cast<int>(_P.chains.size())) {
+	printf ("Unknown chain: %d\n",chainnumber);
+	return false;
+      }
+      if (resnumber>=static_cast<int>(_P.chains[chainnumber].residues.size())) {
+	printf ("Unknown residue number %d in chain %d\n",resnumber,chainnumber);
+	return false;
+      }
+      return true;
+    }
     //
     //
     virtual double get_external_energy() {

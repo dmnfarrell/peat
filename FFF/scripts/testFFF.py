@@ -66,7 +66,7 @@ class FFF:
                 max_clash=1.0
                 energy=self.Model.Mutate('',str(count),aa,3,max_clash)
                 energies[count][aa]=energy
-                print self.Model._ENERGY.get_accessibility(1,count)
+                print 'Acc for %d is %5.3f' %(count,self.Model.get_accessibility(0,count))
                 #print 'Mutate done'
                 #self.FFF.write_pdb('alascan/2lzt_%d_%s.pdb' %(count,aa))
                 #print 'PDB file written'

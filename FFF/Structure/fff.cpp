@@ -351,6 +351,12 @@ void FFF::update_BOXLJ() {
     return;
 }
 
+void FFF::update_BOX10A() {
+  //Update the box for accessibility calculations
+  BOX10A = new Boxes(all_atoms,8.0);
+  return;
+}
+
 void FFF::update_all_atoms() {
     //
     // Loop over all atoms and do lots of stuff

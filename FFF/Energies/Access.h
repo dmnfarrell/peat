@@ -55,7 +55,7 @@ public:
     return 0.0;
   };  
   //double get_energy();
-  //double get_energy(int chainnumber, int resnumber);
+  double get_energy(int chainnumber, int resnumber);
   //double get_external_energy(int chainnumber, int resnumber);
   //static const double pi=3.14159265;
 };

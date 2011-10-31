@@ -28,15 +28,33 @@
 
 
 double Access::get_energy(int chainnumber,int resnumber) {
-  // Count the number of atoms within 6A
-  double interactions=0;
-  for (unsigned int atom=0;atom<_P.chains[chainnumber].residues[resnumber].atoms.size();atom++) {
-    vector<atom_class*> close_atoms=(*(_P.BOXLJ)).get_close_atoms(_P.chains[chainnumber].residues[resnumber].atoms[atom]);
-    for (unsigned int count2=0;count2<close_atoms.size();count2++) {
-      interactions=interactions+1.0;
+  // Count the number of atoms within  10A
+  double interactions=0.0;
+  if (check_indexes(chainnumber,resnumber)) {
+    printf ("residues: %d\n",static_cast<int>(_P.chains[chainnumber].residues.size()));
+    for (unsigned int atom=0;atom<_P.chains[chainnumber].residues[resnumber].atoms.size();atom++) {
+      atom_class* atom1=&(_P.chains[chainnumber].residues[resnumber].atoms[atom]);
+      if ((*atom1).is_backbone() || (*atom1).is_hydrogen()) {
+	continue;
+      }
+      vector<atom_class*> close_atoms=(*(_P.BOX10A)).get_close_atoms(atom1);
+      for (unsigned int count2=0;count2<close_atoms.size();count2++) {
+	atom_class* atom2=close_atoms[count2];
+	if ((*atom2).inresidue!=resnumber || (*atom2).inchain!=chainnumber) {
+	  if (not (*atom2).is_hydrogen()) {
+	    if (Dist(*(_P.all_atoms[atom]),*atom2)<=8.0 && Dist(*(_P.all_atoms[atom]),*atom2)>2.5) {
+	      interactions=interactions+1.0;
+	    }
+	  }
+	}
+      }
     }
+    return interactions;
   }
-  return interactions;
+  else {
+    throw exception();
+  }
+  return 0.0;
 }
 
 

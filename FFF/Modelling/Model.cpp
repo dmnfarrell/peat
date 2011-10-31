@@ -44,6 +44,31 @@ vector<double> model_class::Mutate(const std::string chainname,const std::string
     return dummy;
 }
 
+vector<int> model_class::get_chain_and_residue(const std::string resid) {
+  // Given a Protool residue ID, get the corresponding FFF residuenumber and chainnumber
+  vector<int> numbers;
+  string chainname(resid,0,1);
+  string pdbresnumber(resid,2,6);
+  if (chainname==":") {
+    chainname="";
+    string pdbresnumber(resid,1,5);
+  }
+  printf ("Extracted chain name: %s, residue number: %s",chainname.c_str(),pdbresnumber.c_str());
+  //
+  for (unsigned int chain=0;chain<_P.chains.size();chain++) {
+    if (strip(chainname)==strip(_P.chains[chain].name)) {
+      numbers.push_back(chain);
+      for (unsigned int residue=0;residue<_P.chains[chain].residues.size();residue++) {
+	//printf ("prsnumber: %s \n",strip(_P.chains[chain].residues[residue].pdbnum).c_str());
+	if (strip(pdbresnumber)==strip(_P.chains[chain].residues[residue].pdbnum)) {
+	  numbers.push_back(residue);
+	}
+      }
+    }
+  }
+  return numbers;
+}
+
 //
 // -------------
 //
@@ -1204,4 +1229,13 @@ vector<double> model_class::get_soup_energy() {
   update_bonds();
   _P.update_BOXLJ(); // We must update the LJ boxes before calculating energies
   return _ENERGY.get_external_energy();
+}
+
+double model_class::get_accessibility(int chainnumber, int residuenumber) {
+  // Get the accessibility for a single residue
+  update_bonds();
+  _P.update_BOX10A();
+  double access=_ENERGY.get_accessibility(chainnumber,residuenumber);
+  printf ("Access: %5.3f\n",access);
+  return access;
 }

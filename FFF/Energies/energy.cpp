@@ -125,7 +125,9 @@ vector<double> energy_class::return_energies(vector<double> energies) {
 double energy_class::get_accessibility(int chainnumber, int resnumber) {
   // Get a quick accessibility for this residue
   Access ACC(_P);
+  printf ("In energy - getting access for %d %d\n",chainnumber,resnumber);
   double interactions=ACC.get_energy(chainnumber,resnumber);
+  printf ("came back\n");
   return interactions;
 }
     

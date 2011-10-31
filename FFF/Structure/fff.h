@@ -74,6 +74,7 @@ class FFF {
     void check_soup(); // Check the integrety of the soup
     void update_all_atoms(); //Update the all_atoms array
     void update_BOXLJ(); //Update the boxes for LJ and Steric Clash
+    void update_BOX10A(); //Update the 10A boxes
     //
     // 
     //
@@ -105,6 +106,7 @@ class FFF {
     vector <TitGroup_class> _titratable_groups;
     //Boxes* BOXB; 
     Boxes* BOXLJ;
+    Boxes* BOX10A;
     //
     // Environment
     //

@@ -93,6 +93,7 @@ class model_class {
   //
   // Normal functions
   //
+  vector<int> get_chain_and_residue(const std::string resid);
   vector<double> Mutate(const std::string chainname,const std::string pdbresnumber, const std::string newresidue,int mode,double max_clash);
   vector<double> Mutate_2(int chainnumber,int resnumber,const std::string newresidue,int mode,double max_clash);
   vector<atom_class> mutate_special(int chainnumber,int resnumber,const std::string newresidue);
