@@ -97,6 +97,9 @@ string join(vector<string> words,string joiner) {
 // -------------------------------------------
 //
 string strip(string s) {
+  //
+  // Remove whitespace and tabs
+  //
   if (s.length()==0) {
     return s;
   }
@@ -109,6 +112,25 @@ string strip(string s) {
   sn=s.substr(b,e-b+1);
   return sn;
 }
+//
+// ----
+//
+string zstrip(string s) {
+  // Remove leading zeros ans trailing whitespace
+  if (s.length()==0) {
+    return s;
+  }
+  int b = s.find_first_not_of("0 \t");
+  int e = s.find_last_not_of(" \t");
+  if (b==-1) {
+    return "";
+  }
+  string sn;
+  sn=s.substr(b,e-b+1);
+  return sn;
+}
+
+//
 //
 // --------------------------------------------
 //

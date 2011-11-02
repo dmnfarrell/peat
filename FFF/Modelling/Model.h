@@ -77,12 +77,13 @@ class model_class {
     //
     // Update all bonds
     //
-     update_bonds();
+    update_bonds();
     //
-        // set standard flags
-        //
-        _use_hydrogens=false;
-     cout << "Model_class instantiated\n" << endl;
+    // set standard flags
+    //
+    _use_hydrogens=false;
+    printf ("Number of residue types in rotamer library: %d\n",static_cast<int>(_ROT._names.size()));
+    cout << "Model_class instantiated\n" << endl;
   };
   //
   // Destructor
@@ -93,8 +94,8 @@ class model_class {
   //
   // Normal functions
   //
-  vector<int> get_chain_and_residue(const std::string resid);
-  vector<double> Mutate(const std::string chainname,const std::string pdbresnumber, const std::string newresidue,int mode,double max_clash);
+  vector<int> get_chain_and_residue(const std::string resid) throw(exception);
+  vector<double> Mutate(const std::string resid, const std::string newresidue,int mode,double max_clash);
   vector<double> Mutate_2(int chainnumber,int resnumber,const std::string newresidue,int mode,double max_clash);
   vector<atom_class> mutate_special(int chainnumber,int resnumber,const std::string newresidue);
   void undo_mutation();
@@ -103,28 +104,28 @@ class model_class {
   double getchi(int chainnumber,int residuenumber,int chinum);
   int getnumchi(int chainnumber,int residuenumber);
   //int get_atom(int chainnumber,int residuenumber,string atomname) ;
-    atom_class* _get_atom(int chainnumber,int residuenumber,string atomname) throw(FFFError);
-    //
-    // Global modelling functions
-    //
-    double resolve_clashes(); // Resolves all clashes. Does not touch clash-free residues
-    //
-    // Backbone functions
-    //
-    //void setphi(int chainnumber,int residuenumber,double angle);
-    vector<int> _get_prev_residue(int chainnumber,int residuenumber) throw(FFFError);
-    vector<int> _get_next_residue(int chainnumber,int residuenumber) throw(FFFError);
-    double getphi(int chainnumber,int residuenumber);
-    double getpsi(int chainnumber,int residuenumber);
-    void calc_phi(int chain,int residue);
-    void calc_psi(int chain,int residue);
-    double calc_chi(int chainnumber,int residuenumber,int chinum);
-    //
-    // Bonding information
-    //
-    void update_bonds(); //Update the boxes for bonding
-    void update_bonds(atom_class& atom);
-
+  atom_class* _get_atom(int chainnumber,int residuenumber,string atomname) throw(FFFError);
+  //
+  // Global modelling functions
+  //
+  double resolve_clashes(); // Resolves all clashes. Does not touch clash-free residues
+  //
+  // Backbone functions
+  //
+  //void setphi(int chainnumber,int residuenumber,double angle);
+  vector<int> _get_prev_residue(int chainnumber,int residuenumber) throw(FFFError);
+  vector<int> _get_next_residue(int chainnumber,int residuenumber) throw(FFFError);
+  double getphi(int chainnumber,int residuenumber);
+  double getpsi(int chainnumber,int residuenumber);
+  void calc_phi(int chain,int residue);
+  void calc_psi(int chain,int residue);
+  double calc_chi(int chainnumber,int residuenumber,int chinum);
+  //
+  // Bonding information
+  //
+  void update_bonds(); //Update the boxes for bonding
+  void update_bonds(atom_class& atom);
+  
   //double getomega(int chainnumber,int residuenumber);
   void repair_all();
   void find_bad_residues();
@@ -141,7 +142,7 @@ class model_class {
   //
   vector<double> get_energy(const std::string chain,const std::string residue);
   vector<double> get_soup_energy();
-  double get_accessibility(int chainnumber, int residuenumber);
+  double get_accessibility(const std::string resid);
   //
   // Parameters
   //

@@ -48,9 +48,10 @@ class Rotamer_class {
     vector<vector<float> > get_rotamers(string resname,double phi, double psi);
   // Constructor end
   //
+    vector<string> _names;
  private:
   vector<vector<vector<float> > >_rotamers;
-  vector<string> _names;
+  
 };
 
 #endif

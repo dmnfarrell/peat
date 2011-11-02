@@ -34,7 +34,7 @@
 class energy_base_class {
 public:
     energy_base_class(FFF& P) : _P(P) {
-        printf ("Energy base initialized\n");
+    //printf ("Energy base initialized\n");
     };
     FFF& _P;
     //

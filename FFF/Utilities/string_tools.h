@@ -36,7 +36,8 @@ using namespace std;
 //
 // Functions
 //
-string strip(string s);
+string strip(string s); // Remove leading and trailing whitespace
+string zstrip(string s); //Remove leading zeros and trailing whitespace
 //
 // Get all integers from a string
 //

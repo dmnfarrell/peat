@@ -31,26 +31,28 @@ int main(int argc, char *argv[]) {
     // Do some simple tests
     //
     FFF Protein;
-    Protein.read_pdb("2LZT.pdb");
+    Protein.read_pdb("2lzt_A.pdb");
     Rotamer_class ROT("parameters/small_lib");
-    pKa_class PKA(Protein,ROT,"parameters");
+    //pKa_class PKA(Protein,ROT,"parameters");
     //PKA.resolve_clashes();
     //Protein.write_pdb("resolved.pdb");
-    exit(0);
+    //exit(0);
     //M.repair_all();
     //M.build_hydrogens();
     //Protein.write_pdb("repaired.pdb");
     //exit(0);
 //
-  for (unsigned int res=16;res<315;res++) {
-    PKA.Mutate_2(0,res,"GLN",2,1.0);
-    printf ("modelled\n");
-    Protein.write_pdb("alascan/testCpp.pdb");
-    printf ("wrote pdb\n");
-    PKA.undo_mutation();
-    printf ("undid mutation\n");
+    model_class M(Protein,ROT,"parameters");
+    for (unsigned int res=1;res<10;res++) {
+      M.Mutate("A:0001","PHE",3,0.5);
+      printf ("modelled\n");
+      Protein.write_pdb("alascan/testCpp.pdb");
+      printf ("wrote pdb\n");
+      M.undo_mutation();
+      printf ("undid mutation\n");
       //exit(0);
   }
+    exit(0);
   //
   // Test that everything is ok
   //
@@ -58,7 +60,7 @@ int main(int argc, char *argv[]) {
   //
   // Instantiate the model class
   //
-  //model_class M(Protein);
+  //
   //
   // Get a chiangle
   //

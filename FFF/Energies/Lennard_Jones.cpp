@@ -49,10 +49,10 @@ double Steric_Clash::calculate_interaction(const atom_class& atom1,const atom_cl
         if (_P.are_1_3_bonded(atom1,atom2)) tolerance=1.3;
         if (_P.are_1_4_bonded(atom1,atom2)) tolerance=0.8;
         if (distance+tolerance<0.0) {
-	  printf ("Bump with energy: %5.3f, distance: %5.3f A, dist-vdw1-vdw2: %5.3f A\n",distance+tolerance,Dist(atom1,atom2),Dist(atom1,atom2)-atom1.vdw-atom2.vdw);
-	  atom1.print_detail();
-	  atom2.print_detail();
-	  printf ("---\n");
+	  //printf ("Bump with energy: %5.3f, distance: %5.3f A, dist-vdw1-vdw2: %5.3f A\n",distance+tolerance,Dist(atom1,atom2),Dist(atom1,atom2)-atom1.vdw-atom2.vdw);
+	  //atom1.print_detail();
+	  //atom2.print_detail();
+	  //printf ("---\n");
 	   return fabs(distance+tolerance);
 	}
     }

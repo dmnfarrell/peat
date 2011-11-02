@@ -75,40 +75,42 @@ Rotamer_class::Rotamer_class (const std::string filename) {
     _names.push_back(name);
     // Close the file
     file.close();
-    printf ("Read %d rotamers\n",jcount);
-    for (unsigned int j=0;j<_names.size();j++) {
-        printf ("Name: %s # rotamers: %d\n",_names[j].c_str(),static_cast<int>(_rotamers[j].size()));
-    }
+    //printf ("Read %d rotamers\n",jcount);
+    //for (unsigned int j=0;j<_names.size();j++) {
+    //    printf ("Name: %s # rotamers: %d\n",_names[j].c_str(),static_cast<int>(_rotamers[j].size()));
+    //}
 };
 
 vector<vector<float> > Rotamer_class::get_rotamers(string resname,double phi, double psi) {
-    //
-    // Get the rotamers that fit the bill
-    //
-    unsigned int rot_residue=9999;
-    for (unsigned int j=0;j<_names.size();j++) {
-        if (resname.compare(_names[j])==0) {
-            rot_residue=j;
-            break;
-        }
+  //
+  // Get the rotamers that fit the bill
+  //
+  //printf ("got to rotamers: %s %f %f %d\n",resname.c_str(),phi,psi,static_cast<int>(_names.size()));
+  unsigned int rot_residue=9999;
+  for (unsigned int j=0;j<_names.size();j++) {
+    //printf ("number: %d %s\n",j,_names[j].c_str());
+    if (resname.compare(_names[j])==0) {
+      rot_residue=j;
+      break;
     }
-    if (rot_residue>9998) {
-        printf ("Request for invalid rotamer residue: %s\n",resname.c_str());
-        exit(0);
+  }
+  if (rot_residue>9998) {
+    printf ("Request for invalid rotamer residue: %s\n",resname.c_str());
+    exit(0);
+  }
+  vector<vector<float > > use_rotamers;
+  for (unsigned int rotamer=0;rotamer<_rotamers[rot_residue].size();rotamer++) {
+    //printf ("length: %d\n",_rotamers[rot_residue][rotamer].size());
+    if (fabs(_rotamers[rot_residue][rotamer][0]-phi)<=10.0 && fabs(_rotamers[rot_residue][rotamer][1]-psi)<=10.0) {
+      use_rotamers.push_back(_rotamers[rot_residue][rotamer]);
+      //for (unsigned int j=0;j<_rotamers[rot_residue][rotamer].size();j++) {
+      //  printf ("%6.2f ",_rotamers[rot_residue][rotamer][j]);
+      //}
+      //printf ("\n");
     }
-    vector<vector<float > > use_rotamers;
-    for (unsigned int rotamer=0;rotamer<_rotamers[rot_residue].size();rotamer++) {
-        //printf ("length: %d\n",_rotamers[rot_residue][rotamer].size());
-        if (fabs(_rotamers[rot_residue][rotamer][0]-phi)<=10.0 && fabs(_rotamers[rot_residue][rotamer][1]-psi)<=10.0) {
-            use_rotamers.push_back(_rotamers[rot_residue][rotamer]);
-	    //for (unsigned int j=0;j<_rotamers[rot_residue][rotamer].size();j++) {
-	    //  printf ("%6.2f ",_rotamers[rot_residue][rotamer][j]);
-	    //}
-	    //printf ("\n");
-        }
-    }
-    return use_rotamers;
+  }
+  return use_rotamers;
 }
 
-    
+
     

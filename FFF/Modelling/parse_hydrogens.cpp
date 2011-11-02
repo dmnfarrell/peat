@@ -61,7 +61,7 @@ hydrogens_defclass::hydrogens_defclass(vector<string> lines) {
           break;
       }
       while (lines[count].substr(0,1).compare("*")!=0 && count<lines.size()) {
-          printf ("LL: %s\n",lines[count].c_str());
+	//printf ("LL: %s\n",lines[count].c_str());
           if (!lines[count].substr(0,2).compare("//") || !lines[count].substr(0,1).compare("#"))  {
               count++;
               if (count>=lines.size()) {

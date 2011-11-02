@@ -86,7 +86,7 @@ public:
   string name, inresiduename, pdbchainname, pdbresnum, _element;
   string tag; //for identifying ligands etc.  
   int index;
-  bool is_donor, is_acceptor;
+  bool is_donor, is_acceptor,counted;
   map<string,double> attr;
   //
   // Bonds

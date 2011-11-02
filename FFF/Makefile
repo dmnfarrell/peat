@@ -8,7 +8,7 @@ SUBDIRS = Energies Structure Utilities Modelling
 all:	FFF pyFFF
 
 compile_subdirs:
-	rm -f fff _FFFcontrol.so FFFcontrol.py	
+	rm -f fff _FFFcontrol.so FFFcontrol.py	_FFFcontrol.so
 	@echo	
 	@echo "#######################################"
 	@echo "### BUILDING ALL TARGETS ###"

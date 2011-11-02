@@ -27,8 +27,9 @@ class FFF:
 
     def __init__(self):
         import Protool
-        X=Protool.structureIO()
-        self.aas=X.trueaminoacids.keys()
+        self.PI=Protool.structureIO()
+        self.aas=self.PI.trueaminoacids.keys()
+        self.PI.readpdb('2lzt.pdb')
         #
         import FFF.FFFcontrol as FFFC
         import os, sys
@@ -58,15 +59,15 @@ class FFF:
         import os
         if not os.path.isdir('alascan'):
             os.mkdir('alascan')
-        for count in range(1,129):
-            if not energies.has_key(count):
-                energies[count]={}
+        for resid in (self.PI.residues.keys()):
+            if not energies.has_key(resid):
+                energies[resid]={}
             for aa in self.aas:
-                print 'Mutating residue %d to %s' %(count,aa)
+                print 'Mutating residue %s to %s' %(resid,aa)
                 max_clash=1.0
-                energy=self.Model.Mutate('',str(count),aa,3,max_clash)
-                energies[count][aa]=energy
-                print 'Acc for %d is %5.3f' %(count,self.Model.get_accessibility(0,count))
+                energy=self.Model.Mutate(resid,aa,3,max_clash)
+                energies[resid][aa]=energy
+                print 'Acc for %s is %5.3f' %(resid,self.Model.get_accessibility(resid))
                 #print 'Mutate done'
                 #self.FFF.write_pdb('alascan/2lzt_%d_%s.pdb' %(count,aa))
                 #print 'PDB file written'

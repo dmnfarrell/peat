@@ -28,23 +28,16 @@
 
 using namespace std;
 
-vector<double> model_class::Mutate(const std::string chainname,const std::string pdbresnumber, const std::string newresidue,int mode,double max_clash) {
-    for (unsigned int chain=0;chain<_P.chains.size();chain++) {
-      if (strip(chainname)==strip(_P.chains[chain].name)) {
-            for (unsigned int residue=0;residue<_P.chains[chain].residues.size();residue++) {
-                //printf ("prsnumber: %s \n",strip(_P.chains[chain].residues[residue].pdbnum).c_str());
-                if (strip(pdbresnumber)==strip(_P.chains[chain].residues[residue].pdbnum)) {
-                    return Mutate_2(chain,residue,newresidue,mode,max_clash);
-                }
-            }
-        }
-    }
-    printf ("Could not find residue to mutate: '%s' '%s'\n",chainname.c_str(),pdbresnumber.c_str());
-    vector<double> dummy;
-    return dummy;
+vector<double> model_class::Mutate(const std::string resid, const std::string newresidue,int mode,double max_clash) {
+  vector<int> numbers=get_chain_and_residue(resid);
+  return Mutate_2(numbers[0],numbers[1],newresidue,mode,max_clash);
 }
 
-vector<int> model_class::get_chain_and_residue(const std::string resid) {
+//
+// ------------
+//
+
+vector<int> model_class::get_chain_and_residue(const std::string resid) throw(exception) {
   // Given a Protool residue ID, get the corresponding FFF residuenumber and chainnumber
   vector<int> numbers;
   string chainname(resid,0,1);
@@ -53,18 +46,20 @@ vector<int> model_class::get_chain_and_residue(const std::string resid) {
     chainname="";
     string pdbresnumber(resid,1,5);
   }
-  printf ("Extracted chain name: %s, residue number: %s",chainname.c_str(),pdbresnumber.c_str());
-  //
+  pdbresnumber=zstrip(pdbresnumber); // Get rid of leading zeros
   for (unsigned int chain=0;chain<_P.chains.size();chain++) {
     if (strip(chainname)==strip(_P.chains[chain].name)) {
       numbers.push_back(chain);
       for (unsigned int residue=0;residue<_P.chains[chain].residues.size();residue++) {
-	//printf ("prsnumber: %s \n",strip(_P.chains[chain].residues[residue].pdbnum).c_str());
 	if (strip(pdbresnumber)==strip(_P.chains[chain].residues[residue].pdbnum)) {
 	  numbers.push_back(residue);
 	}
       }
     }
+  }
+  if (numbers.size()!=2) {
+    printf ("Could not find residue in FFF array\n");
+    throw exception();
   }
   return numbers;
 }
@@ -83,7 +78,7 @@ vector<double> model_class::Mutate_2(int chainnumber,int resnumber,const std::st
   // mode=3: Loop through all the conformations in the rotamer library and select 
   // the one with the lowest energy
   //
-    vector<double> energy;
+  vector<double> energy;
   switch (mode) {
   case 0: {
     _mutate(chainnumber,resnumber,newresidue);
@@ -129,8 +124,6 @@ void model_class::_mutate(int chainnumber,int resnumber,string newresidue) {
     //
     // This is the routine that actually changes the atom names and the coordinates
     // Don't call this function, but call Mutate instead
-    //
-  
     //
     // Make backup of original residue
     //
@@ -425,16 +418,16 @@ vector<double> model_class::_optimise1res_exhaustive(int chainnumber, int resnum
       printf ("Cannot do brute force optimisation for PRO\n");
       return _ENERGY.get_external_energy(chainnumber,resnumber);
     }
-    printf ("Brute force optimisation using chistep of %5.1f degrees\n",chistep);
+    //printf ("Brute force optimisation using chistep of %5.1f degrees\n",chistep);
     vector<double> energy=_ENERGY.get_energy(chainnumber,resnumber);
-    printf ("Starting to optimise with clash= %5.2f energy=%5.2f\n",energy[0],energy[1]);
+    //printf ("Starting to optimise with clash= %5.2f energy=%5.2f\n",energy[0],energy[1]);
     int optchis=getnumchi(chainnumber,resnumber);
     iteration_count=0;
     if (optchis>0) {
         energy=opt_chi(chainnumber,resnumber,1,chistep,max_clash);
     }
     energy=_ENERGY.get_external_energy(chainnumber,resnumber);
-    printf ("Final energy after optimisation: clash %5.2f energy %5.2f\n-----------------------\n",energy[0],energy[1]);
+    //printf ("Final energy after optimisation: clash %5.2f energy %5.2f\n-----------------------\n",energy[0],energy[1]);
   return energy;
 }
 
@@ -501,14 +494,14 @@ vector<double> model_class::_optimise1res(int chainnumber, int resnumber,double 
     // Optimise one residue using the rotamer library
     //
     _P.update_BOXLJ(); // We must update the LJ boxes before calculating energies
-    printf ("Optimizing using rotamer library\n");
+    //printf ("Optimizing using rotamer library\n");
     vector<double> best_energy=_ENERGY.get_energy(chainnumber,resnumber);
     vector<double> start_chis;
     for (unsigned int j=0;j<static_cast<unsigned int>(getnumchi(chainnumber,resnumber));j++) {
       start_chis.push_back(getchi(chainnumber,resnumber,j+1));
     }
     //
-    printf ("Starting clash: %7.3f energy: %7.3f\n",best_energy[0],best_energy[1]);
+    //printf ("Starting clash: %7.3f energy: %7.3f\n",best_energy[0],best_energy[1]);
     vector<double> new_energy;
     unsigned int best_rotamer=30000;
     // Get the residue name
@@ -521,18 +514,19 @@ vector<double> model_class::_optimise1res(int chainnumber, int resnumber,double 
     double phi, psi;
     phi=getphi(chainnumber,resnumber);
     psi=getpsi(chainnumber,resnumber);
-    printf ("Phi: %5.2f, psi: %5.2f\n",getphi(chainnumber,resnumber),getpsi(chainnumber,resnumber));
-    vector<vector<float> > use_rotamers=_ROT.get_rotamers(resname,getphi(chainnumber,resnumber),getpsi(chainnumber,resnumber));
+    //printf ("Resname: %s, Phi: %5.2f, psi: %5.2f\n",resname.c_str(),getphi(chainnumber,resnumber),getpsi(chainnumber,resnumber));
+    vector<vector<float> > use_rotamers=_ROT.get_rotamers(resname,phi,psi);
+    //printf ("got rotamers\n");
 
     bool brute=false;
     
     if (phi>180.0 || phi<-180.0 || psi>180.0 || psi<-180.0) {
-        printf ("Phi or Psi undefined, defaulting to brute force optimisation");
+      //printf ("Phi or Psi undefined, defaulting to brute force optimisation");
         brute=true;
     }
     if (use_rotamers.size()==0) {
-        printf ("No rotamers found for chain: %d residue: %d with phi: %5.1f, psi: %5.1f. Defaulting to brute force optimisation",chainnumber,resnumber,
-                phi,psi);
+      //printf ("No rotamers found for chain: %d residue: %d with phi: %5.1f, psi: %5.1f. Defaulting to brute force optimisation",chainnumber,resnumber,
+      //         phi,psi);
         brute=true;
     }
     if (brute) {
@@ -1231,11 +1225,12 @@ vector<double> model_class::get_soup_energy() {
   return _ENERGY.get_external_energy();
 }
 
-double model_class::get_accessibility(int chainnumber, int residuenumber) {
+double model_class::get_accessibility(const std::string resid) {
   // Get the accessibility for a single residue
+  vector<int> numbers=get_chain_and_residue(resid);
   update_bonds();
   _P.update_BOX10A();
-  double access=_ENERGY.get_accessibility(chainnumber,residuenumber);
-  printf ("Access: %5.3f\n",access);
+  double access=_ENERGY.get_accessibility(numbers[0],numbers[1]);
+  //printf ("Access: %5.3f\n",access);
   return access;
 }

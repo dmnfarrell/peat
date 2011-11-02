@@ -260,7 +260,7 @@ void FFF::write_pdb(const std::string filename) {
 
 vector<string> FFF::make_pdblines(string type) {
     //
-    // Create a vector with all the lines
+    // Create a vector with all the lines. Type is PDB or PQR
     //
     vector<string> pdblines;
     //
