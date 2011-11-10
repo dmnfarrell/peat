@@ -26,6 +26,7 @@
 # 
 
 from PEATDB.Ekin.Base import *
+from PEATDB.Tables import TableCanvas
 from PEATDB.TableModels import TableModel
 import os, sys, math, random, glob, numpy, string
 import ConfigParser, csv
@@ -37,11 +38,14 @@ from PEATDB.GUI_helper import *
 class EkinPipe(Frame, GUI_help):
     """Data pipe GUI for importing and fitting of raw data.
        This class uses ekin provided an automated pipeline for fitting
-       raw text data files abnd propagating errors.
+       raw text data files and propagating errors.
        Uses a config file to store the pipeline settings"""
-    
+                                  
     def __init__(self, parent=None, rawfile=None, conffile=None):
-        self.parent=parent
+        self.parent=parent    
+        self.tableformat = {'cellwidth':50, 'thefont':"Arial 10",
+                            'rowheight':16, 'editable':False,
+                            'rowselectedcolor':'yellow'}           
         if not self.parent:
             Frame.__init__(self)
             self.main=self.master
@@ -51,19 +55,15 @@ class EkinPipe(Frame, GUI_help):
         self.main.title('EkinPipe - Fitting Pipeline')
         self.main.geometry('800x600+200+100')
         self.main.protocol('WM_DELETE_WINDOW',self.quit)
-        self.savedir = os.getcwd()
-        self.filename=''
-        self.queue = []
-        self.results = []
+        
+        #pipeline object is used for everything except gui stuff
+        self.p = Pipeline(conffile)
         self.setupVars()
-        if conffile==None:
-            self.createConfig('pipe.conf')
         self.setupGUI()
         #redirect stdout to log win
         self.log.delete(1.0,END)
         sys.stdout = self
-        #sys.stderr = self
-      
+        #sys.stderr = self   
         return
 
     def setupVars(self):
@@ -80,19 +80,27 @@ class EkinPipe(Frame, GUI_help):
                            orient=HORIZONTAL,
                            sashwidth=3,
                            showhandle=True)
+        self.m1 = PanedWindow(self.m,
+                           orient=VERTICAL,
+                           sashwidth=3,
+                           showhandle=True)        
         self.m.pack(side=BOTTOM,fill=BOTH,expand=1) 
-        self.preview = Pmw.ScrolledText(self.m,
+        self.m.add(self.m1)
+        self.rawcontents = Pmw.ScrolledText(self.m1,
                 labelpos = 'n',
-                label_text='Raw File Preview',
+                label_text='Raw File Contents',
                 rowheader=1,
                 columnheader=1,
                 Header_foreground = 'blue',
                 rowheader_width = 3,
                 usehullsize = 1,
                 hull_width = 500,
-                hull_height = 500,
+                hull_height = 300,
                 text_wrap='none')
-        self.m.add(self.preview)
+        self.m1.add(self.rawcontents)
+        self.previewer = PlotPreviewer(app=self)
+        self.m1.add(self.previewer)
+        
         self.log = Pmw.ScrolledText(self.m,
                 labelpos = 'n',
                 label_text='Logs',
@@ -113,23 +121,23 @@ class EkinPipe(Frame, GUI_help):
         return
 
     def updateinfoPane(self):
-        self.conffilevar.set(self.conffile)
-        self.queuefilesvar.set(len(self.queue))
-        self.currfilevar.set(self.filename)
+        self.conffilevar.set(self.p.conffile)
+        self.queuefilesvar.set(len(self.p.queue))
+        self.currfilevar.set(self.p.filename)
         return
     
     def createMenuBar(self):
         """Create the menu bar for the application. """
         self.menu=Menu(self.main)
-        self.file_menu={ '01Open Raw File(s)':{'cmd':self.openRaw},
+        self.file_menu={'01Open Raw File(s)':{'cmd':self.openRaw},
                          '02Load Config File':{'cmd':self.loadConfig},
                          '03Edit Current Config':{'cmd':self.editConfig},
-                         '04Create Config':{'cmd':self.createConfig},                        
+                         '04Create Config':{'cmd':self.p.createConfig},                        
                          '05Quit':{'cmd':self.quit}}                         
         self.file_menu=self.create_pulldown(self.menu,self.file_menu)
         self.menu.add_cascade(label='File',menu=self.file_menu['var'])
         self.presetsMenu()                
-        self.run_menu={ '01Execute':{'cmd': self.run},
+        self.run_menu={'01Execute':{'cmd': self.execute},
                         '02Add files to queue':{'cmd': self.addtoQueue},
                         '03Open results in Ekin':{'cmd':self.openEkin}}       
         self.run_menu=self.create_pulldown(self.menu,self.run_menu)
@@ -148,21 +156,210 @@ class EkinPipe(Frame, GUI_help):
         for name in presets:
             def func(p):
                 def new():
-                    self.loadPreset(preset=p)
+                    self.p.loadPreset(preset=p)
                 return new
             self.preset_menu.add_command(label=name,command=func(name))
         return
-    
+   
+    def openRaw(self):        
+        filename = self.openFilename('.csv')            
+        if not filename or not os.path.exists(filename):
+            return 
+        lines = self.p.openRaw(filename)
+        self.updateinfoPane()
+        self.showRawFile(lines)
+        self.showPreview()
+        
     def loadConfig(self):
-        f=self.openFilename()
+        f=self.openFilename('.conf')
         if not f: return
-        self.parseConfig(f)
-        return
+        self.p.parseConfig(f)
+        return        
         
     def editConfig(self):
-        self.editFile(self.conffile)
+        self.editFile(self.p.conffile)
         return
         
+    def parseConfig(self, conffile=None):
+        """Parse a config file - settings for import/fitting"""        
+        self.p.parseConfig()
+        self.updateinfoPane()
+        return
+        
+    def editFile(self, filename=None):
+        """Edit a file"""
+        if filename==None:
+            filename = self.openFilename('.conf')
+        if not filename:
+            return
+        from PEATDB.textFrame import textFrame
+        tf = textFrame(parent=self,title=filename)
+        tf.load_from_file(filename)
+        return
+   
+    def showRawFile(self, lines):
+        """Show raw file contents"""
+        if self.p.rowend>len(lines):
+            self.p.rowend=len(lines)
+        c=self.rawcontents
+        c.delete("1.0",END)
+        c.component('columnheader').delete("1.0",END)
+        c.component('rowheader').delete("1.0",END)
+        count=0
+        for row in range(0, len(lines)):
+            if type(lines[row]) is types.StringType:
+                line = string.strip(lines[row])
+            else:
+                line = lines[row]         
+            c.insert(END,'%s\n' %line)
+            c.component('rowheader').insert(END, str(count)+'\n')
+            count=count+1
+            
+        return
+
+    def execute(self):
+        self.log.delete(1.0,END)
+        self.p.run()
+        return
+    
+    def showPreview(self,lines=None):
+        """Show how the data looks with the import formatting applied"""
+        self.previewer.update()        
+        return        
+        
+    def addtoQueue(self):
+        """Add files"""
+        files = self.openFilenames()
+        self.p.addtoQueue(files)   
+        self.updateinfoPane()
+        return
+    
+    def openEkin(self, fname=None):
+        """Open results in ekin"""
+        
+        if len(self.results)==0:
+            print 'no results files'
+            return
+        fname = self.results[0]
+        from Ekin_main import EkinApp
+        EK = EkinApp(parent=self, project=fname)
+        return
+    
+    def openFilename(self, ext='.txt'):
+        filename=tkFileDialog.askopenfilename(defaultextension=ext,initialdir=self.p.savedir,
+                                              filetypes=[("text files","*.txt"),
+                                                         ("csv files","*.csv"),
+                                                         ("csvx files","*.csvx"),
+                                                         ("excel files","*.xls"),
+                                                         ("conf files","*.conf"),
+                                                         ("All files","*.*")],
+                                              parent=self.main)
+        return filename
+
+    def openFilenames(self, ext='.txt'):
+        filename=tkFileDialog.askopenfilenames(defaultextension=ext,initialdir=self.p.savedir,
+                                              filetypes=[("text files","*.txt"),                                                                                                              
+                                                         ("All files","*.*")],
+                                              parent=self.main)
+        return filename
+    
+    def saveFilename(self, ext='.conf'):
+        filename=tkFileDialog.asksaveasfilename(defaultextension=ext,initialdir=self.p.savedir,
+                                              filetypes=[("conf files","*.conf"),
+                                                         ("All files","*.*")],
+                                              parent=self.main)
+        return filename
+    
+    def write(self, txt):
+        """Handle stdout"""
+        self.log.insert(END, txt)
+        self.log.update_idletasks()
+        return
+
+    def help(self):
+        import webbrowser
+        link='http://enzyme.ucd.ie/main/index.php/EkinPipe'
+        webbrowser.open(link,autoraise=1)        
+        return
+    
+    def quit(self):
+        self.main.destroy()
+        if not self.parent:
+            sys.exit()
+        return
+
+class PlotPreviewer(Frame):
+    def __init__(self, parent=None, app=None):
+        self.parent = parent 
+        self.app = app
+        self.p = self.app.p #reference to pipeline object
+        if not self.parent:
+            Frame.__init__(self)        
+        from PEATDB.Ekin.Ekin_main import PlotPanel
+        fr = Frame(self)
+        b=Button(fr,text='update',command=self.update)
+        b.pack(side=TOP,fill=BOTH)
+        b=Button(fr,text='prev',command=self.prev)
+        b.pack(side=TOP,fill=BOTH)     
+        b=Button(fr,text='next',command=self.next)
+        b.pack(side=TOP,fill=BOTH)         
+        fr.pack(side=LEFT)
+        self.plotframe = PlotPanel(parent=self, side=BOTTOM)
+        self.dsindex = 0
+        return
+        
+    def loadData(self, data):
+        """Load dict into datasets"""
+        #table=self.previewTable = TableCanvas(frame, **self.tableformat)
+        #table.createTableFrame()
+        self.E = E = EkinProject(mode='General')
+        for d in data.keys():
+            xy = data[d]
+            ek=EkinDataset(xy=xy)
+            E.insertDataset(ek, d)
+        self.plotframe.setProject(E)
+        d = E.datasets[self.dsindex]
+        self.plotframe.plotCurrent(d) 
+        return
+        
+    def update(self, evt=None):        
+        """Reload data dict from main app"""
+        data = self.p.doImport()
+        if data == None: return
+        self.dsindex = 0
+        self.loadData(data)        
+        return
+        
+    def prev(self):
+        if self.dsindex <= 0:
+            self.dsindex = 0
+        else:    
+            self.dsindex -= 1
+        d = self.E.datasets[self.dsindex]
+        self.plotframe.plotCurrent(d)
+        return   
+        
+    def next(self):
+        if self.dsindex >= self.E.length-1:
+            self.dsindex = self.E.length-1
+        else:    
+            self.dsindex += 1
+        d = self.E.datasets[self.dsindex]
+        self.plotframe.plotCurrent(d)            
+        return
+        
+class Pipeline(object):
+    
+    def __init__(self, conffile=None):        
+        if conffile==None:
+            self.createConfig('pipe.conf')
+        self.savedir = os.getcwd()
+        self.filename = ''
+        self.lines  =None
+        self.queue = []
+        self.results = []            
+        return
+
     def parseConfig(self, conffile=None):
         """Parse a config file - settings for import/fitting"""        
         f = open(conffile,'r')
@@ -170,7 +367,7 @@ class EkinPipe(Frame, GUI_help):
         try:
             c.read(conffile)
         except:
-            print 'failed to read config file!'
+            print 'failed to read config file! check format'
             return
         self.conffile = conffile
         for f in c.items('settings'):
@@ -179,11 +376,12 @@ class EkinPipe(Frame, GUI_help):
             except: val=f[1]
             self.__dict__[f[0]] = val                
         print 'parsed config file ok\n'
-        self.updateinfoPane()
+        
         return
     
     def createConfig(self, filename=None, **kwargs):
-        """Create a basic config file with default options"""        
+        """Create a basic config file with default options"""
+        
         c = ConfigParser.ConfigParser()
         s = 'settings'
         c.add_section(s)
@@ -231,24 +429,10 @@ class EkinPipe(Frame, GUI_help):
             
         print 'preset conf file written, you can also rename and edit this'
         return
-    
-    def editFile(self, filename=None):
-        """Edit a file"""
-        if filename==None:
-            filename = self.openFilename('.conf')
-        if not filename:
-            return
-        from PEATDB.textFrame import textFrame
-        tf = textFrame(parent=self,title=filename)
-        tf.load_from_file(filename)
-        return
-
-    def openRaw(self, filename=None):
+        
+    def openRaw(self, filename=None, callback=None):
         """Open raw file, display preview and get some info about them"""
-        if filename==None:
-            filename = self.openFilename('.csv')
-        if not filename or not os.path.exists(filename):
-            return   
+        
         if os.path.splitext(filename)[1] == '.xls':
             lines = self.openExcel(filename)            
         else:
@@ -257,22 +441,24 @@ class EkinPipe(Frame, GUI_help):
             fd.close()
         if lines == None:
             return None
-        self.showPreview(lines)
+        
         print 'opened file %s' %filename
         self.filename = filename
-        self.queue = [filename]
-        self.updateinfoPane()
+        self.queue = [filename]        
+        self.filename = filename
+        self.lines = lines
         return lines
 
     def openExcel(self, filename):
         """Open raw excel file"""
+        
         try:
             import xlrd
         except:
             print 'xlrd required for excel import'
             return
         lines=[]
-        sep=','
+        sep=' '
         if filename != None:
             book = xlrd.open_workbook(filename)
             print 'The number of worksheets is', book.nsheets
@@ -285,44 +471,21 @@ class EkinPipe(Frame, GUI_help):
                     txt=txt+str(v)+sep                
                 lines.append(txt)
         return lines
-    
-    def showPreview(self, lines):
-        """Update preview of raw file"""
-        if self.rowend>len(lines):
-            self.rowend=len(lines)
-        p=self.preview
-        p.delete("1.0",END)
-        p.component('columnheader').delete("1.0",END)
-        p.component('rowheader').delete("1.0",END)
-        count=0
-        for row in range(0, len(lines)):
-            if type(lines[row]) is types.StringType:
-                line = string.strip(lines[row])
+        
+    def doImport(self, lines=None):
+        """Import file with current setting and return a dict"""        
+        
+        if lines == None:
+            if self.lines!=None:
+                lines=self.lines
             else:
-                line = lines[row]         
-            p.insert(END,'%s\n' %line)
-            p.component('rowheader').insert(END, str(count)+'\n')
-            count=count+1
-        return
-
-    def addtoQueue(self):
-        """Add files"""        
-        files = self.openFilenames()
-        for f in files[:]:
-            if f not in self.queue:
-                self.queue.append(f)        
-        print self.queue
-        self.updateinfoPane()
-        return
-
-    def doImport(self, filename=None):
-        """Import file with current setting and send to dict"""
+                print 'no file loaded yet'
+                return None
         if self.conffile == None:
             self.loadConfig()
         else:    
-            self.parseConfig(self.conffile)        
-        data = {}
-        lines = self.openRaw(filename)
+            self.parseConfig(self.conffile)
+        data = {}        
         if self.delimeter=='': self.delimeter=' '
         elif self.delimeter=='tab': self.delimeter='\t'
         if self.datainrows == 1:
@@ -362,14 +525,15 @@ class EkinPipe(Frame, GUI_help):
                 data[name] = [x,y]
         print 'imported data ok, found %s datasets' %len(data)
         return data
-    
+        
     def run(self):
-        """Do pipeline with current config"""
+        """Do pipeline with the current config"""
+        
         #clear log
         self.results = [] #list of files
-        self.log.delete(1.0,END)
         for filename in self.queue:
-            raw = self.doImport(filename)
+            lines = self.openRaw(filename)                      
+            raw = self.doImport(lines)
             print 'processing raw data..'
             E = EkinProject(mode='General')
             for d in raw.keys():          
@@ -377,7 +541,8 @@ class EkinPipe(Frame, GUI_help):
                 ek=EkinDataset(xy=xy)
                 E.insertDataset(ek, d)
             if self.model1 != '':    
-                E.fitDatasets('ALL', models=[self.model1], noiter=self.iterations1, conv=1e-6, grad=1e-6, silent=True)
+                E.fitDatasets('ALL', models=[self.model1], noiter=self.iterations1, 
+                               conv=1e-6, grad=1e-6, silent=True)
                 '''for d in E.datasets:
                     ferrs = E.estimateExpUncertainty(d, runs=10)
                     E.addMeta(d, 'exp_errors', ferrs)'''
@@ -387,65 +552,15 @@ class EkinPipe(Frame, GUI_help):
             print E, 'saved to %s' %prjname
         print 'done'
         return
-
-    def openEkin(self, fname=None):
-        """Open results in ekin"""
         
-        if len(self.results)==0:
-            print 'no results files'
-            return
-        fname = self.results[0]
-        from Ekin_main import EkinApp
-        EK = EkinApp(parent=self, project=fname)
+    def addtoQueue(self, files):
+        """Add files"""     
+     
+        for f in files[:]:
+            if f not in self.queue:
+                self.queue.append(f)
+        print self.queue
         return
-    
-    def openFilename(self, ext='.txt'):
-        filename=tkFileDialog.askopenfilename(defaultextension=ext,initialdir=self.savedir,
-                                              filetypes=[("text files","*.txt"),
-                                                         ("csv files","*.csv"),
-                                                         ("csvx files","*.csvx"),
-                                                         ("excel files","*.xls"),
-                                                         ("conf files","*.conf"),
-                                                         ("All files","*.*")],
-                                              parent=self.main)
-        return filename
-
-    def openFilenames(self, ext='.txt'):
-        filename=tkFileDialog.askopenfilenames(defaultextension=ext,initialdir=self.savedir,
-                                              filetypes=[("text files","*.txt"),                                                                                                              
-                                                         ("All files","*.*")],
-                                              parent=self.main)
-        return filename
-    
-    def saveFilename(self, ext='.conf'):
-        filename=tkFileDialog.asksaveasfilename(defaultextension=ext,initialdir=self.savedir,
-                                              filetypes=[("conf files","*.conf"),
-                                                         ("All files","*.*")],
-                                              parent=self.main)
-        return filename
-    
-    def write(self, txt):
-        """Handle stdout"""
-        self.log.insert(END, txt)
-        self.log.update_idletasks()
-        return
-
-    def help(self):
-        import webbrowser
-        link='http://enzyme.ucd.ie/main/index.php/EkinPipe'
-        webbrowser.open(link,autoraise=1)        
-        return
-    
-    def quit(self):
-        self.main.destroy()
-        if not self.parent:
-            sys.exit()
-        return
-        
-def test():
-    """Do basic tests"""
-
-    return
 
 def main():  
     from optparse import OptionParser

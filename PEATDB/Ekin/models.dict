@@ -25,18 +25,18 @@ p11
 (dp12
 S'guess'
 p13
-S"{'A':'1','Ea':'5000','t':'900'}"
+S"{'A':'1','Ea':'5000'}"
 p14
 sg7
 S'Fit unfolding activation energy directly to thermal inactivation data (Vriend et al. 98).'
 p15
 sg5
-S'math.exp(-A*math,exp(-Ea/(8.3145*x))*t)'
+S'math.exp(-A*math.exp(-Ea/(8.3145*x))*900)'
 p16
 sg10
 g11
 sg3
-S'A,t,Ea'
+S'A,Ea'
 p17
 sg9
 S'Thermal Inactivation'
