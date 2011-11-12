@@ -28,6 +28,7 @@
 from PEATDB.Ekin.Base import *
 from PEATDB.Tables import TableCanvas
 from PEATDB.TableModels import TableModel
+from PEATDB.Ekin.Ekin_main import EkinApp, PlotPanel
 import os, sys, math, random, glob, numpy, string
 import ConfigParser, csv
 from Tkinter import *
@@ -35,7 +36,7 @@ import Pmw
 import tkFileDialog
 from PEATDB.GUI_helper import *
 
-class EkinPipe(Frame, GUI_help):
+class PipeApp(Frame, GUI_help):
     """Data pipe GUI for importing and fitting of raw data.
        This class uses ekin provided an automated pipeline for fitting
        raw text data files and propagating errors.
@@ -52,7 +53,7 @@ class EkinPipe(Frame, GUI_help):
         else:
             self.main=Toplevel()
             self.master=self.main
-        self.main.title('EkinPipe - Fitting Pipeline')
+        self.main.title('Fitting Pipeline')
         self.main.geometry('800x600+200+100')
         self.main.protocol('WM_DELETE_WINDOW',self.quit)
         
@@ -83,7 +84,11 @@ class EkinPipe(Frame, GUI_help):
         self.m1 = PanedWindow(self.m,
                            orient=VERTICAL,
                            sashwidth=3,
-                           showhandle=True)        
+                           showhandle=True)
+        self.m2 = PanedWindow(self.m,
+                           orient=VERTICAL,
+                           sashwidth=3,
+                           showhandle=True)
         self.m.pack(side=BOTTOM,fill=BOTH,expand=1) 
         self.m.add(self.m1)
         self.rawcontents = Pmw.ScrolledText(self.m1,
@@ -99,16 +104,19 @@ class EkinPipe(Frame, GUI_help):
                 text_wrap='none')
         self.m1.add(self.rawcontents)
         self.previewer = PlotPreviewer(app=self)
-        self.m1.add(self.previewer)
+        self.m1.add(self.previewer)        
         
-        self.log = Pmw.ScrolledText(self.m,
+        self.m.add(self.m2)
+        self.queueFrame = queueManager(app=self)
+        self.m2.add(self.queueFrame)
+        self.log = Pmw.ScrolledText(self.m2,
                 labelpos = 'n',
                 label_text='Logs',
                 usehullsize = 1,
                 hull_width = 400,
                 hull_height = 500,
                 text_wrap='word')       
-        self.m.add(self.log)
+        self.m2.add(self.log)
         self.infopane = Frame(self.main,height=20)
         self.infopane.pack(side=BOTTOM,fill=X,pady=4)        
         self.updateinfoPane()
@@ -132,16 +140,18 @@ class EkinPipe(Frame, GUI_help):
         self.file_menu={'01Open Raw File(s)':{'cmd':self.openRaw},
                          '02Load Config File':{'cmd':self.loadConfig},
                          '03Edit Current Config':{'cmd':self.editConfig},
-                         '04Create Config':{'cmd':self.p.createConfig},                        
+                         '04Create Config':{'cmd':self.createConfig},                        
                          '05Quit':{'cmd':self.quit}}                         
         self.file_menu=self.create_pulldown(self.menu,self.file_menu)
         self.menu.add_cascade(label='File',menu=self.file_menu['var'])
         self.presetsMenu()                
-        self.run_menu={'01Execute':{'cmd': self.execute},
-                        '02Add files to queue':{'cmd': self.addtoQueue},
-                        '03Open results in Ekin':{'cmd':self.openEkin}}       
-        self.run_menu=self.create_pulldown(self.menu,self.run_menu)
+        self.run_menu={'01Execute':{'cmd': self.execute},                       
+                        '02Open results in Ekin':{'cmd':self.openEkin}}       
+        self.run_menu=self.create_pulldown(self.menu,self.run_menu)        
         self.menu.add_cascade(label='Run',menu=self.run_menu['var'])
+        self.queue_menu={'01Add files to queue':{'cmd': self.addtoQueue}}       
+        self.queue_menu=self.create_pulldown(self.menu,self.queue_menu)        
+        self.menu.add_cascade(label='Queue',menu=self.queue_menu['var'])        
         self.help_menu={ '01Online Help':{'cmd': self.help} }       
         self.help_menu=self.create_pulldown(self.menu,self.help_menu)
         self.menu.add_cascade(label='Help',menu=self.help_menu['var'])        
@@ -159,33 +169,40 @@ class EkinPipe(Frame, GUI_help):
                     self.p.loadPreset(preset=p)
                 return new
             self.preset_menu.add_command(label=name,command=func(name))
-        return
-   
-    def openRaw(self):        
-        filename = self.openFilename('.csv')            
-        if not filename or not os.path.exists(filename):
-            return 
+        return       
+       
+    def openRaw(self, filenames=None):
+        """Open a raw file, if more than one file we add them to queue"""
+        if filenames==None:           
+            filenames = self.openFilenames('.csv')           
+            if not filenames: return
+        filename = filenames[0]
+        if not os.path.exists(filename): return
+        #now we open the first file only
         lines = self.p.openRaw(filename)
         self.updateinfoPane()
         self.showRawFile(lines)
         self.showPreview()
+        self.addtoQueue(filenames)
+        return
         
-    def loadConfig(self):
-        f=self.openFilename('.conf')
-        if not f: return
-        self.p.parseConfig(f)
+    def createConfig(self):               
+        filename = self.saveFilename()
+        self.p.createConfig(filename)
+        return
+            
+    def loadConfig(self, filename=None):
+        if filename==None:
+            filename=self.openFilename('.conf')
+        if not filename: return
+        self.p.parseConfig(filename)
+        self.updateinfoPane()
         return        
         
     def editConfig(self):
         self.editFile(self.p.conffile)
         return
-        
-    def parseConfig(self, conffile=None):
-        """Parse a config file - settings for import/fitting"""        
-        self.p.parseConfig()
-        self.updateinfoPane()
-        return
-        
+                
     def editFile(self, filename=None):
         """Edit a file"""
         if filename==None:
@@ -227,23 +244,24 @@ class EkinPipe(Frame, GUI_help):
         self.previewer.update()        
         return        
         
-    def addtoQueue(self):
+    def addtoQueue(self, files=None):
         """Add files"""
-        files = self.openFilenames()
+        if files==None:
+            files = self.openFilenames()
         self.p.addtoQueue(files)   
         self.updateinfoPane()
+        self.queueFrame.update()
         return
     
     def openEkin(self, fname=None):
         """Open results in ekin"""
         
-        if len(self.results)==0:
+        if len(self.p.results)==0:
             print 'no results files'
             return
-        fname = self.results[0]
-        from Ekin_main import EkinApp
+        fname = self.p.results[0]        
         EK = EkinApp(parent=self, project=fname)
-        return
+        return  
     
     def openFilename(self, ext='.txt'):
         filename=tkFileDialog.askopenfilename(defaultextension=ext,initialdir=self.p.savedir,
@@ -272,7 +290,7 @@ class EkinPipe(Frame, GUI_help):
     
     def write(self, txt):
         """Handle stdout"""
-        self.log.insert(END, txt)
+        self.log.appendtext(txt)       
         self.log.update_idletasks()
         return
 
@@ -295,7 +313,7 @@ class PlotPreviewer(Frame):
         self.p = self.app.p #reference to pipeline object
         if not self.parent:
             Frame.__init__(self)        
-        from PEATDB.Ekin.Ekin_main import PlotPanel
+        
         fr = Frame(self)
         b=Button(fr,text='update',command=self.update)
         b.pack(side=TOP,fill=BOTH)
@@ -304,7 +322,7 @@ class PlotPreviewer(Frame):
         b=Button(fr,text='next',command=self.next)
         b.pack(side=TOP,fill=BOTH)         
         fr.pack(side=LEFT)
-        self.plotframe = PlotPanel(parent=self, side=BOTTOM)
+        self.plotframe = PlotPanel(parent=self, side=BOTTOM, height=200)
         self.dsindex = 0
         return
         
@@ -324,10 +342,14 @@ class PlotPreviewer(Frame):
         
     def update(self, evt=None):        
         """Reload data dict from main app"""
-        data = self.p.doImport()
+        try:
+            data = self.p.doImport()
+        except:
+            print 'could not do import with current config'
+            data=None
         if data == None: return
         self.dsindex = 0
-        self.loadData(data)        
+        self.loadData(data)
         return
         
     def prev(self):
@@ -348,8 +370,63 @@ class PlotPreviewer(Frame):
         self.plotframe.plotCurrent(d)            
         return
         
-class Pipeline(object):
+class queueManager(Frame):
+    """Small class for managing file queue"""
+    def __init__(self, parent=None, app=None):
+        self.parent = parent 
+        self.app = app
+        self.p = self.app.p #reference to pipeline object
+        if not self.parent:
+            Frame.__init__(self)
+        self.listbox = Pmw.ScrolledListBox(self,
+                labelpos='n',
+                label_text='File Queue',
+                listbox_height = 8,                
+                dblclickcommand=self.setFile,
+                usehullsize = 1,
+                hull_width = 200,
+                hull_height = 150)
+        self.listbox.component('listbox').configure(selectmode=EXTENDED)
+        self.listbox.component('listbox').configure(selectbackground='lightblue')
+        self.listbox.pack(fill=BOTH,expand=1)
+        self.doButtons()
+        return
+
+    def doButtons(self):
+        fr=Frame(self)
+        methods = {'remove':self.removeSelected,'clear':self.clear}        
+        for m in methods:
+            b=Button(fr,text=m,command=methods[m])
+            b.pack(side=LEFT,fill=BOTH)
+        fr.pack(fill=BOTH,side=BOTTOM,expand=1)    
+        return
     
+    def clear(self):
+        self.listbox.delete(0,END)
+        self.p.queue = []
+        
+    def removeSelected(self):
+        items = self.listbox.getcurselection()      
+        pos = 0
+        for i in items:
+            idx = items.index(i)
+            self.listbox.delete( idx,idx )
+            pos = pos + 1 
+        return
+        
+    def update(self):
+        print self.p.queue 
+        flist=self.p.queue
+        self.listbox.setlist(flist)
+        
+    def setFile(self):
+        sel = self.listbox.getcurselection()[0]
+        print sel
+        self.app.openRaw(sel)
+        
+        
+class Pipeline(object):
+    """This class does all the pipeline processing and configuration"""
     def __init__(self, conffile=None):        
         if conffile==None:
             self.createConfig('pipe.conf')
@@ -370,20 +447,19 @@ class Pipeline(object):
             print 'failed to read config file! check format'
             return
         self.conffile = conffile
-        for f in c.items('settings'):
-            print f[0], f[1]
+        for f in c.items('base'):
+            #print f[0], f[1]
             try: val=int(f[1])
             except: val=f[1]
             self.__dict__[f[0]] = val                
-        print 'parsed config file ok\n'
-        
+        print 'parsed config file ok\n'        
         return
     
-    def createConfig(self, filename=None, **kwargs):
+    def createConfig(self, filename, **kwargs):
         """Create a basic config file with default options"""
         
         c = ConfigParser.ConfigParser()
-        s = 'settings'
+        s = 'base'
         c.add_section(s)
         c.set(s, 'delimeter', ',')
         c.set(s, 'columns', 10)
@@ -399,14 +475,13 @@ class Pipeline(object):
         c.set(s, 'iterations1', 20)
         c.set(s, 'ignorecomments', 1)
         #excel settings
-        c.set(s, 'sheet', 0)
-        c.set(s, 'numsheets', 1)
+        e='excel'
+        c.add_section(e)
+        c.set(e, 'sheet', 0)
+        c.set(e, 'numsheets', 1)
         #use kwargs to create specific settings
         for k in kwargs:
             c.set(s, k, kwargs[k])
-        #dump to file
-        if filename == None:
-            filename = self.saveFilename()
         c.write(open(filename,'w'))
         self.parseConfig(filename)       
         return c
@@ -490,8 +565,7 @@ class Pipeline(object):
         elif self.delimeter=='tab': self.delimeter='\t'
         if self.datainrows == 1:
             #datasets per row            
-            colnames = string.strip(lines[self.rowstart]).split(self.delimeter)   
-            print colnames
+            colnames = string.strip(lines[self.rowstart]).split(self.delimeter)            
             for row in range(self.rowstart+1, self.rowend):
                 if row>=len(lines):
                     break
@@ -558,10 +632,9 @@ class Pipeline(object):
      
         for f in files[:]:
             if f not in self.queue:
-                self.queue.append(f)
-        print self.queue
+                self.queue.append(f)       
         return
-
+       
 def main():  
     from optparse import OptionParser
     parser = OptionParser()
@@ -571,11 +644,11 @@ def main():
                         help="Raw file", metavar="FILE")    
     
     opts, remainder = parser.parse_args()
-    app = EkinPipe(rawfile=opts.file)
+    app = PipeApp(rawfile=opts.file)
     if opts.conf != None:
-        app.parseConfig(opts.conf)    
+        app.loadConfig(opts.conf)    
     if opts.file != None:
-        app.openRaw(opts.file)
+        app.openRaw([opts.file])
     app.mainloop()    
 
 if __name__ == '__main__':
