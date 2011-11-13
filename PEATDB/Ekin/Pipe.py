@@ -25,11 +25,13 @@
 # Dublin 4, Ireland
 # 
 
+
 from PEATDB.Ekin.Base import *
 from PEATDB.Tables import TableCanvas
 from PEATDB.TableModels import TableModel
 from PEATDB.Ekin.Ekin_main import EkinApp, PlotPanel
-import os, sys, math, random, glob, numpy, string
+from PEATDB.Ekin.Pylab import Options 
+import os, sys, math, random, glob, numpy, string, types
 import ConfigParser, csv
 from Tkinter import *
 import Pmw
@@ -89,7 +91,7 @@ class PipeApp(Frame, GUI_help):
                            orient=VERTICAL,
                            sashwidth=3,
                            showhandle=True)
-        self.m.pack(side=BOTTOM,fill=BOTH,expand=1) 
+        self.m.pack(side=TOP,fill=BOTH,expand=1) 
         self.m.add(self.m1)
         self.rawcontents = Pmw.ScrolledText(self.m1,
                 labelpos = 'n',
@@ -118,7 +120,7 @@ class PipeApp(Frame, GUI_help):
                 text_wrap='word')       
         self.m2.add(self.log)
         self.infopane = Frame(self.main,height=20)
-        self.infopane.pack(side=BOTTOM,fill=X,pady=4)        
+        self.infopane.pack(side=BOTTOM,fill=BOTH,pady=4)
         self.updateinfoPane()
         Label(self.infopane,text='Conf file:').pack(side=LEFT)
         Label(self.infopane,textvariable=self.conffilevar,fg='darkblue').pack(side=LEFT,padx=4)
@@ -171,19 +173,16 @@ class PipeApp(Frame, GUI_help):
             self.preset_menu.add_command(label=name,command=func(name))
         return       
        
-    def openRaw(self, filenames=None):
+    def openRaw(self, filename=None):
         """Open a raw file, if more than one file we add them to queue"""
-        if filenames==None:           
-            filenames = self.openFilenames('.csv')           
-            if not filenames: return
-        filename = filenames[0]
+        if filename==None:           
+            filename = self.openFilename('.csv')                    
         if not os.path.exists(filename): return
         #now we open the first file only
         lines = self.p.openRaw(filename)
         self.updateinfoPane()
         self.showRawFile(lines)
-        self.showPreview()
-        self.addtoQueue(filenames)
+        self.showPreview()       
         return
         
     def createConfig(self):               
@@ -320,12 +319,32 @@ class PlotPreviewer(Frame):
         b=Button(fr,text='prev',command=self.prev)
         b.pack(side=TOP,fill=BOTH)     
         b=Button(fr,text='next',command=self.next)
-        b.pack(side=TOP,fill=BOTH)         
+        b.pack(side=TOP,fill=BOTH)
+        self.numplotscounter = Pmw.Counter(fr,
+                labelpos='w',
+                label_text='plots:',
+                entryfield_value=1,
+                entry_width=3,
+                datatype = 'integer',
+                entryfield_command=self.replot,
+                entryfield_validate={'validator':'numeric', 'min':1,'max':8})    
+        self.numplotscounter.pack()
         fr.pack(side=LEFT)
         self.plotframe = PlotPanel(parent=self, side=BOTTOM, height=200)
         self.dsindex = 0
+        self.opts = {'markersize':15,'fontsize':9}
         return
-        
+
+    def replot(self):
+        p = int(self.numplotscounter.getvalue())
+        if p>1:
+            dsets=self.E.datasets[self.dsindex:self.dsindex+p]                                      
+            c=p/2
+        else:    
+            dsets = self.E.datasets[self.dsindex]
+            c=1            
+        self.plotframe.plotCurrent(dsets,options=self.opts,cols=c)       
+    
     def loadData(self, data):
         """Load dict into datasets"""
         #table=self.previewTable = TableCanvas(frame, **self.tableformat)
@@ -335,21 +354,21 @@ class PlotPreviewer(Frame):
             xy = data[d]
             ek=EkinDataset(xy=xy)
             E.insertDataset(ek, d)
-        self.plotframe.setProject(E)
-        d = E.datasets[self.dsindex]
-        self.plotframe.plotCurrent(d) 
+        self.plotframe.setProject(E)                   
         return
         
     def update(self, evt=None):        
         """Reload data dict from main app"""
-        try:
+        '''try:
             data = self.p.doImport()
         except:
             print 'could not do import with current config'
-            data=None
+            data=None'''
+        data = self.p.doImport()    
         if data == None: return
         self.dsindex = 0
         self.loadData(data)
+        self.replot()
         return
         
     def prev(self):
@@ -357,8 +376,7 @@ class PlotPreviewer(Frame):
             self.dsindex = 0
         else:    
             self.dsindex -= 1
-        d = self.E.datasets[self.dsindex]
-        self.plotframe.plotCurrent(d)
+        self.replot()    
         return   
         
     def next(self):
@@ -366,8 +384,7 @@ class PlotPreviewer(Frame):
             self.dsindex = self.E.length-1
         else:    
             self.dsindex += 1
-        d = self.E.datasets[self.dsindex]
-        self.plotframe.plotCurrent(d)            
+        self.replot()        
         return
         
 class queueManager(Frame):
@@ -398,7 +415,7 @@ class queueManager(Frame):
         for m in methods:
             b=Button(fr,text=m,command=methods[m])
             b.pack(side=LEFT,fill=BOTH)
-        fr.pack(fill=BOTH,side=BOTTOM,expand=1)    
+        fr.pack(fill=BOTH,side=BOTTOM)    
         return
     
     def clear(self):
@@ -462,18 +479,24 @@ class Pipeline(object):
         s = 'base'
         c.add_section(s)
         c.set(s, 'delimeter', ',')
+        c.set(s, 'decimalsymbol', '.')
+        c.set(s, 'checkunicode', 'false')
+        c.set(s, 'path', os.getcwd())
         c.set(s, 'columns', 10)
         c.set(s, 'rowstart', 0)
         c.set(s, 'colstart', 0)
         c.set(s, 'rowend', 1000)
-        c.set(s, 'rowrep', 0)
+        c.set(s, 'colnamesstart', 0)        
         c.set(s, 'datainrows', 1)
-        c.set(s, 'path', os.getcwd())        
-        c.set(s, 'xerror', 0.1)
-        c.set(s, 'yerror', 0.1)
-        c.set(s, 'model1', 'linear')
-        c.set(s, 'iterations1', 20)
-        c.set(s, 'ignorecomments', 1)
+        c.set(s, 'rowrepeat', 0)
+        
+        f = 'fitting'
+        c.add_section(f)
+        c.set(f, 'xerror', 0.1)
+        c.set(f, 'yerror', 0.1)
+        c.set(f, 'model1', 'linear')
+        c.set(f, 'iterations1', 20)
+        c.set(f, 'ignorecomments', 'true')
         #excel settings
         e='excel'
         c.add_section(e)
@@ -560,19 +583,20 @@ class Pipeline(object):
             self.loadConfig()
         else:    
             self.parseConfig(self.conffile)
-        data = {}        
+        data = {}
         if self.delimeter=='': self.delimeter=' '
         elif self.delimeter=='tab': self.delimeter='\t'
+        dec = self.decimalsymbol
         if self.datainrows == 1:
-            #datasets per row            
-            colnames = string.strip(lines[self.rowstart]).split(self.delimeter)            
+            #datasets per row
+            colnames = string.strip(lines[self.rowstart]).split(self.delimeter)
             for row in range(self.rowstart+1, self.rowend):
                 if row>=len(lines):
                     break
                 line = string.strip(lines[row]).split(self.delimeter)
                 name=line[0]
-                if self.ignorecomments==1 and name.startswith('#'):
-                    continue               
+                if self.ignorecomments==True and name.startswith('#'):
+                    continue
                 x=[]; y=[]
                 for c in range(1,self.columns):
                     col=float(colnames[c])
@@ -580,9 +604,13 @@ class Pipeline(object):
                     y.append(float(line[c]))
                 data[name] = [x,y]
         else:
-            #datasets per column
+            #datasets per column, assumes the x values are common in colstart
             names = string.strip(lines[self.rowstart]).split(self.delimeter)
-            colnames = ['x','y']
+            #column names might be offset from column data
+            if self.colnamesstart != 0:
+                names=names[self.colnamesstart:]
+            
+            print names
             for col in range(self.colstart+1, len(names)):
                 name=names[col]
                 x=[]; y=[]
@@ -590,13 +618,18 @@ class Pipeline(object):
                     if row>=len(lines):
                         break                    
                     line = string.strip(lines[row]).split(self.delimeter)
-                    try:
-                        x.append(float(line[0]))
-                        y.append(float(line[col]))
-                    except:
+                    if col>=len(line): break
+                    a = self.checkFloat(line[0],dec)
+                    b = self.checkFloat(line[col],dec)                    
+                    if a==None or b==None:
                         continue
-                #print name, len(x),len(y)    
+                    x.append(a); y.append(b)
+                if len(x)<1: continue
+                
+                #name = self.checkUnicode(name)
+                print name, x
                 data[name] = [x,y]
+        #print data        
         print 'imported data ok, found %s datasets' %len(data)
         return data
         
@@ -634,7 +667,30 @@ class Pipeline(object):
             if f not in self.queue:
                 self.queue.append(f)       
         return
-       
+
+    def checkFloat(self, val, decpt='.'):
+        """Coerce a string to float if possible"""
+        #add code to handle commas in thousand separators
+        if decpt == '.':
+            try:
+                return float(val)
+            except:
+                return None
+        else:        
+            try:
+                return float(val.replace(".","").replace(decpt,"."))
+            except ValueError:
+                return None
+                
+    def checkUnicode(self, s):
+        """Check for unicode string"""
+        try:
+            s.decode('ascii')
+        except UnicodeDecodeError:
+            s = unicode(s)
+        return s
+        
+        
 def main():  
     from optparse import OptionParser
     parser = OptionParser()
@@ -648,7 +704,7 @@ def main():
     if opts.conf != None:
         app.loadConfig(opts.conf)    
     if opts.file != None:
-        app.openRaw([opts.file])
+        app.openRaw(opts.file)
     app.mainloop()    
 
 if __name__ == '__main__':

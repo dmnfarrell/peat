@@ -2262,7 +2262,7 @@ class PlotPanel(Frame):
         #plt.close(self.fig)
         
         if type(datasets) is types.ListType and len(datasets) > 1:
-            self.ax = self.E.plotDatasets(datasets, figure=self.fig, plotoption=plotoption, cols=cols,                               
+            self.ax = self.E.plotDatasets(datasets, figure=self.fig, plotoption=plotoption, cols=cols,                           
                                 **options)
         else:
             self.ax = self.E.plotDatasets(datasets, figure=self.fig, **options)
