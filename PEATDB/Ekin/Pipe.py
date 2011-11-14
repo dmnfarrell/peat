@@ -32,6 +32,7 @@ from PEATDB.TableModels import TableModel
 from PEATDB.Ekin.Ekin_main import EkinApp, PlotPanel
 from PEATDB.Ekin.Pylab import Options 
 import os, sys, math, random, glob, numpy, string, types
+from datetime import datetime
 import ConfigParser, csv
 from Tkinter import *
 import Pmw
@@ -455,7 +456,7 @@ class Pipeline(object):
         return
 
     def parseConfig(self, conffile=None):
-        """Parse a config file - settings for import/fitting"""        
+        """Parse the config file - all settings"""        
         f = open(conffile,'r')
         c = ConfigParser.ConfigParser()
         try:
@@ -464,11 +465,13 @@ class Pipeline(object):
             print 'failed to read config file! check format'
             return
         self.conffile = conffile
-        for f in c.items('base'):
-            #print f[0], f[1]
-            try: val=int(f[1])
-            except: val=f[1]
-            self.__dict__[f[0]] = val                
+        self.sections = ['base','fitting','excel']
+        for s in self.sections:
+            for f in c.items(s):
+                #print f[0], f[1]
+                try: val=int(f[1])
+                except: val=f[1]
+                self.__dict__[f[0]] = val
         print 'parsed config file ok\n'        
         return
     
@@ -480,15 +483,23 @@ class Pipeline(object):
         c.add_section(s)
         c.set(s, 'delimeter', ',')
         c.set(s, 'decimalsymbol', '.')
-        c.set(s, 'checkunicode', 'false')
+        c.set(s, 'checkunicode', 0)
         c.set(s, 'path', os.getcwd())
         c.set(s, 'columns', 10)
         c.set(s, 'rowstart', 0)
         c.set(s, 'colstart', 0)
         c.set(s, 'rowend', 1000)
         c.set(s, 'colnamesstart', 0)        
-        c.set(s, 'datainrows', 1)
+        c.set(s, 'datainrows', 1)       
+        c.set(s, 'groupbycol', 0)
+        c.set(s, 'alternatecols', 0)
+        c.set(s, 'colrepeat', 0)
+        c.set(s, 'groupbyrow', 0)
+        c.set(s, 'alternaterows', 0)
         c.set(s, 'rowrepeat', 0)
+        c.set(s, 'rowdataformat', 'number')
+        c.set(s, 'coldataformat', 'number')
+        c.set(s, 'timeformat', "%Y-%m-%d %H:%M:%S")
         
         f = 'fitting'
         c.add_section(f)
@@ -496,7 +507,7 @@ class Pipeline(object):
         c.set(f, 'yerror', 0.1)
         c.set(f, 'model1', 'linear')
         c.set(f, 'iterations1', 20)
-        c.set(f, 'ignorecomments', 'true')
+        c.set(f, 'ignorecomments', 1)
         #excel settings
         e='excel'
         c.add_section(e)
@@ -582,55 +593,76 @@ class Pipeline(object):
         if self.conffile == None:
             self.loadConfig()
         else:    
-            self.parseConfig(self.conffile)
-        data = {}
+            self.parseConfig(self.conffile)        
         if self.delimeter=='': self.delimeter=' '
-        elif self.delimeter=='tab': self.delimeter='\t'
-        dec = self.decimalsymbol
-        if self.datainrows == 1:
-            #datasets per row
-            colnames = string.strip(lines[self.rowstart]).split(self.delimeter)
-            for row in range(self.rowstart+1, self.rowend):
-                if row>=len(lines):
-                    break
-                line = string.strip(lines[row]).split(self.delimeter)
-                name=line[0]
-                if self.ignorecomments==True and name.startswith('#'):
-                    continue
-                x=[]; y=[]
-                for c in range(1,self.columns):
-                    col=float(colnames[c])
-                    x.append(col)
-                    y.append(float(line[c]))
-                data[name] = [x,y]
+        elif self.delimeter=='tab': self.delimeter='\t'        
+        if self.rowend == 0: self.rowend=len(lines)
+        
+        if self.datainrows == True:
+            data = self.importbyRow(lines)            
         else:
-            #datasets per column, assumes the x values are common in colstart
-            names = string.strip(lines[self.rowstart]).split(self.delimeter)
-            #column names might be offset from column data
-            if self.colnamesstart != 0:
-                names=names[self.colnamesstart:]
-            
-            print names
-            for col in range(self.colstart+1, len(names)):
-                name=names[col]
-                x=[]; y=[]
-                for row in range(self.rowstart+1, self.rowend):
-                    if row>=len(lines):
-                        break                    
-                    line = string.strip(lines[row]).split(self.delimeter)
-                    if col>=len(line): break
-                    a = self.checkFloat(line[0],dec)
-                    b = self.checkFloat(line[col],dec)                    
-                    if a==None or b==None:
-                        continue
-                    x.append(a); y.append(b)
-                if len(x)<1: continue
-                
-                #name = self.checkUnicode(name)
-                print name, x
-                data[name] = [x,y]
-        #print data        
+            data = self.importbyColumn(lines)
+
         print 'imported data ok, found %s datasets' %len(data)
+        return data
+
+    def importbyRow(self):
+        """Import where data are in rows"""
+        data = {}
+        colnames = string.strip(lines[self.rowstart]).split(self.delimeter)
+        for row in range(self.rowstart+1, self.rowend):
+            if row>=len(lines):
+                break
+            line = string.strip(lines[row]).split(self.delimeter)
+            name=line[0]
+            if self.ignorecomments==True and name.startswith('#'):
+                continue
+            x=[]; y=[]
+            for c in range(1,self.columns):
+                col=float(colnames[c])
+                x.append(col)
+                y.append(float(line[c]))
+            data[name] = [x,y]        
+        return data
+        
+    def importbyColumn(self, lines):
+        """Import where datasets are stored in columns"""
+        data = {}
+        dec = self.decimalsymbol
+        #by default assumes the x values are common in colstart
+        names = string.strip(lines[self.rowstart]).split(self.delimeter)
+        #column names might be offset from column data
+        if self.colnamesstart != 0:
+            names=names[self.colnamesstart:]
+        #handle if data is grouped in rows  
+        if self.groupbyrow == True:
+            pass
+        #handle case if rows are grouped in alternating rows
+
+        print names
+        for col in range(self.colstart+1, len(names)):
+            name=names[col]
+            x=[]; y=[]
+            if self.alternaterows == True:
+                step = self.rowrepeat
+            else:
+                step = 1
+            
+            for row in range(self.rowstart+1, self.rowend, step):  
+                line = string.strip(lines[row]).split(self.delimeter)                    
+                line = line[len(line)-len(names):]
+                #print line, row
+                if col >= len(line): continue
+                a = self.checkValue(line[0],dec)
+                b = self.checkValue(line[col],dec)
+                #print a, b
+                if a==None or b==None:
+                    continue
+                x.append(a); y.append(b)
+            if len(x)<1: continue
+
+            #print name, x
+            data[name] = [x,y]        
         return data
         
     def run(self):
@@ -668,7 +700,7 @@ class Pipeline(object):
                 self.queue.append(f)       
         return
 
-    def checkFloat(self, val, decpt='.'):
+    def checkValue(self, val, decpt='.'):
         """Coerce a string to float if possible"""
         #add code to handle commas in thousand separators
         if decpt == '.':
@@ -681,7 +713,14 @@ class Pipeline(object):
                 return float(val.replace(".","").replace(decpt,"."))
             except ValueError:
                 return None
-                
+         
+    def checkTime(self, val, timeformat):
+        """Coerce to a datetime object"""
+        try:
+            datetime.strptime(val,timeformat)
+        except:    
+            return None
+        
     def checkUnicode(self, s):
         """Check for unicode string"""
         try:
