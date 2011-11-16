@@ -56,7 +56,7 @@ class PipeApp(Frame, GUI_help):
         else:
             self.main=Toplevel()
             self.master=self.main
-        self.main.title('Fitting Pipeline')
+        self.main.title('DataPipeline Desktop')
         self.main.geometry('800x600+200+100')
         self.main.protocol('WM_DELETE_WINDOW',self.quit)
         
@@ -216,8 +216,8 @@ class PipeApp(Frame, GUI_help):
    
     def showRawFile(self, lines):
         """Show raw file contents"""
-        if self.p.rowend>len(lines):
-            self.p.rowend=len(lines)
+        #if self.p.rowend>len(lines):
+        #    self.p.rowend=len(lines)
         c=self.rawcontents
         c.delete("1.0",END)
         c.component('columnheader').delete("1.0",END)
@@ -443,36 +443,20 @@ class queueManager(Frame):
         self.app.openRaw(sel)
         
         
-class Pipeline(object):
+class Pipeline(object):    
     """This class does all the pipeline processing and configuration"""
-    def __init__(self, conffile=None):        
+    
+    sections = ['base','fitting','excel']
+    
+    def __init__(self, conffile=None):
+        
         if conffile==None:
             self.createConfig('pipe.conf')
         self.savedir = os.getcwd()
         self.filename = ''
         self.lines  =None
         self.queue = []
-        self.results = []            
-        return
-
-    def parseConfig(self, conffile=None):
-        """Parse the config file - all settings"""        
-        f = open(conffile,'r')
-        c = ConfigParser.ConfigParser()
-        try:
-            c.read(conffile)
-        except:
-            print 'failed to read config file! check format'
-            return
-        self.conffile = conffile
-        self.sections = ['base','fitting','excel']
-        for s in self.sections:
-            for f in c.items(s):
-                #print f[0], f[1]
-                try: val=int(f[1])
-                except: val=f[1]
-                self.__dict__[f[0]] = val
-        print 'parsed config file ok\n'        
+        self.results = []
         return
     
     def createConfig(self, filename, **kwargs):
@@ -481,6 +465,7 @@ class Pipeline(object):
         c = ConfigParser.ConfigParser()
         s = 'base'
         c.add_section(s)
+        c.set(s, 'format', 'databyrow')
         c.set(s, 'delimeter', ',')
         c.set(s, 'decimalsymbol', '.')
         c.set(s, 'checkunicode', 0)
@@ -489,8 +474,7 @@ class Pipeline(object):
         c.set(s, 'rowstart', 0)
         c.set(s, 'colstart', 0)
         c.set(s, 'rowend', 1000)
-        c.set(s, 'colnamesstart', 0)        
-        c.set(s, 'datainrows', 1)       
+        c.set(s, 'colnamesstart', 0)             
         c.set(s, 'groupbycol', 0)
         c.set(s, 'alternatecols', 0)
         c.set(s, 'colrepeat', 0)
@@ -520,14 +504,42 @@ class Pipeline(object):
         self.parseConfig(filename)       
         return c
 
+    def parseConfig(self, conffile=None):
+        """Parse the config file"""        
+        f = open(conffile,'r')
+        cp = ConfigParser.ConfigParser()
+        
+        try:
+            cp.read(conffile)
+        except:
+            print 'failed to read config file! check format'
+            return
+        self.conffile = conffile
+        
+        #get format
+        fmt = cp.get('base', 'format')
+        self.importer = self.getImporter(fmt, cp)
+        print self.importer
+        print 'parsed config file ok\n'
+        return
+         
+    def getImporter(self, format, cp):
+        """Get the required importer object"""
+        if format == 'databyrow':
+            importer = DatabyRowImporter(cp)
+        elif format == 'databycolumn':
+            importer = DatabyColImporter(cp)
+
+        return importer
+            
     def loadPreset(self, preset=None):
         """Load preset config for specific exp type data"""        
         if preset == 'J-810_cd_bywavelength':
-            self.createConfig(preset+'.conf',columns=10,rowstart=19,
+            self.createConfig(preset+'.conf',format='databyrow',columns=10,rowstart=19,
                               delimeter='tab',xerror=0,yerror=0.2,
                               model1='Sigmoid')
         if preset == 'J-810_cd_bytemp':
-            self.createConfig(preset+'.conf',columns=10,rowstart=19,rowend=421,
+            self.createConfig(preset+'.conf',format='databycolumn',columns=10,rowstart=19,rowend=421,
                               delimeter='tab',xerror=0,yerror=0.2,
                               datainrows=0,
                               model1='')            
@@ -582,8 +594,7 @@ class Pipeline(object):
         return lines
         
     def doImport(self, lines=None):
-        """Import file with current setting and return a dict"""        
-        
+        """Import file with current setting and return a dict"""
         if lines == None:
             if self.lines!=None:
                 lines=self.lines
@@ -593,76 +604,12 @@ class Pipeline(object):
         if self.conffile == None:
             self.loadConfig()
         else:    
-            self.parseConfig(self.conffile)        
-        if self.delimeter=='': self.delimeter=' '
-        elif self.delimeter=='tab': self.delimeter='\t'        
-        if self.rowend == 0: self.rowend=len(lines)
-        
-        if self.datainrows == True:
-            data = self.importbyRow(lines)            
-        else:
-            data = self.importbyColumn(lines)
-
-        print 'imported data ok, found %s datasets' %len(data)
-        return data
-
-    def importbyRow(self):
-        """Import where data are in rows"""
-        data = {}
-        colnames = string.strip(lines[self.rowstart]).split(self.delimeter)
-        for row in range(self.rowstart+1, self.rowend):
-            if row>=len(lines):
-                break
-            line = string.strip(lines[row]).split(self.delimeter)
-            name=line[0]
-            if self.ignorecomments==True and name.startswith('#'):
-                continue
-            x=[]; y=[]
-            for c in range(1,self.columns):
-                col=float(colnames[c])
-                x.append(col)
-                y.append(float(line[c]))
-            data[name] = [x,y]        
-        return data
-        
-    def importbyColumn(self, lines):
-        """Import where datasets are stored in columns"""
-        data = {}
-        dec = self.decimalsymbol
-        #by default assumes the x values are common in colstart
-        names = string.strip(lines[self.rowstart]).split(self.delimeter)
-        #column names might be offset from column data
-        if self.colnamesstart != 0:
-            names=names[self.colnamesstart:]
-        #handle if data is grouped in rows  
-        if self.groupbyrow == True:
-            pass
-        #handle case if rows are grouped in alternating rows
-
-        print names
-        for col in range(self.colstart+1, len(names)):
-            name=names[col]
-            x=[]; y=[]
-            if self.alternaterows == True:
-                step = self.rowrepeat
-            else:
-                step = 1
-            
-            for row in range(self.rowstart+1, self.rowend, step):  
-                line = string.strip(lines[row]).split(self.delimeter)                    
-                line = line[len(line)-len(names):]
-                #print line, row
-                if col >= len(line): continue
-                a = self.checkValue(line[0],dec)
-                b = self.checkValue(line[col],dec)
-                #print a, b
-                if a==None or b==None:
-                    continue
-                x.append(a); y.append(b)
-            if len(x)<1: continue
-
-            #print name, x
-            data[name] = [x,y]        
+            self.parseConfig(self.conffile)
+        try:
+            data = self.importer.doImport(lines)
+        except Exception, e:
+            print e
+            data = None
         return data
         
     def run(self):
@@ -672,17 +619,17 @@ class Pipeline(object):
         self.results = [] #list of files
         for filename in self.queue:
             lines = self.openRaw(filename)                      
-            raw = self.doImport(lines)
+            rawdict = self.doImport(lines)
             print 'processing raw data..'
             E = EkinProject(mode='General')
-            for d in raw.keys():          
-                xy = raw[d]
+            for d in rawdict.keys():          
+                xy = rawdict[d]
                 ek=EkinDataset(xy=xy)
                 E.insertDataset(ek, d)
-            if self.model1 != '':    
+            '''if self.model1 != '':    
                 E.fitDatasets('ALL', models=[self.model1], noiter=self.iterations1, 
                                conv=1e-6, grad=1e-6, silent=True)
-                '''for d in E.datasets:
+                for d in E.datasets:
                     ferrs = E.estimateExpUncertainty(d, runs=10)
                     E.addMeta(d, 'exp_errors', ferrs)'''
             prjname=self.filename+'.ekinprj'
@@ -690,8 +637,8 @@ class Pipeline(object):
             self.results.append(prjname)
             print E, 'saved to %s' %prjname
         print 'done'
-        return
-        
+        return   
+    
     def addtoQueue(self, files):
         """Add files"""     
      
@@ -699,18 +646,61 @@ class Pipeline(object):
             if f not in self.queue:
                 self.queue.append(f)       
         return
+            
+class BaseImporter(object):
+    """Importer class, sub-class this to define methods specific to each kind of
+       import format"""
+       
+    def __init__(self, cp):
+        """Arguments: 
+            cp - a ConfigParser object that has been loaded in the parent app""" 
+        for s in Pipeline.sections:
+            for f in cp.items(s):
+                #print f[0], f[1]
+                try: val=int(f[1])
+                except: val=f[1]
+                self.__dict__[f[0]] = val
+        if self.delimeter=='': self.delimeter=' '
+        elif self.delimeter=='tab': self.delimeter='\t'                 
+        return
+           
+    def getRow(self, row, lines):
+        line = string.strip(lines[row]).split(self.delimeter)
+        return row        
+       
+    def getColumn(self, c, lines):
+        return
 
-    def checkValue(self, val, decpt='.'):
+    def getRowHeader(self, lines):
+        """Return labels in header column"""
+        labels=[]
+        for row in range(self.rowstart+1, self.rowend):
+            #if row>=len(lines):
+            #    break
+            line = string.strip(lines[row]).split(self.delimeter)
+            labels.append(line[self.colstart])
+        return labels    
+        
+    def getColumnHeader(self, lines):
+        """Return labels in row header"""
+        labels = string.strip(lines[self.rowstart]).split(self.delimeter)
+        #column names might be offset from column data
+        if self.colnamesstart != 0:
+            labels = labels[self.colnamesstart:]
+        return labels    
+         
+    def checkValue(self, val):
         """Coerce a string to float if possible"""
         #add code to handle commas in thousand separators
-        if decpt == '.':
+        dec = self.decimalsymbol
+        if dec == '.':
             try:
                 return float(val)
             except:
                 return None
         else:        
             try:
-                return float(val.replace(".","").replace(decpt,"."))
+                return float(val.replace(".","").replace(dec,"."))
             except ValueError:
                 return None
          
@@ -728,6 +718,76 @@ class Pipeline(object):
         except UnicodeDecodeError:
             s = unicode(s)
         return s
+        
+    def doImport(self, lines):
+        """Should be overrriden"""        
+        return
+ 
+class DatabyColImporter(BaseImporter):
+    def __init__(self, cp):
+        BaseImporter.__init__(self, cp)
+        return
+
+    def doImport(self, lines):
+        """Import where data are in cols"""
+    
+        data = {}        
+        names = self.getColumnHeader(lines)
+
+        #handle if data is grouped in rows  
+        if self.groupbyrow == True:
+            pass
+        #handle case if rows are grouped in alternating rows
+
+        print names
+        for col in range(self.colstart+1, len(names)):
+            name=names[col]
+            x=[]; y=[]
+            if self.alternaterows == True:
+                step = self.rowrepeat
+            else:
+                step = 1
+            
+            for row in range(self.rowstart+1, self.rowend, step):  
+                line = string.strip(lines[row]).split(self.delimeter)
+                line = line[len(line)-len(names):]
+                #print line, row
+                if col >= len(line): continue
+                a = self.checkValue(line[0])
+                b = self.checkValue(line[col])
+                #print a, b
+                if a==None or b==None:
+                    continue
+                x.append(a); y.append(b)
+            if len(x)<1: continue
+
+            #print name, x
+            data[name] = [x,y]        
+        return data
+        
+class DatabyRowImporter(BaseImporter):
+    def __init__(self, cp):
+        BaseImporter.__init__(self, cp)
+        return
+
+    def doImport(self, lines):
+        """Import where data are in rows"""
+        data = {}
+        colnames = string.strip(lines[self.rowstart]).split(self.delimeter)
+        for row in range(self.rowstart+1, self.rowend):
+            if row>=len(lines):
+                break
+            line = string.strip(lines[row]).split(self.delimeter)
+            name=line[0]
+            if self.ignorecomments==True and name.startswith('#'):
+                continue
+            x=[]; y=[]
+            for c in range(1,self.columns):
+                col=float(colnames[c])
+                x.append(col)
+                y.append(float(line[c]))
+            data[name] = [x,y]        
+        return data
         
         
 def main():  
