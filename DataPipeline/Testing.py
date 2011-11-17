@@ -25,6 +25,32 @@
 # Dublin 4, Ireland
 # 
 
+"""Tests for data pipeline."""
 from Base import Pipeline
+import os
 
+testinfo = {'test1':{'conf':{'format':'databyrow','delimeter':','},
+                     'filename':'databyrow1.csv'},
+            'test2':{'conf':{'format':'databycolumn','delimeter':','},
+                     'filename':'databycol1.csv'}}
+path = 'testfiles'
 
+def formatTests():
+    """Test basic standard format handling"""
+    
+    for t in testinfo:
+        p = Pipeline()
+        conf=testinfo[t]['conf']
+        filename=testinfo[t]['filename']
+        p.createConfig('temp.conf',**conf)
+        p.openRaw(os.path.join(path,filename))
+        data = p.doImport()
+        if data != None:
+            print '%s import ok' %t
+            print data.keys()
+        print '-------------------'
+    
+def queueTests():
+    return
+
+formatTests()

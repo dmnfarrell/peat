@@ -56,10 +56,10 @@ class Pipeline(object):
         c.set(s, 'decimalsymbol', '.')
         c.set(s, 'checkunicode', 0)
         c.set(s, 'path', os.getcwd())
-        c.set(s, 'columns', 10)
+        c.set(s, 'columns', 0)
         c.set(s, 'rowstart', 0)
         c.set(s, 'colstart', 0)
-        c.set(s, 'rowend', 1000)
+        c.set(s, 'rowend', 0)
         c.set(s, 'colnamesstart', 0)             
         c.set(s, 'groupbycol', 0)
         c.set(s, 'alternatecols', 0)
@@ -87,7 +87,7 @@ class Pipeline(object):
         for k in kwargs:
             c.set(s, k, kwargs[k])
         c.write(open(filename,'w'))
-        self.parseConfig(filename)       
+        self.parseConfig(filename)
         return c
 
     def parseConfig(self, conffile=None):
@@ -105,7 +105,8 @@ class Pipeline(object):
         #get format
         fmt = cp.get('base', 'format')
         self.importer = self.getImporter(fmt, cp)
-        print self.importer
+        if self.importer == None:
+            print 'failed to get an importer'
         print 'parsed config file ok\n'
         return
          
@@ -115,11 +116,12 @@ class Pipeline(object):
             importer = DatabyRowImporter(cp)
         elif format == 'databycolumn':
             importer = DatabyColImporter(cp)
-
+        else:
+            importer = None
         return importer
             
     def loadPreset(self, preset=None):
-        """Load preset config for specific exp type data"""        
+        """Load preset config for specific type data"""                    
         if preset == 'J-810_cd_bywavelength':
             self.createConfig(preset+'.conf',format='databyrow',columns=10,rowstart=19,
                               delimeter='tab',xerror=0,yerror=0.2,
@@ -194,6 +196,7 @@ class Pipeline(object):
         try:
             data = self.importer.doImport(lines)
         except Exception, e:
+            print 'Importer returned an error:'
             print e
             data = None
         return data
@@ -319,13 +322,13 @@ class DatabyColImporter(BaseImporter):
     
         data = {}        
         names = self.getColumnHeader(lines)
-
+        if self.rowend == 0:
+            self.rowend=len(lines)
         #handle if data is grouped in rows  
         if self.groupbyrow == True:
             pass
         #handle case if rows are grouped in alternating rows
-
-        print names
+       
         for col in range(self.colstart+1, len(names)):
             name=names[col]
             x=[]; y=[]
@@ -334,7 +337,7 @@ class DatabyColImporter(BaseImporter):
             else:
                 step = 1
             
-            for row in range(self.rowstart+1, self.rowend, step):  
+            for row in range(self.rowstart+1, self.rowend, step):     
                 line = string.strip(lines[row]).split(self.delimeter)
                 line = line[len(line)-len(names):]
                 #print line, row
@@ -348,7 +351,7 @@ class DatabyColImporter(BaseImporter):
             if len(x)<1: continue
 
             #print name, x
-            data[name] = [x,y]        
+            data[name] = [x,y]
         return data
         
 class DatabyRowImporter(BaseImporter):
@@ -359,8 +362,12 @@ class DatabyRowImporter(BaseImporter):
     def doImport(self, lines):
         """Import where data are in rows"""
         data = {}
-        colnames = string.strip(lines[self.rowstart]).split(self.delimeter)
-        for row in range(self.rowstart+1, self.rowend):
+        coldata = string.strip(lines[self.rowstart]).split(self.delimeter)
+        if self.columns == 0:
+            self.columns = len(coldata)
+        if self.rowend == 0:
+            self.rowend=len(lines)
+        for row in range(self.rowstart+1, self.rowend):            
             if row>=len(lines):
                 break
             line = string.strip(lines[row]).split(self.delimeter)
@@ -368,10 +375,12 @@ class DatabyRowImporter(BaseImporter):
             if self.ignorecomments==True and name.startswith('#'):
                 continue
             x=[]; y=[]
+            #print row, line, coldata
             for c in range(1,self.columns):
-                col=float(colnames[c])
-                x.append(col)
+                xval=float(coldata[c])
+                x.append(xval)
                 y.append(float(line[c]))
-            data[name] = [x,y]        
+            data[name] = [x,y]
+        
         return data
         
