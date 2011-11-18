@@ -32,7 +32,10 @@ import os
 testinfo = {'test1':{'conf':{'format':'databyrow','delimeter':','},
                      'filename':'databyrow1.csv'},
             'test2':{'conf':{'format':'databycolumn','delimeter':','},
-                     'filename':'databycol1.csv'}}
+                     'filename':'databycol1.csv'},
+            'test3':{'conf':{'format':'databyrow','delimeter':',','rowrepeat':6},
+                     'filename':'databyrow2.csv'},                     
+            }
 path = 'testfiles'
 
 def formatTests():
