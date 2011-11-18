@@ -28,6 +28,7 @@
 import os, sys, math, random, numpy, string, types
 from datetime import datetime
 import ConfigParser, csv
+from itertools import izip, chain, repeat
 
 class Pipeline(object):    
     """This class does all the pipeline processing and configuration"""
@@ -67,6 +68,7 @@ class Pipeline(object):
         c.set(s, 'groupbyrow', 0)
         c.set(s, 'alternaterows', 0)
         c.set(s, 'rowrepeat', 0)
+        c.set(s, 'colrepeat', 0)
         c.set(s, 'rowdataformat', 'number')
         c.set(s, 'coldataformat', 'number')
         c.set(s, 'timeformat', "%Y-%m-%d %H:%M:%S")
@@ -107,7 +109,7 @@ class Pipeline(object):
         self.importer = self.getImporter(fmt, cp)
         if self.importer == None:
             print 'failed to get an importer'
-        print 'parsed config file ok\n'
+        print 'parsed config file ok'
         return
          
     def getImporter(self, format, cp):
@@ -199,6 +201,7 @@ class Pipeline(object):
             print 'Importer returned an error:'
             print e
             data = None
+        print 'importer returned %s datasets' %len(data)    
         return data
         
     def run(self):
@@ -253,15 +256,12 @@ class BaseImporter(object):
         elif self.delimeter=='tab': self.delimeter='\t'                 
         return
            
-    def getRow(self, row, lines):
+    def getColumn(self, row, lines):
         line = string.strip(lines[row]).split(self.delimeter)
         return row        
        
-    def getColumn(self, c, lines):
-        return
-
     def getRowHeader(self, lines):
-        """Return labels in header column"""
+        """Return values in header row"""
         labels=[]
         for row in range(self.rowstart+1, self.rowend):
             #if row>=len(lines):
@@ -271,13 +271,30 @@ class BaseImporter(object):
         return labels    
         
     def getColumnHeader(self, lines):
-        """Return labels in row header"""
-        labels = string.strip(lines[self.rowstart]).split(self.delimeter)
+        """Column headers are taken from colstart row"""
         #column names might be offset from column data
-        if self.colnamesstart != 0:
-            labels = labels[self.colnamesstart:]
-        return labels    
-         
+        #if self.colnamesstart != 0:
+        #    labels = labels[self.colnamesstart:]        
+        return self.getRow(lines, self.rowstart)
+
+    def getRow(self, lines, row):
+        """Return values in a row"""
+
+        #if we have repeating cols we return multiple lists
+        if self.ignorecomments==True and lines[row].startswith('#'):
+            return ''        
+        vals = string.strip(lines[row]).split(self.delimeter)
+        if self.colrepeat == 0:
+            return [vals]
+        elif self.colrepeat > 1:
+            return self.groupList(self.colrepeat, vals) 
+        else:
+            return None
+
+    def groupList(self, n, l, padvalue=None):
+        """group a list into chunks of n size"""      
+        return [l[i:i+n] for i in range(0, len(l), n)]
+        
     def checkValue(self, val):
         """Coerce a string to float if possible"""
         #add code to handle commas in thousand separators
@@ -313,7 +330,10 @@ class BaseImporter(object):
         return
  
 class DatabyColImporter(BaseImporter):
-    def __init__(self, cp):
+    """This importer handles data formatted in columns with common x values
+       in a specified column, it also handles multiple sets of data grouped 
+       in evenly spaced distances down each column"""    
+    def __init__(self, cp):       
         BaseImporter.__init__(self, cp)
         return
 
@@ -321,7 +341,7 @@ class DatabyColImporter(BaseImporter):
         """Import where data are in cols"""
     
         data = {}        
-        names = self.getColumnHeader(lines)
+        names = self.getRowHeader(lines)
         if self.rowend == 0:
             self.rowend=len(lines)
         #handle if data is grouped in rows  
@@ -355,32 +375,42 @@ class DatabyColImporter(BaseImporter):
         return data
         
 class DatabyRowImporter(BaseImporter):
+    """This importer handles data formatted in rows with common x values
+       along the top (or specified in a specific row), it also handles 
+       multiple sets of data grouped in evenly spaced distances along the row"""
     def __init__(self, cp):
         BaseImporter.__init__(self, cp)
         return
 
     def doImport(self, lines):
-        """Import where data are in rows"""
-        data = {}
-        coldata = string.strip(lines[self.rowstart]).split(self.delimeter)
-        if self.columns == 0:
-            self.columns = len(coldata)
+        
+        data = {}       
+        headerdata = self.getColumnHeader(lines)      
+        if headerdata == None:
+            return 
         if self.rowend == 0:
             self.rowend=len(lines)
+            
         for row in range(self.rowstart+1, self.rowend):            
             if row>=len(lines):
-                break
-            line = string.strip(lines[row]).split(self.delimeter)
-            name=line[0]
-            if self.ignorecomments==True and name.startswith('#'):
-                continue
-            x=[]; y=[]
-            #print row, line, coldata
-            for c in range(1,self.columns):
-                xval=float(coldata[c])
-                x.append(xval)
-                y.append(float(line[c]))
-            data[name] = [x,y]
-        
+                break     
+            rowdata = self.getRow(lines,row)
+            #print headerdata,rowdata
+            for xd,yd in zip(headerdata,rowdata):
+                name = yd[0]
+                x=[]; y=[]                
+                #pad header data of missing first element
+                if len(xd)<len(yd):
+                    xd.insert(0,'')
+                #print xd, yd    
+                for i in range(1,len(xd)):
+                    xval = self.checkValue(xd[i])
+                    yval = self.checkValue(yd[i])                    
+                    if xval==None or yval==None:
+                        continue
+                    x.append(xval)
+                    y.append(yval)
+                #print name,x,y    
+                data[name] = [x,y]        
         return data
         

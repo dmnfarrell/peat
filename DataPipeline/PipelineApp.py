@@ -192,8 +192,8 @@ class PipeApp(Frame, GUI_help):
         return
             
     def loadConfig(self, filename=None):
-        if filename==None:
-            filename=self.openFilename('.conf')
+        if filename == None:
+            filename = self.openFilename('.conf')
         if not filename: return
         self.p.parseConfig(filename)
         self.updateinfoPane()
@@ -259,9 +259,9 @@ class PipeApp(Frame, GUI_help):
         if len(self.p.results)==0:
             print 'no results files'
             return
-        fname = self.p.results[0]        
+        fname = self.p.results[0]
         EK = EkinApp(parent=self, project=fname)
-        return  
+        return
     
     def openFilename(self, ext='.txt'):
         filename=tkFileDialog.askopenfilename(defaultextension=ext,initialdir=self.p.savedir,

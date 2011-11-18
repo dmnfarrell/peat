@@ -29,16 +29,27 @@
 from Base import Pipeline
 import os
 
-testinfo = {'test1':{'conf':{'format':'databyrow','delimeter':','},
-                     'filename':'databyrow1.csv'},
+basictests = {'test1':{'conf':{'format':'databyrow','delimeter':','},
+                     'filename':'databyrow1.txt'},
             'test2':{'conf':{'format':'databycolumn','delimeter':','},
-                     'filename':'databycol1.csv'},
-            'test3':{'conf':{'format':'databyrow','delimeter':',','rowrepeat':6},
-                     'filename':'databyrow2.csv'},                     
+                     'filename':'databycol1.txt'},
+            #rows, multiple groups         
+            #'test3':{'conf':{'format':'databyrow','delimeter':',','colrepeat':6},
+            #         'filename':'databyrow2.txt'}, 
+            #cols, multiple groups
+            #'test4':{'conf':{'format':'databycol','delimeter':',','rowrepeat':4},
+            #         'filename':'databycol2.txt'},  
+            #various non-default formatting
+            'test5':{'conf':{'format':'databyrow','delimeter':'tab','decimalsymbol':','},
+                     'filename':'databyrow3.txt'},    
             }
+            
+exceltests = {'test1':{'conf':{'format':'databyrow'},
+                       'filename':'databyrow1.xls'}}
+    
 path = 'testfiles'
 
-def formatTests():
+def formatTests(testinfo):
     """Test basic standard format handling"""
     
     for t in testinfo:
@@ -56,4 +67,8 @@ def formatTests():
 def queueTests():
     return
 
-formatTests()
+def fittingTests():
+    return
+    
+formatTests(basictests)
+
