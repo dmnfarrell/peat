@@ -61,6 +61,7 @@ class Pipeline(object):
         c.set(s, 'rowstart', 0)
         c.set(s, 'colstart', 0)
         c.set(s, 'rowend', 0)
+        c.set(s, 'colend', 0)
         c.set(s, 'colnamesstart', 0)             
         c.set(s, 'groupbycol', 0)
         c.set(s, 'alternatecols', 0)
@@ -256,19 +257,33 @@ class BaseImporter(object):
         elif self.delimeter=='tab': self.delimeter='\t'                 
         return
            
-    def getColumn(self, row, lines):
-        line = string.strip(lines[row]).split(self.delimeter)
-        return row        
+    def getRow(self, lines, row):
+        """Return values in a row"""        
+        #if we have repeating cols we return multiple lists
+        if self.ignorecomments==True and lines[row].startswith('#'):
+            return ''        
+        vals = string.strip(lines[row]).split(self.delimeter)
+        
+        if self.colrepeat == 0:
+            return [vals]
+        elif self.colrepeat > 1:
+            return self.groupList(self.colrepeat, vals) 
+        else:
+            return None
+
+    def getColumn(self, lines, col):
+        """Return values in a column"""
+        vals = []
+        for row in range(self.rowstart, self.rowend):                
+            if self.ignorecomments==True and lines[row].startswith('#'):
+                continue           
+            rowdata = string.strip(lines[row]).split(self.delimeter)            
+            vals.append(rowdata[col])
        
-    def getRowHeader(self, lines):
-        """Return values in header row"""
-        labels=[]
-        for row in range(self.rowstart+1, self.rowend):
-            #if row>=len(lines):
-            #    break
-            line = string.strip(lines[row]).split(self.delimeter)
-            labels.append(line[self.colstart])
-        return labels    
+        if self.rowrepeat == 0: 
+            return [vals]
+        elif self.rowrepeat > 1:
+            return self.groupList(self.rowrepeat, vals)
         
     def getColumnHeader(self, lines):
         """Column headers are taken from colstart row"""
@@ -277,20 +292,10 @@ class BaseImporter(object):
         #    labels = labels[self.colnamesstart:]        
         return self.getRow(lines, self.rowstart)
 
-    def getRow(self, lines, row):
-        """Return values in a row"""
-
-        #if we have repeating cols we return multiple lists
-        if self.ignorecomments==True and lines[row].startswith('#'):
-            return ''        
-        vals = string.strip(lines[row]).split(self.delimeter)
-        if self.colrepeat == 0:
-            return [vals]
-        elif self.colrepeat > 1:
-            return self.groupList(self.colrepeat, vals) 
-        else:
-            return None
-
+    def getRowHeader(self, lines):
+        """Return values in header row"""
+        return self.getColumn(lines, self.colstart)
+        
     def groupList(self, n, l, padvalue=None):
         """group a list into chunks of n size"""      
         return [l[i:i+n] for i in range(0, len(l), n)]
@@ -338,40 +343,40 @@ class DatabyColImporter(BaseImporter):
         return
 
     def doImport(self, lines):
-        """Import where data are in cols"""
     
-        data = {}        
-        names = self.getRowHeader(lines)
+        data = {}
         if self.rowend == 0:
             self.rowend=len(lines)
-        #handle if data is grouped in rows  
-        if self.groupbyrow == True:
-            pass
-        #handle case if rows are grouped in alternating rows
-       
-        for col in range(self.colstart+1, len(names)):
-            name=names[col]
-            x=[]; y=[]
+        headerdata = self.getRowHeader(lines)
+        if self.colend == 0:            
+            self.colend = len(headerdata[0])-1
+        if headerdata == None:
+            return
+
+        for col in range(self.colstart+1, self.colend):
+            '''step=1
             if self.alternaterows == True:
                 step = self.rowrepeat
             else:
-                step = 1
-            
-            for row in range(self.rowstart+1, self.rowend, step):     
-                line = string.strip(lines[row]).split(self.delimeter)
-                line = line[len(line)-len(names):]
-                #print line, row
-                if col >= len(line): continue
-                a = self.checkValue(line[0])
-                b = self.checkValue(line[col])
-                #print a, b
-                if a==None or b==None:
-                    continue
-                x.append(a); y.append(b)
-            if len(x)<1: continue
-
-            #print name, x
-            data[name] = [x,y]
+                step = 1'''
+            coldata = self.getColumn(lines, col)
+            #print headerdata, coldata
+            for xd,yd in zip(headerdata,coldata):
+                name = yd[0]
+                x=[]; y=[]                
+                #pad header data of missing first element
+                if len(xd)<len(yd):
+                    xd.insert(0,'')
+                #print xd, yd    
+                for i in range(1,len(xd)):
+                    xval = self.checkValue(xd[i])
+                    yval = self.checkValue(yd[i])                    
+                    if xval==None or yval==None:
+                        continue
+                    x.append(xval)
+                    y.append(yval)
+                    #print name, x,y
+                data[name] = [x,y]            
         return data
         
 class DatabyRowImporter(BaseImporter):
@@ -402,7 +407,7 @@ class DatabyRowImporter(BaseImporter):
                 #pad header data of missing first element
                 if len(xd)<len(yd):
                     xd.insert(0,'')
-                #print xd, yd    
+                #print xd, yd
                 for i in range(1,len(xd)):
                     xval = self.checkValue(xd[i])
                     yval = self.checkValue(yd[i])                    
