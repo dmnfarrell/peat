@@ -29,19 +29,25 @@
 from Base import Pipeline
 import os
 
-basictests = {#'test1':{'conf':{'format':'databyrow','delimeter':','},
-              #       'filename':'databyrow1.txt'},
-            'test2':{'conf':{'format':'databycolumn','delimeter':','},
-                     'filename':'databycol1.txt'},
-            #rows, multiple groups
-            #'test3':{'conf':{'format':'databyrow','delimeter':',','colrepeat':6},
-            #         'filename':'databyrow2.txt'},
-            #cols, multiple groups
-            'test4':{'conf':{'format':'databycolumn','delimeter':',','rowrepeat':6},
-                     'filename':'databycol2.txt'},
-            #various non-default formatting
-            'test5':{'conf':{'format':'databyrow','delimeter':'tab','decimalsymbol':','},
-                     'filename':'databyrow3.txt'},
+basictests = {'test1':{'conf':{'format':'databyrow','delimeter':','},
+                       'filename':'databyrow1.txt'},
+              'test2':{'conf':{'format':'databycolumn','delimeter':','},
+                       'filename':'databycol1.txt'},
+              #rows, multiple groups
+              'test3':{'conf':{'format':'databyrow','delimeter':',','colrepeat':6},
+                     'filename':'databyrow2.txt'},
+              #cols, multiple groups
+              'test4':{'conf':{'format':'databycolumn','delimeter':',','rowrepeat':6},
+                       'filename':'databycol2.txt'},
+              #paired x-y data in rows         
+              'test5':{'conf':{'format':'paireddatabyrow','delimeter':','},
+                       'filename':'databyrow_paired.txt'},
+              #paired x-y data in cols    
+              'test6':{'conf':{'format':'paireddatabycolumn','delimeter':','},
+                       'filename':'databycol_paired.txt'},                     
+              #various non-default formatting
+              #'test7':{'conf':{'format':'databyrow','delimeter':'tab','decimalsymbol':','},
+              #         'filename':'databyrow3.txt'},
             }
             
 exceltests = {'test1':{'conf':{'format':'databyrow'},

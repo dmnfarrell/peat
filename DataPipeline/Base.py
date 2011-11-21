@@ -56,8 +56,7 @@ class Pipeline(object):
         c.set(s, 'delimeter', ',')
         c.set(s, 'decimalsymbol', '.')
         c.set(s, 'checkunicode', 0)
-        c.set(s, 'path', os.getcwd())
-        c.set(s, 'columns', 0)
+        c.set(s, 'path', os.getcwd())        
         c.set(s, 'rowstart', 0)
         c.set(s, 'colstart', 0)
         c.set(s, 'rowend', 0)
@@ -65,8 +64,6 @@ class Pipeline(object):
         c.set(s, 'colnamesstart', 0)             
         c.set(s, 'groupbycol', 0)
         c.set(s, 'alternatecols', 0)
-        c.set(s, 'colrepeat', 0)
-        c.set(s, 'groupbyrow', 0)
         c.set(s, 'alternaterows', 0)
         c.set(s, 'rowrepeat', 0)
         c.set(s, 'colrepeat', 0)
@@ -119,6 +116,10 @@ class Pipeline(object):
             importer = DatabyRowImporter(cp)
         elif format == 'databycolumn':
             importer = DatabyColImporter(cp)
+        elif format == 'paireddatabyrow':
+            importer = PairedDatabyRowImporter(cp)
+        elif format == 'paireddatabycolumn':
+            importer = PairedDatabyColImporter(cp) 
         else:
             importer = None
         return importer
@@ -300,6 +301,24 @@ class BaseImporter(object):
         """group a list into chunks of n size"""      
         return [l[i:i+n] for i in range(0, len(l), n)]
         
+    def getXYValues(self, xd, yd, start=1):
+        """Return a lists of floats from lists of vals whilst doing
+           various checks to remove errors etc."""
+        
+        x=[]; y=[]                
+        #pad header data of missing first element
+        if len(xd)<len(yd):
+            xd.insert(0,'')
+        #print xd, yd
+        for i in range(start,len(xd)):
+            xval = self.checkValue(xd[i])
+            yval = self.checkValue(yd[i])                    
+            if xval==None or yval==None:
+                continue
+            x.append(xval)
+            y.append(yval)
+        return x,y  
+                    
     def checkValue(self, val):
         """Coerce a string to float if possible"""
         #add code to handle commas in thousand separators
@@ -347,12 +366,13 @@ class DatabyColImporter(BaseImporter):
         data = {}
         if self.rowend == 0:
             self.rowend=len(lines)
-        headerdata = self.getRowHeader(lines)
+        xdata = self.getRowHeader(lines)
+        header = self.getColumnHeader(lines)      
         if self.colend == 0:            
-            self.colend = len(headerdata[0])-1
-        if headerdata == None:
+            self.colend = len(header[0])
+        if xdata == None:
             return
-
+        
         for col in range(self.colstart+1, self.colend):
             '''step=1
             if self.alternaterows == True:
@@ -360,22 +380,10 @@ class DatabyColImporter(BaseImporter):
             else:
                 step = 1'''
             coldata = self.getColumn(lines, col)
-            #print headerdata, coldata
-            for xd,yd in zip(headerdata,coldata):
+            #print xdata, coldata
+            for xd,yd in zip(xdata,coldata):
                 name = yd[0]
-                x=[]; y=[]                
-                #pad header data of missing first element
-                if len(xd)<len(yd):
-                    xd.insert(0,'')
-                #print xd, yd    
-                for i in range(1,len(xd)):
-                    xval = self.checkValue(xd[i])
-                    yval = self.checkValue(yd[i])                    
-                    if xval==None or yval==None:
-                        continue
-                    x.append(xval)
-                    y.append(yval)
-                    #print name, x,y
+                x,y = self.getXYValues(xd,yd)
                 data[name] = [x,y]            
         return data
         
@@ -390,8 +398,8 @@ class DatabyRowImporter(BaseImporter):
     def doImport(self, lines):
         
         data = {}       
-        headerdata = self.getColumnHeader(lines)      
-        if headerdata == None:
+        xdata = self.getColumnHeader(lines)
+        if xdata == None:
             return 
         if self.rowend == 0:
             self.rowend=len(lines)
@@ -400,22 +408,64 @@ class DatabyRowImporter(BaseImporter):
             if row>=len(lines):
                 break     
             rowdata = self.getRow(lines,row)
-            #print headerdata,rowdata
-            for xd,yd in zip(headerdata,rowdata):
+            #print xdata,rowdata
+            for xd,yd in zip(xdata,rowdata):
                 name = yd[0]
-                x=[]; y=[]                
-                #pad header data of missing first element
-                if len(xd)<len(yd):
-                    xd.insert(0,'')
-                #print xd, yd
-                for i in range(1,len(xd)):
-                    xval = self.checkValue(xd[i])
-                    yval = self.checkValue(yd[i])                    
-                    if xval==None or yval==None:
-                        continue
-                    x.append(xval)
-                    y.append(yval)
-                #print name,x,y    
-                data[name] = [x,y]        
+                x,y = self.getXYValues(xd,yd)
+                data[name] = [x,y]
         return data
         
+class PairedDatabyColImporter(BaseImporter):
+    """This importer handles data formatted in rows with paired x-y values, 
+       there are therefore no common x-values in the header """
+    def __init__(self, cp):
+        BaseImporter.__init__(self, cp)
+        return
+        
+    def doImport(self, lines):
+        
+        data = {}
+        if self.rowend == 0:
+            self.rowend=len(lines)
+        header = self.getColumnHeader(lines)        
+        if self.colend == 0:
+            self.colend = len(header[0])
+            
+        for col in range(self.colstart+1, self.colend):            
+            coldata = self.getColumn(lines, col)            
+            for xyd in coldata:
+                name = xyd[0]                
+                x = xyd[1:len(xyd):2]
+                y = xyd[2:len(xyd):2]                
+                data[name] = [x,y]
+                
+        return data            
+        
+class PairedDatabyRowImporter(BaseImporter):
+    """This importer handles data formatted in rows with paired x-y values, 
+       there are therefore no common x-values in the header """
+    def __init__(self, cp):
+        BaseImporter.__init__(self, cp)
+        return
+
+    def doImport(self, lines):
+        
+        data = {}
+        if self.rowend == 0:
+            self.rowend=len(lines)
+            
+        for row in range(self.rowstart+1, self.rowend):
+            if row>=len(lines):
+                break     
+            rowdata = self.getRow(lines,row)
+            print rowdata
+            for xyd in rowdata:
+                name = xyd[0]
+                #print name
+                x = xyd[1:len(xyd):2]
+                y = xyd[2:len(xyd):2]
+                #print x,y
+                data[name] = [x,y]
+                
+        return data
+                
