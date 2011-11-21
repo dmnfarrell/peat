@@ -369,7 +369,11 @@ def read_clustal_aln_file(filename):
         #
         import string
         for line in lines:
-            if line[0]=='#':
+            if len(line.strip())==0:
+                continue
+            elif line[0]=='#':
+                continue
+            elif line.split()[0]=='CLUSTAL':
                 continue
             split=string.strip(line).split()
             if len(split)>1 and line[1]!=' ':
@@ -378,6 +382,45 @@ def read_clustal_aln_file(filename):
                 else:
                     seqs[split[0]]=split[1]
     return seqs
+    
+#
+# -------
+#
+
+def calculate_sequence_identity_matrix(seqs):
+    """Given a dictionary of aligned sequences, this function will calculate the % sequence identity matrix"""
+    matrix={}
+    names=sorted(seqs.keys())
+    for name1 in names:
+        matrix[name1]={}
+        for name2 in names:
+            print name1,name2
+            matrix[name1][name2]=calc_identity(seqs[name1],seqs[name2])
+        #
+        s1=seqs[name1].replace('-','')
+        print name1,len(s1)
+    return matrix
+    
+#
+# --------
+#
+
+def calc_identity(seq1,seq2):
+    """Calculate the sequence identity for these two aligned sequences"""
+    id=0
+    if len(seq1)!=len(seq2):
+        print 'Sequences have different length! %d %d' %(len(seq1),len(seq2))
+        raise Exception('Incorrect alignment')
+    #
+    for pos in range(len(seq1)):
+        if seq1[pos]==seq2[pos] and seq1[pos]!='-':
+            id=id+1
+    print 'ID',id
+    s1=seq1.replace('-','')
+    s2=seq2.replace('-','')
+    return max(float(id)/len(s1),float(id)/len(s2))*100.0
+        
+    
     
 def read_fasta_aln_file(filename):
     """Read a FASTA aln file"""
