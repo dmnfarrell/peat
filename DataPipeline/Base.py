@@ -70,6 +70,8 @@ class Pipeline(object):
         c.set(s, 'rowdataformat', 'number')
         c.set(s, 'coldataformat', 'number')
         c.set(s, 'timeformat', "%Y-%m-%d %H:%M:%S")
+        c.set(s, 'rowheader', '')
+        c.set(s, 'colheader', '')
         
         f = 'fitting'
         c.add_section(f)
@@ -119,7 +121,11 @@ class Pipeline(object):
         elif format == 'paireddatabyrow':
             importer = PairedDatabyRowImporter(cp)
         elif format == 'paireddatabycolumn':
-            importer = PairedDatabyColImporter(cp) 
+            importer = PairedDatabyColImporter(cp)
+        elif format == 'groupeddatabyrow':
+            importer = GroupedDatabyRowImporter(cp)            
+        elif format == 'groupeddatabycolumn':
+            importer = GroupedDatabyColImporter(cp)            
         else:
             importer = None
         return importer
@@ -242,8 +248,9 @@ class Pipeline(object):
         return
             
 class BaseImporter(object):
-    """Importer class, sub-class this to define methods specific to each kind of
-       import format"""
+    """Base Importer class, sub-class this to define methods specific to each kind of
+       import format. At minimum we override the doImport method to get specific
+       functionality"""
        
     def __init__(self, cp):
         """Arguments: 
@@ -288,10 +295,11 @@ class BaseImporter(object):
         
     def getColumnHeader(self, lines):
         """Column headers are taken from colstart row"""
-        #column names might be offset from column data
-        #if self.colnamesstart != 0:
-        #    labels = labels[self.colnamesstart:]        
-        return self.getRow(lines, self.rowstart)
+        if self.rowheader == '':
+            row = self.rowstart
+        else:
+            row = self.rowheader
+        return self.getRow(lines, row)
 
     def getRowHeader(self, lines):
         """Return values in header row"""
@@ -374,11 +382,6 @@ class DatabyColImporter(BaseImporter):
             return
         
         for col in range(self.colstart+1, self.colend):
-            '''step=1
-            if self.alternaterows == True:
-                step = self.rowrepeat
-            else:
-                step = 1'''
             coldata = self.getColumn(lines, col)
             #print xdata, coldata
             for xd,yd in zip(xdata,coldata):
@@ -397,22 +400,21 @@ class DatabyRowImporter(BaseImporter):
 
     def doImport(self, lines):
         
-        data = {}       
+        data = {}
         xdata = self.getColumnHeader(lines)
         if xdata == None:
             return 
         if self.rowend == 0:
             self.rowend=len(lines)
-            
+        print self.getRowHeader(lines)
         for row in range(self.rowstart+1, self.rowend):            
             if row>=len(lines):
                 break     
-            rowdata = self.getRow(lines,row)
-            #print xdata,rowdata
+            rowdata = self.getRow(lines,row)           
             for xd,yd in zip(xdata,rowdata):
                 name = yd[0]
                 x,y = self.getXYValues(xd,yd)
-                data[name] = [x,y]
+                data[name] = [x,y] 
         return data
         
 class PairedDatabyColImporter(BaseImporter):
@@ -468,4 +470,39 @@ class PairedDatabyRowImporter(BaseImporter):
                 data[name] = [x,y]
                 
         return data
+ 
+class GroupedDatabyRowImporter(BaseImporter):
+    """This importer handles data formatted in rows with multiple independent x values in
+       each column, each dataset is then repeated in groups every x rows, specified in
+       the rowrepeat option. The importer therefore returns dictionary with multiple sets of
+       x-y values for each label/dataset"""
+    def __init__(self, cp):
+        BaseImporter.__init__(self, cp)
+        return
+
+    def doImport(self, lines):
+        
+        data = {}             
+        labels = self.getColumnHeader(lines)[0]
+        print labels
+        if self.rowend == 0:
+            self.rowend=len(lines)
+        
+        datasets = (self.rowend - self.rowstart) / self.rowrepeat
+        step = self.rowrepeat
+        
+        for d in range(1,datasets):
+            print d
+            for row in range(self.rowstart, self.rowend, step):
+                if row>=len(lines):
+                    break
+                xdata = self.getRow(lines, row)[0]
+                rowdata = self.getRow(lines, row+d)[0]            
+                #print row,xdata,rowdata                
+                name = rowdata[0]
+                print name
+                xyvals = zip(xdata[1:],rowdata[1:])
+                print len (labels), len(xyvals)
                 
+        return data
+            
