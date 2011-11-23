@@ -40,13 +40,16 @@ basictests = {#'test1':{'conf':{'format':'databyrow'},'filename':'databyrow1.txt
               #paired x-y data in cols    
               #'test6':{'conf':{'format':'paireddatabycolumn'},'filename':'databycol_paired.txt'},                     
               #various non-default formatting
-              #'test7':{'conf':{'format':'databyrow','delimeter':'tab','decimalsymbol':','},
-              #         'filename':'databyrow3.txt'},
-              'test8':{'conf':{'format':'groupeddatabyrow','rowrepeat':4,'rowheader':0,'rowstart':1},
-                        'filename':'databyrow_grouped.txt'},    
-              #'test10':{'conf':{'format':'databyrow','rowheader':"aaa,bbb,ccc,ddd"},
-              #          'filename':'databyrow_noheader.txt'},
-                        
+              #'test7':({'format':'databyrow','delimeter':'tab','decimalsymbol':','},
+              #         'databyrow3.txt'),
+              #'test8':({'format':'groupeddatabyrow','rowrepeat':4,'rowheader':0,'rowstart':1,
+              #           'model1':'Linear'},
+              #           'databyrow_grouped.txt'),
+              'test9':({'format':'groupeddatabycolumn','colrepeat':5,'colheader':0,'colstart':1,
+                         'model1':'Linear'},
+                         'databycol_grouped.txt'),              
+              #'test10':({'format':'databyrow','rowheader':"aaa,bbb,ccc,ddd"},
+              #          'databyrow_noheader.txt'),                        
               }
             
 exceltests = {'test1':{'conf':{'format':'databyrow'},
@@ -60,8 +63,8 @@ def formatTests(testinfo):
     for t in testinfo:
         print t
         p = Pipeline()
-        conf=testinfo[t]['conf']
-        filename=testinfo[t]['filename']
+        conf=testinfo[t][0]
+        filename=testinfo[t][1]
         p.createConfig('temp.conf',**conf)
         p.openRaw(os.path.join(path,filename))
         data = p.doImport()

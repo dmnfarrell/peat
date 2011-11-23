@@ -50,7 +50,7 @@ class Pipeline(object):
     def createConfig(self, filename, **kwargs):
         """Create a basic config file with default options"""
         
-        c = ConfigParser.ConfigParser()
+        c = ConfigParser.ConfigParser()        
         s = 'base'
         c.add_section(s)
         c.set(s, 'format', 'databyrow')
@@ -73,7 +73,7 @@ class Pipeline(object):
         c.set(s, 'timeformat', "%Y-%m-%d %H:%M:%S")
         c.set(s, 'rowheader', '')
         c.set(s, 'colheader', '')
-        
+        #fitting settings
         f = 'fitting'
         c.add_section(f)
         c.set(f, 'xerror', 0.1)
@@ -86,9 +86,17 @@ class Pipeline(object):
         c.add_section(e)
         c.set(e, 'sheet', 0)
         c.set(e, 'numsheets', 1)
-        #use kwargs to create specific settings
-        for k in kwargs:
-            c.set(s, k, kwargs[k])
+        
+        m='custom'
+        c.add_section(m)
+        
+        #use kwargs to create specific settings in the appropriate section        
+        for s in c.sections():
+            opts = c.options(s)
+            for k in kwargs:
+                if k in opts: 
+                    #print s,k
+                    c.set(s, k, kwargs[k])
         c.write(open(filename,'w'))
         self.parseConfig(filename)
         return c
@@ -105,12 +113,15 @@ class Pipeline(object):
             return
         self.conffile = conffile
         
-        #get format
-        fmt = cp.get('base', 'format')
-        self.importer = self.getImporter(fmt, cp)
+        #get format so we can create the right Importer
+        format = cp.get('base', 'format')
+        self.importer = self.getImporter(format, cp)
         if self.importer == None:
             print 'failed to get an importer'
-        print 'parsed config file ok, format is %s' %fmt
+        #both the Importer and Pipeline object get copies of the config options 
+        #as attributes
+        self.setAttributesfromConfigParser(self, cp)    
+        print 'parsed config file ok, format is %s' %format
         return
          
     def getImporter(self, format, cp):
@@ -223,13 +234,32 @@ class Pipeline(object):
             lines = self.openRaw(filename)                      
             rawdata = self.doImport(lines)            
             E = self.getEkinProject(rawdata)
+            if self.model1 != '':
+                print  self.model1
+                E.fitDatasets('ALL', models=[self.model1], noiter=self.iterations1, 
+                       conv=1e-6, grad=1e-6, silent=True)
             prjname=self.filename+'.ekinprj'
             E.saveProject(prjname)
             self.results.append(prjname)
             print E, 'saved to %s' %prjname
         print 'done'
-        return   
-
+        return
+        
+    def expUncert(self):
+        '''
+        for d in E.datasets:
+            ferrs = E.estimateExpUncertainty(d, runs=10)
+            E.addMeta(d, 'exp_errors', ferrs)'''        
+        return
+        
+    def addtoQueue(self, files):
+        """Add files"""     
+     
+        for f in files[:]:
+            if f not in self.queue:
+                self.queue.append(f)       
+        return
+        
     @classmethod
     def getEkinProject(self, data):
         """Get an ekin project from a data dict"""
@@ -247,24 +277,19 @@ class Pipeline(object):
                 ek=EkinDataset(xy=xy)
                 E.insertDataset(ek, d)
         return E
-    
-    def expUncert(self):
-        '''if self.model1 != '':
-        E.fitDatasets('ALL', models=[self.model1], noiter=self.iterations1, 
-                       conv=1e-6, grad=1e-6, silent=True)
-        for d in E.datasets:
-            ferrs = E.estimateExpUncertainty(d, runs=10)
-            E.addMeta(d, 'exp_errors', ferrs)'''        
-        return
-        
-    def addtoQueue(self, files):
-        """Add files"""     
-     
-        for f in files[:]:
-            if f not in self.queue:
-                self.queue.append(f)       
-        return
-            
+
+    @classmethod
+    def setAttributesfromConfigParser(self, obj, cp):
+        """A helper method that makes the options in a ConfigParser
+           attributes of the given object"""
+        for s in cp.sections():
+            for f in cp.items(s):
+                #print f[0], f[1]
+                try: val=int(f[1])
+                except: val=f[1]
+                obj.__dict__[f[0]] = val
+                
+                
 class BaseImporter(object):
     """Base Importer class, sub-class this to define methods specific to each kind of
        import format. At minimum we override the doImport method to get specific
@@ -273,12 +298,7 @@ class BaseImporter(object):
     def __init__(self, cp):
         """Arguments: 
             cp - a ConfigParser object that has been loaded in the parent app""" 
-        for s in Pipeline.sections:
-            for f in cp.items(s):
-                #print f[0], f[1]
-                try: val=int(f[1])
-                except: val=f[1]
-                self.__dict__[f[0]] = val
+        Pipeline.setAttributesfromConfigParser(self, cp)
         if self.delimeter=='': self.delimeter=' '
         elif self.delimeter=='tab': self.delimeter='\t'                 
         return
@@ -344,7 +364,7 @@ class BaseImporter(object):
             x.append(xval)
             y.append(yval)
         return x,y  
-                    
+    
     def checkValue(self, val):
         """Coerce a string to float if possible"""
         #add code to handle commas in thousand separators
@@ -502,30 +522,82 @@ class GroupedDatabyRowImporter(BaseImporter):
         
         data = {}
         #assumes the column header has labels for each set of xy vals
-        labels = self.getColumnHeader(lines)[0]
-        
+        labels = self.getColumnHeader(lines)[0]        
         if self.rowend == 0:
             self.rowend=len(lines)          
         if self.colend == 0:            
             self.colend = len(labels)
-            
-        groups = (self.rowend - self.rowstart) / self.rowrepeat
+        
+        headerdata  = self.getRowHeader(lines)
+        grouplen = (self.rowend - self.rowstart) / self.rowrepeat      
         step = self.rowrepeat
         
-        for d in range(1,groups):
+        for d in range(1,grouplen):
             for row in range(self.rowstart, self.rowend, step):
                 if row>=len(lines):
                     break
                 xdata = self.getRow(lines, row)[0]
                 rowdata = self.getRow(lines, row+d)[0]
-                #print row,xdata,rowdata
                 name = rowdata[0]
                 if not data.has_key(name):
-                    data[name] = {}                
-                #print name, xdata,rowdata
-                
+                    data[name] = {}      
+
                 for v in zip(labels,xdata,rowdata)[1:]:
-                    #print v
+                    label = v[0]
+                    x = self.checkValue(v[1])
+                    y = self.checkValue(v[2])
+                    if x==None or y==None:
+                        continue                 
+                    if not data[name].has_key(label):
+                        data[name][label]=[]
+                    l = data[name][label]
+                    l.append((x,y))
+                   
+        #reformat paired vals into x and y lists
+        for d in data:
+            for lbl in data[d]:             
+                data[d][lbl] = zip(*data[d][lbl])
+       
+        return data
+
+class GroupedDatabyColImporter(BaseImporter):
+    """This importer handles data formatted in cols with multiple independent x values in
+       each row, each dataset is then repeated in groups every x columns, specified in
+       the colrepeat option. The importer therefore returns dictionary with multiple sets of
+       x-y values for each label/dataset"""
+    def __init__(self, cp):
+        BaseImporter.__init__(self, cp)
+        return
+
+    def doImport(self, lines):
+        
+        data = {}
+        #assumes the column header has labels for each set of xy vals        
+        
+        if self.rowend == 0:
+            self.rowend=len(lines)   
+        labels = self.getRowHeader(lines)[0]
+        headerdata  = self.getColumnHeader(lines)  
+        if self.colend == 0:
+            self.colend = len(lines[0])
+        grouplen = len(headerdata) 
+        print self.colend,grouplen
+        step = self.colrepeat
+        
+        for d in range(0,grouplen):
+            print d
+            for col in range(self.colstart, self.colend, step):
+                
+                xdata = self.getColumn(lines, col)[0]
+                coldata = self.getColumn(lines, col+d)[0]
+                print row,xdata,coldata
+                name = coldata[0]
+                if not data.has_key(name):
+                    data[name] = {}
+                print name, xdata,coldata
+                
+                for v in zip(labels,xdata,coldata)[1:]:
+                    print v
                     label = v[0]
                     x = self.checkValue(v[1])
                     y = self.checkValue(v[2])
@@ -543,4 +615,3 @@ class GroupedDatabyRowImporter(BaseImporter):
                 data[d][lbl] = zip(*data[d][lbl])
        
         return data
-            

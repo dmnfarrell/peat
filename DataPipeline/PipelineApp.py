@@ -25,7 +25,7 @@
 # Dublin 4, Ireland
 # 
 
-
+from Base import Pipeline
 from PEATDB.Ekin.Base import *
 from PEATDB.Tables import TableCanvas
 from PEATDB.TableModels import TableModel
@@ -37,7 +37,7 @@ from Tkinter import *
 import Pmw
 import tkFileDialog
 from PEATDB.GUI_helper import *
-from Base import Pipeline
+from Wizard import WizardDialog
 
 class PipeApp(Frame, GUI_help):
     """Data pipe GUI for importing and fitting of raw data.
@@ -132,7 +132,8 @@ class PipeApp(Frame, GUI_help):
         return
 
     def updateinfoPane(self):
-        self.conffilevar.set(self.p.conffile)
+        if hasattr(self.p, 'conffile'):
+            self.conffilevar.set(self.p.conffile)
         self.queuefilesvar.set(len(self.p.queue))
         self.currfilevar.set(self.p.filename)
         return
@@ -148,11 +149,12 @@ class PipeApp(Frame, GUI_help):
         self.file_menu=self.create_pulldown(self.menu,self.file_menu)
         self.menu.add_cascade(label='File',menu=self.file_menu['var'])
         self.presetsMenu()                
-        self.run_menu={'01Execute':{'cmd': self.execute},                       
-                        '02Open results in Ekin':{'cmd':self.openEkin}}       
+        self.run_menu={'01Execute':{'cmd': self.execute},
+                        '02Run Config Wizard':{'cmd': self.launchWizard},
+                        '03Open results in Ekin':{'cmd':self.openEkin}}       
         self.run_menu=self.create_pulldown(self.menu,self.run_menu)        
         self.menu.add_cascade(label='Run',menu=self.run_menu['var'])
-        self.queue_menu={'01Add files to queue':{'cmd': self.addtoQueue}}       
+        self.queue_menu={'01Add files to queue':{'cmd': self.addtoQueue}}
         self.queue_menu=self.create_pulldown(self.menu,self.queue_menu)        
         self.menu.add_cascade(label='Queue',menu=self.queue_menu['var'])        
         self.help_menu={ '01Online Help':{'cmd': self.help} }       
@@ -263,6 +265,11 @@ class PipeApp(Frame, GUI_help):
         EK = EkinApp(parent=self, project=fname)
         return
     
+    def launchWizard(self):
+        from Wizard import WizardDialog
+        wz = WizardDialog(parent=self)
+                
+        
     def openFilename(self, ext='.txt'):
         filename=tkFileDialog.askopenfilename(defaultextension=ext,initialdir=self.p.savedir,
                                               filetypes=[("text files","*.txt"),
