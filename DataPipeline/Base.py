@@ -29,6 +29,7 @@ import os, sys, math, random, numpy, string, types
 from datetime import datetime
 import ConfigParser, csv
 from itertools import izip, chain, repeat
+from PEATDB.Ekin.Base import EkinProject, EkinDataset
 
 class Pipeline(object):    
     """This class does all the pipeline processing and configuration"""
@@ -109,7 +110,7 @@ class Pipeline(object):
         self.importer = self.getImporter(fmt, cp)
         if self.importer == None:
             print 'failed to get an importer'
-        print 'parsed config file ok'
+        print 'parsed config file ok, format is %s' %fmt
         return
          
     def getImporter(self, format, cp):
@@ -217,28 +218,45 @@ class Pipeline(object):
         
         #clear log
         self.results = [] #list of files
+        print 'processing files in queue. This may take some time'
         for filename in self.queue:
             lines = self.openRaw(filename)                      
-            rawdict = self.doImport(lines)
-            print 'processing raw data..'
-            E = EkinProject(mode='General')
-            for d in rawdict.keys():          
-                xy = rawdict[d]
-                ek=EkinDataset(xy=xy)
-                E.insertDataset(ek, d)
-            '''if self.model1 != '':    
-                E.fitDatasets('ALL', models=[self.model1], noiter=self.iterations1, 
-                               conv=1e-6, grad=1e-6, silent=True)
-                for d in E.datasets:
-                    ferrs = E.estimateExpUncertainty(d, runs=10)
-                    E.addMeta(d, 'exp_errors', ferrs)'''
+            rawdata = self.doImport(lines)            
+            E = self.getEkinProject(rawdata)
             prjname=self.filename+'.ekinprj'
             E.saveProject(prjname)
             self.results.append(prjname)
             print E, 'saved to %s' %prjname
         print 'done'
         return   
+
+    @classmethod
+    def getEkinProject(self, data):
+        """Get an ekin project from a data dict"""
+        E = EkinProject(mode='General')        
+        for d in data.keys():           
+            if type(data[d]) is types.DictType:
+                for lbl in data[d]:
+                    #print lbl
+                    name = d+'_'+lbl
+                    xy = data[d][lbl]
+                    ek=EkinDataset(xy=xy)
+                    E.insertDataset(ek, name)
+            else:   
+                xy = data[d]
+                ek=EkinDataset(xy=xy)
+                E.insertDataset(ek, d)
+        return E
     
+    def expUncert(self):
+        '''if self.model1 != '':
+        E.fitDatasets('ALL', models=[self.model1], noiter=self.iterations1, 
+                       conv=1e-6, grad=1e-6, silent=True)
+        for d in E.datasets:
+            ferrs = E.estimateExpUncertainty(d, runs=10)
+            E.addMeta(d, 'exp_errors', ferrs)'''        
+        return
+        
     def addtoQueue(self, files):
         """Add files"""     
      
@@ -406,7 +424,7 @@ class DatabyRowImporter(BaseImporter):
             return 
         if self.rowend == 0:
             self.rowend=len(lines)
-        print self.getRowHeader(lines)
+        #print self.getRowHeader(lines)
         for row in range(self.rowstart+1, self.rowend):            
             if row>=len(lines):
                 break     
@@ -482,27 +500,47 @@ class GroupedDatabyRowImporter(BaseImporter):
 
     def doImport(self, lines):
         
-        data = {}             
+        data = {}
+        #assumes the column header has labels for each set of xy vals
         labels = self.getColumnHeader(lines)[0]
-        print labels
-        if self.rowend == 0:
-            self.rowend=len(lines)
         
-        datasets = (self.rowend - self.rowstart) / self.rowrepeat
+        if self.rowend == 0:
+            self.rowend=len(lines)          
+        if self.colend == 0:            
+            self.colend = len(labels)
+            
+        groups = (self.rowend - self.rowstart) / self.rowrepeat
         step = self.rowrepeat
         
-        for d in range(1,datasets):
-            print d
+        for d in range(1,groups):
             for row in range(self.rowstart, self.rowend, step):
                 if row>=len(lines):
                     break
                 xdata = self.getRow(lines, row)[0]
-                rowdata = self.getRow(lines, row+d)[0]            
-                #print row,xdata,rowdata                
+                rowdata = self.getRow(lines, row+d)[0]
+                #print row,xdata,rowdata
                 name = rowdata[0]
-                print name
-                xyvals = zip(xdata[1:],rowdata[1:])
-                print len (labels), len(xyvals)
+                if not data.has_key(name):
+                    data[name] = {}                
+                #print name, xdata,rowdata
                 
+                for v in zip(labels,xdata,rowdata)[1:]:
+                    #print v
+                    label = v[0]
+                    x = self.checkValue(v[1])
+                    y = self.checkValue(v[2])
+                    if x==None or y==None:
+                        continue
+                    #print x,y
+                    if not data[name].has_key(label):
+                        data[name][label]=[]
+                    l = data[name][label]
+                    l.append((x,y))
+                   
+        #reformat paired vals into x and y lists
+        for d in data:
+            for lbl in data[d]:             
+                data[d][lbl] = zip(*data[d][lbl])
+       
         return data
             

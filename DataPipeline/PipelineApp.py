@@ -350,11 +350,7 @@ class PlotPreviewer(Frame):
         """Load dict into datasets"""
         #table=self.previewTable = TableCanvas(frame, **self.tableformat)
         #table.createTableFrame()
-        self.E = E = EkinProject(mode='General')
-        for d in data.keys():
-            xy = data[d]
-            ek=EkinDataset(xy=xy)
-            E.insertDataset(ek, d)
+        E = self.E = Pipeline.getEkinProject(data)    
         self.plotframe.setProject(E)                   
         return
         
