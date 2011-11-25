@@ -23,28 +23,45 @@
 # SBBS, Conway Institute
 # University College Dublin
 # Dublin 4, Ireland
-# 
+#
 
-import os, sys, math, random, numpy, string, types
+import os, sys, math, string, types
+import inspect
 from datetime import datetime
 import ConfigParser, csv
 from Base import BaseImporter
 
-"""Custom Importers should be added here."""
+"""Custom Importers should be added here. These will usually sub-classes of
+BaseImporter but can also inherit from any of the importers in Base.py
+Users should must add an entry to the dictionary below so that the class can
+be identified from the format keyword in the config file"""
+
+importers = {'kineticsdata':'KineticsDataImporter'}
 
 class KineticsDataImporter(BaseImporter):
-    """This is a custom importer to handle the kinetics data supplied as part of the 
-       case study. This data are kinetic assays measured over time intervals per substrate 
+    """This is a custom importer to handle the kinetics data supplied as part of the
+       case study. This data are kinetic assays measured over time intervals per substrate
        concentration. The data are grouped in rows per time point, each row is represents a
-       specific concentration. Each column is one variant.       
-       The importer returns a .."""
-       
+       specific concentration. Each column is one variant.
+       The importer returns a nested dictionary with variants as keys"""
+
     def __init__(self, cp):
         BaseImporter.__init__(self, cp)
         return
 
-    def doImport(self, lines):      
+    def doImport(self, lines):
+        """Common x values for every substrate concentration"""
         data = {}
-        
+
+        if self.rowend == 0:
+            self.rowend=len(lines)
+        labels = self.getRowHeader(lines)
+        header  = self.getColumnHeader(lines)
+        if self.colend == 0:
+            self.colend = len(header)
+        grouplen = len(self.getColumnHeader(lines, grouped=True)[0])
+        step = self.colrepeat
+
+        return data
 
 

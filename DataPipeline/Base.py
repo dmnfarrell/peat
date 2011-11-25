@@ -23,7 +23,7 @@
 # SBBS, Conway Institute
 # University College Dublin
 # Dublin 4, Ireland
-# 
+#
 
 import os, sys, math, random, numpy, string, types
 from datetime import datetime
@@ -31,13 +31,13 @@ import ConfigParser, csv
 from itertools import izip, chain, repeat
 from PEATDB.Ekin.Base import EkinProject, EkinDataset
 
-class Pipeline(object):    
+class Pipeline(object):
     """This class does all the pipeline processing and configuration"""
-    
+
     sections = ['base','fitting','excel']
-    
+
     def __init__(self, conffile=None):
-        
+
         if conffile==None:
             self.createConfig('pipe.conf')
         self.savedir = os.getcwd()
@@ -46,23 +46,23 @@ class Pipeline(object):
         self.queue = []
         self.results = []
         return
-    
+
     def createConfig(self, filename, **kwargs):
         """Create a basic config file with default options"""
-        
-        c = ConfigParser.ConfigParser()        
+
+        c = ConfigParser.ConfigParser()
         s = 'base'
         c.add_section(s)
         c.set(s, 'format', 'databyrow')
         c.set(s, 'delimeter', ',')
         c.set(s, 'decimalsymbol', '.')
         c.set(s, 'checkunicode', 0)
-        c.set(s, 'path', os.getcwd())        
+        c.set(s, 'path', os.getcwd())
         c.set(s, 'rowstart', 0)
         c.set(s, 'colstart', 0)
         c.set(s, 'rowend', 0)
         c.set(s, 'colend', 0)
-        c.set(s, 'colnamesstart', 0)             
+        c.set(s, 'colnamesstart', 0)
         c.set(s, 'groupbycol', 0)
         c.set(s, 'alternatecols', 0)
         c.set(s, 'alternaterows', 0)
@@ -86,15 +86,15 @@ class Pipeline(object):
         c.add_section(e)
         c.set(e, 'sheet', 0)
         c.set(e, 'numsheets', 1)
-        
+
         m='custom'
         c.add_section(m)
-        
-        #use kwargs to create specific settings in the appropriate section        
+
+        #use kwargs to create specific settings in the appropriate section
         for s in c.sections():
             opts = c.options(s)
             for k in kwargs:
-                if k in opts: 
+                if k in opts:
                     #print s,k
                     c.set(s, k, kwargs[k])
         c.write(open(filename,'w'))
@@ -102,30 +102,41 @@ class Pipeline(object):
         return c
 
     def parseConfig(self, conffile=None):
-        """Parse the config file"""        
+        """Parse the config file"""
         f = open(conffile,'r')
         cp = ConfigParser.ConfigParser()
-        
+
         try:
             cp.read(conffile)
         except:
             print 'failed to read config file! check format'
             return
         self.conffile = conffile
-        
+
         #get format so we can create the right Importer
         format = cp.get('base', 'format')
         self.importer = self.getImporter(format, cp)
         if self.importer == None:
             print 'failed to get an importer'
-        #both the Importer and Pipeline object get copies of the config options 
+        #both the Importer and Pipeline object get copies of the config options
         #as attributes
-        self.setAttributesfromConfigParser(self, cp)    
+        self.setAttributesfromConfigParser(self, cp)
         print 'parsed config file ok, format is %s' %format
         return
-         
+
     def getImporter(self, format, cp):
         """Get the required importer object"""
+        import Custom
+        import inspect
+        #try to find a custom importer first
+        customclasses = inspect.getmembers(Custom, inspect.isclass)
+        for f in Custom.importers:
+            if f == format:
+                classname = Custom.importers[f]
+                importerclass = getattr(Custom, classname)
+                print 'found custom importer %s' %classname
+                return importerclass(cp)
+
         if format == 'databyrow':
             importer = DatabyRowImporter(cp)
         elif format == 'databycolumn':
@@ -135,15 +146,15 @@ class Pipeline(object):
         elif format == 'paireddatabycolumn':
             importer = PairedDatabyColImporter(cp)
         elif format == 'groupeddatabyrow':
-            importer = GroupedDatabyRowImporter(cp)            
+            importer = GroupedDatabyRowImporter(cp)
         elif format == 'groupeddatabycolumn':
-            importer = GroupedDatabyColImporter(cp)            
+            importer = GroupedDatabyColImporter(cp)
         else:
             importer = None
         return importer
-            
+
     def loadPreset(self, preset=None):
-        """Load preset config for specific type data"""                    
+        """Load preset config for specific type data"""
         if preset == 'J-810_cd_bywavelength':
             self.createConfig(preset+'.conf',format='databyrow',columns=10,rowstart=19,
                               delimeter='tab',xerror=0,yerror=0.2,
@@ -152,37 +163,37 @@ class Pipeline(object):
             self.createConfig(preset+'.conf',format='databycolumn',columns=10,rowstart=19,rowend=421,
                               delimeter='tab',xerror=0,yerror=0.2,
                               datainrows=0,
-                              model1='')            
+                              model1='')
         elif preset == 'nmr_titration_sparky':
             self.createConfig(preset+'.conf',columns=10,rowstart=0,
                               delimeter='tab',xerror=0.1,yerror=0.02,
-                              model1='1 pKa 2 Chemical shifts')            
-            
+                              model1='1 pKa 2 Chemical shifts')
+
         print 'preset conf file written, you can also rename and edit this'
         return
-        
+
     def openRaw(self, filename=None, callback=None):
         """Open raw file, display preview and get some info about them"""
-        
+
         if os.path.splitext(filename)[1] == '.xls':
-            lines = self.openExcel(filename)            
+            lines = self.openExcel(filename)
         else:
             fd=open(filename)
             lines = fd.readlines()
             fd.close()
         if lines == None:
             return None
-        
+
         print 'opened file %s' %filename
         self.filename = filename
-        self.queue = [filename]        
+        self.queue = [filename]
         self.filename = filename
         self.lines = lines
         return lines
 
     def openExcel(self, filename):
         """Open raw excel file"""
-        
+
         try:
             import xlrd
         except:
@@ -193,16 +204,16 @@ class Pipeline(object):
         if filename != None:
             book = xlrd.open_workbook(filename)
             print 'The number of worksheets is', book.nsheets
-            sh = book.sheet_by_index(self.sheet)           
+            sh = book.sheet_by_index(self.sheet)
             print 'current sheet: %s rows: %s cols: %s' %(sh.name, sh.nrows, sh.ncols)
             for r in range(sh.nrows):
                 vals=sh.row_values(r)
                 txt=''
                 for v in vals:
-                    txt=txt+str(v)+sep                
+                    txt=txt+str(v)+sep
                 lines.append(txt)
         return lines
-        
+
     def doImport(self, lines=None):
         """Import file with current setting and return a dict"""
         if lines == None:
@@ -213,7 +224,7 @@ class Pipeline(object):
                 return None
         if self.conffile == None:
             self.loadConfig()
-        else:    
+        else:
             self.parseConfig(self.conffile)
         try:
             data = self.importer.doImport(lines)
@@ -221,22 +232,22 @@ class Pipeline(object):
             print 'Importer returned an error:'
             print e
             data = None
-        print 'importer returned %s datasets' %len(data)    
+        print 'importer returned %s datasets' %len(data)
         return data
-        
+
     def run(self):
         """Do pipeline with the current config"""
-        
+
         #clear log
         self.results = [] #list of files
         print 'processing files in queue. This may take some time'
         for filename in self.queue:
-            lines = self.openRaw(filename)                      
-            rawdata = self.doImport(lines)            
+            lines = self.openRaw(filename)
+            rawdata = self.doImport(lines)
             E = self.getEkinProject(rawdata)
             if self.model1 != '':
                 print  self.model1
-                E.fitDatasets('ALL', models=[self.model1], noiter=self.iterations1, 
+                E.fitDatasets('ALL', models=[self.model1], noiter=self.iterations1,
                        conv=1e-6, grad=1e-6, silent=True)
             prjname=self.filename+'.ekinprj'
             E.saveProject(prjname)
@@ -244,27 +255,27 @@ class Pipeline(object):
             print E, 'saved to %s' %prjname
         print 'done'
         return
-        
+
     def expUncert(self):
         '''
         for d in E.datasets:
             ferrs = E.estimateExpUncertainty(d, runs=10)
-            E.addMeta(d, 'exp_errors', ferrs)'''        
+            E.addMeta(d, 'exp_errors', ferrs)'''
         return
-        
+
     def addtoQueue(self, files):
-        """Add files"""     
-     
+        """Add files"""
+
         for f in files[:]:
             if f not in self.queue:
-                self.queue.append(f)       
+                self.queue.append(f)
         return
-        
+
     @classmethod
     def getEkinProject(self, data):
         """Get an ekin project from a data dict"""
-        E = EkinProject(mode='General')        
-        for d in data.keys():           
+        E = EkinProject(mode='General')
+        for d in data.keys():
             if type(data[d]) is types.DictType:
                 for lbl in data[d]:
                     #print lbl
@@ -272,7 +283,7 @@ class Pipeline(object):
                     xy = data[d][lbl]
                     ek=EkinDataset(xy=xy)
                     E.insertDataset(ek, name)
-            else:   
+            else:
                 xy = data[d]
                 ek=EkinDataset(xy=xy)
                 E.insertDataset(ek, d)
@@ -288,54 +299,71 @@ class Pipeline(object):
                 try: val=int(f[1])
                 except: val=f[1]
                 obj.__dict__[f[0]] = val
-                
-                
+
+
 class BaseImporter(object):
     """Base Importer class, sub-class this to define methods specific to each kind of
        import format. At minimum we override the doImport method to get specific
        functionality"""
-       
+
     def __init__(self, cp):
-        """Arguments: 
-            cp - a ConfigParser object that has been loaded in the parent app""" 
+        """Arguments:
+            cp - a ConfigParser object that has been loaded in the parent app"""
         Pipeline.setAttributesfromConfigParser(self, cp)
         if self.delimeter=='': self.delimeter=' '
-        elif self.delimeter=='tab': self.delimeter='\t'                 
+        elif self.delimeter=='tab': self.delimeter='\t'
         return
-           
+
+    def guessRowStart(self, lines):
+        """If rowstart is not specified in config, it might be non-zero"""
+        s = 0
+        for line in lines:
+            if not self.checkEmptyRow(line):
+                s+=1
+            else:
+                self.rowstart = s
+                return
+
+    def checkEmptyRow(self, line):
+        if line.startswith('#') or line=='' or line.startswith('\r'):
+            return False
+        return True
+
     def getRow(self, lines, row, grouped=False):
-        """Return values in a row"""        
+        """Return values in a row"""
         #if we have repeating cols we return multiple lists
         if self.ignorecomments==True and lines[row].startswith('#'):
-            return ''        
+            return None
+        if not self.checkEmptyRow(lines[row]):
+            return None
         vals = string.strip(lines[row]).split(self.delimeter)
         vals = vals[self.colstart:]
         if grouped == False:
             return vals
-        else:       
+        else:
             if self.colrepeat == 0:
                 return [vals]
             elif self.colrepeat > 1:
-                return self.groupList(self.colrepeat, vals) 
+                return self.groupList(self.colrepeat, vals)
             else:
                 return None
 
     def getColumn(self, lines, col, grouped=False):
         """Return values in a column"""
         vals = []
-        for row in range(self.rowstart, self.rowend):                
+        for row in range(self.rowstart, self.rowend):
             if self.ignorecomments==True and lines[row].startswith('#'):
-                continue           
-            rowdata = string.strip(lines[row]).split(self.delimeter)            
+                continue
+            rowdata = string.strip(lines[row]).split(self.delimeter)
             vals.append(rowdata[col])
         if grouped == False:
             return vals
-        else:    
-            if self.rowrepeat == 0: 
+        else:
+            if self.rowrepeat == 0:
                 return [vals]
             elif self.rowrepeat > 1:
                 return self.groupList(self.rowrepeat, vals)
-        
+
     def getColumnHeader(self, lines, grouped=False):
         """Column headers are taken from colstart row"""
         if self.rowheader == '':
@@ -349,31 +377,31 @@ class BaseImporter(object):
         if self.colheader == '':
             col = self.colstart
         else:
-            col = self.colheader        
+            col = self.colheader
         return self.getColumn(lines, col, grouped)
-        
+
     def groupList(self, n, l, padvalue=None):
-        """group a list into chunks of n size"""      
+        """group a list into chunks of n size"""
         return [l[i:i+n] for i in range(0, len(l), n)]
-        
+
     def getXYValues(self, xd, yd, start=1):
         """Return a lists of floats from lists of vals whilst doing
            various checks to remove errors etc."""
-        
-        x=[]; y=[]                
+
+        x=[]; y=[]
         #pad header data of missing first element
         if len(xd)<len(yd):
             xd.insert(0,'')
         #print xd, yd
         for i in range(start,len(xd)):
             xval = self.checkValue(xd[i])
-            yval = self.checkValue(yd[i])                    
+            yval = self.checkValue(yd[i])
             if xval==None or yval==None:
                 continue
             x.append(xval)
             y.append(yval)
-        return x,y  
-    
+        return x,y
+
     def checkValue(self, val):
         """Coerce a string to float if possible"""
         #add code to handle commas in thousand separators
@@ -383,19 +411,19 @@ class BaseImporter(object):
                 return float(val)
             except:
                 return None
-        else:        
+        else:
             try:
                 return float(val.replace(".","").replace(dec,"."))
             except ValueError:
                 return None
-         
+
     def checkTime(self, val, timeformat):
         """Coerce to a datetime object"""
         try:
             datetime.strptime(val,timeformat)
-        except:    
+        except:
             return None
-        
+
     def checkUnicode(self, s):
         """Check for unicode string"""
         try:
@@ -403,118 +431,121 @@ class BaseImporter(object):
         except UnicodeDecodeError:
             s = unicode(s)
         return s
-        
+
     def doImport(self, lines):
-        """Should be overrriden"""        
+        """Should be overrriden"""
         return
- 
+
 class DatabyColImporter(BaseImporter):
     """This importer handles data formatted in columns with common x values
-       in a specified column, it also handles multiple sets of data grouped 
-       in evenly spaced distances down each column"""    
-    def __init__(self, cp):       
+       in a specified column, it also handles multiple sets of data grouped
+       in evenly spaced distances down each column"""
+    def __init__(self, cp):
         BaseImporter.__init__(self, cp)
         return
 
     def doImport(self, lines):
-    
+
         data = {}
         if self.rowend == 0:
             self.rowend=len(lines)
         xdata = self.getRowHeader(lines,grouped=True)
-        header = self.getColumnHeader(lines)      
-        if self.colend == 0:            
+        header = self.getColumnHeader(lines)
+        if self.colend == 0:
             self.colend = len(header)
         if xdata == None:
             return
-        
+
         for col in range(self.colstart+1, self.colend):
             coldata = self.getColumn(lines, col, grouped=True)
             #print xdata, coldata
             for xd,yd in zip(xdata,coldata):
                 name = yd[0]
                 x,y = self.getXYValues(xd,yd)
-                data[name] = [x,y]            
+                data[name] = [x,y]
         return data
-        
+
 class DatabyRowImporter(BaseImporter):
     """This importer handles data formatted in rows with common x values
-       along the top (or specified in a specific row), it also handles 
+       along the top (or specified in a specific row), it also handles
        multiple sets of data grouped in evenly spaced distances along the row"""
     def __init__(self, cp):
         BaseImporter.__init__(self, cp)
         return
 
     def doImport(self, lines):
-        
+
         data = {}
+        self.guessRowStart(lines)
         xdata = self.getColumnHeader(lines,grouped=True)
         if xdata == None:
-            return 
+            return
         if self.rowend == 0:
             self.rowend=len(lines)
-            
-        for row in range(self.rowstart+1, self.rowend):            
+
+        for row in range(self.rowstart+1, self.rowend):
             if row>=len(lines):
-                break     
-            rowdata = self.getRow(lines,row,grouped=True)           
+                break
+            rowdata = self.getRow(lines,row,grouped=True)
+            #print rowdata, xdata
+            if rowdata == None: continue
             for xd,yd in zip(xdata,rowdata):
                 name = yd[0]
                 x,y = self.getXYValues(xd,yd)
-                data[name] = [x,y] 
-        return data
-        
-class PairedDatabyColImporter(BaseImporter):
-    """This importer handles data formatted in rows with paired x-y values, 
-       there are therefore no common x-values in the header """
-    def __init__(self, cp):
-        BaseImporter.__init__(self, cp)
-        return
-        
-    def doImport(self, lines):
-        
-        data = {}
-        if self.rowend == 0:
-            self.rowend=len(lines)
-        header = self.getColumnHeader(lines)        
-        if self.colend == 0:
-            self.colend = len(header)
-            
-        for col in range(self.colstart+1, self.colend):            
-            coldata = self.getColumn(lines, col, grouped=True)            
-            for xyd in coldata:
-                name = xyd[0]                
-                x = xyd[1:len(xyd):2]
-                y = xyd[2:len(xyd):2]                
                 data[name] = [x,y]
-                
-        return data            
-        
-class PairedDatabyRowImporter(BaseImporter):
-    """This importer handles data formatted in rows with paired x-y values, 
+        return data
+
+class PairedDatabyColImporter(BaseImporter):
+    """This importer handles data formatted in rows with paired x-y values,
        there are therefore no common x-values in the header """
     def __init__(self, cp):
         BaseImporter.__init__(self, cp)
         return
 
     def doImport(self, lines):
-        
+
         data = {}
         if self.rowend == 0:
             self.rowend=len(lines)
-            
+        header = self.getColumnHeader(lines)
+        if self.colend == 0:
+            self.colend = len(header)
+
+        for col in range(self.colstart+1, self.colend):
+            coldata = self.getColumn(lines, col, grouped=True)
+            for xyd in coldata:
+                name = xyd[0]
+                x = xyd[1:len(xyd):2]
+                y = xyd[2:len(xyd):2]
+                data[name] = [x,y]
+
+        return data
+
+class PairedDatabyRowImporter(BaseImporter):
+    """This importer handles data formatted in rows with paired x-y values,
+       there are therefore no common x-values in the header """
+    def __init__(self, cp):
+        BaseImporter.__init__(self, cp)
+        return
+
+    def doImport(self, lines):
+
+        data = {}
+        if self.rowend == 0:
+            self.rowend=len(lines)
+
         for row in range(self.rowstart+1, self.rowend):
             if row>=len(lines):
-                break     
-            rowdata = self.getRow(lines,row, grouped=True)           
+                break
+            rowdata = self.getRow(lines,row, grouped=True)
             for xyd in rowdata:
                 name = xyd[0]
                 x = xyd[1:len(xyd):2]
-                y = xyd[2:len(xyd):2]               
+                y = xyd[2:len(xyd):2]
                 data[name] = [x,y]
-                
+
         return data
- 
+
 class GroupedDatabyRowImporter(BaseImporter):
     """This importer handles data formatted in rows with multiple independent x values in
        each column, each dataset is then repeated in groups every x rows, specified in
@@ -525,7 +556,7 @@ class GroupedDatabyRowImporter(BaseImporter):
         return
 
     def doImport(self, lines):
-        
+
         data = {}
         #assumes the column header has labels for each set of xy vals
         labels = self.getColumnHeader(lines)
@@ -534,10 +565,10 @@ class GroupedDatabyRowImporter(BaseImporter):
             self.rowend=len(lines)
         if self.colend == 0:
             self.colend = len(labels)
-        
+
         grouplen = (self.rowend - self.rowstart) / self.rowrepeat
         step = self.rowrepeat
-        
+
         for d in range(1,grouplen):
             for row in range(self.rowstart, self.rowend, step):
                 if row>=len(lines):
@@ -553,17 +584,17 @@ class GroupedDatabyRowImporter(BaseImporter):
                     x = self.checkValue(v[1])
                     y = self.checkValue(v[2])
                     if x==None or y==None:
-                        continue                 
+                        continue
                     if not data[name].has_key(label):
                         data[name][label]=[]
                     l = data[name][label]
                     l.append((x,y))
-                   
+
         #reformat paired vals into x and y lists
         for d in data:
-            for lbl in data[d]:             
+            for lbl in data[d]:
                 data[d][lbl] = zip(*data[d][lbl])
-       
+
         return data
 
 class GroupedDatabyColImporter(BaseImporter):
@@ -576,43 +607,41 @@ class GroupedDatabyColImporter(BaseImporter):
         return
 
     def doImport(self, lines):
-        
+
         data = {}
-        #assumes the row header has labels for each set of xy vals        
-        
+        #assumes the row header has labels for each set of xy vals
+
         if self.rowend == 0:
-            self.rowend=len(lines)   
+            self.rowend=len(lines)
         labels = self.getRowHeader(lines)
-        header  = self.getColumnHeader(lines)  
+        header  = self.getColumnHeader(lines)
         if self.colend == 0:
-            self.colend = len(header)      
-        grouplen = len(self.getColumnHeader(lines, grouped=True)[0]) 
+            self.colend = len(header)
+        grouplen = len(self.getColumnHeader(lines, grouped=True)[0])
         step = self.colrepeat
-        
+
         for d in range(1,grouplen):
-            
             for col in range(self.colstart, self.colend, step):
-                
+
                 xdata = self.getColumn(lines, col)
                 coldata = self.getColumn(lines, col+d)
-                
                 name = coldata[0]
                 if not data.has_key(name):
                     data[name] = {}
-                #print name, xdata,coldata                
-                for v in zip(labels,xdata,coldata)[1:]:                   
+                #print name, xdata,coldata
+                for v in zip(labels,xdata,coldata)[1:]:
                     label = v[0]
                     x = self.checkValue(v[1])
                     y = self.checkValue(v[2])
                     if x==None or y==None:
-                        continue                   
+                        continue
                     if not data[name].has_key(label):
                         data[name][label]=[]
                     l = data[name][label]
                     l.append((x,y))
-                   
+
         #reformat paired vals into x and y lists
         for d in data:
-            for lbl in data[d]:             
-                data[d][lbl] = zip(*data[d][lbl])        
+            for lbl in data[d]:
+                data[d][lbl] = zip(*data[d][lbl])
         return data
