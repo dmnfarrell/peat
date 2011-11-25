@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #
-# Protein Engineering Analysis Tool DataBase (PEATDB)
-# Copyright (C) 2010 Damien Farrell & Jens Erik Nielsen
+# DataPipeline - A data import and fitting tool
+# Copyright (C) 2011 Damien Farrell
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,9 +17,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Contact information:
-# Email: Jens.Nielsen_at_gmail.com 
+# Email: damien.farrell_at_ucd.ie
 # Normal mail:
-# Jens Nielsen
+# Damien Farrell
 # SBBS, Conway Institute
 # University College Dublin
 # Dublin 4, Ireland
@@ -303,21 +303,24 @@ class BaseImporter(object):
         elif self.delimeter=='tab': self.delimeter='\t'                 
         return
            
-    def getRow(self, lines, row):
+    def getRow(self, lines, row, grouped=False):
         """Return values in a row"""        
         #if we have repeating cols we return multiple lists
         if self.ignorecomments==True and lines[row].startswith('#'):
             return ''        
         vals = string.strip(lines[row]).split(self.delimeter)
-        
-        if self.colrepeat == 0:
-            return [vals]
-        elif self.colrepeat > 1:
-            return self.groupList(self.colrepeat, vals) 
-        else:
-            return None
+        vals = vals[self.colstart:]
+        if grouped == False:
+            return vals
+        else:       
+            if self.colrepeat == 0:
+                return [vals]
+            elif self.colrepeat > 1:
+                return self.groupList(self.colrepeat, vals) 
+            else:
+                return None
 
-    def getColumn(self, lines, col):
+    def getColumn(self, lines, col, grouped=False):
         """Return values in a column"""
         vals = []
         for row in range(self.rowstart, self.rowend):                
@@ -325,23 +328,29 @@ class BaseImporter(object):
                 continue           
             rowdata = string.strip(lines[row]).split(self.delimeter)            
             vals.append(rowdata[col])
-       
-        if self.rowrepeat == 0: 
-            return [vals]
-        elif self.rowrepeat > 1:
-            return self.groupList(self.rowrepeat, vals)
+        if grouped == False:
+            return vals
+        else:    
+            if self.rowrepeat == 0: 
+                return [vals]
+            elif self.rowrepeat > 1:
+                return self.groupList(self.rowrepeat, vals)
         
-    def getColumnHeader(self, lines):
+    def getColumnHeader(self, lines, grouped=False):
         """Column headers are taken from colstart row"""
         if self.rowheader == '':
             row = self.rowstart
         else:
             row = self.rowheader
-        return self.getRow(lines, row)
+        return self.getRow(lines, row, grouped)
 
-    def getRowHeader(self, lines):
+    def getRowHeader(self, lines, grouped=False):
         """Return values in header row"""
-        return self.getColumn(lines, self.colstart)
+        if self.colheader == '':
+            col = self.colstart
+        else:
+            col = self.colheader        
+        return self.getColumn(lines, col, grouped)
         
     def groupList(self, n, l, padvalue=None):
         """group a list into chunks of n size"""      
@@ -412,15 +421,15 @@ class DatabyColImporter(BaseImporter):
         data = {}
         if self.rowend == 0:
             self.rowend=len(lines)
-        xdata = self.getRowHeader(lines)
+        xdata = self.getRowHeader(lines,grouped=True)
         header = self.getColumnHeader(lines)      
         if self.colend == 0:            
-            self.colend = len(header[0])
+            self.colend = len(header)
         if xdata == None:
             return
         
         for col in range(self.colstart+1, self.colend):
-            coldata = self.getColumn(lines, col)
+            coldata = self.getColumn(lines, col, grouped=True)
             #print xdata, coldata
             for xd,yd in zip(xdata,coldata):
                 name = yd[0]
@@ -439,16 +448,16 @@ class DatabyRowImporter(BaseImporter):
     def doImport(self, lines):
         
         data = {}
-        xdata = self.getColumnHeader(lines)
+        xdata = self.getColumnHeader(lines,grouped=True)
         if xdata == None:
             return 
         if self.rowend == 0:
             self.rowend=len(lines)
-        #print self.getRowHeader(lines)
+            
         for row in range(self.rowstart+1, self.rowend):            
             if row>=len(lines):
                 break     
-            rowdata = self.getRow(lines,row)           
+            rowdata = self.getRow(lines,row,grouped=True)           
             for xd,yd in zip(xdata,rowdata):
                 name = yd[0]
                 x,y = self.getXYValues(xd,yd)
@@ -469,10 +478,10 @@ class PairedDatabyColImporter(BaseImporter):
             self.rowend=len(lines)
         header = self.getColumnHeader(lines)        
         if self.colend == 0:
-            self.colend = len(header[0])
+            self.colend = len(header)
             
         for col in range(self.colstart+1, self.colend):            
-            coldata = self.getColumn(lines, col)            
+            coldata = self.getColumn(lines, col, grouped=True)            
             for xyd in coldata:
                 name = xyd[0]                
                 x = xyd[1:len(xyd):2]
@@ -497,14 +506,11 @@ class PairedDatabyRowImporter(BaseImporter):
         for row in range(self.rowstart+1, self.rowend):
             if row>=len(lines):
                 break     
-            rowdata = self.getRow(lines,row)
-            print rowdata
+            rowdata = self.getRow(lines,row, grouped=True)           
             for xyd in rowdata:
                 name = xyd[0]
-                #print name
                 x = xyd[1:len(xyd):2]
-                y = xyd[2:len(xyd):2]
-                #print x,y
+                y = xyd[2:len(xyd):2]               
                 data[name] = [x,y]
                 
         return data
@@ -522,25 +528,25 @@ class GroupedDatabyRowImporter(BaseImporter):
         
         data = {}
         #assumes the column header has labels for each set of xy vals
-        labels = self.getColumnHeader(lines)[0]        
+        labels = self.getColumnHeader(lines)
+        print labels
         if self.rowend == 0:
-            self.rowend=len(lines)          
-        if self.colend == 0:            
+            self.rowend=len(lines)
+        if self.colend == 0:
             self.colend = len(labels)
         
-        headerdata  = self.getRowHeader(lines)
-        grouplen = (self.rowend - self.rowstart) / self.rowrepeat      
+        grouplen = (self.rowend - self.rowstart) / self.rowrepeat
         step = self.rowrepeat
         
         for d in range(1,grouplen):
             for row in range(self.rowstart, self.rowend, step):
                 if row>=len(lines):
                     break
-                xdata = self.getRow(lines, row)[0]
-                rowdata = self.getRow(lines, row+d)[0]
+                xdata = self.getRow(lines, row)
+                rowdata = self.getRow(lines, row+d)
                 name = rowdata[0]
                 if not data.has_key(name):
-                    data[name] = {}      
+                    data[name] = {}
 
                 for v in zip(labels,xdata,rowdata)[1:]:
                     label = v[0]
@@ -572,38 +578,34 @@ class GroupedDatabyColImporter(BaseImporter):
     def doImport(self, lines):
         
         data = {}
-        #assumes the column header has labels for each set of xy vals        
+        #assumes the row header has labels for each set of xy vals        
         
         if self.rowend == 0:
             self.rowend=len(lines)   
-        labels = self.getRowHeader(lines)[0]
-        headerdata  = self.getColumnHeader(lines)  
+        labels = self.getRowHeader(lines)
+        header  = self.getColumnHeader(lines)  
         if self.colend == 0:
-            self.colend = len(lines[0])
-        grouplen = len(headerdata) 
-        print self.colend,grouplen
+            self.colend = len(header)      
+        grouplen = len(self.getColumnHeader(lines, grouped=True)[0]) 
         step = self.colrepeat
         
-        for d in range(0,grouplen):
-            print d
+        for d in range(1,grouplen):
+            
             for col in range(self.colstart, self.colend, step):
                 
-                xdata = self.getColumn(lines, col)[0]
-                coldata = self.getColumn(lines, col+d)[0]
-                print row,xdata,coldata
+                xdata = self.getColumn(lines, col)
+                coldata = self.getColumn(lines, col+d)
+                
                 name = coldata[0]
                 if not data.has_key(name):
                     data[name] = {}
-                print name, xdata,coldata
-                
-                for v in zip(labels,xdata,coldata)[1:]:
-                    print v
+                #print name, xdata,coldata                
+                for v in zip(labels,xdata,coldata)[1:]:                   
                     label = v[0]
                     x = self.checkValue(v[1])
                     y = self.checkValue(v[2])
                     if x==None or y==None:
-                        continue
-                    #print x,y
+                        continue                   
                     if not data[name].has_key(label):
                         data[name][label]=[]
                     l = data[name][label]
@@ -612,6 +614,5 @@ class GroupedDatabyColImporter(BaseImporter):
         #reformat paired vals into x and y lists
         for d in data:
             for lbl in data[d]:             
-                data[d][lbl] = zip(*data[d][lbl])
-       
+                data[d][lbl] = zip(*data[d][lbl])        
         return data

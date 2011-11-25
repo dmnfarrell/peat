@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #
-# Protein Engineering Analysis Tool DataBase (PEATDB)
-# Copyright (C) 2010 Damien Farrell & Jens Erik Nielsen
+# DataPipeline - A data import and fitting tool
+# Copyright (C) 2011 Damien Farrell
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,9 +17,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Contact information:
-# Email: Jens.Nielsen_at_gmail.com 
+# Email: damien.farrell_at_ucd.ie
 # Normal mail:
-# Jens Nielsen
+# Damien Farrell
 # SBBS, Conway Institute
 # University College Dublin
 # Dublin 4, Ireland
