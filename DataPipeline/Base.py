@@ -62,23 +62,21 @@ class Pipeline(object):
         c.set(s, 'colstart', 0)
         c.set(s, 'rowend', 0)
         c.set(s, 'colend', 0)
-        c.set(s, 'colnamesstart', 0)
-        c.set(s, 'groupbycol', 0)
-        c.set(s, 'alternatecols', 0)
-        c.set(s, 'alternaterows', 0)
+        #c.set(s, 'alternatecols', 0)
+        #c.set(s, 'alternaterows', 0)
         c.set(s, 'rowrepeat', 0)
         c.set(s, 'colrepeat', 0)
-        c.set(s, 'rowdataformat', 'number')
-        c.set(s, 'coldataformat', 'number')
+        #c.set(s, 'rowdataformat', 'number')
+        #c.set(s, 'coldataformat', 'number')
         c.set(s, 'timeformat', "%Y-%m-%d %H:%M:%S")
         c.set(s, 'rowheader', '')
         c.set(s, 'colheader', '')
         #fitting settings
         f = 'fitting'
         c.add_section(f)
-        c.set(f, 'xerror', 0.1)
-        c.set(f, 'yerror', 0.1)
-        c.set(f, 'model1', 'linear')
+        c.set(f, 'xerror', 0)
+        c.set(f, 'yerror', 0)
+        c.set(f, 'model1', '')
         c.set(f, 'iterations1', 20)
         c.set(f, 'ignorecomments', 1)
         #excel settings
@@ -151,6 +149,7 @@ class Pipeline(object):
             importer = GroupedDatabyColImporter(cp)
         else:
             importer = None
+            print 'no importer found!'
         return importer
 
     def loadPreset(self, preset=None):
@@ -232,8 +231,18 @@ class Pipeline(object):
             print 'Importer returned an error:'
             print e
             data = None
-        print 'importer returned %s datasets' %len(data)
+        self.checkImportedData(data)
         return data
+
+    def checkImportedData(self, data):
+        """Report info on imported dict"""
+        l=0
+        for d in data.keys():
+            if type(data[d]) is types.DictType:
+                l+=len(data[d].keys())
+            else: l+=1
+        print 'importer returned %s datasets' %l
+        return
 
     def run(self):
         """Do pipeline with the current config"""
@@ -245,22 +254,48 @@ class Pipeline(object):
             lines = self.openRaw(filename)
             rawdata = self.doImport(lines)
             E = self.getEkinProject(rawdata)
-            if self.model1 != '':
-                print  self.model1
-                E.fitDatasets('ALL', models=[self.model1], noiter=self.iterations1,
-                       conv=1e-6, grad=1e-6, silent=True)
             prjname=self.filename+'.ekinprj'
             E.saveProject(prjname)
+            if self.model1 != '':
+                print self.model1
+                E.fitDatasets('ALL', models=[self.model1], noiter=self.iterations1,
+                       conv=1e-6, grad=1e-6, silent=True)
+                self.expUncert(E)
             self.results.append(prjname)
             print E, 'saved to %s' %prjname
         print 'done'
         return
 
-    def expUncert(self):
-        '''
-        for d in E.datasets:
-            ferrs = E.estimateExpUncertainty(d, runs=10)
-            E.addMeta(d, 'exp_errors', ferrs)'''
+    def createResultsTable(self, E):
+        """Results for fitted variables"""
+        #for d in data.keys():
+        #    if type(data[d]) is types.DictType:
+
+        return
+
+    def expUncert(self, E):
+        """Get fitted variable errors"""
+
+        if self.xerror!=0 or self.yerror!=0:
+            for d in E.datasets:
+                ferrs = E.estimateExpUncertainty(d, runs=10)
+                E.addMeta(d, 'exp_errors', ferrs)
+            E.saveProject()
+        return
+
+    def addFolder(self, path, ext='.txt'):
+        """Add a folder to the queue"""
+
+        for root, dirs, files in os.walk(path):
+            for d in dirs:
+                if d.startswith('.'):
+                    dirs.remove(d)
+            #print root, dirs, files
+            for f in files:
+                fname = os.path.join(root,f)
+                if os.path.splitext(fname)[1] == ext:
+                    self.addtoQueue([fname])
+        #print self.queue
         return
 
     def addtoQueue(self, files):
@@ -274,6 +309,7 @@ class Pipeline(object):
     @classmethod
     def getEkinProject(self, data):
         """Get an ekin project from a data dict"""
+
         E = EkinProject(mode='General')
         for d in data.keys():
             if type(data[d]) is types.DictType:
@@ -384,22 +420,22 @@ class BaseImporter(object):
         """group a list into chunks of n size"""
         return [l[i:i+n] for i in range(0, len(l), n)]
 
-    def getXYValues(self, xd, yd, start=1):
+    def getXYValues(self, xd, yd, start=0):
         """Return a lists of floats from lists of vals whilst doing
            various checks to remove errors etc."""
 
         x=[]; y=[]
-        #pad header data of missing first element
-        if len(xd)<len(yd):
-            xd.insert(0,'')
         #print xd, yd
         for i in range(start,len(xd)):
+            if i>=len(yd): break
             xval = self.checkValue(xd[i])
             yval = self.checkValue(yd[i])
             if xval==None or yval==None:
                 continue
             x.append(xval)
             y.append(yval)
+        if len(x)<=1:
+            return None
         return x,y
 
     def checkValue(self, val):
@@ -459,9 +495,11 @@ class DatabyColImporter(BaseImporter):
         for col in range(self.colstart+1, self.colend):
             coldata = self.getColumn(lines, col, grouped=True)
             #print xdata, coldata
+            if coldata == None: continue
             for xd,yd in zip(xdata,coldata):
+                if len(xd)<=1 or len(yd)<=1: continue
                 name = yd[0]
-                x,y = self.getXYValues(xd,yd)
+                x,y = self.getXYValues(xd[1:],yd[1:])
                 data[name] = [x,y]
         return data
 
@@ -487,11 +525,13 @@ class DatabyRowImporter(BaseImporter):
             if row>=len(lines):
                 break
             rowdata = self.getRow(lines,row,grouped=True)
-            #print rowdata, xdata
+            #print xdata, rowdata
             if rowdata == None: continue
             for xd,yd in zip(xdata,rowdata):
+                #print xd, yd
+                if len(xd)<=1 or len(yd)<=1: continue
                 name = yd[0]
-                x,y = self.getXYValues(xd,yd)
+                x,y = self.getXYValues(xd[1:],yd[1:])
                 data[name] = [x,y]
         return data
 
@@ -641,6 +681,7 @@ class GroupedDatabyColImporter(BaseImporter):
                     l.append((x,y))
 
         #reformat paired vals into x and y lists
+        #by convention we put secondary labels into nested dicts
         for d in data:
             for lbl in data[d]:
                 data[d][lbl] = zip(*data[d][lbl])

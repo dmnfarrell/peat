@@ -1,9 +1,9 @@
 #test file with non default formats and some errors
 #empty data in second group of datasets should be handled
 
-	2	4	6	8	9		2	3	8	10	12
-aaa	3,3	14,1	16	22	26	eee
-bbb	4,5	12	18	23,2	30	fff
+name	2	4	6	8	9	name	2	3	8	10	12
+aaa	3,3	14,1	16	22	26	eee	10	12	16
+bbb	4,5	12	18	23,2	30	fff	3.4	4.5	6.8	7.9	8.3
 ccc	7,9	9,9	19,1	20.1	21,01	ccc
 ddd	9	8	21	b4	29	ddd
 

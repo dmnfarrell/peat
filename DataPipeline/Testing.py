@@ -27,9 +27,10 @@
 
 """Tests for data pipeline."""
 from Base import Pipeline
-import os
+import os, random
+import csv
 
-basictests = {#'test1':({'format':'databyrow'},'databyrow1.txt'),
+basictests = {'test1':({'format':'databyrow'},'databyrow1.txt'),
               #'test2':({'format':'databycolumn'},'databycol1.txt'),
               #rows, multiple groups
               #'test3':({'format':'databyrow','colrepeat':6},'databyrow2.txt'),
@@ -40,13 +41,12 @@ basictests = {#'test1':({'format':'databyrow'},'databyrow1.txt'),
               #paired x-y data in cols
               #'test6':({'format':'paireddatabycolumn'},'databycol_paired.txt'),
               #various non-default formatting
-              'test7':({'format':'databyrow','delimeter':'tab','decimalsymbol':',',
-                        'colrepeat':6}, 'databyrow3.txt'),
-              'test8':({'format':'groupeddatabyrow','rowrepeat':4,'rowheader':0,'rowstart':1,
-                         'model1':'Linear'},
-                         'databyrow_grouped.txt'),
+              #'test7':({'format':'databyrow','delimeter':'tab','decimalsymbol':',',
+              #          'colrepeat':6}, 'databyrow_errors.txt'),
+              #'test8':({'format':'groupeddatabyrow','rowrepeat':4,'rowheader':0,'rowstart':1,
+              #           'model1':'Linear'}, 'databyrow_grouped.txt'),
               'test9':({'format':'groupeddatabycolumn','colrepeat':4,'colheader':0,'colstart':1,
-                        'model1':'Linear'},
+                        'model1':'Linear','model2':'sigmoid','xerror':0.2,'yerror':0.3},
                         'databycol_grouped.txt'),
               #'test10':({'format':'databyrow','rowheader':"aaa,bbb,ccc,ddd"},
               #          'databyrow_noheader.txt')
@@ -55,17 +55,15 @@ basictests = {#'test1':({'format':'databyrow'},'databyrow1.txt'),
 exceltests = {'test1':{'conf':{'format':'databyrow'},
                        'filename':'databyrow1.xls'}}
 
-
 def doTest(info, name='test', path='testfiles'):
     p = Pipeline()
     conf = info[0]
     filename = info[1]
     p.createConfig('temp.conf',**conf)
     p.openRaw(os.path.join(path,filename))
-    data = p.doImport()
-    if data != None:
-        print '%s import ok' %name
-        print data.keys()
+    #data = p.doImport()
+    p.run()
+    print '%s completed' %name
     print '-------------------'
 
 def formatTests(testinfo):
@@ -73,10 +71,17 @@ def formatTests(testinfo):
     for t in sorted(testinfo.keys()):
         doTest(testinfo[t], t)
 
-def queueTests():
-    return
-
-def fittingTests():
+def multiFileTests():
+    """Tests the processing and grouping of multiple files"""
+    pth = 'testfiles/group1'
+    if not os.path.exists(pth):
+        os.mkdir(pth)
+    createFakeFiles(pth)
+    conf = {'format':'databycolumn', 'model1':'Linear'}
+    p = Pipeline()
+    p.createConfig('temp.conf',**conf)
+    p.addFolder(pth, ext='txt')
+    p.run()
     return
 
 def customTests():
@@ -86,7 +91,21 @@ def customTests():
               'model1':'Linear'},'setG_110309_1_pH7,5.txt')
     doTest(info, 'kinetics test', 'novo_setG/rep1')
 
+def createFakeFiles(path='testfiles'):
+    """Create sets of fake data to test queuing and file grouping"""
 
-formatTests(basictests)
+    names = ['aaa','bbb','ccc','ddd']
+    for i in range(2,9):
+        fname = os.path.join(path,'ph_'+str(i)+'.txt')
+        cw = csv.writer(open(fname,'w'))
+        cw.writerow(['temp']+names)
+        for x in range(250,360,5):
+            vals = [round(x/random.normalvariate(10,0.2),2) for i in range(len(names))]
+            vals.insert(0,x)
+            cw.writerow(vals)
+    return
+
+#formatTests(basictests)
 #customTests()
+multiFileTests()
 

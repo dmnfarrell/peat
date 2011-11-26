@@ -80,6 +80,15 @@ class PipeApp(Frame, GUI_help):
     def setupGUI(self):
         """Do GUI elements"""
         self.createMenuBar()
+        self.infopane = Frame(self.main,height=20)
+        self.infopane.pack(side=BOTTOM,fill=BOTH,pady=4)
+        self.updateinfoPane()
+        Label(self.infopane,text='Conf file:').pack(side=LEFT)
+        Label(self.infopane,textvariable=self.conffilevar,fg='darkblue').pack(side=LEFT,padx=4)
+        Label(self.infopane,text='Files in queue:').pack(side=LEFT,padx=4)
+        Label(self.infopane,textvariable=self.queuefilesvar,fg='darkblue').pack(side=LEFT)
+        Label(self.infopane,text='Current file:').pack(side=LEFT,padx=4)
+        Label(self.infopane,textvariable=self.currfilevar,fg='darkblue').pack(side=LEFT)
         self.m = PanedWindow(self.main,
                            orient=HORIZONTAL,
                            sashwidth=3,
@@ -108,7 +117,6 @@ class PipeApp(Frame, GUI_help):
         self.m1.add(self.rawcontents)
         self.previewer = PlotPreviewer(app=self)
         self.m1.add(self.previewer)
-
         self.m.add(self.m2)
         self.queueFrame = queueManager(app=self)
         self.m2.add(self.queueFrame)
@@ -120,15 +128,6 @@ class PipeApp(Frame, GUI_help):
                 hull_height = 500,
                 text_wrap='word')
         self.m2.add(self.log)
-        self.infopane = Frame(self.main,height=20)
-        self.infopane.pack(side=BOTTOM,fill=BOTH,pady=4)
-        self.updateinfoPane()
-        Label(self.infopane,text='Conf file:').pack(side=LEFT)
-        Label(self.infopane,textvariable=self.conffilevar,fg='darkblue').pack(side=LEFT,padx=4)
-        Label(self.infopane,text='Files in queue:').pack(side=LEFT,padx=4)
-        Label(self.infopane,textvariable=self.queuefilesvar,fg='darkblue').pack(side=LEFT)
-        Label(self.infopane,text='Current file:').pack(side=LEFT,padx=4)
-        Label(self.infopane,textvariable=self.currfilevar,fg='darkblue').pack(side=LEFT)
         return
 
     def updateinfoPane(self):
@@ -154,7 +153,8 @@ class PipeApp(Frame, GUI_help):
                         '03Open results in Ekin':{'cmd':self.openEkin}}
         self.run_menu=self.create_pulldown(self.menu,self.run_menu)
         self.menu.add_cascade(label='Run',menu=self.run_menu['var'])
-        self.queue_menu={'01Add files to queue':{'cmd': self.addtoQueue}}
+        self.queue_menu={'01Add files to queue':{'cmd': self.addtoQueue},
+                         '02Add folder to queue':{'cmd': self.addFolder}}        
         self.queue_menu=self.create_pulldown(self.menu,self.queue_menu)
         self.menu.add_cascade(label='Queue',menu=self.queue_menu['var'])
         self.help_menu={ '01Online Help':{'cmd': self.help} }
@@ -255,6 +255,14 @@ class PipeApp(Frame, GUI_help):
         self.queueFrame.update()
         return
 
+    def addFolder(self, path=None):
+        if path==None:
+            path = self.openDirectory()
+        self.p.addFolder(path)
+        self.updateinfoPane()
+        self.queueFrame.update()
+        return        
+        
     def openEkin(self, fname=None):
         """Open results in ekin"""
 
@@ -294,6 +302,11 @@ class PipeApp(Frame, GUI_help):
                                               parent=self.main)
         return filename
 
+    def openDirectory(self):
+        folder = tkFileDialog.askdirectory(parent=self.main, 
+                                            initialdir=os.getcwd(), title='Select folder')
+        return folder
+        
     def write(self, txt):
         """Handle stdout"""
         self.log.appendtext(txt)
@@ -451,6 +464,8 @@ def main():
                             help="Provide a conf file", metavar="FILE")
     parser.add_option("-f", "--file", dest="file",
                         help="Raw file", metavar="FILE")
+    parser.add_option("-d", "--dir", dest="directory",
+                        help="Folder of raw files", metavar="FILE")    
 
     opts, remainder = parser.parse_args()
     app = PipeApp(rawfile=opts.file)
@@ -458,6 +473,8 @@ def main():
         app.loadConfig(opts.conf)
     if opts.file != None:
         app.openRaw(opts.file)
+    if opts.directory != None:
+        app.addFolder(opts.directory)
     app.mainloop()
 
 if __name__ == '__main__':
