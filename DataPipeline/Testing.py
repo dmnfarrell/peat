@@ -28,6 +28,7 @@
 """Tests for data pipeline."""
 from Base import Pipeline
 import os, random
+import numpy as np
 import csv
 
 basictests = {'test1':({'format':'databyrow'},'databyrow1.txt'),
@@ -95,12 +96,12 @@ def createFakeFiles(path='testfiles'):
     """Create sets of fake data to test queuing and file grouping"""
 
     names = ['aaa','bbb','ccc','ddd']
-    for i in range(2,9):
+    for i in np.arange(2,9,0.5):
         fname = os.path.join(path,'ph_'+str(i)+'.txt')
         cw = csv.writer(open(fname,'w'))
         cw.writerow(['temp']+names)
         for x in range(250,360,5):
-            vals = [round(x/random.normalvariate(10,0.2),2) for i in range(len(names))]
+            vals = [round(i*x/random.normalvariate(10,0.3),2) for j in range(len(names))]
             vals.insert(0,x)
             cw.writerow(vals)
     return

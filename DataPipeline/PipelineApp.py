@@ -242,6 +242,8 @@ class PipeApp(Frame, GUI_help):
 
     def execute(self):
         """Run current files in queue"""
+        if len(self.p.queue) == 0:
+            return
         from Dialogs import ProgressDialog
         pb = ProgressDialog(self.main)
         #self.log.delete(1.0,END)
