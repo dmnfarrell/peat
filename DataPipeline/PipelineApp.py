@@ -57,7 +57,11 @@ class PipeApp(Frame, GUI_help):
             self.main=Toplevel()
             self.master=self.main
         self.main.title('DataPipeline Desktop')
-        self.main.geometry('800x600+200+100')
+        ws = self.main.winfo_screenwidth()
+        hs = self.main.winfo_screenheight()
+        w = 800; h=600
+        x = (ws/2)-(w/2); y = (hs/2)-(h/2)
+        self.main.geometry('%dx%d+%d+%d' % (w,h,x,y))
         self.main.protocol('WM_DELETE_WINDOW',self.quit)
 
         #pipeline object is used for everything except gui stuff
@@ -237,8 +241,12 @@ class PipeApp(Frame, GUI_help):
         return
 
     def execute(self):
-        self.log.delete(1.0,END)
-        self.p.run()
+        """Run current files in queue"""
+        from Dialogs import ProgressDialog
+        pb = ProgressDialog(self.main)
+        #self.log.delete(1.0,END)
+        self.p.run(callback=pb.bar.update)
+        pb.close()
         return
 
     def showPreview(self,lines=None):

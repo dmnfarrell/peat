@@ -185,7 +185,8 @@ class Pipeline(object):
 
         print 'opened file %s' %filename
         self.filename = filename
-        self.queue = [filename]
+        if not filename in self.queue:
+            self.queue.append(filename)
         self.filename = filename
         self.lines = lines
         return lines
@@ -244,12 +245,14 @@ class Pipeline(object):
         print 'importer returned %s datasets' %l
         return
 
-    def run(self):
+    def run(self, callback=None):
         """Do pipeline with the current config"""
 
         #clear log
         self.results = [] #list of files
-        print 'processing files in queue. This may take some time'
+        print 'processing files in queue.'
+        total = len(self.queue)
+        c=0.0
         for filename in self.queue:
             lines = self.openRaw(filename)
             rawdata = self.doImport(lines)
@@ -263,6 +266,9 @@ class Pipeline(object):
                 self.expUncert(E)
             self.results.append(prjname)
             print E, 'saved to %s' %prjname
+            c+=1.0
+            if callback != None:
+                callback(c/total*100)
         print 'done'
         return
 
