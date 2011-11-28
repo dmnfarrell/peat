@@ -158,7 +158,7 @@ class PipeApp(Frame, GUI_help):
         self.run_menu=self.create_pulldown(self.menu,self.run_menu)
         self.menu.add_cascade(label='Run',menu=self.run_menu['var'])
         self.queue_menu={'01Add files to queue':{'cmd': self.addtoQueue},
-                         '02Add folder to queue':{'cmd': self.addFolder}}        
+                         '02Add folder to queue':{'cmd': self.addFolder}}
         self.queue_menu=self.create_pulldown(self.menu,self.queue_menu)
         self.menu.add_cascade(label='Queue',menu=self.queue_menu['var'])
         self.help_menu={ '01Online Help':{'cmd': self.help} }
@@ -271,8 +271,8 @@ class PipeApp(Frame, GUI_help):
         self.p.addFolder(path)
         self.updateinfoPane()
         self.queueFrame.update()
-        return        
-        
+        return
+
     def openEkin(self, fname=None):
         """Open results in ekin"""
 
@@ -313,12 +313,13 @@ class PipeApp(Frame, GUI_help):
         return filename
 
     def openDirectory(self):
-        folder = tkFileDialog.askdirectory(parent=self.main, 
+        folder = tkFileDialog.askdirectory(parent=self.main,
                                             initialdir=os.getcwd(), title='Select folder')
         return folder
-        
+
     def write(self, txt):
         """Handle stdout"""
+        self.log.yview('moveto', '1')
         self.log.appendtext(txt)
         self.log.update_idletasks()
         return
@@ -458,7 +459,6 @@ class queueManager(Frame):
         return
 
     def update(self):
-        print self.p.queue
         flist=self.p.queue
         self.listbox.setlist(flist)
 
@@ -475,7 +475,7 @@ def main():
     parser.add_option("-f", "--file", dest="file",
                         help="Raw file", metavar="FILE")
     parser.add_option("-d", "--dir", dest="directory",
-                        help="Folder of raw files", metavar="FILE")    
+                        help="Folder of raw files")
 
     opts, remainder = parser.parse_args()
     app = PipeApp(rawfile=opts.file)

@@ -25,7 +25,9 @@
 # Dublin 4, Ireland
 #
 
-import os, sys, math, random, numpy, string, types
+import os, sys
+import math, random, numpy, string, types
+import re
 from datetime import datetime
 import ConfigParser, csv
 from itertools import izip, chain, repeat
@@ -57,7 +59,8 @@ class Pipeline(object):
         c.set(s, 'delimeter', ',')
         c.set(s, 'decimalsymbol', '.')
         c.set(s, 'checkunicode', 0)
-        c.set(s, 'path', os.getcwd())
+        wdir = os.path.join(os.getcwd(),'workingdir')
+        c.set(s, 'workingdir', wdir)
         c.set(s, 'rowstart', 0)
         c.set(s, 'colstart', 0)
         c.set(s, 'rowend', 0)
@@ -71,6 +74,7 @@ class Pipeline(object):
         c.set(s, 'timeformat', "%Y-%m-%d %H:%M:%S")
         c.set(s, 'rowheader', '')
         c.set(s, 'colheader', '')
+        c.set(s, 'groupbyfile', 0)
         #fitting settings
         f = 'fitting'
         c.add_section(f)
@@ -246,38 +250,90 @@ class Pipeline(object):
         return
 
     def run(self, callback=None):
-        """Do pipeline with the current config"""
+        """Do initial import/fitting run with the current config"""
 
-        #clear log
-        self.results = [] #list of files
+        if not os.path.exists(self.workingdir):
+            os.mkdir(self.workingdir)
+
         print 'processing files in queue.'
+        if self.groupbyfile == True:
+            filelabels = self.parseFileNames(self.queue)
+        else:
+            filelabels = None
+
         total = len(self.queue)
         c=0.0
+        rawdata = self.rawdata = {}
+        results = {}
         for filename in self.queue:
+            if filelabels != None:
+                key = filelabels[filename]
+            else:
+                key = filename
             lines = self.openRaw(filename)
-            rawdata = self.doImport(lines)
-            E = self.getEkinProject(rawdata)
-            prjname=self.filename+'.ekinprj'
-            E.saveProject(prjname)
+            data = self.doImport(lines)
             if self.model1 != '':
-                print self.model1
-                E.fitDatasets('ALL', models=[self.model1], noiter=self.iterations1,
-                       conv=1e-6, grad=1e-6, silent=True)
-                self.expUncert(E)
-            self.results.append(prjname)
-            print E, 'saved to %s' %prjname
+                fits = self.getFits(data, self.model1, filename)
+                results[key] = fits
+
+            '''E.saveProject(prjname)
+            print E, 'saved to %s' %prjname'''
             c+=1.0
             if callback != None:
                 callback(c/total*100)
-        print 'done'
-        return
 
-    def createResultsTable(self, E):
-        """Results for fitted variables"""
-        #for d in data.keys():
-        #    if type(data[d]) is types.DictType:
+        print 'initial processing done'
+        self.processResults(results)
 
         return
+
+    def getFits(self, rawdata, model, filename):
+        """Process raw data from importer, this could be called recursively depending
+           on the nesting/grouping of data"""
+
+        E = self.getEkinProject(rawdata)
+        fits = {}
+        if model != '':
+            E.fitDatasets('ALL', models=[self.model1], noiter=self.iterations1,
+                   conv=1e-6, grad=1e-6, silent=True)
+            self.expUncert(E)
+        for d in rawdata.keys():
+            if type(rawdata[d]) is types.DictType:
+                print d,prdata[d].keys()
+                for l in prdata[d].keys():
+                    print l
+            else:
+                fits[d] = E.getMetaData(d)['a']
+        #path = self.workingdir
+        #E.saveProject(os.path.join(path,filename))
+        return fits
+
+    def processResults(self, fits):
+        path = self.workingdir
+        if len(fits)<1: return
+        E = EkinProject()
+        dsets = fits[fits.keys()[0]]
+        for d in dsets:
+            x=[]; y=[]
+            for l in fits:
+                if d in fits[l]:
+                    x.append(l)
+                    y.append(fits[l][d])
+                    #print d,l,fits[l][d]
+            print d, x,y
+            ek=EkinDataset(xy=[x,y])
+            E.insertDataset(ek, d)
+        E.saveProject(os.path.join(path,'results.ekinprj'))
+        return
+
+    def parseFileNames(self, filenames):
+        """Parse file names to extract a numerical value"""
+        labels = {}
+        for f in filenames:
+            bname = os.path.basename(f)
+            l = re.findall("([0-9.]*[0-9]+)", bname)[0]
+            labels[f] = l
+        return labels
 
     def expUncert(self, E):
         """Get fitted variable errors"""
@@ -302,11 +358,11 @@ class Pipeline(object):
                 if os.path.splitext(fname)[1] == ext:
                     self.addtoQueue([fname])
         #print self.queue
+        #self.parseFileNames(self.queue)
         return
 
     def addtoQueue(self, files):
         """Add files"""
-
         for f in files[:]:
             if f not in self.queue:
                 self.queue.append(f)
@@ -321,7 +377,7 @@ class Pipeline(object):
             if type(data[d]) is types.DictType:
                 for lbl in data[d]:
                     #print lbl
-                    name = d+'_'+lbl
+                    name = d+'__'+lbl
                     xy = data[d][lbl]
                     ek=EkinDataset(xy=xy)
                     E.insertDataset(ek, name)

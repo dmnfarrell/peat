@@ -30,7 +30,7 @@ import tkSimpleDialog, tkFileDialog, tkMessageBox
 import Pmw
 
 class TopLevelModalDialog(Toplevel):
-    def __init__(self, parent, width=300, height=200):
+    def __init__(self, parent, width=300, height=100):
         Toplevel.__init__(self, parent)
         self.transient(parent)
         self.title('')

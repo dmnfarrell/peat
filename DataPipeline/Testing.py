@@ -78,7 +78,7 @@ def multiFileTests():
     if not os.path.exists(pth):
         os.mkdir(pth)
     createFakeFiles(pth)
-    conf = {'format':'databycolumn', 'model1':'Linear'}
+    conf = {'format':'databycolumn', 'model1':'Linear', 'groupbyfile':1}
     p = Pipeline()
     p.createConfig('temp.conf',**conf)
     p.addFolder(pth, ext='txt')
@@ -96,7 +96,7 @@ def createFakeFiles(path='testfiles'):
     """Create sets of fake data to test queuing and file grouping"""
 
     names = ['aaa','bbb','ccc','ddd']
-    for i in np.arange(2,9,0.5):
+    for i in np.arange(2,9,1.0):
         fname = os.path.join(path,'ph_'+str(i)+'.txt')
         cw = csv.writer(open(fname,'w'))
         cw.writerow(['temp']+names)
