@@ -90,8 +90,9 @@ class Fitting(object):
                     globals()[self.varnames[i]] = variables[i]
                 try:   
                     value = eval(eq)
-                except:
+                except Exception, e:
                     value = 1.0
+                    print e
                 return value
     
             def guess_start(self):
@@ -133,7 +134,7 @@ class Fitting(object):
             print 'current available models are: %s' %cls.fitterClasses.keys()
             return
         inst = fitclass(variables=vrs,exp_data=expdata,callback=callback)
-        return inst         
+        return inst
     
     @classmethod
     def makeFitter(cls, fitdata, expdata=None, callback=None):

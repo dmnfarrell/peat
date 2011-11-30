@@ -26,6 +26,7 @@
 # 
 
 import numpy, math
+from math import *
 
 class LM_Fitter:
 

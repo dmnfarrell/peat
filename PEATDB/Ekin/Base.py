@@ -543,7 +543,11 @@ class EkinProject(object):
         """Calculate the fit for this current dataset, if a model
            is given we use that instead of the current one.
            update=True means that the dataset fit info will be overwritten"""
-
+           
+        #check case of model, as our names are stupidly kept case sensitive
+        for m in Fitting.fitterClasses:
+            if model == m or model == m.lower():
+                model = m
         datatofit = self.data[dataset]
         if model == None:
             currfitdata = self.getFitData(dataset)

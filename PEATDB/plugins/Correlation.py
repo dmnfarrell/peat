@@ -303,7 +303,7 @@ class CorrelationAnalyser(Plugin):
   
     def markOutliers(self,x,y):
         labels = model.getColumnData(columnName=labelcol,filterby=filterby)      
-        #user peat_sa stats tools to get outliers here
+        
         #outliers = self.findOutliers(x,y,errs)
         '''for l in labels:
             i=labels.index(l)
