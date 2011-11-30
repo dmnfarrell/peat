@@ -31,6 +31,7 @@ from PEATDB.Tables import TableCanvas
 from PEATDB.TableModels import TableModel
 from PEATDB.Ekin.Ekin_main import EkinApp, PlotPanel
 from PEATDB.Ekin.Pylab import Options
+from ModelDesign import ModelDesignApp
 import os, sys, math, random, glob, numpy, string, types
 import csv
 from Tkinter import *
@@ -154,7 +155,8 @@ class PipeApp(Frame, GUI_help):
         self.presetsMenu()
         self.run_menu={'01Execute':{'cmd': self.execute},
                         '02Run Config Helper':{'cmd': self.launchHelper},
-                        '03Open results in Ekin':{'cmd':self.openEkin}}
+                        '03Model Design':{'cmd': self.launchModelDesigner},
+                        '04Open results in Ekin':{'cmd':self.openEkin}}
         self.run_menu=self.create_pulldown(self.menu,self.run_menu)
         self.menu.add_cascade(label='Run',menu=self.run_menu['var'])
         self.queue_menu={'01Add files to queue':{'cmd': self.addtoQueue},
@@ -283,9 +285,13 @@ class PipeApp(Frame, GUI_help):
         EK = EkinApp(parent=self, project=fname)
         return
 
+    def launchModelDesigner(self):
+        self.modelapp = ModelDesignApp(parent=self)
+        return
+
     def launchHelper(self):
         wz = HelperDialog(parent=self)
-
+        return
 
     def openFilename(self, ext='.txt'):
         filename=tkFileDialog.askopenfilename(defaultextension=ext,initialdir=self.p.savedir,
@@ -340,7 +346,8 @@ class PlotPreviewer(Frame):
     def __init__(self, parent=None, app=None):
         self.parent = parent
         self.app = app
-        self.p = self.app.p #reference to pipeline object
+        if hasattr(self.app,'p'):
+            self.p = self.app.p     #reference to pipeline object
         if not self.parent:
             Frame.__init__(self)
 
