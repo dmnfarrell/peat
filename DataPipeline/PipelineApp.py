@@ -120,7 +120,7 @@ class PipeApp(Frame, GUI_help):
                 hull_height = 300,
                 text_wrap='none')
         self.m1.add(self.rawcontents)
-        self.previewer = PlotPreviewer(app=self)
+        self.previewer = PlotPreviewer(self.m1,app=self)
         self.m1.add(self.previewer)
         self.m.add(self.m2)
         self.queueFrame = queueManager(app=self)
@@ -156,7 +156,7 @@ class PipeApp(Frame, GUI_help):
         self.run_menu={'01Execute':{'cmd': self.execute},
                         '02Run Config Helper':{'cmd': self.launchHelper},
                         '03Model Design':{'cmd': self.launchModelDesigner},
-                        '04Open results in Ekin':{'cmd':self.openEkin}}
+                        '04Launch Ekin':{'cmd':self.openEkin}}
         self.run_menu=self.create_pulldown(self.menu,self.run_menu)
         self.menu.add_cascade(label='Run',menu=self.run_menu['var'])
         self.queue_menu={'01Add files to queue':{'cmd': self.addtoQueue},
@@ -276,13 +276,8 @@ class PipeApp(Frame, GUI_help):
         return
 
     def openEkin(self, fname=None):
-        """Open results in ekin"""
-
-        if len(self.p.results)==0:
-            print 'no results files'
-            return
-        fname = self.p.results[0]
-        EK = EkinApp(parent=self, project=fname)
+        """Open ekin"""
+        EK = EkinApp(parent=self)
         return
 
     def launchModelDesigner(self):
@@ -294,7 +289,8 @@ class PipeApp(Frame, GUI_help):
         return
 
     def openFilename(self, ext='.txt'):
-        filename=tkFileDialog.askopenfilename(defaultextension=ext,initialdir=self.p.savedir,
+        filename=tkFileDialog.askopenfilename(defaultextension=ext,
+                                              initialdir=self.p.savedir,
                                               filetypes=[("text files","*.txt"),
                                                          ("csv files","*.csv"),
                                                          ("csvx files","*.csvx"),
@@ -305,14 +301,16 @@ class PipeApp(Frame, GUI_help):
         return filename
 
     def openFilenames(self, ext='.txt'):
-        filename=tkFileDialog.askopenfilenames(defaultextension=ext,initialdir=self.p.savedir,
+        filename=tkFileDialog.askopenfilenames(defaultextension=ext,
+                                              initialdir=self.p.savedir,
                                               filetypes=[("text files","*.txt"),
                                                          ("All files","*.*")],
                                               parent=self.main)
         return filename
 
     def saveFilename(self, ext='.conf'):
-        filename=tkFileDialog.asksaveasfilename(defaultextension=ext,initialdir=self.p.savedir,
+        filename=tkFileDialog.asksaveasfilename(defaultextension=ext,
+                                              initialdir=self.p.savedir,
                                               filetypes=[("conf files","*.conf"),
                                                          ("All files","*.*")],
                                               parent=self.main)
@@ -320,7 +318,8 @@ class PipeApp(Frame, GUI_help):
 
     def openDirectory(self):
         folder = tkFileDialog.askdirectory(parent=self.main,
-                                            initialdir=os.getcwd(), title='Select folder')
+                                            initialdir=os.getcwd(),
+                                            title='Select folder')
         return folder
 
     def write(self, txt):
@@ -343,14 +342,12 @@ class PipeApp(Frame, GUI_help):
         return
 
 class PlotPreviewer(Frame):
-    def __init__(self, parent=None, app=None):
-        self.parent = parent
+    def __init__(self, master, app=None):
+
+        Frame.__init__(self, master)
         self.app = app
         if hasattr(self.app,'p'):
             self.p = self.app.p     #reference to pipeline object
-        if not self.parent:
-            Frame.__init__(self)
-
         fr = Frame(self)
         b=Button(fr,text='update',command=self.update)
         b.pack(side=TOP,fill=BOTH)

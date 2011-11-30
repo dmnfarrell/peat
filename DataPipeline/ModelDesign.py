@@ -29,6 +29,7 @@ import os, sys, math, random, numpy, string, types
 import csv
 import numpy as np
 from Tkinter import *
+import tkFileDialog, tkSimpleDialog
 import Pmw
 from PEATDB.Ekin.Ekin_main import EkinApp, PlotPanel
 from PEATDB.Ekin.Base import EkinProject, EkinDataset
@@ -71,31 +72,22 @@ class ModelDesignApp(Frame):
                            showhandle=True)
         m.add(m1)
         f1=Frame(m1,width=200)
-        self.modelentry = Pmw.ScrolledText(f1,
+
+        self.entrywidgets = {}
+        fields = ['equation','varnames','guess','description']
+        heights = [150,50,100,100]
+        for f in fields:
+            i=fields.index(f)
+            self.entrywidgets[f] = Pmw.ScrolledText(f1,
                 labelpos = 'n',
-                label_text='Equation',
+                label_text=f,
                 hull_width=400,
-                hull_height=150,
+                hull_height=heights[i],
                 usehullsize = 1)
-        self.modelentry.pack(fill=BOTH,side=TOP,expand=1,padx=4)
-        self.varsentry = Pmw.ScrolledText(f1,
-                labelpos = 'n',
-                label_text='Variables',
-                hull_height=50,
-                usehullsize = 1)
-        self.varsentry.pack(fill=BOTH,side=TOP,expand=1,padx=4)
-        self.guessentry = Pmw.ScrolledText(f1,
-                labelpos = 'n',
-                label_text='Start/Guess Values',
-                hull_height=100,
-                usehullsize = 1)
-        self.guessentry.pack(fill=BOTH,side=TOP,expand=1,padx=4)
-        self.descrentry = Pmw.ScrolledText(f1,
-                labelpos = 'n',
-                label_text='Description',
-                hull_height=100,
-                usehullsize = 1)
-        self.descrentry.pack(fill=BOTH,side=TOP,expand=1,padx=4)
+            self.entrywidgets[f].pack(fill=BOTH,side=TOP,expand=1,padx=4)
+        balloon = Pmw.Balloon(self.main)
+        balloon.bind(self.entrywidgets['guess'], 'Models usually require initial guesses.\n'
+                                       'Enter a calculation or float value for any variable.')
 
         f2=Frame(m1)
         m1.add(f2)
@@ -105,26 +97,25 @@ class ModelDesignApp(Frame):
         b.pack(side=TOP,fill=BOTH,pady=2)
         b=Button(f2,text='Save Current Models',command=self.save)
         b.pack(side=TOP,fill=BOTH,pady=2)
-        #b=Button(f2,text='Fit Model',command=self.fit)
-        #b.pack(side=TOP,fill=BOTH)
+
         self.modelselector = Pmw.ScrolledListBox(f2,
                 items=self.modelsdict.keys(),
                 labelpos='nw',
-                label_text='Current Model:',
+                label_text='Current Models:',
                 listbox_height = 3,
-                #selectioncommand=self.selectionCommand,
-                dblclickcommand=self.loadModel,
+                selectioncommand=self.loadModel,
+                #dblclickcommand=self.loadModel,
                 usehullsize = 1,
                 hull_width = 300,
                 hull_height = 100,
         )
         self.modelselector.pack()
-        b=Button(f2,text='Test Fit',command=self.testFitter,bg='#FFFF99')
+        b=Button(f2,text='Test Model',command=self.testFitter,bg='#FFFF99')
         b.pack(side=TOP,fill=BOTH,pady=2)
         m1.add(f1)
-
-        self.previewer = FitPreviewer(app=self)
+        self.previewer = FitPreviewer(m,app=self)
         m.add(self.previewer)
+        return
 
     def createModels(self):
         """Create default models file"""
@@ -143,7 +134,7 @@ class ModelDesignApp(Frame):
              'varnames': 'tm,bottom,top,slope'},
             'Gaussian': {'Name': 'Gaussian',
              'description': 'gaussian function, a bell-shaped curve',
-             'equation': 'a*exp(-(pow(x-b),2)/(pow(2*c,2)))',
+             'equation': 'a*exp(-(pow((x-b),2)/(pow(2*c,2))))',
              'guess': '{}',
              'name': 'Gaussian',
              'varnames': 'a,b,c'}
@@ -151,6 +142,20 @@ class ModelDesignApp(Frame):
         return
 
     def newModel(self):
+        """Create new model"""
+        name = tkSimpleDialog.askstring('New model','Enter a name',
+                                          initialvalue='',
+                                          parent=self.main)
+        if not name: return
+        model = { 'description': '',
+             'equation': 'a*x+b',
+             'guess': "",
+             'name': name,
+             'varnames': 'a,b'}
+        self.modelsdict[name] = model
+        self.updateModelSelector()
+        self.modelselector.setvalue(name)
+        self.loadModel()
         return
 
     def save(self):
@@ -160,17 +165,32 @@ class ModelDesignApp(Frame):
 
     def loadModelsFile(self):
         """Load a dict of models, the pickled format from Ekin"""
+        import pickle
+        filename=tkFileDialog.askopenfilename(defaultextension='.dict',
+                                              initialdir=os.getcwd(),
+                                              filetypes=[("dict files","*.dict"),
+                                                         ("All files","*.*")],
+                                              parent=self.main)
+        if filename:
+            self.modelsdict = pickle.load(open(filename,'r'))
+            self.updateModelSelector()
+        return
 
+    def updateModelSelector(self):
+        self.modelselector.setlist(self.modelsdict.keys())
         return
 
     def loadModel(self):
         """Load a model from the current dict"""
+
+        #add confirmation dialog here
+
         sel = self.modelselector.getcurselection()[0]
         self.currentmodel = model = self.modelsdict[sel]
-        self.modelentry.settext(model['equation'])
-        self.descrentry.settext(model['description'])
-        self.varsentry.settext(model['varnames'])
-        self.guessentry.settext(model['guess'])
+        for f in model:
+            if f in self.entrywidgets:
+                self.entrywidgets[f].settext(model[f])
+        self.previewer.replot()
         return
 
     def createFitter(self, model):
@@ -184,52 +204,50 @@ class ModelDesignApp(Frame):
         """Parse the entry fields and create the fitter"""
         self.currentmodel = self.parseValues()
         X = self.createFitter(self.currentmodel)
-        X.fit(rounds=50)
-        #self.previewer.replot()
+        X.guess_start()
+        X.fit(rounds=60)
         return
 
     def parseValues(self):
         """Parse model entry and create a new fitter"""
         model = {}
-        model['equation'] = self.modelentry.get().rstrip()
-        model['description'] = self.descrentry.get().rstrip()
-        model['varnames'] = self.varsentry.get().rstrip()
-        model['guess'] = self.guessentry.get().rstrip()
+        for f in self.entrywidgets:
+            model[f] = self.entrywidgets[f].get().rstrip()
         return model
+
+    def quit(self):
+        self.main.destroy()
+        if not self.parent:
+            sys.exit()
+        return
 
 class FitPreviewer(Frame):
     """Class to preview model fitting in plot"""
-    def __init__(self, parent=None, app=None):
-        self.parent = parent
-        self.app = app
-        if not self.parent:
-            Frame.__init__(self)
+    def __init__(self, master, app=None):
 
+        Frame.__init__(self, master)
+        self.main=self.master
+        self.app = app
         self.gui()
         self.sampleData()
         return
 
     def gui(self):
         fr = Frame(self)
+        b=Button(fr,text='load csv',command=self.importCSV)
+        b.pack(side=LEFT,fill=BOTH)
+        b=Button(fr,text='load ekin prj',command=self.loadProject)
+        b.pack(side=LEFT,fill=BOTH)
         b=Button(fr,text='update',command=self.replot)
         b.pack(side=LEFT,fill=BOTH)
         b=Button(fr,text='prev',command=self.prev)
         b.pack(side=LEFT,fill=BOTH)
         b=Button(fr,text='next',command=self.next)
         b.pack(side=LEFT,fill=BOTH)
-        self.numplotscounter = Pmw.Counter(fr,
-                labelpos='w',
-                label_text='plots:',
-                entryfield_value=1,
-                entry_width=3,
-                datatype = 'integer',
-                entryfield_command=self.replot,
-                entryfield_validate={'validator':'numeric', 'min':1,'max':8})
-        self.numplotscounter.pack()
         fr.pack(side=TOP)
         self.plotframe = PlotPanel(parent=self, side=BOTTOM, height=200)
         self.dsindex = 0
-        self.opts = {'markersize':15,'fontsize':9}
+        self.opts = {'markersize':18,'fontsize':10}
         return
 
     def sampleData(self):
@@ -242,22 +260,16 @@ class FitPreviewer(Frame):
         self.replot()
 
     def replot(self):
-        p = int(self.numplotscounter.getvalue())
-        if p>1:
-            dsets=self.E.datasets[self.dsindex:self.dsindex+p]
-            c=p/2
-        else:
-            dsets = self.E.datasets[self.dsindex]
-            c=1
-        self.plotframe.plotCurrent(dsets,options=self.opts,cols=c)
+        dset = self.E.datasets[self.dsindex]
+        self.plotframe.plotCurrent(dset,options=self.opts)
 
     def getCurrentData(self):
-        ek = self.E.getDataset('testdata')
+        dset = self.E.datasets[self.dsindex]
+        ek = self.E.getDataset(dset)
         return ek.getxy()
 
     def updateFit(self, selfdiff, vrs, fitvals, c, X):
         self.plotframe.updateFit(X)
-        self.app.update_idletasks()
         #if self.stopfit == True:
         #    X.stop_fit=1
 
@@ -277,6 +289,28 @@ class FitPreviewer(Frame):
         self.replot()
         return
 
+    def importCSV(self):
+        """Import csv file"""
+        from PEATDB.Ekin.IO import Importer
+        importer = Importer(self, parent_win=self)
+        importer.path = os.getcwd()
+        newdata = importer.import_multiple()
+        for name in newdata.keys():
+            self.E.insertDataset(newdata[name], newname=name)
+        self.dsindex = self.E.datasets.index(name)
+        self.replot()
+        return
+
+    def loadProject(self):
+        filename=tkFileDialog.askopenfilename(defaultextension='.ekinprj',
+                                              initialdir=os.getcwd(),
+                                              filetypes=[("Ekin files","*.ekinprj"),
+                                                         ("All files","*.*")],
+                                              parent=self.main)
+        if not filename: return
+        self.E.openProject(filename)
+        self.replot()
+        return
 
 def main():
     from optparse import OptionParser
