@@ -31,7 +31,7 @@ from PEATDB.Tables import TableCanvas
 from PEATDB.TableModels import TableModel
 from PEATDB.Ekin.Ekin_main import EkinApp, PlotPanel
 from PEATDB.Ekin.Pylab import Options
-from ModelDesign import ModelDesignApp
+from PEATDB.Ekin.ModelDesign import ModelDesignApp
 import os, sys, math, random, glob, numpy, string, types
 import csv
 from Tkinter import *
@@ -47,10 +47,8 @@ class PipeApp(Frame, GUI_help):
        Uses a config file to store the pipeline settings"""
 
     def __init__(self, parent=None, rawfile=None, conffile=None):
+
         self.parent=parent
-        self.tableformat = {'cellwidth':50, 'thefont':"Arial 10",
-                            'rowheight':16, 'editable':False,
-                            'rowselectedcolor':'yellow'}
         if not self.parent:
             Frame.__init__(self)
             self.main=self.master
