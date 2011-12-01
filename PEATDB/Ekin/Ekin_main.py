@@ -1266,15 +1266,23 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
         return        
 
     def createFitModel(self):
+        #from ModelDesign import ModelDesignApp
+        #app = ModelDesignApp(parent=self)
+        #self.ekin_win.wait_window(app)
+        
         from PEATDB.DictEdit import DictEditor
         app = DictEditor(self.ekin_win)
         app.loadDict(Fitting.modelsfile)
         #self.ekin_win.wait_window(app)
         #update models
-        print 'model file',Fitting.modelsfile
-        Fitting.presetmodels = pickle.load(open(Fitting.modelsfile,'r'))  
-        return
+        #print 'model file',Fitting.modelsfile
+        #Fitting.presetmodels = pickle.load(open(Fitting.modelsfile,'r'))  
+        return    
     
+    def reloadModels(self):
+        """load a models file"""
+        return
+        
     #
     # Import and export functions, most should use the Importer class to do the actual
     # importing stuff and get the returned dataset that we simply insert
