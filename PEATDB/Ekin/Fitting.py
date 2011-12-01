@@ -100,6 +100,7 @@ class Fitting(object):
                 if self.guess==None:
                     return
                 guess = self.guess
+                print guess
                 if type(guess) is not types.DictType:
                     guess = eval(guess)
                 x=[i[0] for i in self.exp_data]
