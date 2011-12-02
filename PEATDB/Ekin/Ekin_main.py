@@ -2284,9 +2284,9 @@ class PlotPanel(Frame):
         self.canvas.draw()
         return
 
-    def updateFit(self, X):
+    def updateFit(self, X, showfitvars=False):
         """Just update fit line"""
-        self.E.updateFit(X)
+        self.E.updateFit(X, showfitvars=showfitvars)
         self.canvas.draw()
         return
 

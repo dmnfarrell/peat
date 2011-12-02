@@ -17,13 +17,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Contact information:
-# Email: Jens.Nielsen_at_gmail.com 
+# Email: Jens.Nielsen_at_gmail.com
 # Normal mail:
 # Jens Nielsen
 # SBBS, Conway Institute
 # University College Dublin
 # Dublin 4, Ireland
-# 
+#
 
 import math, sys, os, types
 import IO
@@ -54,14 +54,14 @@ class EkinProject(object):
        a GUI.
        Usage: E = EkinProject(data=ekindata)
     """
-    
+
     fitmodels = sorted(Fitting.presetmodels.keys())
     Fitting.createFitters()
     ekinfields = ['__datatabs_fits__', '__fit_matches__', '__Exp_Meta_Dat__',
                   '__distance_matches__', '__datatab_structmapping__', '__meta_data__',
                   '__plotopts__', '__currentdataset__', '__displaymultiple__']
 
-    modes =['General', 
+    modes =['General',
                 'Simple enzyme kinetic',
                 'Enzyme pH-activity',
                 'pH-stability',
@@ -113,7 +113,7 @@ class EkinProject(object):
             #just load the data
             self.loadData(data)
         self.current = None    #track 'current' dataset
-        self.length = 0        
+        self.length = 0
         return
 
     def loadData(self, data=None):
@@ -172,7 +172,7 @@ class EkinProject(object):
         #here we need to add to self.data
         ek=self.data[label]=EkinDataset()
         for i in range(8):
-            ek.add()            
+            ek.add()
         self.__datatabs_fits__[label]={}
         return
 
@@ -180,16 +180,16 @@ class EkinProject(object):
                               replace=False, update=1):
         """Insert pre-existing data as a dataset"""
         #print newdata
-        if newdata == None:            
+        if newdata == None:
             ek = EkinDataset(xy=xydata)
         else:
             #check for old or bad data
-            ek = self.checkDataset(newdata)            
+            ek = self.checkDataset(newdata)
             if ek == False:
                 return
-                
+
         if self.data.has_key(newname) and replace==False:
-            newname = newname + 'a'        
+            newname = newname + 'a'
         self.data[newname] = ek
         self.datasets.append(newname)
         self.length = len(self.datasets)
@@ -231,7 +231,7 @@ class EkinProject(object):
 
     def renameDataset(self, currname, newname):
         """Rename a dataset"""
-        if newname == None or newname == currname:            
+        if newname == None or newname == currname:
             return
         self.copyDataset(currname, newname)
         self.deleteDataset(currname)
@@ -291,35 +291,35 @@ class EkinProject(object):
         """Check for arbitrary fields stored in the old format dataset
            we move these to metadata"""
         if not type(dataset) is types.DictType:
-            return None        
+            return None
         for k in dataset.keys():
-            if not k in [0,1,2]:            
+            if not k in [0,1,2]:
                 self.addMeta(name, k, dataset[k])
         #print self.getMetaData(name)
-        return        
-        
+        return
+
     def checkDataset(self, dataset):
-        """Check for old format or bad dataset"""           
+        """Check for old format or bad dataset"""
         if type(dataset) is types.DictType:
             #old format
-            x,y,a,xerr,yerr = EkinConvert.ekin2xy(dataset, getall=1, geterrors=True)           
-            return EkinDataset(x=x,y=y,active=a,xerrs=xerr,yerrs=yerr)           
+            x,y,a,xerr,yerr = EkinConvert.ekin2xy(dataset, getall=1, geterrors=True)
+            return EkinDataset(x=x,y=y,active=a,xerrs=xerr,yerrs=yerr)
         elif not type(dataset) is EkinDataset:
             return False
         else:
             return dataset
-                
+
     def checkDatasets(self):
         """Check corrupt datasets and remove"""
-        #print 'checking for old or bad datasets'        
+        #print 'checking for old or bad datasets'
         for d in self.datasets[:]:
-            ek = self.checkDataset(self.data[d])            
+            ek = self.checkDataset(self.data[d])
             if ek == False:
                 print 'removed', d
                 self.deleteDataset(d)
             else:
                 other = self.checkDict(self.data[d], d)
-                self.data[d] = ek                
+                self.data[d] = ek
         return
 
     def importCSV(self, filename=None, text=None, format=1, sep=',',
@@ -379,7 +379,7 @@ class EkinProject(object):
         datasets = self.checkDatasetParam(datasets)
 
         for d in self.datasets:
-            writer.writerow([d])            
+            writer.writerow([d])
 	    ek=self.getDataset(d)
 	    x,y = ek.getxy()
             for i in range(len(x)):
@@ -392,7 +392,7 @@ class EkinProject(object):
         if filename==None:
             return
         if os.path.splitext(filename)[1] == '':
-            filename = filename + '.ekinprj'        
+            filename = filename + '.ekinprj'
         if not os.path.exists(filename):
             #print 'no such file'
             return None
@@ -405,7 +405,7 @@ class EkinProject(object):
                 fd.close()
 
         self.loadData(data)
-        self.filename = filename       
+        self.filename = filename
         return
 
     def saveProject(self, filename=None):
@@ -543,7 +543,7 @@ class EkinProject(object):
         """Calculate the fit for this current dataset, if a model
            is given we use that instead of the current one.
            update=True means that the dataset fit info will be overwritten"""
-           
+
         #check case of model, as our names are stupidly kept case sensitive
         for m in Fitting.fitterClasses:
             if model == m or model == m.lower():
@@ -557,12 +557,12 @@ class EkinProject(object):
                 model = self.defaultmodel
         else:
             currfitdata = None
-       
+
         fitresult, X = Fitting.doFit(ekindata=datatofit, fitdata=currfitdata, model=model,
                                      noiter=noiter, conv=conv, grad=grad, LM_damper=damper,
                                      silent=silent, guess=guess, startvalues=startvalues,
                                      changevars=changevars, callback=callback)
-               
+
         if fitresult == None:
             print 'Fitter returned None..'
             return
@@ -596,7 +596,7 @@ class EkinProject(object):
                             checkfunc=None, conv=None, grad=None, alpha=0.01,
                             silent=False):
         """Finds the best fit model using f-testing"""
-      
+
         thisdata = self.data[dataset]
         #print 'models', models
         if models == None:
@@ -671,7 +671,7 @@ class EkinProject(object):
         shapes = Options.shapes
 
         plt.rc('font', family=prms.font)
-        plt.rc('font', size=prms.fontsize)        
+        plt.rc('font', size=prms.fontsize)
         plt.rc('text', usetex=prms.usetex)
 
         if plotoption == 2 and cols>=3:
@@ -681,23 +681,23 @@ class EkinProject(object):
             return
         if figure != None:
             fig = figure
-        else:           
+        else:
             #from matplotlib import figure
-            #fig = figure.Figure(figsize=size, dpi=80)        
+            #fig = figure.Figure(figsize=size, dpi=80)
             fig = plt.figure(figsize=size, dpi=80)
         fig.clf()
         datasets = self.checkDatasetParam(datasets)
         if plotoption == 2:
             if cols==0 or cols=='':
-                cols=math.ceil(math.sqrt(len(datasets)))               
+                cols=math.ceil(math.sqrt(len(datasets)))
             plt.rc('font', size=9.0)
             if prms.title != None:
                 fig.suptitle(prms.title, fontsize=prms.fontsize)
             if len(datasets) == 2:
                    cols=1; dim=2
-            else:       
+            else:
                 dim = math.ceil(len(datasets)/float(cols))
-            n=1            
+            n=1
         else:
             ax = fig.add_subplot(111)
             ax.cla()
@@ -708,10 +708,10 @@ class EkinProject(object):
         #get ekin data into plot values
         xdata={};ydata={};adata={};xerrors={};yerrors={}
 
-        for name in datasets: 
+        for name in datasets:
             self.fitline = None
-            ek = self.data[name]            
-            xd,yd = xdata[name],ydata[name] = ek.getxy()      
+            ek = self.data[name]
+            xd,yd = xdata[name],ydata[name] = ek.getxy()
             adata[name] = ek.active
             xerrors[name], yerrors[name] = ek.getErrors()
             #if no error stored for points, try using global error if present
@@ -723,14 +723,14 @@ class EkinProject(object):
                 for i in range(len(yd)): yerrors[name].append(yerror)
 
             if prms.xlabel != '':
-                xlabel = prms.xlabel 
+                xlabel = prms.xlabel
             else:
-                xlabel = ek.labels[0]            
+                xlabel = ek.labels[0]
             if prms.ylabel != '':
-                ylabel = prms.ylabel 
+                ylabel = prms.ylabel
             else:
-                ylabel = ek.labels[1]  
- 
+                ylabel = ek.labels[1]
+
         e=[]
         for i in xdata: e.append(i[0])
         i=0
@@ -757,7 +757,7 @@ class EkinProject(object):
             xerr = xerrors[name]
             yerr = yerrors[name]
             self.currxdata = x
-            if len(x) == 0:                
+            if len(x) == 0:
                 continue
             if prms.normalise == True:
                 self.mindata=min(y); self.maxdata=max(y)
@@ -778,12 +778,12 @@ class EkinProject(object):
                         actclr = '0.5'
                     else:
                         actclr = prms.colors[cc]
-                    for i in range(len(x)):              
+                    for i in range(len(x)):
                         if act[i]==0:
                             ptcolors.append('0.8')
                         else:
                             ptcolors.append(actclr)
-                          
+
                     line = ax.scatter(x, y, marker=prms.marker, c=ptcolors,
                                       s=prms.markersize, lw=prms.linewidth, alpha=prms.alpha)
                     cc+=1
@@ -799,14 +799,15 @@ class EkinProject(object):
                 lineclr = line.get_facecolor()
 
             if len(xd)>0:
-                if abs(min(yd))>0.01 and max(yd)<1e4:               
+                if abs(min(yd))>0.01 and max(yd)<1e4:
                     major_formatter = plt.FormatStrFormatter('%2.2f')
                     ax.yaxis.set_major_formatter(major_formatter)
 
             legendlines.append(line)
+            X=None
             if self.__datatabs_fits__.has_key(name):
                 f = self.__datatabs_fits__[name]
-                if f.has_key('model'):                    
+                if f.has_key('model'):
                     #create the required fitter
                     d=[]
                     X = Fitting.makeFitter(f, zip(x,y))
@@ -826,10 +827,10 @@ class EkinProject(object):
                 l = min(x)-prms.xlim; u=max(y)+prms.xlim
                 ax.set_xlim((l,u))
                 #print l,u
-            if prms.ylim!=0: 
+            if prms.ylim!=0:
                 l = min(y)-prms.ylim; u=max(y)+prms.ylim
                 ax.set_ylim((l,u))
-                               
+
         if plotoption != 2:
             if prms.title == None or prms.title == '':
                 prms.title=name
@@ -848,14 +849,14 @@ class EkinProject(object):
         else:
             fig.subplots_adjust(hspace=0.4,wspace=0.4)
 
-        if filename != None:           
+        if filename != None:
             fig.savefig(filename, dpi=dpi)
             plt.close(fig)
 
         return ax
-        
+
     def updateFit(self, X, ax=None, xdata=None, clr=None,
-                        normalise=None, plotoption=1):
+                        normalise=None, plotoption=1, showfitvars=False):
         """Get the fit data line for given fitter object and redraw"""
         if xdata == None:
             xdata = self.currxdata
@@ -878,6 +879,9 @@ class EkinProject(object):
             self.fitline, = ax.plot(xx, fity, clr, linewidth=2.5, alpha=0.8)
         else:
             self.fitline.set_data(xx, fity)
+
+        if showfitvars == True:
+            self.showfitResults(X, ax)
         return xx, fity
 
     def _getlineColor(self, line):
@@ -890,14 +894,24 @@ class EkinProject(object):
             while clr == '#cccccc':
                 clr = tuple(line.get_facecolor()[i][:3])
                 clr = matplotlib.colors.rgb2hex(clr)
-                i+=1        
+                i+=1
         return clr
-    
+
     def showfitResults(self, X, ax):
         """Show fit vars in a plot"""
+        if X==None:
+            return
+        info = X.getResult()
+        text=''
+        bboxprops = {'facecolor':'lightyellow', 'alpha':0.9, 'pad':10, 'lw':1}
+        for i in X.varnames:
+            text += i+'='+str(round(info[i],3))+'\n'
+        if len(ax.texts) >= 1:
+            ax.texts[0].set_text(text)
+        else:
+            ax.text(.1, .8, text, transform=ax.transAxes, size=12,
+                bbox=bboxprops)
 
-        ax.text(.1, .8, X.getResult(), transform=ax.transAxes,
-                bbox={'facecolor':'yellow', 'alpha':0.6, 'pad':10})
         plt.draw()
         return
 
@@ -939,27 +953,27 @@ class EkinProject(object):
 
     def __setitem__(self, key, item):
         self.__dict__[key] = item
-        
+
     def getFields(self):
         return self.__dict__.keys()
-    
+
     def addProject(self, E, overwrite=False):
         """Combine another project with the current one, duplicates are renamed"""
         import copy
-        for d in E.datasets:            
-            edata = copy.deepcopy(E.getDataset(d))            
+        for d in E.datasets:
+            edata = copy.deepcopy(E.getDataset(d))
             fitdata = E.getFitData(d)
             if d in self.datasets:
                 name = d + '_1'
             else:
-                name = d            
+                name = d
             self.insertDataset(edata, name, fit=fitdata)
             for field in self.ekinfields:
                 if not E.__dict__.has_key(field):
                     continue
                 #if E.__dict__.has_key(field):
-                #    print field, type(E.__dict__[field]), E.__dict__[field][name]                
-                if E.__dict__[field].has_key(name):   
+                #    print field, type(E.__dict__[field]), E.__dict__[field][name]
+                if E.__dict__[field].has_key(name):
                     self.__dict__[field][name] = copy.deepcopy(E.__dict__[field][name])
         return
 
@@ -983,7 +997,7 @@ class EkinProject(object):
 
 class Params(object):
     """Class to store options passed to plotter"""
-    def __init__(self, **kwargs):        
+    def __init__(self, **kwargs):
         self.colors = Options.colors
         self.marker = 'o'
         self.linewidth = 1
@@ -1006,8 +1020,8 @@ class Params(object):
         self.xlabel = ''
         self.ylabel = ''
         self.varyshapes = False
-        self.grayscale = False        
+        self.grayscale = False
         for k in kwargs:
             self.__dict__[k] = kwargs[k]
-        return   
+        return
 

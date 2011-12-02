@@ -150,7 +150,7 @@ class ModelDesignApp(Frame):
             'Gaussian': {'Name': 'Gaussian',
              'description': 'gaussian function, a bell-shaped curve',
              'equation': 'a*exp(-(pow((x-b),2)/(pow(2*c,2))))',
-             'guess': {},
+             'guess': {'a':'max(y)'},
              'name': 'Gaussian',
              'varnames': 'a,b,c'}
         }
@@ -173,6 +173,12 @@ class ModelDesignApp(Frame):
         self.loadModel()
         return
 
+    def updateModelsDict(self):
+        """Send the current model to the dict"""
+        name = self.modelselector.getcurselection()[0]
+        self.modelsdict[name] = self.currentmodel
+        return
+
     def save(self):
         """Save current models"""
         if self.filename == None:
@@ -184,6 +190,7 @@ class ModelDesignApp(Frame):
         if not self.filename:
             return
         f=open(self.filename, 'w')
+        self.updateModelsDict()
         pickle.dump(self.modelsdict, f)
         f.close()
         return
@@ -213,7 +220,7 @@ class ModelDesignApp(Frame):
 
     def updateGuessEntryWidgets(self, model):
         """Update guess entry widget, special case as guess vals are in
-        a dict"""
+             a dict"""
         for v in self.guessentrywidgets.keys()[:]:
             w = self.guessentrywidgets[v]
             del self.guessentrywidgets[v]
@@ -261,6 +268,7 @@ class ModelDesignApp(Frame):
         X = self.createFitter(self.currentmodel)
         X.guess_start()
         X.fit(rounds=60)
+        self.updateModelsDict()
         return
 
     def parseValues(self):
@@ -268,6 +276,11 @@ class ModelDesignApp(Frame):
         model = {}
         for f in self.entrywidgets:
             model[f] = self.entrywidgets[f].get().rstrip()
+        model['guess']={}
+        for v in self.guessentrywidgets:
+            val = self.guessentrywidgets[v].get().rstrip()
+            if val != '':
+                model['guess'][v] = val
         return model
 
     def quit(self):
@@ -302,7 +315,7 @@ class FitPreviewer(Frame):
         fr.pack(side=TOP)
         self.plotframe = PlotPanel(parent=self, side=BOTTOM, height=200)
         self.dsindex = 0
-        self.opts = {'markersize':18,'fontsize':10}
+        self.opts = {'markersize':18,'fontsize':10,'showfitvars':True}
         return
 
     def sampleData(self):
@@ -324,7 +337,7 @@ class FitPreviewer(Frame):
         return ek.getxy()
 
     def updateFit(self, selfdiff, vrs, fitvals, c, X):
-        self.plotframe.updateFit(X)
+        self.plotframe.updateFit(X, showfitvars=True)
         #if self.stopfit == True:
         #    X.stop_fit=1
 
