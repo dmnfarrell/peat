@@ -39,7 +39,7 @@ from PEATDB.Ekin.Fitting import Fitting
 class ModelDesignApp(Frame):
     """Simple GUI for designing new models for use in ekin fitting"""
 
-    def __init__(self, parent=None, modelsfile=None):
+    def __init__(self, parent=None):
 
         self.parent=parent
         if not self.parent:
@@ -201,9 +201,10 @@ class ModelDesignApp(Frame):
         self.save()
         return
 
-    def loadModelsFile(self):
+    def loadModelsFile(self, filename=None):
         """Load a dict of models, the pickled format from Ekin"""
-        filename=tkFileDialog.askopenfilename(defaultextension='.dict',
+        if filename==None:
+            filename=tkFileDialog.askopenfilename(defaultextension='.dict',
                                               initialdir=os.getcwd(),
                                               filetypes=[("dict files","*.dict"),
                                                          ("All files","*.*")],
@@ -320,10 +321,14 @@ class FitPreviewer(Frame):
 
     def sampleData(self):
         E=self.E = EkinProject()
-        x=range(20)
+        x=range(30)
         y=[i+np.random.normal(.2) for i in x]
         ek = EkinDataset(xy=[x,y])
-        self.E.insertDataset(ek,'testdata')
+        self.E.insertDataset(ek,'testdata1')
+        x=np.arange(0,5,0.1)
+        y=[math.pow(i,3)+np.random.normal(5) for i in x]
+        ek = EkinDataset(xy=[x,y])
+        self.E.insertDataset(ek,'testdata2')
         self.plotframe.setProject(E)
         self.replot()
 
@@ -387,9 +392,9 @@ def main():
                         help="Raw file", metavar="FILE")
 
     opts, remainder = parser.parse_args()
-    app = ModelDesignApp(modelsfile=opts.file)
+    app = ModelDesignApp()
     if opts.file != None:
-        app.openRaw(opts.file)
+        app.loadModelsFile(opts.file)
     app.mainloop()
 
 if __name__ == '__main__':
