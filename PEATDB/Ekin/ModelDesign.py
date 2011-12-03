@@ -175,7 +175,12 @@ class ModelDesignApp(Frame):
 
     def updateModelsDict(self):
         """Send the current model to the dict"""
-        name = self.modelselector.getcurselection()[0]
+        try:
+            name = self.modelselector.getcurselection()[0]
+        except:
+            #if we lose the listbox selection
+            name = self.currentname
+            self.modelselector.setvalue(name)
         self.modelsdict[name] = self.currentmodel
         return
 
@@ -236,6 +241,8 @@ class ModelDesignApp(Frame):
                 labelpos = 'w',
                 label_text = v,
                 hull_width=400)
+            #if type(model['guess']) is types.StringType:
+            #    model['guess'] = eval(model['guess'])
             if v in model['guess']:
                 w.setvalue(model['guess'][v])
             w.pack(fill=BOTH,side=TOP,expand=1,pady=2)
@@ -245,8 +252,7 @@ class ModelDesignApp(Frame):
         """Load a model from the current dict"""
 
         #add confirmation dialog here
-
-        sel = self.modelselector.getcurselection()[0]
+        self.currentname = sel = self.modelselector.getcurselection()[0]
         self.currentmodel = model = self.modelsdict[sel]
         for f in model:
             if f in self.entrywidgets:

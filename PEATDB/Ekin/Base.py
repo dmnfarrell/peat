@@ -909,7 +909,7 @@ class EkinProject(object):
         if len(ax.texts) >= 1:
             ax.texts[0].set_text(text)
         else:
-            ax.text(.1, .8, text, transform=ax.transAxes, size=12,
+            ax.text(.1, .7, text, transform=ax.transAxes, size=12,
                 bbox=bboxprops)
 
         plt.draw()
