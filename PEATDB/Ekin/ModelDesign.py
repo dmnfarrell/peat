@@ -101,6 +101,10 @@ class ModelDesignApp(Frame):
         b.pack(side=TOP,fill=BOTH,pady=2)
         b=Button(f2,text='Save Current Models',command=self.save)
         b.pack(side=TOP,fill=BOTH,pady=2)
+        self.filenamevar = StringVar()
+        w=Label(f2, text='', textvariable=self.filenamevar, fg='blue')
+        w.pack(side=TOP,fill=BOTH,pady=2)
+        self.updateFileLabel()
 
         self.modelselector = Pmw.ScrolledListBox(f2,
                 items=self.modelsdict.keys(),
@@ -119,6 +123,14 @@ class ModelDesignApp(Frame):
         m1.add(f1)
         self.previewer = FitPreviewer(m,app=self)
         m.add(self.previewer)
+        return
+
+    def updateFileLabel(self):
+        """Update the file name"""
+        if self.filename == None:
+            self.filenamevar.set('no file loaded')
+        else:
+            self.filenamevar.set(self.filename)
         return
 
     def createGuessEntryWidget(self, parent):
@@ -218,6 +230,7 @@ class ModelDesignApp(Frame):
             self.modelsdict = pickle.load(open(filename,'r'))
             self.updateModelSelector()
             self.filename = filename
+            self.updateFileLabel()
         return
 
     def updateModelSelector(self):
@@ -241,8 +254,8 @@ class ModelDesignApp(Frame):
                 labelpos = 'w',
                 label_text = v,
                 hull_width=400)
-            #if type(model['guess']) is types.StringType:
-            #    model['guess'] = eval(model['guess'])
+            if type(model['guess']) is types.StringType:
+                model['guess'] = eval(model['guess'])
             if v in model['guess']:
                 w.setvalue(model['guess'][v])
             w.pack(fill=BOTH,side=TOP,expand=1,pady=2)
@@ -349,8 +362,7 @@ class FitPreviewer(Frame):
 
     def updateFit(self, selfdiff, vrs, fitvals, c, X):
         self.plotframe.updateFit(X, showfitvars=True)
-        #if self.stopfit == True:
-        #    X.stop_fit=1
+        return
 
     def prev(self):
         if self.dsindex <= 0:
