@@ -186,7 +186,7 @@ class PDBparser:
             pass
         elif type=='SSBOND':
             self.parsessbond(line)
-        elif type=='CRYST1':
+        elif type=='CRYST1' or type=='CRYSTL' or type=='CRYST':
             self.parsecryst(line)
         elif type=='ORIGX1' or type=='ORIGX2' or type=='ORIGX3':
             self.parseorig(line)
@@ -219,7 +219,9 @@ class PDBparser:
         elif type=='NUMMDL':
             pass
         else:
-            raise ParseLineError, 'Unknown Header type: %s' %type
+            #print 'Ignored header: %s' %type
+            #raise ParseLineError, 'Unknown Header type: %s' %type
+            pass
         return
 
     #
@@ -423,9 +425,14 @@ class PDBparser:
         return
 
     def parseheader(self,line):
+        #if not hasattr(self,'header'):
+        #    self.header=''
+        self.header=self.header+line
+        self.header=self.header.replace('HEADER','').strip()
         return
 
     def parsecompnd(self,line):
+        self.compnd=self.compnd+line.replace('COMPND','').strip()
         return
     
     def parsesource(self,line):
@@ -441,6 +448,7 @@ class PDBparser:
         return
 
     def parsescale(self,line):
+        self.scale.append(line.strip())
         return
 
     def parsejournal(self,line):
@@ -462,9 +470,20 @@ class PDBparser:
         return
 
     def parsecryst(self,line):
+        self.cryst.append(line.strip())
+        #
+        # Find the space group
+        #
+        pos=self.cryst[0].find(' P')
+        self.spacegroup=self.cryst[0][pos:].strip()
+        if len(self.spacegroup.split())>4:
+            sp=self.spacegroup.split()
+            import string
+            self.spacegroup=string.join(sp[:4],' ').strip()
         return
 
     def parseorig(self,line):
+        self.orig.append(line.strip())
         return
 
     def parseconnect(self,line):

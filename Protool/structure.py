@@ -846,6 +846,22 @@ class structureIO(structure):
             #
             Y.parse()
             self.atoms=Y.atoms
+            if hasattr(Y,'spacegroup'):
+                self.spacegroup=Y.spacegroup # Transfer spacegroup info
+            else:
+                self.spacegroup='Unknown'
+            self.header=''
+            if hasattr(Y,'header'):
+                self.header=Y.header
+            #
+            # Transfer crystal symmetry info
+            #
+            self.scale=Y.scale
+            self.orig=Y.orig
+            self.cryst=Y.cryst
+            #
+            # Update
+            #
             self.Update()
             self.attribute=Y.attribute
             if not silent:
@@ -913,6 +929,18 @@ class structureIO(structure):
         #
         if header:
             fd.write(header)
+        #
+        # Write the cryst info
+        #
+        for line in self.cryst:
+            fd.write(line+'\n')
+        for line in self.orig:
+            fd.write(line+'\n')
+        for line in self.scale:
+            fd.write(line+'\n')
+        #
+        # Now write atoms
+        #
         atoms={}
         for atom in self.atoms.keys():
             atoms[self.atoms[atom]['NUMBER']]=atom
