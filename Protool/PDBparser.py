@@ -480,6 +480,13 @@ class PDBparser:
             sp=self.spacegroup.split()
             import string
             self.spacegroup=string.join(sp[:4],' ').strip()
+        sg=self.spacegroup.strip()
+        if sg[0]=='P' and sg[1]!=' ':
+            sg=sg[0]+' '+sg[1:]
+        conv={'1':'P 1','2':'P 2','P 1 21 1':'P 21','P21':'P 21'}
+        if conv.has_key(sg):
+            sg=conv[sg]
+        self.spacegroup=sg
         return
 
     def parseorig(self,line):

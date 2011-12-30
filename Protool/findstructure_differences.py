@@ -65,11 +65,11 @@ def alignsequences(pdb1,pdb2,name1='pdb1',name2='pdb2'):
     import PEATDB.sequence_alignment as SA
     seq1=pdb1.PirSeq()
     seq2=pdb2.PirSeq()
-    ALIGN=SA.NW(seq1,seq2)
-    al1,al2,alres1,alres2=ALIGN.Align(verbose=True)
-    if ALIGN.sequence_identity<95.0:
-        print 'Sequence identity too low: %f' %ALIGN.sequence_identity
-        return False
+    ALIGN=SA.NW(seq1,seq2,gap=5.0)
+    al1,al2,alres1,alres2=ALIGN.Align(verbose=False)
+    #if ALIGN.sequence_identity<95.0:
+    #    print 'Sequence identity too low: %f' %ALIGN.sequence_identity
+    #    return False
     #
     # Now relate the PDB sequence numbers to each other
     #
