@@ -579,6 +579,7 @@ class fit_stability(Double_mutant.double_mutant):
         """Add noise to the experimental data"""
         import random
         self.tmp_stab_data={}
+        dS=random.gauss(1.37,self.options.dSscaling) # Effect of using different dS
         for prop in self.stab_data.keys():
             self.tmp_stab_data[prop]=[]
             #
@@ -594,6 +595,8 @@ class fit_stability(Double_mutant.double_mutant):
                     dp=dp
                 else:
                     dp=float(dp)+shift
+                    dp=dp*dS
+                    #print 'Used random dS scaling of: %5.2f' %dS
                 self.tmp_stab_data[prop].append(dp)
         return
         
@@ -815,10 +818,10 @@ class fit_stability(Double_mutant.double_mutant):
             #
             self.add_experimental_noise()
             #
-            # Do the fir
+            # Do the fit
             #
             import scipy.optimize
-            solution,score,numits,func_calls,warnflag=scipy.optimize.fmin(self.get_difference_all,fit_variables,full_output=True)
+            solution,score,numits,func_calls,warnflag=scipy.optimize.fmin(self.get_difference_all,fit_variables,full_output=True,maxiter=990000000,ftol=1.49012e-12, xtol=1.49012e-12)
             print 'Solution for fit #%3d:' %(numfit)
             print 'Groups and fitted variables'
             print '%15s %5s %5s' %('Group','start','fitted pKa')
@@ -871,7 +874,7 @@ class fit_stability(Double_mutant.double_mutant):
         #
         import pylab
         pylab.clf()
-        for solution,format,txt in [[best,'k-','Best'],[results,'r-','Avg.']]:
+        for solution,format,txt in [[best,'k-','Best']]: #,[results,'r-','Avg.']]:
             fit_count=0
             fitted={}
             for group in sorted(self.TGs):
@@ -891,7 +894,7 @@ class fit_stability(Double_mutant.double_mutant):
                 xs.append(pH)
                 ys.append(stabprof[pH])
             RMSD=self.get_RMSD(stabprof,'wt')
-            pylab.plot(xs,ys,format,label='%s. RMSD: %5.1f' %(txt,RMSD))
+            #pylab.plot(xs,ys,format,label='%s. RMSD: %5.1f' %(txt,RMSD))
         #
         # Plot the profile assuming model pKa values for the unfolded state
         #
@@ -915,7 +918,7 @@ class fit_stability(Double_mutant.double_mutant):
         #import pylab
         #pylab.clf()
         RMSD=self.get_RMSD(stabprof,'wt')
-        pylab.plot(xs,ys,'g-',label='Unfitted. RMSD: %5.1f' %RMSD)
+        pylab.plot(xs,ys,'g-',label='Model pKa values. ')
         #
         # Plot the exerimental pH-stability profile
         #
@@ -926,9 +929,10 @@ class fit_stability(Double_mutant.double_mutant):
             ys.append(ddG)
         pylab.plot(xs,ys,'bo-',label='wt exp')
         pylab.legend(loc=9)
-        pylab.title('Global fit of HEWL pH-stability profile')
+        pylab.title('HEWL pH-stability profile')
         pylab.xlabel('pH')
         pylab.ylabel('dGfold (kJ/mol)')
+        pylab.xlim((1.5,11.0))
         pylab.savefig('global_fit.png',dpi=300)
         if self.options.showplot:
             pylab.show()    
@@ -1033,6 +1037,7 @@ if __name__=='__main__':
 
     parser.add_option('-u','--unfold',dest='ddGunfold',action='store_true',default=True,help='Stability values are ddG(unfold) values. Default: %default')
     parser.add_option('--kcal',dest='kcal',action='store_true',default=False,help='Stability values are in kcal/mol. Default: %default')
+    parser.add_option('--dSscaling',dest='dSscaling',action='store',type='float',default=0.0,help='Model changes in dS. Default: %default')
     #
     # Specifying mutations
     #
