@@ -111,7 +111,7 @@ cdict3 = {'red':  ((0.0, 0.0, 0.0),
                    (1.0, 0.0, 0.0))
         }
 
-def heatmap(values,title='Effect of mutations',firstkey='X',secondkey='Y',colorbar=True,zlabel='Z',firstticks=False,secondticks=False):
+def heatmap(values,title='Effect of mutations',firstkey='X',secondkey='Y',colorbar=True,zlabel='Z',firstticks=False,secondticks=False,show=True):
     # Now we will use this example to illustrate 3 ways of
     # handling custom colormaps.
     # First, the most direct and explicit:
@@ -153,7 +153,7 @@ def heatmap(values,title='Effect of mutations',firstkey='X',secondkey='Y',colorb
         Z.append(zs)
 
     #plt.figure(figsize=(10,10))
-    plt.imshow(Z,interpolation='nearest') #,vmin=0.0,vmax=2.8)#, interpolation='nearest', cmap=blue_red1)
+    plt.imshow(Z,interpolation='nearest',extent=[-0.5,9.5,-0.5,9.5],origin='lower') #,vmin=0.0,vmax=2.8)#, interpolation='nearest', cmap=blue_red1)
     plt.xlabel(secondkey)
     plt.ylabel(firstkey)
     #
@@ -180,7 +180,8 @@ def heatmap(values,title='Effect of mutations',firstkey='X',secondkey='Y',colorb
     #plt.xticks(numpy.arange(0,121,10))
     #plt.yticks(numpy.arange(0,165,10))
     plt.savefig('heatmap.png',dpi=300)
-    plt.show()
+    if show:
+        plt.show()
     return
     
 if __name__=='__main__':

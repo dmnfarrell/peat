@@ -30,7 +30,7 @@ class yasara_handler:
         return
 
     def load_mol(self,pdbfile,center=None):
-        """LOad a molecule"""
+        """Load a molecule"""
         #self.yasara.run('DelAll')
         import os
         obj=self.yasara.run('LOADPDB %s' %os.path.join(os.getcwd(),pdbfile))

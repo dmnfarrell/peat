@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-#!/usr/bin/env python
 #
 # pKa - various programs and scripts for pKa value analysis, calculation and redesign
 # Copyright (C) 2010 Jens Erik Nielsen
@@ -55,7 +54,7 @@ import os, sys, csv, math
 sys.path.append('../')
 from myfitter import fitter
 import matplotlib.pyplot as plt
-import matplotlib.gridspec as gridspec
+#import matplotlib.gridspec as gridspec
 plt.rc('font',size=10)
 plt.rc('font',family='monospace')
 plt.rc('axes',linewidth=.5)
@@ -231,7 +230,7 @@ class fit_stability(Double_mutant.double_mutant):
         pylab.plot(xs,ys,'bo-',label='wt exp')
         pylab.legend()
         pylab.xlabel('pH')
-        pylab.ylabel('ddGfold (kJ/mol)')
+        pylab.ylabel(r'$\Delta$Gfold (kJ/mol)')
         pylab.show()
         return
     #
@@ -655,7 +654,7 @@ class fit_stability(Double_mutant.double_mutant):
         # Print info and fit
         #
         print '---------------------------------'
-        print 'Fitting %d pKa values for mutant %10s' %(len(fit_variables),mutant)
+        print 'Fitting %d variables (pKa values and a stability offset) for mutant %10s' %(len(fit_variables),mutant)
         print 'Groups being fit and their starting values'
         stats=[]
         for group,value in zip(fit_names,fit_variables):
@@ -757,6 +756,8 @@ class fit_stability(Double_mutant.double_mutant):
         pylab.xlabel('pH')
         pylab.ylabel('ddGfold (kJ/mol)')
         pylab.title(self.mutant.upper())
+        if not os.path.isdir('fits'):
+            os.mkdir('fits')
         pylab.savefig('fits/%s.png' %self.mutant.upper(),dpi=300)
         if self.options.showplot:
             pylab.show()

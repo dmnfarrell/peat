@@ -144,7 +144,20 @@ class sequence:
         fd.write(buffer+'\n')
         fd.close()
         return
-        
+
+    def pirlines(self,sequence,name):
+        lines=[]
+        buffer=''
+        buffer=buffer+'>%s\n' %name
+        lines.append(buffer)
+        buffer=''
+        for char in sequence:
+            buffer=buffer+char
+            if len(buffer)==80:
+                lines.append(buffer+'\n')
+                buffer=''
+        lines.append(buffer+'\n\n')
+        return lines
         
     #
     # ---------
@@ -164,6 +177,38 @@ class sequence:
         if self.sequence[-1]=='*':
             self.sequence=self.sequence[:-1]
         return self.sequence
+
+    #
+    # ----
+    # 
+
+    def read_fastamult(self,filename):
+        """Read a fasta database file, i.e. multiple (or a single) sequences"""
+        fd=open(filename)
+        lines=fd.readlines()
+        fd.close()
+        sequences=[]
+        count=0
+        buffer=''
+        ID=None
+        while 1:
+            if count==len(lines):
+                if buffer!='':
+                    sequences.append([ID,buffer.replace(' ','')])
+                break
+            line=lines[count]
+            if len(line.strip())==0:
+                count=count+1
+                continue
+            if line.strip()[0]=='>':
+                if buffer!='':
+                    sequences.append([ID,buffer.replace(' ','')])
+                ID=line.strip()[1:]
+                buffer=''
+            else:
+                buffer=buffer+line.strip()
+            count=count+1
+        return sequences
     #
     # ---------
     #

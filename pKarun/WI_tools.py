@@ -322,6 +322,16 @@ def get_hbondscore(pdbfile):
             return None
     return None
 
+def get_crystal_contacts(pdbname):
+    """Get all crystal contact for a PDB file"""
+    import os, string
+    #pdbname=os.path.split(pdbname)[1]
+    newpdb='symtry.pdb'
+    command=' getmol %s \n Y \n set \n delwat \n symtry \n symspg \n sympar 5\n soushl \n %%makmol \n %s \n %s \n \n tot 0 \n' %(os.path.split(pdbname)[1],os.path.split(pdbname)[1],newpdb)
+    logfile,files=RunWI(command,[newpdb],None,[pdbname])
+    return logfile,files
+
+    
 def get_saltbridges(pdbfile):
     import os, string
     command=' getmol '+os.path.split(pdbfile)[1]+' \n Y \n set \n symtry \n symspg \n sympar 3\n soushl \n %shosbr \n tot \n tot \n y \n 4.5 \n'

@@ -1,7 +1,1 @@
 This is a output file!
--------------------------------------------------------------------------------
-Method:$Id: mutant_stability_change.cpp 5537 2010-01-18 10:50:46Z nielsen $
-Calculates MSC terms
--------------------------------------------------------------------------------
-Method:$Id: matrix_io.cpp,v 1.1 2005/11/15 09:56:07 chresten Exp $
-

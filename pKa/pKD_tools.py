@@ -31,11 +31,18 @@ def filter_deletion_insertion(mutation):
         # Right now we model deletions as glycines
         mutation=mutation.replace('delete:','')
         mutation=mutation+':GLY'
-    elif mutation.find('insert:')!=-1:
-        raise Exception('We cannot model insertions')
+    elif mutation.find('insert')!=-1:
+        sp=mutation.split(':')
+        mutation='%s:%s:NON:%s' %(sp[1],sp[2],sp[3])
     elif mutation.find('+')!=-1:
         raise Exception('Something went wrong. I should have gotten a single mutation and got %s' %mutation)
     return mutation
+
+def get_intresnum_from_mut(mutation):
+    #
+    # Given a mutation (A:0112:ASN:ARG) return the int residue number 112
+    #
+    return int(get_resnum_from_mut(mutation))
 
 def get_resnum_from_mut(mutation):
     #
@@ -68,7 +75,7 @@ def get_newres_from_mut(mutation):
 
 def get_oldres_from_mut(mutation):
     #
-    # Given a mutation (A:0112:ASN:ARG) return the new residue (A:0112:ASN)
+    # Given a mutation (A:0112:ASN:ARG) return the old residue (A:0112:ASN)
     #
     mutation=filter_deletion_insertion(mutation)
     return get_resid_from_mut(mutation)+':'+get_oldrestyp_from_mut(mutation)
@@ -141,6 +148,18 @@ def get_single_operations(operations):
         single.append(s.strip())
     return single
 
+def interpret_mutations(operations):
+    """Combine a string of operations to a set of PEAT operations.
+    This function detects whether we have a classic or a PEAT format
+    and cleans the operations afterwards"""
+    if operations.find(':')!=-1:
+        pass
+    else:
+        operations=convert_classic_to_PEAT(operations)
+    if not operations:
+        return False
+    return check_mutation_syntax(operations)
+
 def combine_operations(operations):
     """Combine single operations into a single operation string"""
     operations.sort()
@@ -174,4 +193,141 @@ def convert_classic_to_PEAT(operations):
         except KeyError:
             return False
     return string.join(POP,'+')
-        
+
+def convert_PEAT_to_classic(operations):
+    operations=get_single_operations(operations)
+    newops=[]
+    import string, Protool
+    PI=Protool.structure()
+    for operation in operations:
+        resid=get_resid_from_mut(operation)
+        old=PI.three_to_one[get_oldrestyp_from_mut(operation)]
+        new=PI.three_to_one[get_newrestyp_from_mut(operation)]
+        resnum=get_resnum_from_mut(operation)
+        resnum=string.lstrip(resnum,'0')
+        classic='%s%s%s' %(old,resnum.strip(),new)
+        newops.append(classic)
+
+    classicops=string.join(newops,'+')
+    return classicops
+
+#
+# -----
+#
+
+def get_mutations(parent,child,ignoreCterm=False):
+    """Given two Protool instances, extract sequences, align and extract mutations
+    PDB residue identifier information"""
+    import PEATDB.sequence_alignment as SA
+    seq1=parent.PirSeq()
+    seq2=child.PirSeq()
+    #
+    ALIGN=SA.NW(seq1,seq2,gap=15.0)
+    al1,al2,alres1,alres2=ALIGN.Align(verbose=False)
+    if ALIGN.sequence_identity<95.0:
+        print 'Sequence identity too low: %f' %ALIGN.sequence_identity
+        return False
+    #
+    operations=findSequenceDifferences(al2,al1,parent.sequence,ignoreCterm)
+    return operations
+
+def findSequenceDifferences(child_sequence, parent_sequence,full_parent_sequence,ignoreCterm=False):
+    """
+    # Find all amino acid differences between child_sequence and parent_sequence
+    Child sequence and parent sequence must be aligned and in 1-letter format:
+    child_sequence, parent_sequence: AAADEFFG
+    full parent sequence is a Protool.sequence object
+    """
+    #
+    # Loop over the sequences - changes are record from parent -> child
+    #
+    import string
+    operations=[]
+    import Protool
+    PI=Protool.structureIO()
+    #
+    Cterm_add=0
+    insert_num=0
+    full_parent_count=0
+    #for count in range(len(record_sequence)):
+    #    parent_aa=parent_sequence[count]
+    #    child_aa=record_sequence[count]
+    for parent_aa,child_aa in zip(parent_sequence,child_sequence):
+        #
+        #print parent_aa,child_aa
+        if parent_aa!=child_aa:
+            
+            # Find the PDB file residue number
+            if full_parent_count>=len(full_parent_sequence):
+                # If we have an insertion at the Cterm
+                aa_identifier=full_parent_sequence[-1][0]
+                if ignoreCterm:
+                    continue
+            else:
+                aa_identifier=full_parent_sequence[full_parent_count][0]
+            #if aa_identifier[-1]==':':
+            #    aa_identifier=aa_identifier[:-1]
+            #
+            # Convert to 3letter format
+            #
+            if parent_aa!='-':
+                full_parent_count=full_parent_count+1
+                parent_aa=PI.one_to_three[parent_aa]
+            if child_aa!='-':
+                child_aa=PI.one_to_three[child_aa]
+            if parent_aa=='-':
+                operations.append('insert%d:%s:%s' %(insert_num,aa_identifier,child_aa))
+                insert_num=insert_num+1
+            elif child_aa=='-':
+                insert_num=0
+                operations.append('delete:%s:%s' %(aa_identifier,parent_aa))
+            else:
+                insert_num=0
+                operations.append('%s:%s:%s' %(aa_identifier,parent_aa,child_aa))
+        else:
+            full_parent_count=full_parent_count+1
+    return operations
+
+#
+# -----
+#
+
+
+def shortenOperations(operations):
+    """Provide the more conventional short form of the mutations"""
+    new_ops=[]
+    import DNAtool.mutation
+    import pKa.pKD_tools as pKD_tools
+    for operation in operations:
+        if operation.find('insert')!=-1:
+            text=operation.replace('insert','').split(':')
+            insertnum=int(text[0])
+            resnum='%s:%s' %(text[1],text[2])
+            resnum=int(pKD_tools.get_intresnum_from_res(resnum))
+            chainID=text[1]
+            if len(chainID)!=0:
+                chainID='(%s)' %chainID
+            insertchar='abcdefghijklmnopqrstuvw'
+            new=text[-1]
+            new_ops.append('*%s%d%s%s' %(chainID,resnum,insertchar[insertnum],DNAtool.mutation.three_to_one[new]))
+        elif operation.find('delete:')!=-1:
+            text=operation.replace('delete:','')
+            restext=text.split(':')
+            chainID=restext[0]
+            if len(chainID)!=0:
+                chainID='(%s)' %chainID
+            resnum=int(pKD_tools.get_intresnum_from_res(text))
+            old=restext[-1]
+            new_ops.append('%s%s%d*' %(DNAtool.mutation.three_to_one[old],chainID,resnum))
+        else:
+            new=pKD_tools.get_newrestyp_from_mut(operation)
+            old=pKD_tools.get_oldrestyp_from_mut(operation)
+            chainID=operation.split(':')[0]
+            resnum=pKD_tools.get_intresnum_from_res(operation)
+            if len(chainID)!=0:
+                chainID='(%s)' %chainID
+            new_ops.append('%s%s%d%s' %(DNAtool.mutation.three_to_one[old],
+                                        chainID,
+                                        resnum,
+                                        DNAtool.mutation.three_to_one[new]))
+    return new_ops
