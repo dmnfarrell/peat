@@ -131,11 +131,6 @@ void model_class::_mutate(int chainnumber,int resnumber,string newresidue) {
     vector<atom_class> oldatoms;
     for (unsigned int oldatom=0;oldatom<_P.chains[chainnumber].residues[resnumber].atoms.size();oldatom++) {
         oldatoms.push_back(_P.chains[chainnumber].residues[resnumber].atoms[oldatom]);
-        // Put in delete atoms
-	//delete_atoms.push_back(
-      
-    }
-  _org_atoms.push_back(oldatoms);
   //
   // Deal with the simple cases
   // Asp <-> Asn, Gln <-> Glu and so on ..
@@ -277,7 +272,7 @@ void model_class::_mutate(int chainnumber,int resnumber,string newresidue) {
     _P.chains[chainnumber].residues[resnumber].atoms.push_back(newcoords[atom]);
   } 
   //
-  // Change the resiue name
+  // Change the residue name
   //
   _P.chains[chainnumber].residues[resnumber].name=newresidue;
   //
