@@ -31,10 +31,10 @@ import os, random
 import numpy as np
 import csv
 
-basictests = {'test1':({'format':'databyrow'},'databyrow1.txt'),
-              #'test2':({'format':'databycolumn'},'databycol1.txt'),
+basictests = {'test1':({'format':'databyrow','model1':'Linear'},'databyrow1.txt'),
+              'test2':({'format':'databycolumn'},'databycol1.txt'),
               #rows, multiple groups
-              #'test3':({'format':'databyrow','colrepeat':6},'databyrow2.txt'),
+              'test3':({'format':'databyrow','colrepeat':6},'databyrow2.txt'),
               #cols, multiple groups
               #'test4':({'format':'databycolumn','rowrepeat':6},'databycol2.txt'),
               #paired x-y data in rows
@@ -92,7 +92,7 @@ def customTests():
               'model1':'Linear'},'setG_110309_1_pH7,5.txt')
     doTest(info, 'kinetics test', 'novo_setG/rep1')
 
-def createFakeFiles(path='testfiles'):
+def createGroupedData1(path='testfiles'):
     """Create sets of fake data to test queuing and file grouping"""
 
     names = ['aaa','bbb','ccc','ddd']
@@ -105,8 +105,22 @@ def createFakeFiles(path='testfiles'):
             vals.insert(0,x)
             cw.writerow(vals)
     return
+    
+def createGroupedData2(path='testfiles'):
+    """Create sets of fake data to test queuing and file grouping"""
 
-#formatTests(basictests)
+    names = ['aaa','bbb','ccc','ddd']
+    for i in np.arange(2,9,1.0):
+        fname = os.path.join(path,'ph_'+str(i)+'.txt')
+        cw = csv.writer(open(fname,'w'))
+        cw.writerow(['temp']+names)
+        for x in range(250,360,5):
+            vals = [round(i*x/random.normalvariate(10,0.3),2) for j in range(len(names))]
+            vals.insert(0,x)
+            cw.writerow(vals)
+    return   
+
+formatTests(basictests)
 #customTests()
-multiFileTests()
+#multiFileTests()
 

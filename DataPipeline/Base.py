@@ -47,6 +47,7 @@ class Pipeline(object):
         self.lines  =None
         self.queue = []
         self.results = []
+        self.sep = '__'   #symbol for internal separator
         return
 
     def createConfig(self, filename, **kwargs):
@@ -80,9 +81,12 @@ class Pipeline(object):
         c.add_section(f)
         c.set(f, 'xerror', 0)
         c.set(f, 'yerror', 0)
-        c.set(f, 'model1', '')
         c.set(f, 'iterations1', 20)
         c.set(f, 'ignorecomments', 1)
+        #models
+        m = 'models'
+        c.add_section(m)
+        c.set(m, 'model1', '')
         #excel settings
         e='excel'
         c.add_section(e)
@@ -220,6 +224,7 @@ class Pipeline(object):
 
     def doImport(self, lines=None):
         """Import file with current setting and return a dict"""
+        
         if lines == None:
             if self.lines!=None:
                 lines=self.lines
@@ -241,6 +246,7 @@ class Pipeline(object):
 
     def checkImportedData(self, data):
         """Report info on imported dict"""
+        
         l=0
         for d in data.keys():
             if type(data[d]) is types.DictType:
@@ -263,7 +269,7 @@ class Pipeline(object):
 
         total = len(self.queue)
         c=0.0
-        rawdata = self.rawdata = {}
+        #rawdata = self.rawdata = {}
         results = {}
         for filename in self.queue:
             if filelabels != None:
@@ -272,60 +278,89 @@ class Pipeline(object):
                 key = filename
             lines = self.openRaw(filename)
             data = self.doImport(lines)
-            if self.model1 != '':
-                fits = self.getFits(data, self.model1, filename)
+            print data
+            #if we have models to fit this means we propagate data           
+            if self.model1 != '' and self.groupbyfile == 0:
+                fits = self.processFits(data, self.models)
+                print 'fits',fits
                 results[key] = fits
 
-            '''E.saveProject(prjname)
-            print E, 'saved to %s' %prjname'''
             c+=1.0
             if callback != None:
                 callback(c/total*100)
-
+                
+        #if groupbyfiles then we process that here from results, 
+        #should use the same fitting/propagation routine as above?
+        #but labels come from filenames....        
+        #group by folder is a subset of this... I think
+        #e.g.
+        #if self.groupbyfile == 1:
+            #fits = self.getFits(results, nextmodel, filename)
+        
         print 'initial processing done'
-        self.processResults(results)
+        #print results
+        #self.processResults(results)
 
         return
 
-    def getFits(self, rawdata, model, filename):
-        """Process raw data from importer, this could be called recursively depending
-           on the nesting/grouping of data"""
-
-        E = self.getEkinProject(rawdata)
-        fits = {}
-        if model != '':
-            E.fitDatasets('ALL', models=[self.model1], noiter=self.iterations1,
-                   conv=1e-6, grad=1e-6, silent=True)
-            self.expUncert(E)
-        for d in rawdata.keys():
-            if type(rawdata[d]) is types.DictType:
-                print d,prdata[d].keys()
-                for l in prdata[d].keys():
-                    print l
+    def getDictNesting(self, data):
+        """Get level of nesting"""
+        for d in data.keys():
+            if type(data[d]) is types.DictType:
+                return 1
             else:
-                fits[d] = E.getMetaData(d)['a']
-        #path = self.workingdir
-        #E.saveProject(os.path.join(path,filename))
+                return 0
+                
+    def processFits(self, rawdata, models, ind=0):
+        """Process the raw data by fitting moving to the lowest level of nesting
+           returns: """       
+        #print models[ind]
+        model1 = 'Linear'
+        model2 = 'sigmoid'
+        fits = {}
+        nesting = self.getDictNesting(rawdata)
+        print nesting    
+        if nesting == 0:
+            #final level of nesting, we just fit and return
+            model = model1
+            E,fits = self.getFits(rawdata, model2, 'tm')        
+            #Em.addProject(E)
+            print fits
+            return E,fits
+        else:
+            #if there is nesting we fit and pass the new data back 
+            newdata = {}
+            for l in rawdata.keys():
+                print l
+                E,fits = self.getFits(rawdata[l], model1)
+                #Em.addProject(E)
+                print E,fits
+                newdata[l] = fits
+            E,fits = self.processFits(newdata, models, ind+1)
+            
+            #Em.addProject(E)
+            #save fits/plots to ekin
+            fname = os.path.basename('results')+'.ekinprj'
+            
+        #Em.saveProject(fname) 
+        print 'done fitting'
         return fits
-
-    def processResults(self, fits):
-        path = self.workingdir
-        if len(fits)<1: return
-        E = EkinProject()
-        dsets = fits[fits.keys()[0]]
-        for d in dsets:
-            x=[]; y=[]
-            for l in fits:
-                if d in fits[l]:
-                    x.append(l)
-                    y.append(fits[l][d])
-                    #print d,l,fits[l][d]
-            print d, x,y
-            ek=EkinDataset(xy=[x,y])
-            E.insertDataset(ek, d)
-        E.saveProject(os.path.join(path,'results.ekinprj'))
-        return
-
+    
+    def getFits(self, data, model, varname='a'):
+        """Fit a set of data
+           data: x-y data
+           model: model to fit
+           filename: where to save fits as ekinprj"""        
+        fits = []
+        E = self.getEkinProject(data)            
+        E.fitDatasets('ALL', models=[model], noiter=20,
+                   conv=1e-6, grad=1e-6, silent=True)
+        #self.expUncert(E)
+        labels = E.datasets
+        for d in labels:
+            fits.append(E.getMetaData(d)[varname])        
+        return E,(labels,fits)
+        
     def parseFileNames(self, filenames):
         """Parse file names to extract a numerical value"""
         labels = {}
@@ -369,7 +404,7 @@ class Pipeline(object):
         return
 
     @classmethod
-    def getEkinProject(self, data):
+    def getEkinProject(self, data, sep='__'):
         """Get an ekin project from a data dict"""
 
         E = EkinProject(mode='General')
@@ -377,7 +412,7 @@ class Pipeline(object):
             if type(data[d]) is types.DictType:
                 for lbl in data[d]:
                     #print lbl
-                    name = d+'__'+lbl
+                    name = d+sep+lbl
                     xy = data[d][lbl]
                     ek=EkinDataset(xy=xy)
                     E.insertDataset(ek, name)
@@ -392,13 +427,13 @@ class Pipeline(object):
         """A helper method that makes the options in a ConfigParser
            attributes of the given object"""
         for s in cp.sections():
+            obj.__dict__[s] = cp.items(s)
             for f in cp.items(s):
                 #print f[0], f[1]
                 try: val=int(f[1])
                 except: val=f[1]
-                obj.__dict__[f[0]] = val
-
-
+                obj.__dict__[f[0]] = val        
+        
 class BaseImporter(object):
     """Base Importer class, sub-class this to define methods specific to each kind of
        import format. At minimum we override the doImport method to get specific
