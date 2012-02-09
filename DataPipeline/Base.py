@@ -281,7 +281,8 @@ class Pipeline(object):
             print data
             #if we have models to fit this means we propagate data           
             if self.model1 != '' and self.groupbyfile == 0:
-                fits = self.processFits(data, self.models)
+                Em = EkinProject()
+                fits = self.processFits(data, self.models, Em=Em)
                 print 'fits',fits
                 results[key] = fits
 
@@ -311,40 +312,42 @@ class Pipeline(object):
             else:
                 return 0
                 
-    def processFits(self, rawdata, models, ind=0):
+    def processFits(self, rawdata, models, ind=0, parentkey='', Em=None):
         """Process the raw data by fitting moving to the lowest level of nesting
-           returns: """       
-        #print models[ind]
-        model1 = 'Linear'
-        model2 = 'sigmoid'
-        fits = {}
+            returns: """
+            
+        model1 = 'Linear'    
+        #print models[ind]  
         nesting = self.getDictNesting(rawdata)
-        print nesting    
+        #print nesting
+        #print rawdata
         if nesting == 0:
-            #final level of nesting, we just fit and return
+            #final level of nesting, triggers fitting
             model = model1
-            E,fits = self.getFits(rawdata, model2, 'tm')        
-            #Em.addProject(E)
-            print fits
-            return E,fits
+            E,fit = self.getFits(rawdata, model1, 'a')
+            Em.addProject(E, label=parentkey)
+            #print fit
+            return E,fit
         else:
             #if there is nesting we fit and pass the new data back 
             newdata = {}
             for l in rawdata.keys():
                 print l
-                E,fits = self.getFits(rawdata[l], model1)
-                #Em.addProject(E)
-                print E,fits
-                newdata[l] = fits
-            E,fits = self.processFits(newdata, models, ind+1)
+                if parentkey!='':
+                    lbl = str(l)+'_'+str(parentkey)
+                else:
+                    lbl = l
+                E,fit = self.processFits(rawdata[l], models, ind+1, parentkey=lbl, Em=Em)
+                newdata[l] = fit
+            E,fit = self.getFits(newdata, model1, 'a')
+            #print fit        
+            Em.addProject(E,label=parentkey)
             
-            #Em.addProject(E)
             #save fits/plots to ekin
             fname = os.path.basename('results')+'.ekinprj'
-            
-        #Em.saveProject(fname) 
-        print 'done fitting'
-        return fits
+            print Em.datasets
+            Em.saveProject(fname)
+            return E,fit
     
     def getFits(self, data, model, varname='a'):
         """Fit a set of data
