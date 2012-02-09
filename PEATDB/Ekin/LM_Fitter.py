@@ -184,6 +184,20 @@ class LM_Fitter:
         x = math.sqrt(self.get_difference(self.variables)/v)      
         return x
         
+    def AIC(self):
+        """Computes the Akaike Information Criterion.
+           see http://adorio-research.org/wordpress/?p=1932
+           
+           RSS-residual sum of squares of the fitting errors.
+           k  - number of fitted parameters.
+           n  - number of observations.
+        """
+        RSS = self.getRMSE()
+        k = len(self.variables)
+        n = len(self.exp_data)
+        AIC = 2 * k + n * (log(2 * pi * RSS/n) + 1)
+        return AIC
+    
     def get_value(self,function_variables,data_point):
         """To be overridden
         Function should return the value of the function with function_variables at data point
@@ -380,7 +394,7 @@ class LM_Fitter:
 
         return jacobian,errors
 
-    def do_statistics(self):
+    def doStatistics(self):
         residualsT = numpy.transpose(self.residuals)
         m = len(self.exp_data)
         n = len(self.variables)
@@ -442,23 +456,19 @@ class difficult(LM_Fitter):
         return
 
 
-if __name__=='__main__':
-    #
-    # Test of LM_Fitter class
-    #
+if __name__=='__main__':    
+    """Test of LM_Fitter class"""
 
     exp_data=[[0,1],[0.5,1.966],[0.8,1.5965],[1,1.0187],[1.8,-0.15115],[2.6,1.266]]
     X=difficult(variables=[1.8,1.],exp_data=exp_data)
-
-    #exp_data=[[0,1],[0.5,1.966],[0.8,1.5965],[1,1.0187],[1.8,-0.15115],[2.6,1.266]]
     #X=myfitter(variables=[2,1],exp_data=exp_data) ##sin(3*x) + cos(0.5*x)
 
-
-    status,variables=X.fit(rounds = 10000, error_crit = 0.000001, LM_damper =1.0, damper_adjustment_factor = 1.0, step = 1e-8)
+    status,variables=X.fit(rounds = 10000, error_crit = 0.000001, LM_damper =1.0, 
+                            damper_adjustment_factor = 1.0, step = 1e-8)
     print
     print 'Done. Status',status
     print 'Fitted variables',variables
-
-    X.do_statistics()
-
+    X.doStatistics()
+    #print X.getRMSE()
+    #print X.AIC()
 

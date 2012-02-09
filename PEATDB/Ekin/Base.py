@@ -957,16 +957,18 @@ class EkinProject(object):
     def getFields(self):
         return self.__dict__.keys()
 
-    def addProject(self, E, overwrite=False):
+    def addProject(self, E, overwrite=False, label=''):
         """Combine another project with the current one, duplicates are renamed"""
         import copy
         for d in E.datasets:
             edata = copy.deepcopy(E.getDataset(d))
             fitdata = E.getFitData(d)
+            if label != '':
+                d = str(d)+'_'+str(label)
             if d in self.datasets:
-                name = d + '_1'
+                name = str(d) + '_a'
             else:
-                name = d
+                name = str(d)
             self.insertDataset(edata, name, fit=fitdata)
             for field in self.ekinfields:
                 if not E.__dict__.has_key(field):

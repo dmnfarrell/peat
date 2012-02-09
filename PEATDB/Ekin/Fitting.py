@@ -100,7 +100,7 @@ class Fitting(object):
                 if self.guess==None:
                     return
                 guess = self.guess
-                print guess
+                #print guess
                 if type(guess) is not types.DictType:
                     guess = eval(guess)
                 x=[i[0] for i in self.exp_data]
@@ -280,8 +280,8 @@ class Fitting(object):
         for v in varnames:
             fitvars[v] = []     #group lists by variable name
         
-	xd,yd,a,xerrs,yerrs = ekindata.getAll()
-	estdata={}; estdata['__datatabs_fits__']={}
+        xd,yd,a,xerrs,yerrs = ekindata.getAll()
+        estdata={}; estdata['__datatabs_fits__']={}
         for r in range(runs):
             mut_x=[];mut_y=[]
             #if the datapoint has x or y error values, we use that instead
