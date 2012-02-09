@@ -30,6 +30,7 @@ from Base import Pipeline
 import os, random
 import numpy as np
 import csv
+from PEATDB.Ekin.Base import EkinProject
 
 basictests = {'test1':({'format':'databyrow','model1':'Linear'},'databyrow1.txt'),
               'test2':({'format':'databycolumn'},'databycol1.txt'),
@@ -85,6 +86,25 @@ def multiFileTests():
     p.run()
     return
 
+def fitPropagationTest():
+    """Tests the propagation of fit data direct from a dict - no importing"""
+    import time
+    start=time.time()    
+    p = Pipeline()
+    conf = {'model1':'linear','model2':'linear','model3':'power'}#,'xerror':0.1,'yerror':0.2}
+    p.createConfig('temp.conf',**conf)
+    print p.models
+    data = createNestedData()
+    Em = EkinProject()
+    models = ['linear','linear','power']
+    #models = [('model1', 'linear'),('model2', 'linear')]
+    fits = p.processFits(data, models, Em=Em)
+    Em.saveProject('results.ekinprj')
+    print 'completed fit propagation test'
+    print 'took %s seconds' %round((time.time()-start),2)
+    print '-------------------'
+    return
+        
 def customTests():
     """Tests kinetics data for paper"""
 
@@ -106,21 +126,25 @@ def createGroupedData1(path='testfiles'):
             cw.writerow(vals)
     return
     
-def createGroupedData2(path='testfiles'):
-    """Create sets of fake data to test queuing and file grouping"""
-
-    names = ['aaa','bbb','ccc','ddd']
-    for i in np.arange(2,9,1.0):
-        fname = os.path.join(path,'ph_'+str(i)+'.txt')
-        cw = csv.writer(open(fname,'w'))
-        cw.writerow(['temp']+names)
-        for x in range(250,360,5):
-            vals = [round(i*x/random.normalvariate(10,0.3),2) for j in range(len(names))]
-            vals.insert(0,x)
-            cw.writerow(vals)
-    return   
+def createNestedData():
+    """Create fake nested data similar to our kinetics data"""
+    data={}
+    names = ['aaa','bbb','ccc']
+    labels = range(1,8) #e.g. a ph range
+    sublabels1 = np.arange(0.2,0.5,0.1)
+    x = range(20)    
+    for n in names:
+        data[n]={}
+        for l in labels:
+            data[n][l]={}
+            for s in sublabels1:
+                data[n][l][s]={}
+                y=[round(i*s/l+random.normalvariate(1,0.1),3) for i in x]
+                data[n][l][s] = (x,y) 
+    return data  
 
 formatTests(basictests)
 #customTests()
 #multiFileTests()
+#fitPropagationTest()
 

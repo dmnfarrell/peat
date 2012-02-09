@@ -73,20 +73,23 @@ class Pipeline(object):
         #c.set(s, 'rowdataformat', 'number')
         #c.set(s, 'coldataformat', 'number')
         c.set(s, 'timeformat', "%Y-%m-%d %H:%M:%S")
+        c.set(s, 'ignorecomments', 1)
         c.set(s, 'rowheader', '')
         c.set(s, 'colheader', '')
         c.set(s, 'groupbyfile', 0)
         #fitting settings
         f = 'fitting'
-        c.add_section(f)
+        c.add_section(f)      
         c.set(f, 'xerror', 0)
         c.set(f, 'yerror', 0)
-        c.set(f, 'iterations1', 20)
-        c.set(f, 'ignorecomments', 1)
+        c.set(f, 'iterations', 30)
+        
         #models
         m = 'models'
         c.add_section(m)
         c.set(m, 'model1', '')
+        c.set(m, 'model2', '')
+        c.set(m, 'model3', '')
         #excel settings
         e='excel'
         c.add_section(e)
@@ -127,9 +130,15 @@ class Pipeline(object):
         #both the Importer and Pipeline object get copies of the config options
         #as attributes
         self.setAttributesfromConfigParser(self, cp)
+        self.getModelsList()
         print 'parsed config file ok, format is %s' %format
         return
 
+    def getModelsList(self):
+        """Convert models chosen in conf file to a list"""
+        print self.models
+        return
+        
     def getImporter(self, format, cp):
         """Get the required importer object"""
         import Custom
@@ -240,7 +249,7 @@ class Pipeline(object):
         except Exception, e:
             print 'Importer returned an error:'
             print e
-            data = None
+            data = {}
         self.checkImportedData(data)
         return data
 
@@ -276,24 +285,28 @@ class Pipeline(object):
                 key = filelabels[filename]
             else:
                 key = filename
-            lines = self.openRaw(filename)
+            lines = self.openRaw(filename)            
             data = self.doImport(lines)
-            print data
-            #if we have models to fit this means we propagate data           
+            #print data
+            #if we have models to fit this means we might need to propagate fit data
+            #all this is handled in processFits
             if self.model1 != '' and self.groupbyfile == 0:
-                Em = EkinProject()
-                fits = self.processFits(data, self.models, Em=Em)
-                print 'fits',fits
+                #pass an ekin project to store all the fits for later viewing
+                Em = EkinProject()  
+                E,fits = self.processFits(data, self.models, Em=Em)
+                print 'final fits', fits
                 results[key] = fits
+                #save fits/plots to ekin
+                fname = os.path.basename(filename)
+                fname = os.path.join(self.workingdir, fname+'.ekinprj')
+                Em.saveProject(fname)
 
             c+=1.0
             if callback != None:
                 callback(c/total*100)
                 
         #if groupbyfiles then we process that here from results, 
-        #should use the same fitting/propagation routine as above?
         #but labels come from filenames....        
-        #group by folder is a subset of this... I think
         #e.g.
         #if self.groupbyfile == 1:
             #fits = self.getFits(results, nextmodel, filename)
@@ -317,16 +330,14 @@ class Pipeline(object):
             returns: """
             
         model1 = 'Linear'    
-        #print models[ind]  
-        nesting = self.getDictNesting(rawdata)
-        #print nesting
-        #print rawdata
+        print models, self.models
+        nesting = self.getDictNesting(rawdata)        
+        
         if nesting == 0:
             #final level of nesting, triggers fitting
             model = model1
             E,fit = self.getFits(rawdata, model1, 'a')
             Em.addProject(E, label=parentkey)
-            #print fit
             return E,fit
         else:
             #if there is nesting we fit and pass the new data back 
@@ -337,16 +348,13 @@ class Pipeline(object):
                     lbl = str(l)+'_'+str(parentkey)
                 else:
                     lbl = l
+                #now we pass each child node to the same function    
                 E,fit = self.processFits(rawdata[l], models, ind+1, parentkey=lbl, Em=Em)
+                #for d in E.datasets:
+                #    print E.getMeta(d,'exp_errors')['a'][1]
                 newdata[l] = fit
-            E,fit = self.getFits(newdata, model1, 'a')
-            #print fit        
+            E,fit = self.getFits(newdata, model1, 'a')                 
             Em.addProject(E,label=parentkey)
-            
-            #save fits/plots to ekin
-            fname = os.path.basename('results')+'.ekinprj'
-            print Em.datasets
-            Em.saveProject(fname)
             return E,fit
     
     def getFits(self, data, model, varname='a'):
@@ -358,10 +366,11 @@ class Pipeline(object):
         E = self.getEkinProject(data)            
         E.fitDatasets('ALL', models=[model], noiter=20,
                    conv=1e-6, grad=1e-6, silent=True)
-        #self.expUncert(E)
+        if self.xerror != 0 or self.yerror != 0:
+            self.expUncert(E)
         labels = E.datasets
         for d in labels:
-            fits.append(E.getMetaData(d)[varname])        
+            fits.append(E.getMetaData(d)[varname])
         return E,(labels,fits)
         
     def parseFileNames(self, filenames):
