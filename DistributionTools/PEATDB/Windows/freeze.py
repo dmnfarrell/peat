@@ -20,6 +20,7 @@ version = '2.0'
 f = Freezer('peatdb', excludes=('wx'))
 f.addScript(os.path.join(peatpath, "PEATApp.py"))
 f.addScript(os.path.join(peatpath, "Ekin/Ekin_main.py"))
+f.addScript(os.path.join(peatpath, "Ekin/ModelDesign.py"))
 f.addScript(os.path.join(peatpath, "DNAtool/DNAtool.py"))
 #these lines allow the plugins to work
 f.addModule('PEATDB.PEATApp')
