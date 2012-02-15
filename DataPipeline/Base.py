@@ -41,7 +41,7 @@ class Pipeline(object):
     def __init__(self, conffile=None):
 
         if conffile==None:
-            self.createConfig('pipe.conf')
+            self.createConfig('default.conf')
         self.savedir = os.getcwd()
         self.filename = ''
         self.lines  =None
@@ -51,7 +51,7 @@ class Pipeline(object):
         return
 
     def createConfig(self, filename, **kwargs):
-        """Create a basic config file with default options"""
+        """Create a basic config file with default options and/or custom values"""
 
         c = ConfigParser.ConfigParser()
         s = 'base'
@@ -82,14 +82,19 @@ class Pipeline(object):
         c.add_section(f)      
         c.set(f, 'xerror', 0)
         c.set(f, 'yerror', 0)
-        c.set(f, 'iterations', 30)
-        
+        c.set(f, 'iterations', 30)        
         #models
         m = 'models'
         c.add_section(m)
         c.set(m, 'model1', '')
         c.set(m, 'model2', '')
         c.set(m, 'model3', '')
+        #variables
+        v = 'variables'
+        c.add_section(v)
+        c.set(v, 'variable1', '')
+        c.set(v, 'variable2', '')
+        c.set(v, 'variable3', '')
         #excel settings
         e='excel'
         c.add_section(e)
@@ -100,8 +105,10 @@ class Pipeline(object):
         c.add_section(m)
 
         #use kwargs to create specific settings in the appropriate section
+       
         for s in c.sections():
             opts = c.options(s)
+            #print s, c.options(s)
             for k in kwargs:
                 if k in opts:
                     #print s,k
@@ -130,13 +137,9 @@ class Pipeline(object):
         #both the Importer and Pipeline object get copies of the config options
         #as attributes
         self.setAttributesfromConfigParser(self, cp)
-        self.getModelsList()
+        self.models = self.getListFromConfigItems(self.models)
+        self.variables = self.getListFromConfigItems(self.variables)
         print 'parsed config file ok, format is %s' %format
-        return
-
-    def getModelsList(self):
-        """Convert models chosen in conf file to a list"""
-        print self.models
         return
         
     def getImporter(self, format, cp):
@@ -263,7 +266,7 @@ class Pipeline(object):
             else: l+=1
         print 'importer returned %s datasets' %l
         return
-
+        
     def run(self, callback=None):
         """Do initial import/fitting run with the current config"""
 
@@ -288,12 +291,11 @@ class Pipeline(object):
             lines = self.openRaw(filename)            
             data = self.doImport(lines)
             #print data
-            #if we have models to fit this means we might need to propagate fit data
-            #all this is handled in processFits
+            #if we have models to fit this means we might need to propagate fit data          
             if self.model1 != '' and self.groupbyfile == 0:
                 #pass an ekin project to store all the fits for later viewing
                 Em = EkinProject()  
-                E,fits = self.processFits(data, self.models, Em=Em)
+                E,fits = self.processFits(rawdata=data, Em=Em)
                 print 'final fits', fits
                 results[key] = fits
                 #save fits/plots to ekin
@@ -325,22 +327,31 @@ class Pipeline(object):
             else:
                 return 0
                 
-    def processFits(self, rawdata, models, ind=0, parentkey='', Em=None):
-        """Process the raw data by fitting moving to the lowest level of nesting
-            returns: """
+    def processFits(self, rawdata=None, ind=None, parentkey='', Em=None):
+        """Process the a dict of possibly nested dicts
+            ind: the index indicating the level of recursion, used to find the right model
+                 and variable
+            parentkey: the label from the parent dict that will be matched to the fits
+            returns: final set of fits"""
             
-        model1 = 'Linear'    
-        print models, self.models
-        nesting = self.getDictNesting(rawdata)        
+        models = self.models
+        variables = self.variables
+        xerror = float(self.xerror); yerror = float(self.yerror)
+        if ind == None:
+            ind = len(models)-1    
         
+        nesting = self.getDictNesting(rawdata) 
+        #print ind, models, variables
+        print nesting, models[ind]
+
         if nesting == 0:
-            #final level of nesting, triggers fitting
-            model = model1
-            E,fit = self.getFits(rawdata, model1, 'a')
+            #final level of nesting, we just fit
+            E = self.getEkinProject(rawdata)#, xerrs=xerrs, yerrs=yerrs)
+            E,fit = self.getFits(E, models[ind], variables[ind])
             Em.addProject(E, label=parentkey)
             return E,fit
         else:
-            #if there is nesting we fit and pass the new data back 
+            #if there is nesting we pass the subdicts recursively and get their fits 
             newdata = {}
             for l in rawdata.keys():
                 print l
@@ -349,28 +360,27 @@ class Pipeline(object):
                 else:
                     lbl = l
                 #now we pass each child node to the same function    
-                E,fit = self.processFits(rawdata[l], models, ind+1, parentkey=lbl, Em=Em)
-                #for d in E.datasets:
-                #    print E.getMeta(d,'exp_errors')['a'][1]
+                E,fit = self.processFits(rawdata[l], ind=ind-1, parentkey=lbl, Em=Em)
                 newdata[l] = fit
-            E,fit = self.getFits(newdata, model1, 'a')                 
+            E = self.getEkinProject(newdata)#, xerrs=xerrs, yerrs=yerrs)
+            E,fit = self.getFits(E, models[ind], variables[ind])
+            #print fit
             Em.addProject(E,label=parentkey)
             return E,fit
     
-    def getFits(self, data, model, varname='a'):
-        """Fit a set of data
-           data: x-y data
+    def getFits(self, E, model, varname='a'):
+        """Fit an Ekin project   
            model: model to fit
-           filename: where to save fits as ekinprj"""        
+           varname: variable to extract"""
+           
         fits = []
-        E = self.getEkinProject(data)            
         E.fitDatasets('ALL', models=[model], noiter=20,
-                   conv=1e-6, grad=1e-6, silent=True)
-        if self.xerror != 0 or self.yerror != 0:
-            self.expUncert(E)
+                      conv=1e-6, grad=1e-6, silent=True)
+        #if self.xerror != 0 or self.yerror != 0:
+        #    self.expUncert(E)
         labels = E.datasets
         for d in labels:
-            fits.append(E.getMetaData(d)[varname])
+            fits.append(E.getMetaData(d)[varname])            
         return E,(labels,fits)
         
     def parseFileNames(self, filenames):
@@ -382,14 +392,13 @@ class Pipeline(object):
             labels[f] = l
         return labels
 
-    def expUncert(self, E):
+    def expUncert(self, E, xerr=0, yerr=0):
         """Get fitted variable errors"""
-
-        if self.xerror!=0 or self.yerror!=0:
-            for d in E.datasets:
-                ferrs = E.estimateExpUncertainty(d, runs=10)
-                E.addMeta(d, 'exp_errors', ferrs)
-            E.saveProject()
+    
+        for d in E.datasets:
+            ferrs = E.estimateExpUncertainty(d, runs=10, xuncert=xerr, yuncert=yerr)
+            E.addMeta(d, 'exp_errors', ferrs)
+        E.saveProject()
         return
 
     def addFolder(self, path, ext='.txt'):
@@ -416,7 +425,7 @@ class Pipeline(object):
         return
 
     @classmethod
-    def getEkinProject(self, data, sep='__'):
+    def getEkinProject(self, data, sep='__', xerrs=None, yerrs=None):
         """Get an ekin project from a data dict"""
 
         E = EkinProject(mode='General')
@@ -426,25 +435,33 @@ class Pipeline(object):
                     #print lbl
                     name = d+sep+lbl
                     xy = data[d][lbl]
-                    ek=EkinDataset(xy=xy)
+                    ek=EkinDataset(xy=xy)   
                     E.insertDataset(ek, name)
             else:
                 xy = data[d]
-                ek=EkinDataset(xy=xy)
+                ek=EkinDataset(xy=xy)#, xerrs=xerrs, yerrs=yerrs)
                 E.insertDataset(ek, d)
         return E
 
     @classmethod
     def setAttributesfromConfigParser(self, obj, cp):
-        """A helper method that makes the options in a ConfigParser
-           attributes of the given object"""
+        """A helper method that makes the options in a ConfigParser object
+           attributes of obj"""
+       
         for s in cp.sections():
-            obj.__dict__[s] = cp.items(s)
+            obj.__dict__[s] = cp.items(s)          
+            #print cp.items(s)
             for f in cp.items(s):
                 #print f[0], f[1]
                 try: val=int(f[1])
                 except: val=f[1]
-                obj.__dict__[f[0]] = val        
+                obj.__dict__[f[0]] = val    
+                
+    @classmethod
+    def getListFromConfigItems(self, items):
+        """Get a list from a set of ConfigParser key-value pairs"""
+        lst = [i[1] for i in items]
+        return lst
         
 class BaseImporter(object):
     """Base Importer class, sub-class this to define methods specific to each kind of

@@ -91,20 +91,20 @@ def fitPropagationTest():
     import time
     start=time.time()    
     p = Pipeline()
-    conf = {'model1':'linear','model2':'linear','model3':'power'}#,'xerror':0.1,'yerror':0.2}
-    p.createConfig('temp.conf',**conf)
-    print p.models
+    conf = {'model1':'linear','model2':'linear','model3':'sigmoid',
+            'variable1':'a','variable2':'a','variable3':'tm','xerror':0.1,'yerror':0.2}    
+    p.createConfig('temp.conf',**conf)   
     data = createNestedData()
-    Em = EkinProject()
-    models = ['linear','linear','power']
-    #models = [('model1', 'linear'),('model2', 'linear')]
-    fits = p.processFits(data, models, Em=Em)
+    Em = EkinProject()    
+    E,fits = p.processFits(data, Em=Em)
+    print 'final fits', fits
     Em.saveProject('results.ekinprj')
     print 'completed fit propagation test'
     print 'took %s seconds' %round((time.time()-start),2)
     print '-------------------'
+    
     return
-        
+
 def customTests():
     """Tests kinetics data for paper"""
 
@@ -131,7 +131,7 @@ def createNestedData():
     data={}
     names = ['aaa','bbb','ccc']
     labels = range(1,8) #e.g. a ph range
-    sublabels1 = np.arange(0.2,0.5,0.1)
+    sublabels1 = np.arange(0.2,0.6,0.1)
     x = range(20)    
     for n in names:
         data[n]={}
@@ -143,8 +143,8 @@ def createNestedData():
                 data[n][l][s] = (x,y) 
     return data  
 
-formatTests(basictests)
+#formatTests(basictests)
 #customTests()
 #multiFileTests()
-#fitPropagationTest()
+fitPropagationTest()
 
