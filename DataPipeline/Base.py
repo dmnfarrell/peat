@@ -290,7 +290,7 @@ class Pipeline(object):
                 key = filename
             lines = self.openRaw(filename)            
             data = self.doImport(lines)
-            #print data
+            print self.model1
             #if we have models to fit this means we might need to propagate fit data          
             if self.model1 != '' and self.groupbyfile == 0:
                 #pass an ekin project to store all the fits for later viewing
@@ -302,6 +302,7 @@ class Pipeline(object):
                 fname = os.path.basename(filename)
                 fname = os.path.join(self.workingdir, fname+'.ekinprj')
                 Em.saveProject(fname)
+                print Em, fname
 
             c+=1.0
             if callback != None:
@@ -314,8 +315,6 @@ class Pipeline(object):
             #fits = self.getFits(results, nextmodel, filename)
         
         print 'initial processing done'
-        #print results
-        #self.processResults(results)
 
         return
 
@@ -336,23 +335,34 @@ class Pipeline(object):
             
         models = self.models
         variables = self.variables
-        xerror = float(self.xerror); yerror = float(self.yerror)
-        if ind == None:
-            ind = len(models)-1    
         
+        if len(models) == 0:
+            print 'no models found for fitting!'
+            return None, None
+        if ind == None:
+            ind = len(models)-1            
+        currmodel = models[ind]
+        if len(variables) == 0:            
+            currvariable = self.findVariableName(currmodel)
+            print 'no variable given to extract, using %s' %currvariable
+        else:
+            currvariable = variables[ind]
+
         nesting = self.getDictNesting(rawdata) 
+        
         #print ind, models, variables
-        print nesting, models[ind]
+        #print nesting, models[ind]
 
         if nesting == 0:
             #final level of nesting, we just fit
-            E = self.getEkinProject(rawdata)#, xerrs=xerrs, yerrs=yerrs)
-            E,fit = self.getFits(E, models[ind], variables[ind])
+            xerror = float(self.xerror); yerror = float(self.yerror)
+            E = self.getEkinProject(rawdata, xerror=xerror, yerror=yerror)
+            E,fit = self.getFits(E, currmodel, currvariable)
             Em.addProject(E, label=parentkey)
             return E,fit
         else:
             #if there is nesting we pass the subdicts recursively and get their fits 
-            newdata = {}
+            fitdata = {}
             for l in rawdata.keys():
                 print l
                 if parentkey!='':
@@ -361,9 +371,10 @@ class Pipeline(object):
                     lbl = l
                 #now we pass each child node to the same function    
                 E,fit = self.processFits(rawdata[l], ind=ind-1, parentkey=lbl, Em=Em)
-                newdata[l] = fit
-            E = self.getEkinProject(newdata)#, xerrs=xerrs, yerrs=yerrs)
-            E,fit = self.getFits(E, models[ind], variables[ind])
+                fitdata[l] = fit
+  
+            E = self.getEkinProject(fitdata)
+            E,fit = self.getFits(E, currmodel, currvariable)
             #print fit
             Em.addProject(E,label=parentkey)
             return E,fit
@@ -374,15 +385,42 @@ class Pipeline(object):
            varname: variable to extract"""
            
         fits = []
+        xerrors = []
+        yerrors = []
         E.fitDatasets('ALL', models=[model], noiter=20,
                       conv=1e-6, grad=1e-6, silent=True)
-        #if self.xerror != 0 or self.yerror != 0:
-        #    self.expUncert(E)
         labels = E.datasets
+        if self.xerror != 0 or self.yerror != 0:
+            print 'getting exp uncert'
+            self.expUncert(E, xerr=float(self.xerror))
+            for d in labels:
+                yerrors.append(E.getMeta(d,'exp_errors')[varname][1])
         for d in labels:
             fits.append(E.getMetaData(d)[varname])            
-        return E,(labels,fits)
+        return E,(labels,fits,xerrors,yerrors)
         
+    def findVariableName(self, model, i=0):
+        """Find a parameter name for the given model at index i,
+           used so we don't cause an error when doing processFits when no
+           variable is given in the conf file"""
+            
+        from PEATDB.Ekin.Fitting import Fitting    
+        X = Fitting.getFitter(model)
+        if X==None:
+            print 'no fitter found for this model name'
+            return 'a'
+        varname = X.getVarNames()[i]
+        return varname
+        
+    def expUncert(self, E, xerr=0, yerr=0):
+        """Get fitted variable errors using the iterative method"""
+    
+        for d in E.datasets:
+            ferrs = E.estimateExpUncertainty(d, runs=10, xuncert=xerr, yuncert=yerr)
+            E.addMeta(d, 'exp_errors', ferrs)
+        E.saveProject()
+        return
+
     def parseFileNames(self, filenames):
         """Parse file names to extract a numerical value"""
         labels = {}
@@ -391,16 +429,7 @@ class Pipeline(object):
             l = re.findall("([0-9.]*[0-9]+)", bname)[0]
             labels[f] = l
         return labels
-
-    def expUncert(self, E, xerr=0, yerr=0):
-        """Get fitted variable errors"""
-    
-        for d in E.datasets:
-            ferrs = E.estimateExpUncertainty(d, runs=10, xuncert=xerr, yuncert=yerr)
-            E.addMeta(d, 'exp_errors', ferrs)
-        E.saveProject()
-        return
-
+        
     def addFolder(self, path, ext='.txt'):
         """Add a folder to the queue"""
 
@@ -425,22 +454,29 @@ class Pipeline(object):
         return
 
     @classmethod
-    def getEkinProject(self, data, sep='__', xerrs=None, yerrs=None):
-        """Get an ekin project from a data dict"""
+    def getEkinProject(self, data, xerror=None, yerror=None):
+        """Get an ekin project from a dict of the form
+             {label:([x],[y]),label2:([x],[y])} or
+             {label:([x],[y],[xerr],[yerr]),label2:([x],[y],[xerr],[yerr])}"""
 
         E = EkinProject(mode='General')
         for d in data.keys():
             if type(data[d]) is types.DictType:
-                for lbl in data[d]:
-                    #print lbl
-                    name = d+sep+lbl
-                    xy = data[d][lbl]
-                    ek=EkinDataset(xy=xy)   
-                    E.insertDataset(ek, name)
+                pass
             else:
-                xy = data[d]
-                ek=EkinDataset(xy=xy)#, xerrs=xerrs, yerrs=yerrs)
-                E.insertDataset(ek, d)
+                #print data[d]
+                if len(data[d]) == 4:
+                    x,y,xerrs,yerrs = data[d]
+                else:
+                    x,y = data[d]
+                    xerrs = []; yerrs=[]
+                    if xerror!=None:
+                        xerrs=[xerror for i in x]
+                    if yerror!=None:
+                        yerrs=[yerror for i in y]                   
+                ek = EkinDataset(xy=[x,y], xerrs=xerrs, yerrs=yerrs)
+                E.insertDataset(ek, d)                
+                #print ek.errors
         return E
 
     @classmethod
@@ -455,12 +491,12 @@ class Pipeline(object):
                 #print f[0], f[1]
                 try: val=int(f[1])
                 except: val=f[1]
-                obj.__dict__[f[0]] = val    
+                obj.__dict__[f[0]] = val
                 
     @classmethod
     def getListFromConfigItems(self, items):
         """Get a list from a set of ConfigParser key-value pairs"""
-        lst = [i[1] for i in items]
+        lst = [i[1] for i in items if i[1] != '']
         return lst
         
 class BaseImporter(object):

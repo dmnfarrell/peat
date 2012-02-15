@@ -37,18 +37,20 @@ basictests = {'test1':({'format':'databyrow','model1':'Linear'},'databyrow1.txt'
               #rows, multiple groups
               'test3':({'format':'databyrow','colrepeat':6},'databyrow2.txt'),
               #cols, multiple groups
-              #'test4':({'format':'databycolumn','rowrepeat':6},'databycol2.txt'),
+              'test4':({'format':'databycolumn','rowrepeat':6},'databycol2.txt'),
               #paired x-y data in rows
-              #'test5':({'format':'paireddatabyrow'},'databyrow_paired.txt'),
+              'test5':({'format':'paireddatabyrow'},'databyrow_paired.txt'),
               #paired x-y data in cols
-              #'test6':({'format':'paireddatabycolumn'},'databycol_paired.txt'),
+              'test6':({'format':'paireddatabycolumn'},'databycol_paired.txt'),
               #various non-default formatting
-              #'test7':({'format':'databyrow','delimeter':'tab','decimalsymbol':',',
-              #          'colrepeat':6}, 'databyrow_errors.txt'),
-              #'test8':({'format':'groupeddatabyrow','rowrepeat':4,'rowheader':0,'rowstart':1,
-              #           'model1':'Linear'}, 'databyrow_grouped.txt'),
+              'test7':({'format':'databyrow','delimeter':'tab','decimalsymbol':',',
+                        'colrepeat':6}, 'databyrow_errors.txt'),
+              #fitting models included
+              'test8':({'format':'groupeddatabyrow','rowrepeat':4,'rowheader':0,'rowstart':1,
+                         'model1':'Linear'}, 'databyrow_grouped.txt'),
               'test9':({'format':'groupeddatabycolumn','colrepeat':4,'colheader':0,'colstart':1,
-                        'model1':'Linear','model2':'sigmoid','xerror':0.2,'yerror':0.3},
+                        'model1':'Linear','model2':'sigmoid','variable1':'a','variable2':'tm',
+                        'xerror':0.2,'yerror':0.3},
                         'databycol_grouped.txt'),
               #'test10':({'format':'databyrow','rowheader':"aaa,bbb,ccc,ddd"},
               #          'databyrow_noheader.txt')
@@ -92,8 +94,8 @@ def fitPropagationTest():
     start=time.time()    
     p = Pipeline()
     conf = {'model1':'linear','model2':'linear','model3':'sigmoid',
-            'variable1':'a','variable2':'a','variable3':'tm','xerror':0.1,'yerror':0.2}    
-    p.createConfig('temp.conf',**conf)   
+            'variable1':'a','variable2':'a','variable3':'tm','xerror':1,'yerror':0.2}    
+    p.createConfig('temp.conf',**conf)
     data = createNestedData()
     Em = EkinProject()    
     E,fits = p.processFits(data, Em=Em)
@@ -141,9 +143,9 @@ def createNestedData():
                 data[n][l][s]={}
                 y=[round(i*s/l+random.normalvariate(1,0.1),3) for i in x]
                 data[n][l][s] = (x,y) 
-    return data  
+    return data
 
-#formatTests(basictests)
+formatTests(basictests)
 #customTests()
 #multiFileTests()
 fitPropagationTest()
