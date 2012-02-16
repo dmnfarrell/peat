@@ -387,7 +387,7 @@ class Pipeline(object):
         fits = []
         xerrors = []
         yerrors = []
-        E.fitDatasets('ALL', models=[model], noiter=20,
+        E.fitDatasets('ALL', models=[model], noiter=30,
                       conv=1e-6, grad=1e-6, silent=True)
         labels = E.datasets
         if self.xerror != 0 or self.yerror != 0:

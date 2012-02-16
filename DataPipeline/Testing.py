@@ -29,6 +29,7 @@
 from Base import Pipeline
 import os, random
 import numpy as np
+from math import *
 import csv
 from PEATDB.Ekin.Base import EkinProject
 
@@ -93,8 +94,8 @@ def fitPropagationTest():
     import time
     start=time.time()    
     p = Pipeline()
-    conf = {'model1':'linear','model2':'linear','model3':'sigmoid',
-            'variable1':'a','variable2':'a','variable3':'tm','xerror':1,'yerror':0.2}    
+    conf = {'model1':'linear','model2':'Michaelis-Menten','model3':'sigmoid',
+            'variable1':'a','variable2':'Km','variable3':'tm','xerror':.1,'yerror':0.05}    
     p.createConfig('temp.conf',**conf)
     data = createNestedData()
     Em = EkinProject()    
@@ -129,23 +130,31 @@ def createGroupedData1(path='testfiles'):
     return
     
 def createNestedData():
-    """Create fake nested data similar to our kinetics data"""
+    """Create simulated nested data similar to our kinetics data"""
     data={}
     names = ['aaa','bbb','ccc']
-    labels = range(1,8) #e.g. a ph range
-    sublabels1 = np.arange(0.2,0.6,0.1)
-    x = range(20)    
-    for n in names:
-        data[n]={}
-        for l in labels:
-            data[n][l]={}
-            for s in sublabels1:
-                data[n][l][s]={}
-                y=[round(i*s/l+random.normalvariate(1,0.1),3) for i in x]
-                data[n][l][s] = (x,y) 
-    return data
+    tms = [7.5,8.0,8.5]
+    phs = range(2,14) #e.g. a ph range
+    concs = [0.01,0.1,0.2,0.3,0.5,1.0,2.0,5.0]
+    x = range(0,100,5)
 
-formatTests(basictests)
+    for n in names:
+        i=names.index(n)
+        tm=tms[i]#+random.normalvariate(0,0.1)
+        data[n]={}
+        for p in phs:
+            km = 2/(1+exp((p-tm)/1.2))
+            #print p,km
+            data[n][p]={}
+            for s in concs:
+                vel = (10 * s)/(s + km)
+                y = [round(i*vel,3) for i in x]
+                y = [i * random.normalvariate(1,0.03) for i in y]
+                data[n][p][s] = (x,y)    
+    return data
+    
+    
+#formatTests(basictests)
 #customTests()
 #multiFileTests()
 fitPropagationTest()
