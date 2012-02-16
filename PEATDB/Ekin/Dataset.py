@@ -52,10 +52,10 @@ class EkinDataset(object):
             if len(active)==0:
                 active = [1 for i in self.x]
             self.active=active
-            if xerrs!=None and len(xerrs)==0:
-                xerrs=[0 for i in self.x]
-            if yerrs!=None and len(yerrs)==0:
-                yerrs=[0 for i in self.y]
+            if xerrs != None and len(xerrs) == 0:
+                xerrs = [0 for i in self.x]
+            if yerrs != None and len(yerrs) == 0:
+                yerrs = [0 for i in self.y]
             self.checkLists() #convert to floats if needed
             self.errors=[xerrs,yerrs]
             self.labels=[xlabel,ylabel]

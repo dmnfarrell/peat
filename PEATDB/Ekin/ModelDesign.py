@@ -407,7 +407,7 @@ def main():
     from optparse import OptionParser
     parser = OptionParser()
     parser.add_option("-f", "--file", dest="file",
-                        help="Raw file", metavar="FILE")
+                        help="Models File", metavar="FILE")
 
     opts, remainder = parser.parse_args()
     app = ModelDesignApp()
