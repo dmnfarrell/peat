@@ -27,7 +27,7 @@
 
 """Tests for data pipeline."""
 from Base import Pipeline
-import os, random
+import os, random, time, string
 import numpy as np
 from math import *
 import csv
@@ -79,35 +79,36 @@ def formatTests(testinfo):
 def multiFileTests():
     """Tests the processing and grouping of multiple files"""
     pth = 'testfiles/group1'
-    if not os.path.exists(pth):
-        os.mkdir(pth)
-    createFakeFiles(pth)
-    conf = {'format':'databycolumn', 'model1':'Linear', 'groupbyfile':1}
+    createGroupedData1(pth)
+    conf = {'format':'databycolumn','groupbyfile':1, 'saveplots':1,
+            'model1':'linear','variable1':'a'}
     p = Pipeline()
     p.createConfig('temp.conf',**conf)
-    p.addFolder(pth, ext='txt')
+    p.addFolder(pth, ext='txt')    
     p.run()
     return
 
 def fitPropagationTest():
     """Tests the propagation of fit data direct from a dict - no importing"""
-    import time
-    start=time.time()    
+
+    start=time.time()
     p = Pipeline()
     conf = {'model1':'linear','model2':'Michaelis-Menten','model3':'sigmoid',
-            'variable1':'a','variable2':'Km','variable3':'tm','xerror':.1,'yerror':0.05}    
+            'variable1':'a','variable2':'Km','variable3':'tm',#'xerror':.1,'yerror':0.05,
+            'saveplots':1}    
     p.createConfig('temp.conf',**conf)
     data = createNestedData()
     Em = EkinProject()    
     E,fits = p.processFits(data, Em=Em)
     print 'final fits', fits
-    Em.saveProject('results.ekinprj')
+    fname = os.path.join(p.workingdir,'results')
+    Em.saveProject(fname)
+    p.saveEkinPlotstoImages(Em, fname)
     print 'completed fit propagation test'
     print 'took %s seconds' %round((time.time()-start),2)
     print '-------------------'
+    return 
     
-    return
-
 def customTests():
     """Tests kinetics data for paper"""
 
@@ -117,13 +118,19 @@ def customTests():
 
 def createGroupedData1(path='testfiles'):
     """Create sets of fake data to test queuing and file grouping"""
-
-    names = ['aaa','bbb','ccc','ddd']
-    for i in np.arange(2,9,1.0):
+    
+    if not os.path.exists(path):
+        os.mkdir(path)
+    names = []
+    for n in range(10):    
+        l=''.join(random.choice(string.ascii_uppercase) for x in range(6))
+        names.append(l)
+    print names
+    for i in np.arange(2,10,1.0):
         fname = os.path.join(path,'ph_'+str(i)+'.txt')
         cw = csv.writer(open(fname,'w'))
         cw.writerow(['temp']+names)
-        for x in range(250,360,5):
+        for x in range(250,360,2):
             vals = [round(i*x/random.normalvariate(10,0.3),2) for j in range(len(names))]
             vals.insert(0,x)
             cw.writerow(vals)
@@ -136,7 +143,7 @@ def createNestedData():
     tms = [7.5,8.0,8.5]
     phs = range(2,14) #e.g. a ph range
     concs = [0.01,0.1,0.2,0.3,0.5,1.0,2.0,5.0]
-    x = range(0,100,5)
+    x = range(0,100,10)
 
     for n in names:
         i=names.index(n)
@@ -156,6 +163,6 @@ def createNestedData():
     
 #formatTests(basictests)
 #customTests()
-#multiFileTests()
-fitPropagationTest()
+multiFileTests()
+#fitPropagationTest()
 

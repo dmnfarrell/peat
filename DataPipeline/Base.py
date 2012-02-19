@@ -77,6 +77,7 @@ class Pipeline(object):
         c.set(s, 'rowheader', '')
         c.set(s, 'colheader', '')
         c.set(s, 'groupbyfile', 0)
+        c.set(s, 'saveplots', 0)
         #fitting settings
         f = 'fitting'
         c.add_section(f)      
@@ -290,32 +291,38 @@ class Pipeline(object):
                 key = filename
             lines = self.openRaw(filename)            
             data = self.doImport(lines)
-            print self.model1
+            #set filename
+            fname = os.path.basename(filename)
+            fname = os.path.join(self.workingdir, fname)
+            
             #if we have models to fit this means we might need to propagate fit data          
-            if self.model1 != '' and self.groupbyfile == 0:
-                #pass an ekin project to store all the fits for later viewing
-                Em = EkinProject()  
+            if self.model1 != '':
+                #pass the ekin project to store all the fits
+                Em = EkinProject()
                 E,fits = self.processFits(rawdata=data, Em=Em)
-                print 'final fits', fits
+                print '%s fits' %key, fits 
                 results[key] = fits
-                #save fits/plots to ekin
-                fname = os.path.basename(filename)
-                fname = os.path.join(self.workingdir, fname+'.ekinprj')
-                Em.saveProject(fname)
-                print Em, fname
-
+            #if no fitting we just put the data in ekin
+            else:            
+                Em = self.getEkinProject(data)
+            Em.saveProject(fname)
+            
+            if self.saveplots == 1:               
+                self.saveEkinPlotstoImages(Em, fname)
             c+=1.0
             if callback != None:
                 callback(c/total*100)
-                
-        #if groupbyfiles then we process that here from results, 
-        #but labels come from filenames....        
-        #e.g.
-        #if self.groupbyfile == 1:
-            #fits = self.getFits(results, nextmodel, filename)
-        
-        print 'initial processing done'
-
+              
+        #if groupbyfiles then we process that here from results
+        if self.groupbyfile == 1:
+            results = self.extractSecondaryKeysFromDict(results)
+            Em = EkinProject()
+            E,fits = self.processFits(rawdata=results, Em=Em)
+            fname = os.path.join(self.workingdir, 'final')
+            Em.saveProject(os.path.join(self.workingdir, fname))
+            if self.saveplots == 1:
+                self.saveEkinPlotstoImages(Em, fname)
+        print 'processing done'
         return
 
     def getDictNesting(self, data):
@@ -356,8 +363,8 @@ class Pipeline(object):
         if nesting == 0:
             #final level of nesting, we just fit
             xerror = float(self.xerror); yerror = float(self.yerror)
-            E = self.getEkinProject(rawdata, xerror=xerror, yerror=yerror)
-            E,fit = self.getFits(E, currmodel, currvariable)
+            E = self.getEkinProject(rawdata, xerror=xerror, yerror=yerror)            
+            E,fit = self.getFits(E, currmodel, currvariable, str(parentkey))
             Em.addProject(E, label=parentkey)
             return E,fit
         else:
@@ -372,14 +379,14 @@ class Pipeline(object):
                 #now we pass each child node to the same function    
                 E,fit = self.processFits(rawdata[l], ind=ind-1, parentkey=lbl, Em=Em)
                 fitdata[l] = fit
-  
+
             E = self.getEkinProject(fitdata)
-            E,fit = self.getFits(E, currmodel, currvariable)
-            #print fit
+            if parentkey == '': parentkey = 'final'
+            E,fit = self.getFits(E, currmodel, currvariable, str(parentkey))            
             Em.addProject(E,label=parentkey)
             return E,fit
     
-    def getFits(self, E, model, varname='a'):
+    def getFits(self, E, model, varname='a', filename=None):
         """Fit an Ekin project   
            model: model to fit
            varname: variable to extract"""
@@ -387,7 +394,7 @@ class Pipeline(object):
         fits = []
         xerrors = []
         yerrors = []
-        E.fitDatasets('ALL', models=[model], noiter=30,
+        E.fitDatasets('ALL', models=[model], noiter=self.iterations,
                       conv=1e-6, grad=1e-6, silent=True)
         labels = E.datasets
         if self.xerror != 0 or self.yerror != 0:
@@ -396,7 +403,9 @@ class Pipeline(object):
             for d in labels:
                 yerrors.append(E.getMeta(d,'exp_errors')[varname][1])
         for d in labels:
-            fits.append(E.getMetaData(d)[varname])            
+            fits.append(E.getMetaData(d)[varname]) 
+        if self.saveplots == 1 and filename != None and filename != '':                       
+            self.saveEkinPlotstoImages(E, filename)           
         return E,(labels,fits,xerrors,yerrors)
         
     def findVariableName(self, model, i=0):
@@ -428,21 +437,25 @@ class Pipeline(object):
             bname = os.path.basename(f)
             l = re.findall("([0-9.]*[0-9]+)", bname)[0]
             labels[f] = l
+            print f, labels[f]
         return labels
         
     def addFolder(self, path, ext='.txt'):
         """Add a folder to the queue"""
-
+        
+        print 'checking folder %s for files' %path
         for root, dirs, files in os.walk(path):
+            #print root, dirs, files
             for d in dirs:
                 if d.startswith('.'):
                     dirs.remove(d)
             #print root, dirs, files
             for f in files:
                 fname = os.path.join(root,f)
-                if os.path.splitext(fname)[1] == ext:
+                #print fname, os.path.splitext(fname)[1], ext
+                if ext in os.path.splitext(fname)[1]:
                     self.addtoQueue([fname])
-        #print self.queue
+        print self.queue
         #self.parseFileNames(self.queue)
         return
 
@@ -456,13 +469,17 @@ class Pipeline(object):
     @classmethod
     def getEkinProject(self, data, xerror=None, yerror=None):
         """Get an ekin project from a dict of the form
-             {label:([x],[y]),label2:([x],[y])} or
-             {label:([x],[y],[xerr],[yerr]),label2:([x],[y],[xerr],[yerr])}"""
+             {label:([x],[y]),..} or
+             {label:([x],[y],[xerr],[yerr]),..}"""
 
         E = EkinProject(mode='General')
         for d in data.keys():
             if type(data[d]) is types.DictType:
-                pass
+                for lbl in data[d]:
+                    name = d+sep+lbl
+                    xy = data[d][lbl]
+                    ek=EkinDataset(xy=xy)
+                    E.insertDataset(ek, name)
             else:
                 #print data[d]
                 if len(data[d]) == 4:
@@ -478,7 +495,7 @@ class Pipeline(object):
                 E.insertDataset(ek, d)                
                 #print ek.errors
         return E
-
+       
     @classmethod
     def setAttributesfromConfigParser(self, obj, cp):
         """A helper method that makes the options in a ConfigParser object
@@ -498,6 +515,41 @@ class Pipeline(object):
         """Get a list from a set of ConfigParser key-value pairs"""
         lst = [i[1] for i in items if i[1] != '']
         return lst
+        
+    @classmethod
+    def extractSecondaryKeysFromDict(self, data):
+        """Re-arrange a dict of the form {key1:([names],[values]),..
+           into the form {name1:([keys],[values]),..}"""
+           
+        newdata = {}
+        kys = data.keys()
+        datasets = data[kys[0]][0]
+        for d in datasets:
+            newdata[d] = []
+        for l in data:                
+            names, vals, xerr, yerr = data[l]
+            #print zip(names, vals)
+            for d,v in zip(names, vals):
+                newdata[d].append((l,v))
+        for d in newdata:
+            newdata[d] = zip(*newdata[d])                        
+        #print newdata        
+        return newdata
+            
+    def saveEkinPlotstoImages(self, E, filename):
+        """Save the ekin plots to png images"""
+        title = os.path.basename(filename)
+        filename = os.path.join(self.workingdir, filename)
+        filename = filename + '.png'
+        print filename
+        #limit to 25 plots per image
+        d = E.datasets        
+        if len(d) > 25: d = E.datasets[:25]
+        E.plotDatasets(d, filename=filename, plotoption=2,
+                       dpi=100, size=(10,8), showerrorbars=True, 
+                       title=title, )
+                       #normalise=normalise,legend=legend)
+        return
         
 class BaseImporter(object):
     """Base Importer class, sub-class this to define methods specific to each kind of
