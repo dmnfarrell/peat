@@ -54,66 +54,44 @@ class Pipeline(object):
         """Create a basic config file with default options and/or custom values"""
 
         c = ConfigParser.ConfigParser()
-        s = 'base'
-        c.add_section(s)
-        c.set(s, 'format', 'databyrow')
-        c.set(s, 'delimeter', ',')
-        c.set(s, 'decimalsymbol', '.')
-        c.set(s, 'checkunicode', 0)
         wdir = os.path.join(os.getcwd(),'workingdir')
-        c.set(s, 'workingdir', wdir)
-        c.set(s, 'rowstart', 0)
-        c.set(s, 'colstart', 0)
-        c.set(s, 'rowend', 0)
-        c.set(s, 'colend', 0)
-        #c.set(s, 'alternatecols', 0)
-        #c.set(s, 'alternaterows', 0)
-        c.set(s, 'rowrepeat', 0)
-        c.set(s, 'colrepeat', 0)
-        #c.set(s, 'rowdataformat', 'number')
-        #c.set(s, 'coldataformat', 'number')
-        c.set(s, 'timeformat', "%Y-%m-%d %H:%M:%S")
-        c.set(s, 'ignorecomments', 1)
-        c.set(s, 'rowheader', '')
-        c.set(s, 'colheader', '')
-        c.set(s, 'groupbyfile', 0)
-        c.set(s, 'saveplots', 0)
-        #fitting settings
-        f = 'fitting'
-        c.add_section(f)      
-        c.set(f, 'xerror', 0)
-        c.set(f, 'yerror', 0)
-        c.set(f, 'iterations', 30)        
-        #models
-        m = 'models'
-        c.add_section(m)
-        c.set(m, 'model1', '')
-        c.set(m, 'model2', '')
-        c.set(m, 'model3', '')
-        #variables
-        v = 'variables'
-        c.add_section(v)
-        c.set(v, 'variable1', '')
-        c.set(v, 'variable2', '')
-        c.set(v, 'variable3', '')
-        #excel settings
-        e='excel'
-        c.add_section(e)
-        c.set(e, 'sheet', 0)
-        c.set(e, 'numsheets', 1)
 
-        m='custom'
-        c.add_section(m)
+        defaults = {'base': [('format', 'databyrow'), ('rowstart', 0), ('colstart', 0), ('rowend', 0),
+                        ('colend', 0), ('rowheader', ''), ('colheader', ''),  
+                        ('rowrepeat', 0), ('colrepeat', 0), ('delimeter', ','),             
+                        ('workingdir', wdir),  ('ignorecomments', 1),
+                        ('checkunicode', 0), ('decimalsymbol', '.')], 
+                    'files': [('parsevaluesindex', 0), ('parsenumericvalues', 0), ('groupbyfile', 0),
+                        ('replicatesperfolder', 0)], 
+                    'models': [('model1', '')], 'variables': [('variable1', '')], 
+                    'excel': [('sheet', 0), ('numsheets', 1)], 
+                    'plotting': [('saveplots', 0), ('normaliseplots', 0), ('grayscale', 0), 
+                        ('dpi', 100)],
+                    'custom': [], 'fitting': [('xerror', 0), ('yerror', 0), ('iterations', 30),], 
+                    }
+        order = ['base','files','fitting','models','variables',
+                 'excel','plotting','custom']
 
-        #use kwargs to create specific settings in the appropriate section
-       
+        for s in order:            
+            c.add_section(s)
+            for i in defaults[s]:
+                name,val = i
+                c.set(s, name, val)
+     
+        #use kwargs to create specific settings in the appropriate section       
         for s in c.sections():
-            opts = c.options(s)
-            #print s, c.options(s)
+            opts = c.options(s)         
             for k in kwargs:
-                if k in opts:
-                    #print s,k
+                if k in opts:                    
                     c.set(s, k, kwargs[k])
+        #handle model and variable sections which can have zero or multiple
+        #options
+        for k in kwargs:
+            if k.startswith('model'):
+                c.set('models', k, kwargs[k])
+            elif k.startswith('variable'):
+                c.set('variables', k, kwargs[k])
+                    
         c.write(open(filename,'w'))
         self.parseConfig(filename)
         return c
@@ -273,16 +251,18 @@ class Pipeline(object):
 
         if not os.path.exists(self.workingdir):
             os.mkdir(self.workingdir)
-
-        print 'processing files in queue.'
-        if self.groupbyfile == True:
-            filelabels = self.parseFileNames(self.queue)
+        else:
+            print 'clearing working directory..'
+            self.clearDirectory(self.workingdir)
+            
+        print 'processing files in queue.'        
+        if self.groupbyfile == 1:
+            filelabels = self.parseFileNames(self.queue,ind=self.parsevaluesindex)
         else:
             filelabels = None
 
         total = len(self.queue)
-        c=0.0
-        #rawdata = self.rawdata = {}
+        c=0.0        
         results = {}
         for filename in self.queue:
             if filelabels != None:
@@ -315,9 +295,11 @@ class Pipeline(object):
               
         #if groupbyfiles then we process that here from results
         if self.groupbyfile == 1:
-            results = self.extractSecondaryKeysFromDict(results)
-            Em = EkinProject()
-            E,fits = self.processFits(rawdata=results, Em=Em)
+            print results
+            if self.parsenumericvalues == 1:
+                results = self.extractSecondaryKeysFromDict(results)
+                Em = EkinProject()
+                E,fits = self.processFits(rawdata=results, Em=Em, ind=len(models)-1)
             fname = os.path.join(self.workingdir, 'final')
             Em.saveProject(os.path.join(self.workingdir, fname))
             if self.saveplots == 1:
@@ -347,7 +329,7 @@ class Pipeline(object):
             print 'no models found for fitting!'
             return None, None
         if ind == None:
-            ind = len(models)-1            
+            ind = len(models)-1
         currmodel = models[ind]
         if len(variables) == 0:            
             currvariable = self.findVariableName(currmodel)
@@ -355,10 +337,9 @@ class Pipeline(object):
         else:
             currvariable = variables[ind]
 
-        nesting = self.getDictNesting(rawdata) 
-        
-        #print ind, models, variables
-        #print nesting, models[ind]
+        nesting = self.getDictNesting(rawdata)
+        print models
+        print nesting, models[ind]
 
         if nesting == 0:
             #final level of nesting, we just fit
@@ -430,12 +411,13 @@ class Pipeline(object):
         E.saveProject()
         return
 
-    def parseFileNames(self, filenames):
-        """Parse file names to extract a numerical value"""
+    def parseFileNames(self, filenames, ind=0):
+        """Parse file names to extract a numerical value
+           ind: extract the ith instance of a number in the filename"""
         labels = {}
         for f in filenames:
             bname = os.path.basename(f)
-            l = re.findall("([0-9.]*[0-9]+)", bname)[0]
+            l = re.findall("([0-9.]*[0-9]+)", bname)[ind]
             labels[f] = l
             print f, labels[f]
         return labels
@@ -455,8 +437,7 @@ class Pipeline(object):
                 #print fname, os.path.splitext(fname)[1], ext
                 if ext in os.path.splitext(fname)[1]:
                     self.addtoQueue([fname])
-        print self.queue
-        #self.parseFileNames(self.queue)
+        print self.queue      
         return
 
     def addtoQueue(self, files):
@@ -465,7 +446,19 @@ class Pipeline(object):
             if f not in self.queue:
                 self.queue.append(f)
         return
-
+        
+    @classmethod
+    def clearDirectory(self, path):
+        """Remove all files in folder"""
+        for f in os.listdir(path):
+            filepath = os.path.join(path, f)
+            try:
+                if os.path.isfile(filepath):
+                    os.unlink(filepath)
+            except Exception, e:
+                print e
+        return
+        
     @classmethod
     def getEkinProject(self, data, xerror=None, yerror=None):
         """Get an ekin project from a dict of the form
@@ -513,7 +506,7 @@ class Pipeline(object):
     @classmethod
     def getListFromConfigItems(self, items):
         """Get a list from a set of ConfigParser key-value pairs"""
-        lst = [i[1] for i in items if i[1] != '']
+        lst = [i[1] for i in sorted(items) if i[1] != '']        
         return lst
         
     @classmethod
@@ -546,9 +539,9 @@ class Pipeline(object):
         d = E.datasets        
         if len(d) > 25: d = E.datasets[:25]
         E.plotDatasets(d, filename=filename, plotoption=2,
-                       dpi=100, size=(10,8), showerrorbars=True, 
-                       title=title, )
-                       #normalise=normalise,legend=legend)
+                       dpi=self.dpi, size=(10,8), showerrorbars=True, 
+                       title=title, normalise=self.normaliseplots,
+                       grayscale=self.grayscale)
         return
         
 class BaseImporter(object):

@@ -161,6 +161,9 @@ class PipeApp(Frame, GUI_help):
                          '02Add folder to queue':{'cmd': self.addFolder}}
         self.queue_menu=self.create_pulldown(self.menu,self.queue_menu)
         self.menu.add_cascade(label='Queue',menu=self.queue_menu['var'])
+        self.utils_menu={'01Run Tests':{'cmd': self.runTests}}
+        self.utils_menu=self.create_pulldown(self.menu,self.utils_menu)
+        self.menu.add_cascade(label='Utilities',menu=self.utils_menu['var'])        
         self.help_menu={ '01Online Help':{'cmd': self.help} }
         self.help_menu=self.create_pulldown(self.menu,self.help_menu)
         self.menu.add_cascade(label='Help',menu=self.help_menu['var'])
@@ -273,6 +276,14 @@ class PipeApp(Frame, GUI_help):
         self.queueFrame.update()
         return
 
+    def runTests(self):
+        """Run tests"""
+        from Testing import Tester
+        t=Tester()
+        t.formatTests(t.basictests)
+        print 'tests completed ok'
+        return
+        
     def openEkin(self, fname=None):
         """Open ekin"""
         EK = EkinApp(parent=self)
