@@ -64,6 +64,7 @@ class Tester(object):
                            'filename':'databyrow1.xls'}}
 
     def doTest(self, info, name='test', path='testfiles'):
+        print 'running %s' %name
         p = Pipeline()
         conf = info[0]
         filename = info[1]
@@ -118,7 +119,7 @@ class Tester(object):
     
         info = ({'format':'kineticsdata','colrepeat':4,'colheader':0,'colstart':1,
                   'model1':'Linear'},'setG_110309_1_pH7,5.txt')
-        doTest(info, 'kinetics test', 'novo_setG/rep1')
+        self.doTest(info, 'kinetics test', 'novo_setG/rep1')
     
     def createGroupedData1(self, path='testfiles'):
         """Create sets of fake data to test queuing and file grouping"""
@@ -128,11 +129,11 @@ class Tester(object):
         else:
             Pipeline.clearDirectory(path)
         names = []
-        for n in range(10):    
+        for n in range(3):    
             l=''.join(random.choice(string.ascii_uppercase) for x in range(6))
             names.append(l)
         print names
-        for i in np.arange(2,10,1.0):
+        for i in np.arange(2,5,1.0):
             #fname = os.path.join(path,'ph_'+str(i)+'.txt')
             fname = os.path.join(path,'ph_'+str(i)+'__xx_'+str(i*3)+'.txt')
             cw = csv.writer(open(fname,'w'))
@@ -164,15 +165,15 @@ class Tester(object):
                     vel = (10 * s)/(s + km)
                     y = [round(i*vel,3) for i in x]
                     y = [i * random.normalvariate(1,0.03) for i in y]
-                    data[n][p][s] = (x,y)    
+                    data[n][p][s] = (x,y)
         return data
 
 def main():
     t=Tester()
     #t.formatTests(t.basictests)
-    #t.customTests()
     t.multiFileTests()
     #t.fitPropagationTest()
+    #t.customTests()
     
 if __name__ == '__main__':
     main()

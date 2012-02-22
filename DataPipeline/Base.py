@@ -86,7 +86,7 @@ class Pipeline(object):
                     c.set(s, k, kwargs[k])
         #handle model and variable sections which can have zero or multiple
         #options
-        for k in kwargs:
+        for k in sorted(kwargs):
             if k.startswith('model'):
                 c.set('models', k, kwargs[k])
             elif k.startswith('variable'):
@@ -114,10 +114,8 @@ class Pipeline(object):
         if self.importer == None:
             print 'failed to get an importer'
         #both the Importer and Pipeline object get copies of the config options
-        #as attributes
+        #as attributes, convenient but probably bad..
         self.setAttributesfromConfigParser(self, cp)
-        self.models = self.getListFromConfigItems(self.models)
-        self.variables = self.getListFromConfigItems(self.variables)
         print 'parsed config file ok, format is %s' %format
         return
         
@@ -279,11 +277,18 @@ class Pipeline(object):
             if self.model1 != '':
                 #pass the ekin project to store all the fits
                 Em = EkinProject()
-                E,fits = self.processFits(rawdata=data, Em=Em)
-                print '%s fits' %key, fits 
-                results[key] = fits
-            #if no fitting we just put the data in ekin
-            else:            
+                if self.parsenumericvalues == 1:
+                    #we don't pass the last model if it has to be
+                    #reserved for a final round of fitting from the files dict
+                    models = self.models[:-1]
+                    variables = self.variables[:-1]
+                    E,fits = self.processFits(rawdata=data, Em=Em, 
+                                               models=models,variables=variables)
+                else:
+                    E,fits = self.processFits(rawdata=data, Em=Em)                
+                results[key] = fits           
+            else:
+                 #if no fitting we just put the data in ekin                
                 Em = self.getEkinProject(data)
             Em.saveProject(fname)
             
@@ -299,60 +304,58 @@ class Pipeline(object):
             if self.parsenumericvalues == 1:
                 results = self.extractSecondaryKeysFromDict(results)
                 Em = EkinProject()
-                E,fits = self.processFits(rawdata=results, Em=Em, ind=len(models)-1)
-            fname = os.path.join(self.workingdir, 'final')
+                E,fits = self.processFits(rawdata=results, Em=Em)
+                fname = os.path.join(self.workingdir, 'final')
             Em.saveProject(os.path.join(self.workingdir, fname))
             if self.saveplots == 1:
                 self.saveEkinPlotstoImages(Em, fname)
         print 'processing done'
         return
 
-    def getDictNesting(self, data):
-        """Get level of nesting"""
-        for d in data.keys():
-            if type(data[d]) is types.DictType:
-                return 1
-            else:
-                return 0
-                
-    def processFits(self, rawdata=None, ind=None, parentkey='', Em=None):
+    def processFits(self, rawdata, models=None, variables=None, ind=None, parentkey='', Em=None):
         """Process the a dict of possibly nested dicts
             ind: the index indicating the level of recursion, used to find the right model
                  and variable
             parentkey: the label from the parent dict that will be matched to the fits
             returns: final set of fits"""
             
-        models = self.models
-        variables = self.variables
-        
+        nesting = self.getDictNesting(rawdata)
+        if models == None:
+            models = self.models
+            variables = self.variables
+       
         if len(models) == 0:
             print 'no models found for fitting!'
             return None, None
         if ind == None:
             ind = len(models)-1
-        currmodel = models[ind]
-        if len(variables) == 0:            
-            currvariable = self.findVariableName(currmodel)
-            print 'no variable given to extract, using %s' %currvariable
-        else:
-            currvariable = variables[ind]
-
-        nesting = self.getDictNesting(rawdata)
-        print models
-        print nesting, models[ind]
-
+    
+        def getmodelinfo():
+            model = models[ind][1]
+            try:
+                var = variables[ind][1]
+            except:
+                var = ''
+            if var == '':    
+                var = self.findVariableName(model)
+            return model, var
+            
+        currmodel,currvariable = getmodelinfo()
+        print models, variables
+        print nesting,currmodel,currvariable        
+        
         if nesting == 0:
-            #final level of nesting, we just fit
+            #final level of nesting, we just fit            
             xerror = float(self.xerror); yerror = float(self.yerror)
             E = self.getEkinProject(rawdata, xerror=xerror, yerror=yerror)            
             E,fit = self.getFits(E, currmodel, currvariable, str(parentkey))
-            Em.addProject(E, label=parentkey)
+            Em.addProject(E, label=parentkey)            
             return E,fit
         else:
             #if there is nesting we pass the subdicts recursively and get their fits 
             fitdata = {}
             for l in rawdata.keys():
-                print l
+                #print l
                 if parentkey!='':
                     lbl = str(l)+'_'+str(parentkey)
                 else:
@@ -363,7 +366,7 @@ class Pipeline(object):
 
             E = self.getEkinProject(fitdata)
             if parentkey == '': parentkey = 'final'
-            E,fit = self.getFits(E, currmodel, currvariable, str(parentkey))            
+            E,fit = self.getFits(E, currmodel, currvariable, str(parentkey))
             Em.addProject(E,label=parentkey)
             return E,fit
     
@@ -383,10 +386,11 @@ class Pipeline(object):
             self.expUncert(E, xerr=float(self.xerror))
             for d in labels:
                 yerrors.append(E.getMeta(d,'exp_errors')[varname][1])
-        for d in labels:
-            fits.append(E.getMetaData(d)[varname]) 
+        
+        for d in labels:            
+            fits.append(E.getMetaData(d)[varname])
         if self.saveplots == 1 and filename != None and filename != '':                       
-            self.saveEkinPlotstoImages(E, filename)           
+            self.saveEkinPlotstoImages(E, filename)
         return E,(labels,fits,xerrors,yerrors)
         
     def findVariableName(self, model, i=0):
@@ -411,6 +415,14 @@ class Pipeline(object):
         E.saveProject()
         return
 
+    def getDictNesting(self, data):
+        """Get level of nesting"""
+        for d in data.keys():
+            if type(data[d]) is types.DictType:
+                return 1
+            else:
+                return 0
+                
     def parseFileNames(self, filenames, ind=0):
         """Parse file names to extract a numerical value
            ind: extract the ith instance of a number in the filename"""
