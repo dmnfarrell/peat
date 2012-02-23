@@ -82,7 +82,7 @@ class Tester(object):
     
     def multiFileTests(self):
         """Tests the processing and grouping of multiple files"""
-        pth = 'testfiles/group1'
+        pth = 'testfiles/grouped'
         self.createGroupedData1(pth)
         conf = {'format':'databycolumn','groupbyfile':1, 'parsenumericvalues':1,
                 'parsevaluesindex':0,'saveplots':1,
@@ -114,6 +114,23 @@ class Tester(object):
         print '-------------------'
         return 
         
+    def replicatesTest(self):
+        """Tests handling of replicates"""
+        
+        p = Pipeline()
+        conf = {'format':'databycolumn','groupbyfile':1, 'parsenumericvalues':1,
+                'saveplots':1,'replicates':'perfolder',
+                'model1':'linear','variable1':'a','model2':'sigmoid','variable2':'tm'}
+        p.createConfig('temp.conf',**conf)
+        reps = ['rep1','rep2','rep3']
+        path = 'testfiles'
+        for r in reps:
+            rpath = os.path.join(path, r)
+            self.createGroupedData1(rpath)
+            p.addFolder(rpath, ext='txt')
+        p.run()
+        return
+        
     def customTests(self):
         """Tests kinetics data for paper"""
     
@@ -121,8 +138,8 @@ class Tester(object):
                   'model1':'Linear'},'setG_110309_1_pH7,5.txt')
         self.doTest(info, 'kinetics test', 'novo_setG/rep1')
     
-    def createGroupedData1(self, path='testfiles'):
-        """Create sets of fake data to test queuing and file grouping"""
+    def createGroupedData1(self, path='testfiles', clear=False):
+        """Create sets of grouped data to test queuing and file grouping"""
         
         if not os.path.exists(path):
             os.mkdir(path)
@@ -170,9 +187,10 @@ class Tester(object):
 
 def main():
     t=Tester()
-    #t.formatTests(t.basictests)
-    t.multiFileTests()
+    t.formatTests(t.basictests)
+    #t.multiFileTests()
     #t.fitPropagationTest()
+    #t.replicatesTest()
     #t.customTests()
     
 if __name__ == '__main__':
