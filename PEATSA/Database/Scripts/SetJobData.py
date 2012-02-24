@@ -45,6 +45,11 @@ parser.add_option("-c", "--calculation",
                   dest="calculation",
                   help="The calculation data to send",
                   metavar='CALC')		  		  		  		  		  		  
+parser.add_option("", "--configuration",
+                  dest="configurationFile",
+                  help="Configuration file containing info on database to connect to. If not specified the default is used",
+		  default=None,
+                  metavar='CONF')		  		  		  		  		  		  
 		  
 (options, args) = parser.parse_args()
 
@@ -63,7 +68,12 @@ except ValueError, data:
 	print '%s is an invalid calculation option. Valid options %s' % (options.calculation, calculations)
 	sys.exit(1)
 
-connection = WebApp.UtilityFunctions.ConnectionFromDefaultConfiguration()
+if options.configurationFile is None:
+	connection = WebApp.UtilityFunctions.ConnectionFromDefaultConfiguration()
+else:
+	conf = Core.Environment.Configuration(options.configurationFile)
+	connection = WebApp.UtilityFunctions.ConnectionFromConfiguration(conf)
+
 job = WebApp.Data.Job(jobID=options.jobID, connection=connection)
 
 data = Core.Data.DataSet(options.data)
