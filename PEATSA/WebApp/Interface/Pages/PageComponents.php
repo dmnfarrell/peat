@@ -56,7 +56,7 @@
 	{
 		echo '<div id="colophon">';
 		echo '<p class="colophon">';
-		echo 'Copyright 2009-2010 @ Michael Johnston & Jens Erik Nielsen';	
+		echo 'Copyright 2009-2012 @ Michael Johnston & Jens Erik Nielsen';	
 		echo '</p>';
 		echo '</div>';
 	}
