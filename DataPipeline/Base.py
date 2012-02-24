@@ -35,7 +35,6 @@ from Importer import *
 import Utilities
 from PEATDB.Ekin.Base import EkinProject, EkinDataset
 
-        
 class Pipeline(object):
     """This class does all the pipeline processing and configuration"""
 
@@ -223,10 +222,8 @@ class Pipeline(object):
             else:
                 print 'no file loaded yet'
                 return None
-        if self.conffile == None:
-            self.loadConfig()
-        else:
-            self.parseConfig(self.conffile)
+
+        #self.parseConfig(self.conffile)
         try:
             data = self.importer.doImport(lines)
         except Exception, e:
@@ -247,38 +244,48 @@ class Pipeline(object):
         print 'importer returned %s datasets' %l
         return
         
-    def run(self, callback=None):
-        """Do initial import/fitting run with the current config"""
-
+    def preProcess(self):
+        """Prepare for data import and processing"""
         if not os.path.exists(self.workingdir):
             os.mkdir(self.workingdir)
         else:
             print 'clearing working directory..'
-            Utilities.clearDirectory(self.workingdir)
-            
-        print 'processing files in queue.'        
-        if self.groupbyfile == 1:
-            filelabels = self.parseFileNames(self.queue,ind=self.parsevaluesindex)
-        else:
-            filelabels = None
+            Utilities.clearDirectory(self.workingdir)        
+        return
+        
+    def run(self, callback=None):
+        """Do initial import/fitting run with the current config"""
 
-        total = len(self.queue)
-        c=0.0        
-        results = {}
-        for filename in self.queue:
-            if filelabels != None:
-                key = filelabels[filename]
-            else:
-                key = filename
-            lines = self.openRaw(filename)            
-            data = self.doImport(lines)
-            #set filename
-            fname = os.path.basename(filename)
-            fname = os.path.join(self.workingdir, fname)
+        self.preProcess()    
+        print 'processing files in queue..'
+        
+        filelabels = self.parseFileNames(self.queue, ind=self.parsevaluesindex)
+        '''for pth in self.queue:
+            print pth
+            if not os.path.isdir(pth):
+                pass
+            for root, dirs, files in os.walk(pth):
+                print root, dirs, files'''
             
+                    
+        total = len(self.queue)
+        c=0.0       
+        imported = {}   #raw data
+        results = {}    #fitted data 
+       
+        for filename in self.queue:
+            lines = self.openRaw(filename)
+            data = self.doImport(lines)
+            imported[filename] = data
+            
+        for key in imported:
+            #set filename
+            fname = os.path.basename(key)
+            fname = os.path.join(self.workingdir, fname)
+            label = filelabels[key]
+          
             #if we have models to fit this means we might need to propagate fit data          
-            if self.model1 != '':
-                #pass the ekin project to store all the fits
+            if self.model1 != '':                
                 Em = EkinProject()
                 if self.parsenumericvalues == 1:
                     #we don't pass the last model if it has to be
@@ -289,7 +296,7 @@ class Pipeline(object):
                                                models=models,variables=variables)
                 else:
                     E,fits = self.processFits(rawdata=data, Em=Em)                
-                results[key] = fits
+                results[label] = fits
             else:
                  #if no fitting we just put the data in ekin                
                 Em = self.getEkinProject(data)
@@ -302,10 +309,10 @@ class Pipeline(object):
                 callback(c/total*100)
               
         #if groupbyfiles then we process that here from results
-        if self.groupbyfile == 1:
-            print results
+        if self.groupbyfile == 1:            
             if self.parsenumericvalues == 1:
                 results = self.extractSecondaryKeysFromDict(results)
+                #print results
                 Em = EkinProject()
                 E,fits = self.processFits(rawdata=results, Em=Em)
                 fname = os.path.join(self.workingdir, 'final')
@@ -441,15 +448,16 @@ class Pipeline(object):
             bname = os.path.basename(f)
             l = re.findall("([0-9.]*[0-9]+)", bname)[ind]
             labels[f] = l
-            print f, labels[f]
+            #print f, labels[f]
         return labels
         
     def addFolder(self, path, ext='.txt'):
         """Add a folder to the queue"""
         
         print 'checking folder %s for files' %path
-        for root, dirs, files in os.walk(path):
-            #print root, dirs, files
+        self.folderstructure = os.walk(path)
+        print self.folderstructure
+        for root, dirs, files in self.folderstructure:            
             for d in dirs:
                 if d.startswith('.'):
                     dirs.remove(d)
@@ -534,3 +542,19 @@ class Pipeline(object):
         #print newdata        
         return newdata
         
+class RawData(object):
+    """Class to hold imported rawdata that makes handling it easier"""
+    
+    def __init__(self):
+        self.data = {}
+        self.info = {}
+        return
+    
+    def add(self, data, key, filename):
+        self.data[key] = data
+        self.info[key] = filename
+        return
+        
+    def __getitem__(self, key):
+        return self.data[key]
+     

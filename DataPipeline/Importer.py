@@ -25,6 +25,7 @@
 # Dublin 4, Ireland
 #
 
+import string
 import Base, Utilities
 
 class BaseImporter(object):

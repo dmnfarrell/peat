@@ -32,6 +32,7 @@ import numpy as np
 from math import *
 import csv
 from PEATDB.Ekin.Base import EkinProject
+import Utilities
 
 class Tester(object):
     """This class does all the pipeline tests"""
@@ -123,7 +124,7 @@ class Tester(object):
                 'model1':'linear','variable1':'a','model2':'sigmoid','variable2':'tm'}
         p.createConfig('temp.conf',**conf)
         reps = ['rep1','rep2','rep3']
-        path = 'testfiles'
+        path = 'testfiles/replicates'
         for r in reps:
             rpath = os.path.join(path, r)
             self.createGroupedData1(rpath)
@@ -144,19 +145,19 @@ class Tester(object):
         if not os.path.exists(path):
             os.mkdir(path)
         else:
-            Pipeline.clearDirectory(path)
+            Utilities.clearDirectory(path)
         names = []
         for n in range(3):    
             l=''.join(random.choice(string.ascii_uppercase) for x in range(6))
             names.append(l)
-        print names
-        for i in np.arange(2,5,1.0):
+       
+        for i in np.arange(2,6,1.0):
             #fname = os.path.join(path,'ph_'+str(i)+'.txt')
             fname = os.path.join(path,'ph_'+str(i)+'__xx_'+str(i*3)+'.txt')
             cw = csv.writer(open(fname,'w'))
             cw.writerow(['temp']+names)
             for x in range(250,360,2):
-                vals = [round(i*x/random.normalvariate(10,0.3),2) for j in range(len(names))]
+                vals = [round(i*x/random.normalvariate(10,0.2),2) for j in range(len(names))]
                 vals.insert(0,x)
                 cw.writerow(vals)
         return
@@ -187,10 +188,10 @@ class Tester(object):
 
 def main():
     t=Tester()
-    t.formatTests(t.basictests)
+    #t.formatTests(t.basictests)
     #t.multiFileTests()
     #t.fitPropagationTest()
-    #t.replicatesTest()
+    t.replicatesTest()
     #t.customTests()
     
 if __name__ == '__main__':
