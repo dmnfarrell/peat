@@ -30,6 +30,7 @@ while(1):
 	for id in ids:
 		job = WebApp.Data.Job(id, connection)
 		print 'Sending mail for job %s to %s' % (job.identification, job.email())
+		print job.error()
 		WebApp.UtilityFunctions.SendNotificationEmail(job)
 	connection.close()
 	time.sleep(30)
