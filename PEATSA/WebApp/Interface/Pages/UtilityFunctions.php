@@ -59,7 +59,7 @@
 			
 			//admin
 			$headers = array("From"=>"peatadmin@ucd.ie", "Subject"=>"PEATSA Job Finished");
-			$body = "Your job has finished\n\nSee http://peat.ucd.ie/PEATSA/Pages/Results.php?jobId=$jobID\nRegards,\n\nThe PEAT-SA developers.";
+			$body = "Your job has finished\n\nSee http://enzyme.ucd.ie/PEATSA/Pages/Results.php?jobId=$jobID\nRegards,\n\nThe PEAT-SA developers.";
 			$mail = $smtp->send($email, $headers, $body);
 			set_email_sent($jobID);
 		}
@@ -95,7 +95,7 @@
 			
 			//admin
 			$headers = array("From"=>"peatadmin@ucd.ie", "Subject"=>"PEATSA Job Error");
-			$body = "Unfortunately we encountered an error when running your job\n\nPlease see http://peat.ucd.ie/PEATSA/Pages/Results.php?jobId=$jobID for more information,\nRegards,\n\nThe PEAT-SA developers.";
+			$body = "Unfortunately we encountered an error when running your job\n\nPlease see http://enzyme.ucd.ie/PEATSA/Pages/Results.php?jobId=$jobID for more information,\nRegards,\n\nThe PEAT-SA developers.";
 			$mail = $smtp->send($email, $headers, $body);
 			set_email_sent($jobID);
 		}
