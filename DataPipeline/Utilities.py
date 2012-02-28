@@ -27,17 +27,16 @@
 
 '''Module containing utility classes and functions'''
 
-import os
+import os, random, string
+import csv
 
 def setAttributesfromConfigParser(obj, cp):
     """A helper method that makes the options in a ConfigParser object
        attributes of obj"""
    
     for s in cp.sections():
-        obj.__dict__[s] = cp.items(s)          
-        #print cp.items(s)
-        for f in cp.items(s):
-            #print f[0], f[1]
+        obj.__dict__[s] = cp.items(s)       
+        for f in cp.items(s):        
             try: val=int(f[1])
             except: val=f[1]
             obj.__dict__[f[0]] = val
@@ -49,6 +48,7 @@ def getListFromConfigItems(items):
 
 def clearDirectory(path):
     """Remove all files in folder"""
+    
     for f in os.listdir(path):
         filepath = os.path.join(path, f)
         try:
@@ -56,4 +56,57 @@ def clearDirectory(path):
                 os.unlink(filepath)
         except Exception, e:
             print e
-    return    
+    return
+    
+def createDirectory(path):
+    
+    """Create or clear a directory"""
+    if not os.path.exists(path):
+        os.mkdir(path)
+    else:
+        clearDirectory(path)
+ 
+def getdirectoryStructure(rootdir):
+    """Creates a nested dictionary that represents the folder structure
+       of rootdir
+       taken from http://code.activestate.com/recipes/577879/"""
+    
+    dir = {}
+    rootdir = rootdir.rstrip(os.sep)
+    start = rootdir.rfind(os.sep) + 1
+    for path, dirs, files in os.walk(rootdir):
+        folders = path[start:].split(os.sep)
+        filenames = [os.path.join(path,f) for f in files]
+        subdir = dict.fromkeys(filenames)        
+        parent = reduce(dict.get, folders[:-1], dir)
+        parent[folders[-1]] = subdir
+    return dir
+    
+def traverseTree(dictionary):
+    print dictionary
+    for key, value in dictionary.items():
+        if key == 'id':
+            if value == id:
+                print dictionary
+        else:
+             traverseTree(value, id)
+                     
+def createRandomStrings(l,n):
+    """create list of l random strings, each of length n"""
+    
+    names = []
+    for i in range(l):
+        val = ''.join(random.choice(string.ascii_uppercase) for x in range(n))
+        names.append(val)
+    return names
+    
+def createTempData(fname, names, slope):
+    """Create some simulated linear data with noise as a function of temp"""
+    
+    cw = csv.writer(open(fname,'w'))
+    cw.writerow(['temp']+names)   
+    for x in range(250,360,2):
+        vals = [round(slope*x/random.normalvariate(10,0.2),2) for j in range(len(names))]
+        vals.insert(0,x)
+        cw.writerow(vals)
+    return

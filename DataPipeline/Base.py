@@ -63,13 +63,14 @@ class Pipeline(object):
                         ('rowrepeat', 0), ('colrepeat', 0), ('delimeter', ','),             
                         ('workingdir', wdir),  ('ignorecomments', 1),
                         ('checkunicode', 0), ('decimalsymbol', '.')], 
-                    'files': [('parsevaluesindex', 0), ('parsenumericvalues', 0), ('groupbyfile', 0)],
+                    'files': [('parsevaluesindex', 0), ('parsenumericvalues', 0), ('groupby', '')],
                     'replicates':[('perfolder','')],
                     'models': [('model1', '')], 'variables': [('variable1', '')], 
                     'excel': [('sheet', 0), ('numsheets', 1)], 
                     'plotting': [('saveplots', 0), ('normaliseplots', 0), ('grayscale', 0), 
                         ('dpi', 100)],
-                    'custom': [], 'fitting': [('xerror', 0), ('yerror', 0), ('iterations', 30),], 
+                    'custom': [], 
+                    'fitting': [('xerror', 0), ('yerror', 0), ('iterations', 30), ('modelsfile','')], 
                     }
         order = ['base','files','fitting','models','variables','replicates',
                  'excel','plotting','custom']
@@ -160,8 +161,7 @@ class Pipeline(object):
         if preset == 'J-810_cd_bytemp':
             self.createConfig(preset+'.conf',format='databycolumn',columns=10,rowstart=19,rowend=421,
                               delimeter='tab',xerror=0,yerror=0.2,
-                              datainrows=0,
-                              model1='')
+                              datainrows=0,modelsfile='test.dict')
         elif preset == 'nmr_titration_sparky':
             self.createConfig(preset+'.conf',columns=10,rowstart=0,
                               delimeter='tab',xerror=0.1,yerror=0.02,
@@ -260,19 +260,18 @@ class Pipeline(object):
         print 'processing files in queue..'
         
         filelabels = self.parseFileNames(self.queue, ind=self.parsevaluesindex)
-        '''for pth in self.queue:
-            print pth
-            if not os.path.isdir(pth):
-                pass
-            for root, dirs, files in os.walk(pth):
-                print root, dirs, files'''
-            
                     
         total = len(self.queue)
         c=0.0       
         imported = {}   #raw data
         results = {}    #fitted data 
-       
+
+        print 'queue'
+        print self.queue
+        #print 'folderstructure'
+        #print self.folderstructure
+        print '--------------------'
+            
         for filename in self.queue:
             lines = self.openRaw(filename)
             data = self.doImport(lines)
@@ -283,7 +282,8 @@ class Pipeline(object):
             fname = os.path.basename(key)
             fname = os.path.join(self.workingdir, fname)
             label = filelabels[key]
-          
+            data = imported[key]
+            
             #if we have models to fit this means we might need to propagate fit data          
             if self.model1 != '':                
                 Em = EkinProject()
@@ -308,8 +308,8 @@ class Pipeline(object):
             if callback != None:
                 callback(c/total*100)
               
-        #if groupbyfiles then we process that here from results
-        if self.groupbyfile == 1:            
+        #if groupby files then we process that here from results
+        if self.groupby == 'file':            
             if self.parsenumericvalues == 1:
                 results = self.extractSecondaryKeysFromDict(results)
                 #print results
@@ -351,8 +351,8 @@ class Pipeline(object):
             return model, var
             
         currmodel,currvariable = getmodelinfo()
-        print models, variables
-        print nesting,currmodel,currvariable        
+        #print models, variables
+        #print nesting,currmodel,currvariable        
         
         if nesting == 0:
             #final level of nesting, we just fit            
@@ -372,7 +372,6 @@ class Pipeline(object):
                     lbl = l
                 #now we pass each child node to the same function    
                 E,fit = self.processFits(rawdata[l], ind=ind-1, parentkey=lbl, Em=Em)
-                fitdata[l] = fit
 
             E = self.getEkinProject(fitdata)
             if parentkey == '': parentkey = 'final'
@@ -455,10 +454,10 @@ class Pipeline(object):
         """Add a folder to the queue"""
         
         print 'checking folder %s for files' %path
-        self.folderstructure = os.walk(path)
-        print self.folderstructure
-        for root, dirs, files in self.folderstructure:            
-            for d in dirs:
+        self.folderstructure = Utilities.getdirectoryStructure(path)
+        #print self.folderstructure
+        for root, dirs, files in os.walk(path):            
+            for d in dirs:               
                 if d.startswith('.'):
                     dirs.remove(d)
             #print root, dirs, files
@@ -467,7 +466,7 @@ class Pipeline(object):
                 #print fname, os.path.splitext(fname)[1], ext
                 if ext in os.path.splitext(fname)[1]:
                     self.addtoQueue([fname])
-        print self.queue      
+        #print self.queue      
         return
 
     def addtoQueue(self, files):
@@ -481,8 +480,7 @@ class Pipeline(object):
         """Save the ekin plots to png images"""
         title = os.path.basename(filename)
         filename = os.path.join(self.workingdir, filename)
-        filename = filename + '.png'
-        print filename
+        filename = filename + '.png'        
         #limit to 25 plots per image
         d = E.datasets        
         if len(d) > 25: d = E.datasets[:25]
@@ -538,23 +536,18 @@ class Pipeline(object):
             for d,v in zip(names, vals):
                 newdata[d].append((l,v))
         for d in newdata:
-            newdata[d] = zip(*newdata[d])                        
-        #print newdata        
+            newdata[d] = zip(*newdata[d])
         return newdata
         
-class RawData(object):
-    """Class to hold imported rawdata that makes handling it easier"""
+class FolderStructure(object):
+    """Class to hold structure rawdata that makes handling it easier"""
     
     def __init__(self):
-        self.data = {}
         self.info = {}
         return
     
-    def add(self, data, key, filename):
-        self.data[key] = data
+    def add(self, data, key, filename):     
         self.info[key] = filename
         return
-        
-    def __getitem__(self, key):
-        return self.data[key]
+
      

@@ -81,19 +81,59 @@ class Tester(object):
         for t in sorted(testinfo.keys()):
             self.doTest(testinfo[t], t)
     
-    def multiFileTests(self):
+    def groupedFileTest(self):
         """Tests the processing and grouping of multiple files"""
-        pth = 'testfiles/grouped'
-        self.createGroupedData1(pth)
-        conf = {'format':'databycolumn','groupbyfile':1, 'parsenumericvalues':1,
+        path = 'testfiles/grouped'
+        self.createGroupedData(path)
+        conf = {'format':'databycolumn','groupby':'file', 'parsenumericvalues':1,
                 'parsevaluesindex':0,'saveplots':1,
                 'model1':'linear','variable1':'a','model2':'sigmoid','variable2':'tm'}
         p = Pipeline()
         p.createConfig('temp.conf',**conf)
-        p.addFolder(pth, ext='txt')
+        p.addFolder(path, ext='txt')
         p.run()
         return
-    
+
+    def multiFolderTest(self):
+        """Handling of multiple folders in a hierarchy"""
+        p = Pipeline()
+        conf = {'format':'databycolumn','groupby':'folder', #'parsenumericvalues':1,
+                'saveplots':1,'hasreplicates':0,
+                'model1':'linear','variable1':'a','model2':'sigmoid','variable2':'tm'}
+        p.createConfig('temp.conf',**conf)
+        path = 'testfiles/multifolders'
+        Utilities.createDirectory(path)
+        phs = range(2,6)
+        reps = range(1,3)
+        names = Utilities.createRandomStrings(3,6)
+        for i in phs:
+            folder = os.path.join(path,'ph'+str(i))            
+            Utilities.createDirectory(folder)
+            for r in reps:
+                fname = os.path.join(folder,'r'+str(r)+'.txt')
+                Utilities.createTempData(fname, names, i)
+                
+        p.addFolder(path, ext='txt')
+        p.run()
+        return
+                
+    def replicatesTest(self):
+        """Tests handling of replicates"""
+        
+        p = Pipeline()
+        conf = {'format':'databycolumn','groupby':'file', 'parsenumericvalues':1,
+                'saveplots':1,'hasreplicates':1,
+                'model1':'linear','variable1':'a','model2':'sigmoid','variable2':'tm'}
+        p.createConfig('temp.conf',**conf)
+        reps = ['rep1','rep2','rep3']
+        path = 'testfiles/replicates'
+        for r in reps:
+            rpath = os.path.join(path, r)
+            self.createGroupedData(rpath)
+        p.addFolder(path, ext='txt')
+        p.run()
+        return
+        
     def fitPropagationTest(self):
         """Tests the propagation of fit data direct from a dict - no importing"""
     
@@ -104,7 +144,7 @@ class Tester(object):
                 'saveplots':1}
         p.createConfig('temp.conf',**conf)
         data = self.createNestedData()
-        Em = EkinProject()    
+        Em = EkinProject()
         E,fits = p.processFits(data, Em=Em)
         print 'final fits', fits
         fname = os.path.join(p.workingdir,'results')
@@ -114,24 +154,7 @@ class Tester(object):
         print 'took %s seconds' %round((time.time()-start),2)
         print '-------------------'
         return 
-        
-    def replicatesTest(self):
-        """Tests handling of replicates"""
-        
-        p = Pipeline()
-        conf = {'format':'databycolumn','groupbyfile':1, 'parsenumericvalues':1,
-                'saveplots':1,'replicates':'perfolder',
-                'model1':'linear','variable1':'a','model2':'sigmoid','variable2':'tm'}
-        p.createConfig('temp.conf',**conf)
-        reps = ['rep1','rep2','rep3']
-        path = 'testfiles/replicates'
-        for r in reps:
-            rpath = os.path.join(path, r)
-            self.createGroupedData1(rpath)
-            p.addFolder(rpath, ext='txt')
-        p.run()
-        return
-        
+
     def customTests(self):
         """Tests kinetics data for paper"""
     
@@ -139,27 +162,14 @@ class Tester(object):
                   'model1':'Linear'},'setG_110309_1_pH7,5.txt')
         self.doTest(info, 'kinetics test', 'novo_setG/rep1')
     
-    def createGroupedData1(self, path='testfiles', clear=False):
+    def createGroupedData(self, path='testfiles', clear=False):
         """Create sets of grouped data to test queuing and file grouping"""
         
-        if not os.path.exists(path):
-            os.mkdir(path)
-        else:
-            Utilities.clearDirectory(path)
-        names = []
-        for n in range(3):    
-            l=''.join(random.choice(string.ascii_uppercase) for x in range(6))
-            names.append(l)
-       
-        for i in np.arange(2,6,1.0):
-            #fname = os.path.join(path,'ph_'+str(i)+'.txt')
+        Utilities.createDirectory(path)
+        names = Utilities.createRandomStrings(3,6)       
+        for i in np.arange(2,6,1.0):         
             fname = os.path.join(path,'ph_'+str(i)+'__xx_'+str(i*3)+'.txt')
-            cw = csv.writer(open(fname,'w'))
-            cw.writerow(['temp']+names)
-            for x in range(250,360,2):
-                vals = [round(i*x/random.normalvariate(10,0.2),2) for j in range(len(names))]
-                vals.insert(0,x)
-                cw.writerow(vals)
+            Utilities.createTempData(fname, names, i)
         return
         
     def createNestedData(self):
@@ -189,9 +199,10 @@ class Tester(object):
 def main():
     t=Tester()
     #t.formatTests(t.basictests)
-    #t.multiFileTests()
-    #t.fitPropagationTest()
-    t.replicatesTest()
+    t.groupedFileTest()
+    #t.multiFolderTest()
+    #t.replicatesTest()
+    #t.fitPropagationTest()    
     #t.customTests()
     
 if __name__ == '__main__':

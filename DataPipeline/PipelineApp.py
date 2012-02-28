@@ -289,8 +289,10 @@ class PipeApp(Frame, GUI_help):
         EK = EkinApp(parent=self)
         return
 
-    def launchModelDesigner(self):
+    def launchModelDesigner(self):        
         self.modelapp = ModelDesignApp(parent=self)
+        if self.p.modelsfile != '':           
+            self.modelapp.loadModelsFile(self.p.modelsfile)
         return
 
     def launchHelper(self):
