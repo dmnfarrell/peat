@@ -34,7 +34,7 @@ import tkFileDialog, tkSimpleDialog
 import Pmw
 from PEATDB.Ekin.Ekin_main import EkinApp, PlotPanel
 from PEATDB.Ekin.Base import EkinProject, EkinDataset
-from PEATDB.Ekin.Fitting import Fitting
+import PEATDB.Ekin.Fitting as Fitting
 
 class ModelDesignApp(Frame):
     """Simple GUI for designing new models for use in ekin fitting"""
@@ -59,8 +59,10 @@ class ModelDesignApp(Frame):
                             'rowheight':16, 'editable':False,
                             'rowselectedcolor':'yellow'}
         self.filename = None
-        self.createModels()
+        self.modelsdict = Fitting.createModels()
         self.setupGUI()
+        self.currentname = 'Linear' 
+        self.loadModel(self.currentname)
         return
 
     def setupGUI(self):
@@ -143,30 +145,6 @@ class ModelDesignApp(Frame):
                          'Enter a calculation or float value for any variable.')
         self.guessentry = fr
         return fr
-
-    def createModels(self):
-        """Create default models file"""
-        self.modelsdict = {
-            'Linear': {'Name': 'Linear',
-             'description': 'straight line',
-             'equation': 'a*x+b',
-             'guess': {'a': 'min(y)', 'b': 'max(y)-min(y)/max(x)-min(x)'},
-             'name': 'Linear',
-             'varnames': 'a,b'},
-            'Sigmoid': {'Name': 'Sigmoid',
-             'description': 'simple sigmoid',
-             'equation': 'bottom+(top-bottom)/(1+exp((tm-x)/slope))',
-             'guess': {'slope': '1', 'top': 'max(y)', 'tm': '(max(x)-min(x))/2+min(x)', 'bottom': 'min(y)'},
-             'name': 'Sigmoid',
-             'varnames': 'tm,bottom,top,slope'},
-            'Gaussian': {'Name': 'Gaussian',
-             'description': 'gaussian function, a bell-shaped curve',
-             'equation': 'a*exp(-(pow((x-b),2)/(pow(2*c,2))))',
-             'guess': {'a':'max(y)'},
-             'name': 'Gaussian',
-             'varnames': 'a,b,c'}
-        }
-        return
 
     def newModel(self):
         """Create new model"""
@@ -261,11 +239,12 @@ class ModelDesignApp(Frame):
             w.pack(fill=BOTH,side=TOP,expand=1,pady=2)
         return
 
-    def loadModel(self):
+    def loadModel(self, sel=None):
         """Load a model from the current dict"""
 
         #add confirmation dialog here
-        self.currentname = sel = self.modelselector.getcurselection()[0]
+        if sel == None:
+            self.currentname = sel = self.modelselector.getcurselection()[0]
         self.currentmodel = model = self.modelsdict[sel]
         for f in model:
             if f in self.entrywidgets:

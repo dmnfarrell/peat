@@ -45,7 +45,7 @@ except:
     pass
 from PEATDB.TableModels import TableModel
 from PEATDB.Ekin.Base import EkinDataset
-from PEATDB.Ekin.Fitting import Fitting
+import PEATDB.Ekin.Fitting as Fitting
 
 class CorrelationAnalyser(Plugin):
     """A class for processing specific Kinetics exp data"""

@@ -29,7 +29,7 @@ import math, sys, os, types
 from Base import EkinProject, EkinDataset
 import IO
 #from Convert import EkinConvert
-from Fitting import Fitting
+import Fitting
 from Meta import MetaData
 from PEATDB.Tables import TableCanvas, ColumnHeader
 from PEATDB.TableModels import TableModel

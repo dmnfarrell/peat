@@ -44,7 +44,7 @@ except:
 from NMR import NMR_data
 import Utils
 from PEATDB.Ekin.Base import EkinProject, EkinDataset
-from PEATDB.Ekin.Fitting import Fitting
+import Fitting
 from PEATDB.Ekin.Pylab import Options
 try:
     from Bio import Entrez

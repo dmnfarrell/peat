@@ -30,7 +30,7 @@ import IO
 from Convert import EkinConvert
 from PEATDB.Ekin.Dataset import EkinDataset
 from List_Utils import *
-from Fitting import Fitting
+import Fitting
 from Meta import MetaData
 import numpy
 import Utils
@@ -54,9 +54,8 @@ class EkinProject(object):
        a GUI.
        Usage: E = EkinProject(data=ekindata)
     """
-
-    fitmodels = sorted(Fitting.presetmodels.keys())
-    Fitting.createFitters()
+    
+    fitmodels = Fitting.getCurrentModels()
     ekinfields = ['__datatabs_fits__', '__fit_matches__', '__Exp_Meta_Dat__',
                   '__distance_matches__', '__datatab_structmapping__', '__meta_data__',
                   '__plotopts__', '__currentdataset__', '__displaymultiple__']
@@ -417,7 +416,7 @@ class EkinProject(object):
             else:
                 filename=self.filename
         self.filename = filename
-        if os.path.splitext(filename)[1] == '':
+        if os.path.splitext(filename)[1] != 'ekinprj':
             filename = filename + '.ekinprj'
         data = self.prepare_data()
         fd=open(filename,'w')
@@ -731,8 +730,8 @@ class EkinProject(object):
             else:
                 ylabel = ek.labels[1]
 
-        e=[]
-        for i in xdata: e.append(i[0])
+        #e=[]
+        #for i in xdata: e.append(i[0])
         i=0
         cc=0
         for name in datasets:

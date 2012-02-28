@@ -39,7 +39,7 @@ from PEATDB.TableModels import TableModel
 import PEATDB.Table_images as Table_images
 from PEATDB.Ekin.Base import *
 from PEATDB.Ekin.Tables import EkinDataModel, EkinDataTable
-from PEATDB.Ekin.Fitting import Fitting
+import PEATDB.Ekin.Fitting as Fitting
 from PEATDB.Ekin.Convert import EkinConvert
 from PEATDB.Ekin.Ekin_map import *
 from PEATDB.Ekin.IO import *
