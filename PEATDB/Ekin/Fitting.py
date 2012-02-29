@@ -38,7 +38,9 @@ def loadModelsFile(modelsfile=None):
     if modelsfile == None:
         path = os.path.abspath(os.path.dirname(__file__))
         modelsfile = os.path.join(path,'models.dict')
-    #print modelsfile
+    if not os.path.exists(modelsfile):
+        path = os.getcwd()
+        modelsfile = os.path.join(path,'models.dict')
     if not os.path.exists(modelsfile):
         #write a default file if none available
         modelsdict = createModels()
