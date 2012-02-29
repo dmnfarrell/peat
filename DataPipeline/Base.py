@@ -257,10 +257,13 @@ class Pipeline(object):
         """Do initial import/fitting run with the current config"""
 
         self.preProcess()    
-        print 'processing files in queue..'
+        print 'processing files in queue..'        
         
-        filelabels = self.parseFileNames(self.queue, ind=self.parsevaluesindex)
-                    
+        if self.parsenumericvalues == 1:
+            filelabels = self.parseFileNames(self.queue, ind=self.parsevaluesindex)
+        else:
+            filelabels = self.queue
+            
         total = len(self.queue)
         c=0.0       
         imported = {}   #raw data
@@ -280,14 +283,17 @@ class Pipeline(object):
         for key in imported:
             #set filename
             fname = os.path.basename(key)
-            fname = os.path.join(self.workingdir, fname)
-            label = filelabels[key]
+            fname = os.path.join(self.workingdir, fname)            
             data = imported[key]
+            if self.parsenumericvalues == 1:
+                label = filelabels[key]
+            else:
+                label = key
             
             #if we have models to fit this means we might need to propagate fit data          
             if self.model1 != '':                
                 Em = EkinProject()
-                if self.parsenumericvalues == 1:
+                if self.parsenumericvalues == 1:      
                     #we don't pass the last model if it has to be
                     #reserved for a final round of fitting from the files dict
                     models = self.models[:-1]
@@ -358,24 +364,23 @@ class Pipeline(object):
             #final level of nesting, we just fit            
             xerror = float(self.xerror); yerror = float(self.yerror)
             E = self.getEkinProject(rawdata, xerror=xerror, yerror=yerror)            
-            E,fit = self.getFits(E, currmodel, currvariable, str(parentkey))
+            E,fit = self.getFits(E, currmodel, currvariable, str(parentkey))           
             Em.addProject(E, label=parentkey)            
             return E,fit
         else:
             #if there is nesting we pass the subdicts recursively and get their fits 
             fitdata = {}
-            for l in rawdata.keys():
-                #print l
-                if parentkey!='':
+            for l in rawdata.keys():                
+                if parentkey != '':
                     lbl = str(l)+'_'+str(parentkey)
                 else:
-                    lbl = l
+                    lbl = l               
                 #now we pass each child node to the same function    
                 E,fit = self.processFits(rawdata[l], ind=ind-1, parentkey=lbl, Em=Em)
-
+                fitdata[l] = fit
             E = self.getEkinProject(fitdata)
             if parentkey == '': parentkey = 'final'
-            E,fit = self.getFits(E, currmodel, currvariable, str(parentkey))
+            E,fit = self.getFits(E, currmodel, currvariable, str(parentkey))           
             Em.addProject(E,label=parentkey)
             return E,fit
     
@@ -414,7 +419,7 @@ class Pipeline(object):
            used so we don't cause an error when doing processFits when no
            variable is given in the conf file"""
             
-        from PEATDB.Ekin.Fitting import Fitting    
+        import PEATDB.Ekin.Fitting as Fitting    
         X = Fitting.getFitter(model)
         if X==None:
             print 'no fitter found for this model name'
@@ -454,7 +459,7 @@ class Pipeline(object):
         """Add a folder to the queue"""
         
         print 'checking folder %s for files' %path
-        self.folderstructure = Utilities.getdirectoryStructure(path)
+        #self.folderstructure = Utilities.getdirectoryStructure(path)
         #print self.folderstructure
         for root, dirs, files in os.walk(path):            
             for d in dirs:               
