@@ -31,10 +31,10 @@ class Preferences:
             # If we didn't find a file then set to default and save
             print 'Did not find preferences!'
             self.prefs=defaults.copy()
-	    print dirs
-            self.pref_file=os.path.join(dirs[0],filename)
+            print dirs
+            self.pref_file = os.path.join(dirs[0],filename)
             self.prefs['_prefdir']=dirs[0]
-            self.prefs['_preffile']=self.pref_file
+            self.prefs['_preffile'] = self.pref_file
             self.save_prefs()
 
             # Can we set more variables?
@@ -76,7 +76,6 @@ class Preferences:
         """No we have this key"""
         return self.prefs.has_key(key)
 
-
     def delete(self,key):
         if self.prefs.has_key(key):
             del self.prefs[key]
@@ -111,11 +110,8 @@ class Preferences:
                 rdirs.append(dirname)
         return rdirs
 
-
-    def load_prefs(self,filename):
-        #
-        # Load prefs
-        #
+    def load_prefs(self,filename):        
+        # Load prefs        
         self.pref_file=filename
         import pickle
         try:
@@ -129,10 +125,8 @@ class Preferences:
             fd.close()
         return
 
-    def save_prefs(self):
-        #
-        # Save prefs
-        #
+    def save_prefs(self):        
+        # Save prefs        
         import pickle
         fd=open(self.pref_file,'w')
         pickle.dump(self.prefs,fd)

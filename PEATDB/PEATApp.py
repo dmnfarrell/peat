@@ -164,16 +164,15 @@ class App(Frame, GUI_help):
         """Update currently opened DBs menu from current proj dict"""
 
         menu = self.curr_menu['var']
-        menu.delete(1, menu.index(END))
+        menu.delete(2, menu.index(END))
         for name in self.currentDBs:
             data = self.currentDBs[name]
             def func(data):
                 def new():
-                    #self.removeTable()
-                    self.hideDB()
+                    self.hideDB()   #hide current
                     db = data['db']
                     f = self.filename = data['filename']
-                    if f==None:
+                    if f == None:
                         self.project = data['project']
                     self.loadDB(db)
                 return new
@@ -654,8 +653,8 @@ class App(Frame, GUI_help):
             self.addDB(name, self.DB)
 
         self.updateStatusPane()
-        self.updateMenus(load=True)
         self.toggleMenus('normal')
+        self.updateMenus(load=True)
         return True
 
     def addDB(self, name, DB):
@@ -666,7 +665,6 @@ class App(Frame, GUI_help):
         else:
             d['filename'] = None
             d['project'] = self.project
-
         self.currentDBs[name] = d
         return
 
@@ -853,6 +851,7 @@ class App(Frame, GUI_help):
             elif str(answer) == 'yes':
                 self.saveDB()
 
+        name = self.DB.meta.info['project']
         self.DB.close()
         self.DB = None
         self.removeTable()
@@ -862,7 +861,6 @@ class App(Frame, GUI_help):
         self.cv = self.showBlankCanvas(self.main,row=1)
         self.welcomeLogo()
         self.updateStatusPane()
-        name = self.project
 
         if name in self.currentDBs:
             del self.currentDBs[name]
@@ -874,18 +872,20 @@ class App(Frame, GUI_help):
 
     def closeAll(self):
         """close all currently opened DBs except current viewed"""
-        #print self.currentDBs, self.project
+
         names = self.currentDBs.keys()
+        if self.DB != None:
+            currproj = self.DB.meta.info['project']
+        else:
+            currproj = ''
         for name in names:
-            if self.DB != None:
-                currproj = self.DB.meta.info['project']
-                if name == currproj:
-                    self.closeDB()
+            if name == currproj:
+                self.closeDB()
             else:
                 db = self.currentDBs[name]['db']
                 db.close()
                 del self.currentDBs[name]
-        #self.updateCurrentMenu()
+        self.updateCurrentMenu()
         return
 
     def openProjectfromTable(self, protein=None, field_name=None):
