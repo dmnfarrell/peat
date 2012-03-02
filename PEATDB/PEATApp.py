@@ -164,7 +164,9 @@ class App(Frame, GUI_help):
         """Update currently opened DBs menu from current proj dict"""
 
         menu = self.curr_menu['var']
-        menu.delete(2, menu.index(END))
+        menu.delete(0, menu.index(END))
+        menu.add_command(label='Close All',command=self.closeAll)
+        menu.add_separator()
         for name in self.currentDBs:
             data = self.currentDBs[name]
             def func(data):
