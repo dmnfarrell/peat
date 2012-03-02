@@ -17,7 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Contact information:
-# Email: Jens.Nielsen_at_gmail.com 
+# Email: Jens.Nielsen_at_gmail.com
 # Normal mail:
 # Jens Nielsen
 # SBBS, Conway Institute
@@ -34,7 +34,7 @@ try:
     import matplotlib
     matplotlib.use('TkAgg')
     from matplotlib.font_manager import FontProperties
-    import matplotlib.pyplot as plt   
+    import matplotlib.pyplot as plt
 except:
     pass
 from Base import PDatabase
@@ -79,7 +79,7 @@ class App(Frame, GUI_help):
         self.project = ''   #project name on server
         self.backend = 'mysql'
 
-        self.filename = None       
+        self.filename = None
         self.DB = None
         self.currentDBs = {}
 
@@ -93,7 +93,7 @@ class App(Frame, GUI_help):
         self.DNAtool_state = None
 
         #after loading the database instance is self.DB
-        if DB != None:     
+        if DB != None:
             self.loadDB(DB)
         elif filename !=None:
             self.openLocal(filename)
@@ -136,10 +136,10 @@ class App(Frame, GUI_help):
         homedir = os.path.expanduser("~")
         paths = [peatpath, os.getcwd(), homedir]
         pluginpaths = [os.path.join(p, 'plugins') for p in paths]
-        print pluginpaths
+        #print pluginpaths
         try:
             failed = init_plugin_system(pluginpaths)
-        except:            
+        except:
             return
         plgmenu = self.Pluginmenu['var']
         for plugin in get_plugins_by_capability('gui'):
@@ -149,26 +149,26 @@ class App(Frame, GUI_help):
                 return new
             plgmenu.add_command(label=plugin.menuentry,
                                 command=func(plugin, parent=self))
-        if len(failed)>0:
+        '''if len(failed)>0:
             for f in failed:
-                self.recordEvent('failed to load plugin %s, error: %s' %(f[0],f[1]))
+                self.recordEvent('failed to load plugin %s, error: %s' %(f[0],f[1]))'''
         return
 
     def updatePlugins(self):
-        """Update plugins"""             
+        """Update plugins"""
         self.Pluginmenu['var'].delete(2, self.Pluginmenu['var'].index(END))
         self.discoverPlugins()
         return
 
     def updateCurrentMenu(self):
-        """Update currently opened menu from current proj dict"""
-        
+        """Update currently opened DBs menu from current proj dict"""
+
         menu = self.curr_menu['var']
-        menu.delete(1, menu.index(END))       
-        for name in self.currentDBs:            
+        menu.delete(1, menu.index(END))
+        for name in self.currentDBs:
             data = self.currentDBs[name]
             def func(data):
-                def new():  
+                def new():
                     #self.removeTable()
                     self.hideDB()
                     db = data['db']
@@ -180,7 +180,7 @@ class App(Frame, GUI_help):
             menu.add_command(label=name,
                                 command=func(data))
         return
-    
+
     def setupVars(self):
         """Set some tk vars"""
         self.yasara=False
@@ -331,7 +331,7 @@ class App(Frame, GUI_help):
         return self.sidepane
 
     def resetSidePane(self, width=20):
-        """Create a new sidepane"""        
+        """Create a new sidepane"""
         self.createSidePane(width=width)
         if hasattr(self,'tableframe'):
             self.masterframe.paneconfigure(self.sidepane, before=self.tableframe)
@@ -342,7 +342,7 @@ class App(Frame, GUI_help):
         if hasattr(self, 'sidepane'):
             self.masterframe.forget(self.sidepane)
             self.sidepane.destroy()
-        return    
+        return
 
     def createChildFrame(self, width=400, title=''):
         """Create a child frame in sidepane or as toplevel"""
@@ -421,13 +421,13 @@ class App(Frame, GUI_help):
                      '03Remodel Mutant Structures':{'cmd':self.remodelPEATModels},
                      '04Fetch PDB':{'cmd':self.fetchPDB},
                      '05Update Mutation Codes':{'cmd':self.updateMutations},
-                     '06Update Mutant Sequences':{'cmd':self.updateAASequences}}                     
+                     '06Update Mutant Sequences':{'cmd':self.updateAASequences}}
         self.tools_menu=self.create_pulldown(self.menu,self.tools_menu)
-        self.menu.add_cascade(label='Tools',menu=self.tools_menu['var'])        
-        
+        self.menu.add_cascade(label='Tools',menu=self.tools_menu['var'])
+
         self.labbookmenu = Menu(self.tools_menu['var'], tearoff=1)
         self.tools_menu['var'].add_cascade(label='Labbooks', menu=self.labbookmenu)
-       
+
         self.Pluginmenu={'01Update Plugins':{'cmd':self.updatePlugins},
                          '02sep':'',}
         self.Pluginmenu=self.create_pulldown(self.menu,self.Pluginmenu)
@@ -437,7 +437,7 @@ class App(Frame, GUI_help):
                         '02sep':'',}
         self.curr_menu=self.create_pulldown(self.menu,self.curr_menu)
         self.menu.add_cascade(label='Current',menu=self.curr_menu['var'])
-        
+
         self.help_menu=Menu(self.menu,tearoff=0)
         self.help_menu.add_command(label='Online documentation',command=self.onlineDocumentation)
         self.help_menu.add_command(label='Report Bug',command=self.gotoBugzilla)
@@ -445,6 +445,7 @@ class App(Frame, GUI_help):
         self.menu.add_cascade(label='Help',menu=self.help_menu)
 
         self.main.config(menu=self.menu)
+        self.toggleMenus('disabled')
         return
 
     def updateMenus(self, load=False, close=False):
@@ -452,6 +453,13 @@ class App(Frame, GUI_help):
         if load==True:
             self.updateLabbooksMenu()
             self.updateCurrentMenu()
+        return
+
+    def toggleMenus(self, state='normal'):
+        """Enable or disable main menus when DB is loaded"""
+        items = [2,3,4,6,7,8]
+        for i in items:
+            self.menu.entryconfig(i, state=state)
         return
 
     def doBindings(self):
@@ -487,15 +495,15 @@ class App(Frame, GUI_help):
         #supply any non ekin fields
         fields = []
         model = self.table.getModel()
-        for f in model.columnNames:            
+        for f in model.columnNames:
             if model.columntypes[f] in PEATRecord.ekintypes:
                 pass
             else:
-                fields.append(f)        
+                fields.append(f)
         self.filterframe = self.table.createFilteringBar(self.main, fields=fields)
         self.filterframe.grid(row=2,column=0)
         return
-    
+
     def addOptions(self, root):
         root.option_add('*Button*padx', 4)
         root.option_add('*Button*pady', 4)
@@ -533,11 +541,11 @@ class App(Frame, GUI_help):
         self.preferences.set('recent', [])
         self.recentmenu.delete(0, self.recentmenu.index('last'))
         return
-    
+
     def connect(self, server=None, port=None, project=None, backend='mysql',
                 username=None, password=None):
         """Connect with no dialog"""
-      
+
         if username == None: username=self.username
         if password == None: password=self.password
         if server != None:
@@ -565,7 +573,7 @@ class App(Frame, GUI_help):
 
     def connectDialog(self, event=None):
         """Get a server/port, storage and open DB"""
-        backends = PDatabase.backends        
+        backends = PDatabase.backends
         mpDlg = MultipleValDialog(title='Connect to DB',
                                     initialvalues=(self.username, self.password, self.server,
                                                    self.port, self.project,
@@ -622,7 +630,7 @@ class App(Frame, GUI_help):
         self.DB = DB
         self.removeBlankCanvas()
         self.createSidePane()
-        self.tablemodel = PEATTableModel(DB)     
+        self.tablemodel = PEATTableModel(DB)
         self.tableframe = Frame(self.masterframe, bd=1,relief=RAISED)
         self.table = PEATTable(self.tableframe, self.tablemodel, parentapp=self)
         self.table.loadPrefs(self.preferences)
@@ -643,10 +651,11 @@ class App(Frame, GUI_help):
                 self.DB.meta.info['project'] = self.project
         name = self.DB.meta.info['project']
         if not name in self.currentDBs.keys():
-            self.addDB(name, self.DB)           
-            
+            self.addDB(name, self.DB)
+
         self.updateStatusPane()
         self.updateMenus(load=True)
+        self.toggleMenus('normal')
         return True
 
     def addDB(self, name, DB):
@@ -657,10 +666,10 @@ class App(Frame, GUI_help):
         else:
             d['filename'] = None
             d['project'] = self.project
-            
-        self.currentDBs[name] = d 
+
+        self.currentDBs[name] = d
         return
-    
+
     def setTitle(self):
         """set title of window"""
         if self.DB != None:
@@ -691,7 +700,7 @@ class App(Frame, GUI_help):
 
     def openLocal(self, filename=None):
         """Open local DB"""
-      
+
         if filename == None:
             filename=tkFileDialog.askopenfilename(initialdir=os.getcwd(),
                                        filetypes=[("zodb fs","*.fs"),
@@ -707,7 +716,7 @@ class App(Frame, GUI_help):
             self.project = os.path.basename(filename)
             DB = PDatabase(local=filename)
             self.loadDB(DB)
-            self.addtoRecent(filename)           
+            self.addtoRecent(filename)
         return
 
     def saveDB(self, event=None):
@@ -717,7 +726,7 @@ class App(Frame, GUI_help):
             return
         #cache changed objects in case of conflict?
         import copy
-        
+
         if self.username == '':
             tkMessageBox.showwarning("Set a user name",
                                      'You need to set a user name before saving.\n'
@@ -826,10 +835,10 @@ class App(Frame, GUI_help):
         """Hide the open DB"""
         if hasattr(self, 'table'):
             self.removeTable()
-        self.filename = None    
+        self.filename = None
         self.setTitle()
         return
-    
+
     def closeDB(self, event=None):
         """Close the open DB"""
         if self.DB == None:
@@ -838,8 +847,8 @@ class App(Frame, GUI_help):
             answer = tkMessageBox.askquestion("Save recent changes?",
                                               "Save pending changes before closing?",
                                               icon=tkMessageBox.QUESTION,
-                                              type=tkMessageBox.YESNOCANCEL)            
-            if str(answer) == 'cancel':                
+                                              type=tkMessageBox.YESNOCANCEL)
+            if str(answer) == 'cancel':
                 return 'cancel'
             elif str(answer) == 'yes':
                 self.saveDB()
@@ -854,37 +863,43 @@ class App(Frame, GUI_help):
         self.welcomeLogo()
         self.updateStatusPane()
         name = self.project
-       
+
         if name in self.currentDBs:
             del self.currentDBs[name]
+        self.updateCurrentMenu()
+
+        if len(self.currentDBs) == 0:
+            self.toggleMenus('disabled')
         return True
 
     def closeAll(self):
         """close all currently opened DBs except current viewed"""
-        for name in self.currentDBs.keys()[:]:
-            if name == self.project:
-                #self.closeDB()
-                pass
-            else:    
+        #print self.currentDBs, self.project
+        names = self.currentDBs.keys()
+        for name in names:
+            if self.DB != None:
+                currproj = self.DB.meta.info['project']
+                if name == currproj:
+                    self.closeDB()
+            else:
                 db = self.currentDBs[name]['db']
                 db.close()
                 del self.currentDBs[name]
-        #print self.currentDBs
-        self.updateCurrentMenu()
+        #self.updateCurrentMenu()
         return
 
     def openProjectfromTable(self, protein=None, field_name=None):
-        """Open remote project from table cell"""        
+        """Open remote project from table cell"""
         if self.DB == None:
-            return 
+            return
         D = self.DB.data
         if not D[protein].has_key(field_name):
-            return       
-        settings = D[protein][field_name]       
+            return
+        settings = D[protein][field_name]
         #print settings
         self.connect(**settings)
         return
-    
+
     def packDB(self):
         if self.DB == None:
             return
@@ -1095,8 +1110,8 @@ class App(Frame, GUI_help):
             from Dialogs import PEATDialog
             pb=PEATDialog(self.master, option='progressbar',
                                           message='Deleting this field for all records..')
-            pb.update_progress(0)            
-            callback = pb.update_progress             
+            pb.update_progress(0)
+            callback = pb.update_progress
             self.DB.deleteField(colname, callback=callback)
             self.DB.data._p_jar.cacheGC()
             self.updateTable()
@@ -1245,7 +1260,7 @@ class App(Frame, GUI_help):
 
         if hasattr(self, 'table') and self.table != None:
             #Update the table model to reflect changes in DB and redraw the table
-            model = self.tablemodel           
+            model = self.tablemodel
             if self.table.rows < 10000:
                 sortcol = self.table.sortcol
             else:
@@ -1275,7 +1290,7 @@ class App(Frame, GUI_help):
         if self.DB == None or not hasattr(self, 'table'):
             return
         DB=self.DB
-        newframe = Toplevel()         
+        newframe = Toplevel()
         tableframe = Frame(newframe, bd=1,relief=RAISED)
         tableframe.pack(fill=BOTH,expand=1)
         table = PEATTable(tableframe, self.tablemodel, parentapp=self)
@@ -1283,9 +1298,9 @@ class App(Frame, GUI_help):
         table.createTableFrame()
         if self.preferences.get('thumbsize') == '':
             self.preferences.set('thumbsize',200)
-        table.thumbsize = int(self.preferences.get('thumbsize'))                           
+        table.thumbsize = int(self.preferences.get('thumbsize'))
         return
-    
+
     def pageView(self, event=None):
         if self.pageviewvar.get() == False:
             self.table.paging = 0
@@ -1482,7 +1497,7 @@ class App(Frame, GUI_help):
 
     def hideFieldsDialog(self):
         """Allow fields to be hidden"""
-        fr=Toplevel() 
+        fr=Toplevel()
         fr.geometry('300x350+300+200')
         fr.title('Show/hide fields')
         fr.grab_set()
@@ -1494,7 +1509,7 @@ class App(Frame, GUI_help):
                 if '_' in f: n=f.replace('_',' ')
                 else: n=f
                 print f,n, show
-                if n not in show:                    
+                if n not in show:
                     self.DB.showField(f, False)
                 else:
                     self.DB.showField(f)
@@ -1502,7 +1517,7 @@ class App(Frame, GUI_help):
             return
         def close():
             fr.destroy()
-            
+
         Button(fr, text='Apply', command=apply).grid(row=0,column=0,padx=2,pady=2)
         Button(fr, text='Close', command=close).grid(row=1,column=0,padx=2,pady=2)
         cbfr = Pmw.ScrolledFrame(fr)
@@ -1512,11 +1527,11 @@ class App(Frame, GUI_help):
                 orient = 'vertical',
                 labelpos = 'n',
                 label_text = 'Deselect fields to hide them:')
-        
+
         for f in userfields:
             if '_' in f:
                 n=f.replace('_',' ')
-            else: n=f    
+            else: n=f
             checkbuttons.add(n)
             if userfields[f]['show'] == True:
                 checkbuttons.invoke(n)
@@ -1524,7 +1539,7 @@ class App(Frame, GUI_help):
         fr.columnconfigure(0,weight=1)
         fr.rowconfigure(2,weight=1)
         return
-        
+
     def quit(self,event=None):
         """Close DB and quit"""
         answer = self.closeDB()
@@ -1533,8 +1548,8 @@ class App(Frame, GUI_help):
         #check is plugin running?
         #if hasattr(self,'runningplugin'):
         #    print self.runningplugin
-        
-        self.closeSidePane()        
+
+        self.closeSidePane()
         self.main.destroy()
         self.preferences.save_prefs()
         if not self.parent:
@@ -1569,7 +1584,7 @@ class App(Frame, GUI_help):
                                     types=(['list']),
                                     parent=self.main)
         if mpDlg.result == True:
-            key = mpDlg.results[0]            
+            key = mpDlg.results[0]
         else:
             return
         self.DB.importDict(importdata=IM.data, namefield=key)
@@ -1579,34 +1594,34 @@ class App(Frame, GUI_help):
     def importSequences(self):
         """Import AA sequences"""
         return
-    
+
     def importMutants(self):
         """Specialised import method for adding mutant data from a csv
         file. Requires a wt structure to create mutant AA sequences"""
-        
+
         def getpdb():
             return
         def doimport():
             #self.DB.importDict(importdata=IM.data, namefield='name')
             #use mutations field to derive aa seq..
             return
-                
+
         fr=Frame()
         win=Toplevel()
-        Label(win, text='This dialog allows you to import a set of mutant data\n'                                
+        Label(win, text='This dialog allows you to import a set of mutant data\n'
                         'along with some associated experimental values. You will\n'
                         'need to provide the the structure for creating an AA\n'
-                        'sequence for each mutant. Mutation codes should be of\n' 
+                        'sequence for each mutant. Mutation codes should be of\n'
                         'the form chain:residuenumber:code',bg='#ccFFFF').pack(fill=BOTH,expand=1)
         Button(win,text='Set a wt PDB',command=getpdb).pack(fill=BOTH,expand=1)
         fr=Frame(win); fr.pack(fill=X,expand=1)
         self.useref = IntVar()
         Label(fr,text='Use current reference protein').pack(side=LEFT)
-        Checkbutton(fr,variable=self.useref).pack(side=LEFT)       
+        Checkbutton(fr,variable=self.useref).pack(side=LEFT)
         self.set_centered_geometry(self.main,win)
         Button(win,text='Continue',command=doimport).pack(fill=BOTH,expand=1)
-        return        
-    
+        return
+
     def importFileset(self):
         """Use filehandler class to import a set of external files"""
         if self.DB == None:
@@ -1662,26 +1677,26 @@ class App(Frame, GUI_help):
         if D[protein].has_key(field_name):
             data=D[protein][field_name]
         else:
-            data=default       
+            data=default
         import types
         if not type(data) is types.DictType:
             return
         vals = data.values()
         labels = data.keys()
-        types= ['string' for i in labels]        
+        types= ['string' for i in labels]
         mpDlg = MultipleValDialog(title='Edit Field Data',
                                     initialvalues=vals,
                                     labels=labels,
                                     types=types,
-                                    parent=self.main)        
+                                    parent=self.main)
         if mpDlg.result == True:
             for i in range(len(mpDlg.results)):
                 key = labels[i]
-                data[key] = mpDlg.results[i]              
-            self.DB.data[protein][field_name] = data            
+                data[key] = mpDlg.results[i]
+            self.DB.data[protein][field_name] = data
             self.table.redrawCell(recname=protein, colname=field_name)
         return
-    
+
     def open_link(self, protein, field_name):
         """Open a hyperlink"""
         D = self.DB.data
@@ -1698,7 +1713,7 @@ class App(Frame, GUI_help):
         blank = {'project':'','server':'','username':'','password':'','port':8080}
         self.editDictField(protein, field_name, blank)
         return
-        
+
     def edit_link(self, protein, field_name):
         """Edit a hyperlink"""
         blank = {'text':'','link':''}
@@ -1725,16 +1740,16 @@ class App(Frame, GUI_help):
         # did we get any data back?
         if not getattr(self,'notesdata',None):
             self.notesdata=None
-        if self.notesdata:           
+        if self.notesdata:
             if self.notesdata.has_key('parent_info'):
                 notes_info=self.notesdata['parent_info']
                 protein=notes_info['record']
                 column=notes_info['column']
                 newnotes=self.notesdata['text']
-                del self.notesdata['parent_info']                
+                del self.notesdata['parent_info']
             # Got the record and column - add the data
             self.DB.data[protein][field_name]  = self.notesdata
-            delattr(self,'notesdata')     
+            delattr(self,'notesdata')
             self.table.redrawCell(recname=protein, colname=field_name)
         return
 
@@ -1745,7 +1760,7 @@ class App(Frame, GUI_help):
         if D[protein].has_key(field_name):
             filerec=D[protein][field_name]
         else:
-            return        
+            return
         fh = FileHandler(self)
         fh.displayFile(filerec)
         return
@@ -1760,9 +1775,9 @@ class App(Frame, GUI_help):
             filerec=None
         fh = FileHandler(self)
         newfile = fh.addFileDialog(filerec)
-        
+
         if newfile:
-            self.DB.addBlob(protein, field_name, fh.newfile)           
+            self.DB.addBlob(protein, field_name, fh.newfile)
             self.table.redrawCell(recname=protein, colname=field_name)
         return
 
@@ -1821,8 +1836,8 @@ class App(Frame, GUI_help):
         import textFrame
         tf = textFrame.textFrame(parent=self.main,title=protein+' Structure')
         tf.load_text(pdblines)
-        return        
-    
+        return
+
     def displayStructure(self, protein, field_name):
         """Display a structure"""
         app = self.preferences.get('molgraphApplication')
@@ -1893,7 +1908,7 @@ class App(Frame, GUI_help):
         """Start DNAtool - this function is far too long and should be simplified"""
         self.DNAtool_instance = None
         if self.DB == None:
-            return        
+            return
         DB = self.DB
         D = DB.data
         M = DB.meta  #DNAtool/primers stuff is now stored in DB.meta
@@ -1930,7 +1945,7 @@ class App(Frame, GUI_help):
             if sel_prot:
                 data_passed['PEAT_DBrecord'] = sel_prot
                 import types
-                
+
                 if D[sel_prot].has_key('DNAseq') and D[sel_prot].DNAseq != None:
                     data_passed['DNAseq'] = D[sel_prot].DNAseq
 
@@ -1964,7 +1979,7 @@ class App(Frame, GUI_help):
                         ok = DB.addDNAseq(sel_prot, DNAdata['DNAseq'])
                         data = DNAdata['ORF_selected']
                         ok = DB.addProperty(sel_prot, 'ORF_selected', data)
-                       
+
                         if not ok:
                             raise 'Something went wrong when adding ORF info'
 
@@ -2038,13 +2053,13 @@ class App(Frame, GUI_help):
                     ok=self.DB.addProtseq(record_name, DNAdata['ORF_selected']['aaseq3'],
                                                    DNAdata['ORF_selected']['aastart_number'])
                     if not ok:
-                        raise 'Something went wrong when addding the protein sequence'                    
-                    
+                        raise 'Something went wrong when addding the protein sequence'
+
                     #add a code for the mutation, this can be parsed to create
                     #a PEATSA mutationset later
                     ref = self.DB.meta.refprotein
                     #DBActions.checkMutation(self.DB, record_name, ref)
-                    self.updateTable(record_name, 'Mutations')                    
+                    self.updateTable(record_name, 'Mutations')
         return
 
     def startEkin(self, protein=None, field_name=None, mode=None):
@@ -2058,7 +2073,7 @@ class App(Frame, GUI_help):
         #Get the data of the cell
         if protein and field_name:
             if D[protein].has_key(field_name):
-                E = copy.deepcopy(D[protein][field_name])                
+                E = copy.deepcopy(D[protein][field_name])
             else:
                 E = None
             #add to open instances
@@ -2100,9 +2115,9 @@ class App(Frame, GUI_help):
 
     def startLabbook(self, protein=None, field_name=None):
         """Edit a labbook style sub-table"""
-        
+
         if self.DB == None:
-            return 
+            return
         D = self.DB.data
         tabledata = None
         info = None
@@ -2111,7 +2126,7 @@ class App(Frame, GUI_help):
             tabledata = self.DB.meta['labbook']
             if tabledata == {}: tabledata=None
         elif hasattr(self.DB.meta, 'labbooks') and protein in self.DB.meta.labbooks:
-            tabledata = self.DB.meta.labbooks[protein]               
+            tabledata = self.DB.meta.labbooks[protein]
         elif protein and field_name:
             if D[protein].has_key(field_name):
                 tabledata = D[protein][field_name]
@@ -2133,32 +2148,32 @@ class App(Frame, GUI_help):
             if protein == 'ALL':
                 self.DB.meta['labbook'] = self.templabbookdata
             elif hasattr(self.DB.meta, 'labbooks') and protein in self.DB.meta.labbooks:
-                self.DB.meta.labbooks[protein] = self.templabbookdata                
+                self.DB.meta.labbooks[protein] = self.templabbookdata
                 self.updateLabbooksMenu()
             else:
                 D[protein][field_name] = self.templabbookdata
             delattr(self,'templabbookdata')
             #self.updateTable(protein, field_name)
-            self.table.redrawCell(recname=protein, colname=field_name)           
+            self.table.redrawCell(recname=protein, colname=field_name)
         return
 
     def updateLabbooksMenu(self ):
         """Add existing laboooks to tools menu"""
         import string, types
-       
+
         self.labbookmenu.delete(0, self.labbookmenu.index('last'))
         self.labbookmenu.add_command(label='New Labbook', command=self.addLabbook)
-        self.labbookmenu.add_command(label='Manage Labbooks', command=self.manageLabbooks)       
+        self.labbookmenu.add_command(label='Manage Labbooks', command=self.manageLabbooks)
 
         if not hasattr(self.DB.meta,'labbooks'):
-            return        
+            return
         self.labbookmenu.add_separator()
         for name in self.DB.meta.labbooks.keys():
             def func(**kwargs):
                 def new():
                    self.startLabbook(**kwargs)
                 return new
-            self.labbookmenu.add_command(label=name, command=func(protein=name) )              
+            self.labbookmenu.add_command(label=name, command=func(protein=name) )
         return
 
     def addLabbook(self):
@@ -2169,7 +2184,7 @@ class App(Frame, GUI_help):
                                              parent=self.main)
         if name:
             self.DB.addLabbook(name)
-            self.startLabbook(name)            
+            self.startLabbook(name)
         return
 
     def manageLabbooks(self):
@@ -2177,21 +2192,21 @@ class App(Frame, GUI_help):
         return
 
     def labbookSheetsSelector(self, frame):
-        """Show list of labbook sheets"""        
-        names = self.DB.meta.labbook.keys() 
+        """Show list of labbook sheets"""
+        names = self.DB.meta.labbook.keys()
         if hasattr(self.DB.meta, 'labbooks'):
             for l in self.DB.meta.labbooks:
                 sheets = [l+'_'+ s for s in self.DB.meta.labbooks[l].keys()]
                 names.extend(sheets)
-            
-        labbooklist = Pmw.ScrolledListBox(frame,              
+
+        labbooklist = Pmw.ScrolledListBox(frame,
                 labelpos='nw',
                 label_text='Tables',
                 listbox_height = 8)
         labbooklist.pack(fill=Y,expand=1)
         labbooklist.setlist(names)
-        return labbooklist           
-            
+        return labbooklist
+
     def alanineScan(self):
         return
 
@@ -2215,29 +2230,29 @@ class App(Frame, GUI_help):
             DBActions.checkMutation(self.DB, p, ref)
         self.updateTable()
         return
-    
+
     def updateAASequences(self):
-        """Update the AA sequences for mutants, usually applied to 
+        """Update the AA sequences for mutants, usually applied to
         those mutants that don't have a DNA sequence, so at any time we
         can change their AA seq if the ref prot is altered
         requires: reference protein to be set"""
         if not hasattr(self.DB.meta, 'refprotein') or self.DB.meta.refprotein == None:
             tkMessageBox.showinfo('No ref protein',
                                   'Set a reference (wt) protein first')
-            return 
-        sel = self.table.get_selectedRecordNames()    
-        DBActions.setSequencesfromMutationCodes(self.DB, selected=sel)    
+            return
+        sel = self.table.get_selectedRecordNames()
+        DBActions.setSequencesfromMutationCodes(self.DB, selected=sel)
         return
-        
+
     def createRecsOptsMenu(self, parent, callback=None):
         """Get an option menu with a list of the records"""
         def setref(evt=None):
             prot = var.get()
-            if self.DB[prot].Structure == None:              
+            if self.DB[prot].Structure == None:
                 tkMessageBox.showinfo("Warning",
                                      'There is no structure for this record! '
-                                      'You should add one.')                
-            self.DB.meta.refprotein = prot            
+                                      'You should add one.')
+            self.DB.meta.refprotein = prot
         if not hasattr(self.DB.meta, 'refprotein'):
             self.DB.meta.refprotein = None
 
@@ -2255,14 +2270,14 @@ class App(Frame, GUI_help):
                 colbrk=1
             else:
                 colbrk=0
-            m.add_radiobutton(label=name,                                                 
+            m.add_radiobutton(label=name,
                               value=name,
                               variable=var,
                               columnbreak=colbrk,
                               command=setref)
             p+=1
         return o
-    
+
     def remodelPEATModels(self):
         """Remodel current mutant sequences using ref protein"""
         if self.DB == None:
@@ -2271,7 +2286,7 @@ class App(Frame, GUI_help):
         # Delete the temp models
         if getattr(self.DB,'3Dmodels', None):
             self.DB.tmp_3Dmodels={}
-       
+
         c = self.createChildFrame()
         from Dialogs import PEATDialog
 
@@ -2293,7 +2308,7 @@ class App(Frame, GUI_help):
             DBActions.checkModels(DB=self.DB,callback=pb.updateProgress,
                                     selected=sel)
             self.log2Stdout()
-            self.updateTable()            
+            self.updateTable()
         Button(c,text='Go',command=go).pack()
         self.log = self.createLogWin(c)
         #log.delete(1.0,END)
@@ -2308,22 +2323,22 @@ class App(Frame, GUI_help):
             hull_width = 800,
             hull_height = 500,
             text_wrap='word')
-        return log        
+        return log
 
     def stdout2Log(self):
         """Redirect stdout to app control"""
         sys.stdout = self
         sys.stderr = self
         return
-       
+
     def log2Stdout(self):
         """return to stdout"""
         sys.stdout = sys.__stdout__
         sys.stderr = sys.__stderr__
         return
-      
+
     def write(self, txt):
-        """Handle stdout if required"""        
+        """Handle stdout if required"""
         self.log.appendtext(txt)
         self.log.update_idletasks()
         return
@@ -2343,7 +2358,7 @@ class App(Frame, GUI_help):
         if mpDlg.result == True:
             pdbid = mpDlg.results[0]
             recname = mpDlg.results[1]
-            
+
         stream = DBActions.fetchPDB(pdbid)
         if stream == None:
             tkMessageBox.showinfo('info',
@@ -2352,7 +2367,7 @@ class App(Frame, GUI_help):
         DBActions.addPDBFile(self.DB, recname, pdbdata=stream, pdbname=pdbid)
         self.updateTable()
         return
-    
+
     def startComparator(self):
         import sys
         from Compare import Comparator
@@ -2409,15 +2424,15 @@ class App(Frame, GUI_help):
             frame.destroy()
             self.resetSidePane(width=20)
             return
-        
+
         from Search import  searchDialog
-        S = searchDialog(self.sidepane, self.DB)        
-        S.pack()        
+        S = searchDialog(self.sidepane, self.DB)
+        S.pack()
         return
-        
+
     def createDBonServerDialog(self):
         """Allow users with admin passwd to create a project
-           on the remote MySql DB. Relstorage only."""        
+           on the remote MySql DB. Relstorage only."""
         import MySQLdb as mysql
         mpDlg = MultipleValDialog(title='Create DB on Server',
                                     initialvalues=(self.server, self.port,
@@ -2447,7 +2462,7 @@ class App(Frame, GUI_help):
             c.execute(cmd)
         except Exception, e:
             tkMessageBox.showinfo('Error',e)
-        try:   
+        try:
             cmd = "grant all privileges on " + dbname + ".* to " + "'"+access+"'"+ "@'%';"
             print cmd
             c.execute(cmd)
@@ -2456,7 +2471,7 @@ class App(Frame, GUI_help):
             tkMessageBox.showinfo('Error',e)
             self.recordEvent('Failed to create project, check settings')
             return
-            
+
         self.recordEvent('Project %s successfully created on %s' %(dbname,server))
         tkMessageBox.showinfo("Project created",
                               'Project %s successfully created on %s. '
@@ -2471,7 +2486,7 @@ class App(Frame, GUI_help):
     def plotSetup(self, event=None):
         self.table.plotSetup()
         return
-    
+
     def set_geometry(self,pwidget,widget):
         """Set the position of widget in the middle of pwidget"""
         w,h,x,y=get_geometry(pwidget)
@@ -2521,18 +2536,18 @@ class LabbookManager(Toplevel):
         #self.transient(parent)
         self.DB = DB
         self.title('Manage Labbooks')
-        self.parent = parent        
-        self.geometry('400x300+300+200') 
+        self.parent = parent
+        self.geometry('400x300+300+200')
         self.body = Frame(self)
         self.initial_focus = self.body
-        self.body.pack(fill=BOTH,expand=1,padx=5, pady=5)        
+        self.body.pack(fill=BOTH,expand=1,padx=5, pady=5)
         #self.grab_set()
         if not self.initial_focus:
             self.initial_focus = self
         self.protocol("WM_DELETE_WINDOW", self.cancel)
         self.updateList()
         self.labbooklist.pack(side=LEFT,fill=BOTH,expand=1)
-        
+
         bf=Frame(self.body); bf.pack(side=RIGHT)
         Button(bf,text='New',command=self.new).pack(fill=X)
         Button(bf,text='Open',command=self.open).pack(fill=X)
@@ -2545,7 +2560,7 @@ class LabbookManager(Toplevel):
             names = self.DB.meta.labbooks.keys()
         else:
             names = []
-        self.labbooklist = Pmw.ScrolledListBox(self.body,                
+        self.labbooklist = Pmw.ScrolledListBox(self.body,
                 labelpos='nw',
                 label_text='Labbooks',
                 listbox_height = 6,
@@ -2556,7 +2571,7 @@ class LabbookManager(Toplevel):
     def new(self):
         self.parent.addLabbook()
         return
-    
+
     def open(self):
         name = self.labbooklist.curselection()
         self.parent.startLabbook(protein=name)
@@ -2570,10 +2585,10 @@ class LabbookManager(Toplevel):
             self.DB.meta.labbooks.remove(name)
         self.updateList()
         return
-    
+
     def cancel(self):
         self.parent.focus_set()
-        self.destroy()      
+        self.destroy()
         return
 
 
@@ -2631,10 +2646,10 @@ def main():
         app=App(DB=DB)
     elif opts.file != None:
         if not os.path.exists(opts.file):
-            print 'File does not exist.'            
+            print 'File does not exist.'
             opts.file = None
         app=App(filename=opts.file)
-        app.addtoRecent(os.path.abspath(opts.file))        
+        app.addtoRecent(os.path.abspath(opts.file))
     else:
         app=App()
     app.mainloop()

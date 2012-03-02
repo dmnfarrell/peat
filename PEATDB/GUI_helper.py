@@ -17,7 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Contact information:
-# Email: Jens.Nielsen_at_gmail.com 
+# Email: Jens.Nielsen_at_gmail.com
 # Normal mail:
 # Jens Nielsen
 # SBBS, Conway Institute
@@ -36,26 +36,22 @@ class GUI_help:
         var=Menu(menu,tearoff=0)
         items=dict.keys()
         items.sort()
-        for item in items:            
+        for item in items:
             if item[-3:]=='sep':
                 var.add_separator()
-            else:                
-                # Do we have a command?                
+            else:
+                # Do we have a command?
                 command=None
                 if dict[item].has_key('cmd'):
-                    command=dict[item]['cmd']                
-                # Put the command in there                
+                    command=dict[item]['cmd']
+                # Put the command in there
                 if dict[item].has_key('sc'):
                     var.add_command(label='%-25s %9s' %(item[2:],dict[item]['sc']),command=command)
                 else:
                     var.add_command(label='%-25s' %(item[2:]),command=command)
-   
+
         dict['var']=var
         return dict
-
-    #
-    # -------------
-    #
 
     def set_pulldown_and_shortcut_states(self,states,controlvar):
         """
@@ -98,10 +94,6 @@ class GUI_help:
         self.master.update()
         return
 
-    #
-    # ------------
-    #
-
     def get_control_seq(self,shorthand):
         #
         # Expand a shorthand control sequence (e.g. Ctrl+f)
@@ -121,10 +113,6 @@ class GUI_help:
             long=long+'-KeyPress-'+string.lower(split[1])
         return long
 
-    #
-    # ------------
-    #
-
     def get_text_input(self,parent,fields,title=None):
         """
         # Open a window and get text input from the user
@@ -142,9 +130,6 @@ class GUI_help:
                                    parent.winfo_rooty()+50))
         self.window=thisid
 
-        #
-        # Define input fields
-        #
         efields=[]
         row=1
         if title:
@@ -159,9 +144,7 @@ class GUI_help:
             E.bind("<Return>", self.close_thiswin)
             efields.append(E)
             row=row+1
-        #
-        # Buttons
-        #
+
         Button(thisid,text='Cancel',command=self.cancel_thiswin).grid(row=row,column=0)
         Button(thisid,text='Ok',command=self.close_thiswin).grid(row=row,column=1,sticky='news')
         #
@@ -183,25 +166,14 @@ class GUI_help:
             return results
         return None
 
-    #
-    # ----
-    #
-
     def close_thiswin(self,event=None):
         self.window.destroy()
         return
-
-    #
-    # ----
-    #
 
     def cancel_thiswin(self):
         self.winvars=None
         self.window.destroy()
         return
-    #
-    # -----
-    #
 
     def set_geometry(self,pwidget,widget):
         """Set the position of a widget in the middle of pwidget"""
@@ -223,10 +195,6 @@ class GUI_help:
         xorg=int(rest.split('+')[1])
         yorg=int(rest.split('+')[2])
         return width,height,xorg,yorg
-
-    #
-    # -----
-    #
 
     def set_centered_geometry(self,parent,widget):
         """Place a widget on top of a parent"""
@@ -281,14 +249,8 @@ class progress_window:
         self.box=None
         return
 
-    #
-    # ----
-    #
-
     def update_progress(self,fraction,level=1):
-        #
-        #
-        #
+
         y_pos=(level-1)*40+20
         bar_length=(self.prog_x-20)*fraction
         old_obj=self.box
@@ -318,18 +280,10 @@ class progress_window:
         #self.parent_win.update()
         return
 
-    #
-    # ----
-    #
-
     def close(self):
         """Close the window"""
         self.progress_win.destroy()
         return
-
-    #
-    # ----
-    #
 
     def __del__(self):
         """Destructor"""
