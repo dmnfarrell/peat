@@ -39,6 +39,7 @@ import Pmw
 import tkFileDialog
 from PEATDB.GUI_helper import *
 from Helper import HelperDialog
+from Editor import TextEditor
 
 class PipeApp(Frame, GUI_help):
     """Data pipe GUI for importing and fitting of raw data.
@@ -218,9 +219,9 @@ class PipeApp(Frame, GUI_help):
             filename = self.openFilename('.conf')
         if not filename:
             return
-        from PEATDB.textFrame import textFrame
-        tf = textFrame(parent=self,title=filename)
-        tf.load_from_file(filename)
+
+        tf = TextEditor(parent=self,title=filename)
+        tf.openFile(filename)
         return
 
     def showRawFile(self, lines):
