@@ -23,7 +23,7 @@
 # SBBS, Conway Institute
 # University College Dublin
 # Dublin 4, Ireland
-# 
+#
 
 import os
 from Tkinter import *
@@ -33,7 +33,7 @@ import fileinput
 
 class TextEditor(Frame):
     """Class to provide a frame for text editing"""
-    
+
     def __init__(self, parent=None, filename=None, title=None):
         self.parent=parent
         if not self.parent:
@@ -59,7 +59,7 @@ class TextEditor(Frame):
                 usehullsize = 1,
                 hull_width = 300,
                 hull_height = 400,
-                text_wrap='word') 
+                text_wrap='word')
         self.text.grid(row=0,column=0,columnspan=2,sticky='NEWS',padx=2,pady=2)
         self.main.columnconfigure(0,weight=1)
         self.main.rowconfigure(0,weight=1)
@@ -67,19 +67,19 @@ class TextEditor(Frame):
         buttonpanel.grid(row=1,column=0,columnspan=2,sticky='NEWS',padx=2,pady=2)
         self.doButtons(buttonpanel)
         return
-        
+
     def doButtons(self, frame):
         """Buttons"""
         buttons=[['Open',self.openFile],
                  ['Save',self.save],
                  ['Save As',self.saveas],
                  ['Close',self.quit]]
-       
+
         for button,command in buttons:
             x=Button(frame,text=button,command=command)
-            x.pack(side=LEFT,fill=BOTH,padx=2,pady=2)           
-        return        
-    
+            x.pack(side=LEFT,fill=BOTH,padx=2,pady=2)
+        return
+
     def openFile(self, filename=None):
         """Displays text from a simple text file"""
         if filename == None:
@@ -87,20 +87,21 @@ class TextEditor(Frame):
         if not filename:
             return
         for line in fileinput.input(filename):
-            self.text.insert(END, line)        
+            self.text.insert(END, line)
         self.filename = filename
+        self.main.title(filename)
         return
 
     def save(self, filename=None):
         if filename == None:
             filename = self.filename
-        contents = self.text.get(1.0, END)      
+        contents = self.text.get(1.0, END)
         fd=open(filename,'w')
         fd.write(contents)
         fd.close()
         self.filename = filename
         return
-        
+
     def saveas(self):
         filename = self.saveFilename()
         if not filename:
@@ -115,7 +116,7 @@ class TextEditor(Frame):
                                                          ("All files","*.*")],
                                               parent=self.main)
         return filename
-  
+
     def openFilename(self, ext='.txt'):
         filename=tkFileDialog.askopenfilename(defaultextension=ext,
                                               initialdir=os.getcwd(),
@@ -124,12 +125,12 @@ class TextEditor(Frame):
                                                          ("All files","*.*")],
                                               parent=self.main)
         return filename
-        
+
     def quit(self,event=None):
         """Close the frame"""
         self.main.destroy()
         return
-        
+
 def main():
     from optparse import OptionParser
     parser = OptionParser()
@@ -143,4 +144,4 @@ def main():
     app.mainloop()
 
 if __name__ == '__main__':
-    main()        
+    main()

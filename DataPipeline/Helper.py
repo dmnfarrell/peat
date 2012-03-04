@@ -23,7 +23,7 @@
 # SBBS, Conway Institute
 # University College Dublin
 # Dublin 4, Ireland
-# 
+#
 
 from Tkinter import *
 import Images
@@ -35,9 +35,9 @@ from Editor import TextEditor
 select and appropriate Importer and some other base settings"""
 
 class HelperDialog(Frame):
-    
+
     def __init__(self, parent=None):
-        self.parent=parent         
+        self.parent=parent
         if not self.parent:
             Frame.__init__(self)
             self.main=self.master
@@ -45,53 +45,53 @@ class HelperDialog(Frame):
             self.main=Toplevel()
             self.master=self.main
         self.main.title('Configuration Helper')
-        self.main.geometry('680x500+300+200')
+        self.main.geometry('780x500+300+200')
         self.formatPanel()
-        self.filename = 'mysettings.conf'
-        self.p = Pipeline()
-        self.p.createConfig(self.filename)        
-        
+        self.p = self.parent.p
         if self.parent:
             self.parent.wait_window(self.main)
         return
-        
+
     def formatPanel(self):
         """Showing format options"""
-        panel1 = Frame(self.main)
-        panel1.pack(fill=BOTH,side=BOTTOM)
         self.img1 = Images.formatsDiagram()
         label1 = Label(self.main,image=self.img1)
-        label1.pack(fill=BOTH,padx=4,pady=4,ipadx=2,ipady=2)        
-        self.formatsbox = Pmw.ScrolledListBox(panel1,
-                        items=(range(1,9)),
-                        labelpos='n',
-                        label_text='Format Option:',
-                        listbox_height = 4,                                        
-                        usehullsize = 1,
-                        hull_width = 100,
-                        hull_height = 100 )
-        self.formatsbox.grid(row=0,column=0,padx=4,pady=4)
-        
-        showconfigbtn = Button(panel1, text='Show Config',command=self.showConfig)
-        showconfigbtn.grid(row=0,column=3,padx=4,pady=4)        
-        writeconfigbtn = Button(panel1, text='Write Config',command=self.writeConfig)
-        writeconfigbtn.grid(row=0,column=4,padx=4,pady=4)
-        
-        return        
-      
-    def addButton(self, parent, img, row, col):
-        button = Button(parent,image=img)
-        button.grid(row=row,column=col,padx=4,pady=4,ipadx=2,ipady=2,sticky='ew')
-        return button
-    
-    def writeConfig(self):
-        """Write out a config using current settings"""
-        
+        label1.pack(fill=BOTH,padx=4,pady=4,ipadx=2,ipady=2)
+        text = """The layout/format of your data is specified in the configuration
+        file under the 'format' keyword. 8 typical formats
+        are built into DataPipeline, covering most simple cases."""
+        text=text.replace('\t','')
+        Label(self.main,text=text,wraplength=600).pack(fill=Y,side=TOP,pady=4)
+        panel2 = Frame(self.main)
+        panel2.pack(fill=Y,side=BOTTOM)
+        self.doButtons(panel2)
         return
- 
+
+    def doButtons(self, frame):
+        """Buttons"""
+        buttons=[['Show Config',self.showConfig],
+                 ['Online Help',self.help],
+                 ['Close',self.close]]
+
+        for button,command in buttons:
+            x=Button(frame,text=button,command=command)
+            x.pack(side=LEFT,fill=BOTH,padx=2,pady=2)
+        return
+
     def showConfig(self):
-        """Show current config"""        
-        t = TextEditor(parent=self,title=self.filename)
-        t.openFile(self.filename)        
+        """Show current config"""
+        t = TextEditor(parent=self)
+        print self.p.__dict__
+        t.openFile(self.p.conffile)
         return
-     
+
+    def help(self):
+        import webbrowser
+        link='http://enzyme.ucd.ie/main/index.php/DataPipeline'
+        webbrowser.open(link,autoraise=1)
+        return
+
+    def close(self,event=None):
+        """Close the frame"""
+        self.main.destroy()
+        return

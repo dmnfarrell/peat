@@ -40,6 +40,7 @@ import tkFileDialog
 from PEATDB.GUI_helper import *
 from Helper import HelperDialog
 from Editor import TextEditor
+import Images
 
 class PipeApp(Frame, GUI_help):
     """Data pipe GUI for importing and fitting of raw data.
@@ -153,19 +154,21 @@ class PipeApp(Frame, GUI_help):
         self.menu.add_cascade(label='File',menu=self.file_menu['var'])
         self.presetsMenu()
         self.run_menu={'01Execute':{'cmd': self.execute},
-                        '02Run Config Helper':{'cmd': self.launchHelper},
-                        '03Model Design':{'cmd': self.launchModelDesigner},
-                        '04Launch Ekin':{'cmd':self.openEkin}}
+                        '02Model Design':{'cmd': self.launchModelDesigner},
+                        '03Launch Ekin':{'cmd':self.openEkin}}
         self.run_menu=self.create_pulldown(self.menu,self.run_menu)
         self.menu.add_cascade(label='Run',menu=self.run_menu['var'])
         self.queue_menu={'01Add files to queue':{'cmd': self.addtoQueue},
                          '02Add folder to queue':{'cmd': self.addFolder}}
         self.queue_menu=self.create_pulldown(self.menu,self.queue_menu)
         self.menu.add_cascade(label='Queue',menu=self.queue_menu['var'])
-        self.utils_menu={'01Run Tests':{'cmd': self.runTests}}
+        self.utils_menu={'01Show Config Helper':{'cmd': self.launchHelper},
+                         '02Run Tests':{'cmd': self.runTests},
+                         '03Text Editor':{'cmd': self.startTextEditor}}
         self.utils_menu=self.create_pulldown(self.menu,self.utils_menu)
-        self.menu.add_cascade(label='Utilities',menu=self.utils_menu['var'])        
-        self.help_menu={ '01Online Help':{'cmd': self.help} }
+        self.menu.add_cascade(label='Utilities',menu=self.utils_menu['var'])
+        self.help_menu={ '01Online Help':{'cmd': self.help},
+                          '02About':{'cmd': self.about},}
         self.help_menu=self.create_pulldown(self.menu,self.help_menu)
         self.menu.add_cascade(label='Help',menu=self.help_menu['var'])
         self.main.config(menu=self.menu)
@@ -284,15 +287,15 @@ class PipeApp(Frame, GUI_help):
         t.formatTests(t.basictests)
         print 'tests completed ok'
         return
-        
+
     def openEkin(self, fname=None):
         """Open ekin"""
         EK = EkinApp(parent=self)
         return
 
-    def launchModelDesigner(self):        
+    def launchModelDesigner(self):
         self.modelapp = ModelDesignApp(parent=self)
-        if self.p.modelsfile != '':           
+        if self.p.modelsfile != '':
             self.modelapp.loadModelsFile(self.p.modelsfile)
         return
 
@@ -334,6 +337,10 @@ class PipeApp(Frame, GUI_help):
                                             title='Select folder')
         return folder
 
+    def startTextEditor(self):
+        t = TextEditor(parent=self)
+        return
+
     def write(self, txt):
         """Handle stdout"""
         self.log.yview('moveto', '1')
@@ -343,8 +350,30 @@ class PipeApp(Frame, GUI_help):
 
     def help(self):
         import webbrowser
-        link='http://enzyme.ucd.ie/main/index.php/EkinPipe'
+        link='http://enzyme.ucd.ie/main/index.php/DataPipeline'
         webbrowser.open(link,autoraise=1)
+        return
+
+    def about(self):
+        win=Toplevel()
+        win.geometry('+400+350')
+        win.title('About DataPipeline')
+        logo = Images.logo()
+        label = Label(win,image=logo)
+        label.image = logo
+        label.pack(fill=BOTH,padx=4,pady=4)
+        text=['DataPipeline App',
+             'Version 1.0',
+             'DataPipeline is a python desktop and web application',
+             'that uses a configuration file to automate the import of',
+             'raw data in a variety of formats.',
+             'Author: Damien Farrell']
+        row=1
+        for line in text:
+            tmp=Label(win,text=line)
+            tmp.pack(padx=2)
+            row=row+1
+
         return
 
     def quit(self):
