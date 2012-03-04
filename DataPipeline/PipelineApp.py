@@ -356,24 +356,21 @@ class PipeApp(Frame, GUI_help):
 
     def about(self):
         win=Toplevel()
-        win.geometry('+400+350')
+        win.geometry('+500+350')
         win.title('About DataPipeline')
         logo = Images.logo()
         label = Label(win,image=logo)
         label.image = logo
         label.pack(fill=BOTH,padx=4,pady=4)
-        text=['DataPipeline App',
-             'Version 1.0',
-             'DataPipeline is a python desktop and web application',
-             'that uses a configuration file to automate the import of',
-             'raw data in a variety of formats.',
-             'Author: Damien Farrell']
-        row=1
-        for line in text:
-            tmp=Label(win,text=line)
-            tmp.pack(padx=2)
-            row=row+1
-
+        text="""DataPipeline App, Version 1.0
+             is a python desktop and web application
+             that uses a configuration file to automate the import of
+             raw data in a variety of formats.\n
+             Released under GPL v3\n
+             (C) Copyright 2011- Damien Farrell """
+        text=text.replace('\t','')
+        text= ' '.join(text.split())
+        Label(win,text=text,wraplength=400).pack(fill=Y,side=TOP,pady=4)
         return
 
     def quit(self):
