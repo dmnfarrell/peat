@@ -56,7 +56,7 @@ class PEATSAPlugin(Plugin):
     calctypes = ['stability','binding','pka']
     
     def main(self, parent=None, DB=None):
-        print parent, DB
+      
         if parent == None:
             if DB != None:
                 self.DB = DB
@@ -89,7 +89,7 @@ class PEATSAPlugin(Plugin):
             configuration.set('DATABASE', 'user', 'peatdb')
             configuration.set('DATABASE', 'password', '123')
             configuration.writeToFile(self.confpath)
-            if parent != None:               
+            if self.parent != None:               
                 tkMessageBox.showwarning("Connection Error",
                          'No PEATSA server configured, press configure server'
                          ' to set a server, username and password.')
