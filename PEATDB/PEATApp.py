@@ -27,7 +27,7 @@
 
 from Tkinter import *
 import Pmw
-import os
+import os, platform
 import tkSimpleDialog, tkFileDialog, tkMessageBox
 from datetime import datetime
 try:
@@ -459,6 +459,8 @@ class App(Frame, GUI_help):
     def toggleMenus(self, state='normal'):
         """Enable or disable main menus when DB is loaded"""
         items = [2,3,4,6,7,8]
+        if 'Darwin' in platform.platform():
+            items = []
         for i in items:
             self.menu.entryconfig(i, state=state)
         return

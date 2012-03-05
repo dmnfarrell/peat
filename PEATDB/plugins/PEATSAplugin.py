@@ -31,7 +31,6 @@ except:
     from PEATDB.Plugins import Plugin
 import os, types, copy, pickle
 from Tkinter import *
-import tkFileDialog
 import Pmw
 import PEATSA.WebApp.Data
 import PEATSA.WebApp.UtilityFunctions
@@ -40,7 +39,7 @@ from PEATDB.Dialogs import MultipleValDialog
 from PEATDB.Actions import DBActions
 from PEATDB.TableModels import TableModel
 from PEATDB.Tables import TableCanvas
-import tkMessageBox, tkSimpleDialog
+import tkMessageBox, tkSimpleDialog, tkFileDialog
 
 class PEATSAPlugin(Plugin):
     """Template GUI plugin for PEAT App"""
@@ -56,16 +55,20 @@ class PEATSAPlugin(Plugin):
 
     calctypes = ['stability','binding','pka']
     
-    def main(self, parent=None, DB=None):       
-        if parent==None:
-            if DB!=None:
+    def main(self, parent=None, DB=None):
+        print parent, DB
+        if parent == None:
+            if DB != None:
                 self.DB = DB
                 self.setupConnection()
             else:
-                return 
+                return
         else:
             self.parent = parent
             self.DB = parent.DB
+            if self.DB == None:
+                self.displayNoDBWarning()
+                return
             self._doFrame()
             self.setupConnection()
             print 'Updating jobs table..'
@@ -259,8 +262,7 @@ class PEATSAPlugin(Plugin):
               return 1
         def close():
             jobdlg.destroy()
-        def loadmuts():
-            import tkFileDialog
+        def loadmuts():            
             filename=tkFileDialog.askopenfilename(initialdir=os.getcwd(),
                                        filetypes=[("All files","*")])
             if filename:
@@ -892,6 +894,13 @@ class PEATSAPlugin(Plugin):
         #L.merge(L1) 
         return        
 
+    def displayNoDBWarning(self):
+        """Warn user that no DB is present"""        
+        tkMessageBox.showwarning("Cannot launch plugin",
+                         'No Database is currently open. '
+                         'You should first open a project.')       
+        return
+    
     def help(self):
         import webbrowser
         link='http://enzyme.ucd.ie/main/index.php/PEAT_SA'
