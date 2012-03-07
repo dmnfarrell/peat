@@ -159,7 +159,8 @@ class PipeApp(Frame, GUI_help):
         self.run_menu=self.create_pulldown(self.menu,self.run_menu)
         self.menu.add_cascade(label='Run',menu=self.run_menu['var'])
         self.queue_menu={'01Add files to queue':{'cmd': self.addtoQueue},
-                         '02Add folder to queue':{'cmd': self.addFolder}}
+                          '02Add folder to queue':{'cmd': self.addFolder},
+                          '03Clear queue':{'cmd': self.clearQueue}}
         self.queue_menu=self.create_pulldown(self.menu,self.queue_menu)
         self.menu.add_cascade(label='Queue',menu=self.queue_menu['var'])
         self.utils_menu={'01Show Config Helper':{'cmd': self.launchHelper},
@@ -280,6 +281,10 @@ class PipeApp(Frame, GUI_help):
         self.queueFrame.update()
         return
 
+    def clearQueue(self):
+        self.queueFrame.clear()
+        return
+        
     def runTests(self):
         """Run tests"""
         from Testing import Tester

@@ -80,12 +80,12 @@ class Tester(object):
         """Test basic standard format handling"""
         for t in sorted(testinfo.keys()):
             self.doTest(testinfo[t], t)
-    
+
     def groupedFileTest(self):
         """Tests the processing and grouping of multiple files"""
         path = 'testfiles/grouped'
         self.createGroupedData(path)
-        conf = {'format':'databycolumn','groupby':'file', 'parsenumericvalues':1,
+        conf = {'format':'databycolumn','groupbyname':1,
                 'parsevaluesindex':0,'saveplots':1,
                 'model1':'linear','variable1':'a','model2':'sigmoid','variable2':'tm'}
         p = Pipeline()
@@ -97,29 +97,32 @@ class Tester(object):
     def multiFolderTest(self):
         """Handling of multiple folders in a hierarchy"""
         p = Pipeline()
-        conf = {'format':'databycolumn','groupby':'folder', #'parsenumericvalues':1,
+        conf = {'format':'databycolumn','groupbyname':1,
                 'saveplots':1,'hasreplicates':0,
                 'model1':'linear','variable1':'a','model2':'sigmoid','variable2':'tm'}
         p.createConfig('temp.conf',**conf)
         path = 'testfiles/multifolders'
         Utilities.createDirectory(path)
-        phs = range(2,6)
-        reps = range(1,3)
+        phs = range(3,10)
+        reps = range(1,3)   #replicates
         names = Utilities.createRandomStrings(3,6)
         for i in phs:
-            folder = os.path.join(path,'ph'+str(i))            
+            #sigmoid dependence of the slopes on 'ph'
+            #so we know we are getting the right results
+            val = 1/(1+exp((i-5)/1.2))
+            folder = os.path.join(path,'ph'+str(i))
             Utilities.createDirectory(folder)
             for r in reps:
                 fname = os.path.join(folder,'r'+str(r)+'.txt')
-                Utilities.createTempData(fname, names, i)
-                
+                Utilities.createTempData(fname, names, val)
+
         p.addFolder(path, ext='txt')
         p.run()
         return
-                
+
     def replicatesTest(self):
         """Tests handling of replicates"""
-        
+
         p = Pipeline()
         conf = {'format':'databycolumn','groupby':'file', 'parsenumericvalues':1,
                 'saveplots':1,'hasreplicates':1,
@@ -133,10 +136,10 @@ class Tester(object):
         p.addFolder(path, ext='txt')
         p.run()
         return
-        
+
     def fitPropagationTest(self):
         """Tests the propagation of fit data direct from a dict - no importing"""
-    
+
         start=time.time()
         p = Pipeline()
         conf = {'model1':'linear','model2':'Michaelis-Menten','model3':'sigmoid',
@@ -153,25 +156,26 @@ class Tester(object):
         print 'completed fit propagation test'
         print 'took %s seconds' %round((time.time()-start),2)
         print '-------------------'
-        return 
+        return
 
     def customTests(self):
         """Tests kinetics data for paper"""
-    
+
         info = ({'format':'kineticsdata','colrepeat':4,'colheader':0,'colstart':1,
                   'model1':'Linear'},'setG_110309_1_pH7,5.txt')
         self.doTest(info, 'kinetics test', 'novo_setG/rep1')
-    
+
     def createGroupedData(self, path='testfiles', clear=False):
         """Create sets of grouped data to test queuing and file grouping"""
-        
+
         Utilities.createDirectory(path)
-        names = Utilities.createRandomStrings(3,6)       
-        for i in np.arange(2,6,1.0):         
+        names = Utilities.createRandomStrings(3,6)
+        for i in np.arange(2,10,1.0):
+            val = 1/(1+exp((i-5)/1.2))
             fname = os.path.join(path,'ph_'+str(i)+'__xx_'+str(i*3)+'.txt')
-            Utilities.createTempData(fname, names, i)
+            Utilities.createTempData(fname, names, val)
         return
-        
+
     def createNestedData(self):
         """Create simulated nested data similar to our kinetics data"""
         data={}
@@ -180,7 +184,7 @@ class Tester(object):
         phs = range(2,14) #e.g. a ph range
         concs = [0.01,0.1,0.2,0.3,0.5,1.0,2.0,5.0]
         x = range(0,100,10)
-    
+
         for n in names:
             i=names.index(n)
             tm=tms[i]#+random.normalvariate(0,0.1)
@@ -199,11 +203,11 @@ class Tester(object):
 def main():
     t=Tester()
     #t.formatTests(t.basictests)
-    t.groupedFileTest()
-    #t.multiFolderTest()
+    #t.groupedFileTest()
+    t.multiFolderTest()
     #t.replicatesTest()
-    #t.fitPropagationTest()    
+    #t.fitPropagationTest()
     #t.customTests()
-    
+
 if __name__ == '__main__':
     main()

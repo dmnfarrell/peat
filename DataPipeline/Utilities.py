@@ -71,31 +71,22 @@ def getdirectoryStructure(rootdir):
        of rootdir
        taken from http://code.activestate.com/recipes/577879/"""
     
-    dir = {}
+    D = {}
     rootdir = rootdir.rstrip(os.sep)
     start = rootdir.rfind(os.sep) + 1
     for path, dirs, files in os.walk(rootdir):
         folders = path[start:].split(os.sep)
         filenames = [os.path.join(path,f) for f in files]
         subdir = dict.fromkeys(filenames)        
-        parent = reduce(dict.get, folders[:-1], dir)
+        parent = reduce(dict.get, folders[:-1], D)
         parent[folders[-1]] = subdir
-    return dir
-    
-def traverseTree(dictionary):
-    print dictionary
-    for key, value in dictionary.items():
-        if key == 'id':
-            if value == id:
-                print dictionary
-        else:
-             traverseTree(value, id)
+    return D
                      
 def createRandomStrings(l,n):
     """create list of l random strings, each of length n"""
     
     names = []
-    for i in range(l):
+    for i in range(l):                                                                            
         val = ''.join(random.choice(string.ascii_uppercase) for x in range(n))
         names.append(val)
     return names

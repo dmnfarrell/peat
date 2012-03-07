@@ -47,7 +47,7 @@ class Pipeline(object):
         self.savedir = os.getcwd()
         self.filename = ''
         self.lines  =None
-        self.queue = []
+        self.queue = {}
         self.results = []
         self.sep = '__'   #symbol for internal separator
         return
@@ -59,33 +59,33 @@ class Pipeline(object):
         wdir = os.path.join(os.getcwd(),'workingdir')
 
         defaults = {'base': [('format', 'databyrow'), ('rowstart', 0), ('colstart', 0), ('rowend', 0),
-                        ('colend', 0), ('rowheader', ''), ('colheader', ''),  
-                        ('rowrepeat', 0), ('colrepeat', 0), ('delimeter', ','),             
+                        ('colend', 0), ('rowheader', ''), ('colheader', ''),
+                        ('rowrepeat', 0), ('colrepeat', 0), ('delimeter', ','),
                         ('workingdir', wdir),  ('ignorecomments', 1),
-                        ('checkunicode', 0), ('decimalsymbol', '.')], 
-                    'files': [('parsevaluesindex', 0), ('parsenumericvalues', 0), ('groupby', '')],
+                        ('checkunicode', 0), ('decimalsymbol', '.')],
+                    'files': [('groupbyname', 0), ('parsenamesindex', 0),],
                     'replicates':[('perfolder','')],
-                    'models': [('model1', '')], 'variables': [('variable1', '')], 
-                    'excel': [('sheet', 0), ('numsheets', 1)], 
-                    'plotting': [('saveplots', 0), ('normaliseplots', 0), ('grayscale', 0), 
+                    'models': [('model1', '')], 'variables': [('variable1', '')],
+                    'excel': [('sheet', 0), ('numsheets', 1)],
+                    'plotting': [('saveplots', 0), ('normaliseplots', 0), ('grayscale', 0),
                         ('dpi', 100)],
-                    'custom': [], 
-                    'fitting': [('xerror', 0), ('yerror', 0), ('iterations', 30), ('modelsfile','')], 
+                    'custom': [],
+                    'fitting': [('xerror', 0), ('yerror', 0), ('iterations', 30), ('modelsfile','')],
                     }
         order = ['base','files','fitting','models','variables','replicates',
                  'excel','plotting','custom']
 
-        for s in order:            
+        for s in order:
             c.add_section(s)
             for i in defaults[s]:
                 name,val = i
                 c.set(s, name, val)
-     
-        #use kwargs to create specific settings in the appropriate section       
+
+        #use kwargs to create specific settings in the appropriate section
         for s in c.sections():
-            opts = c.options(s)         
+            opts = c.options(s)
             for k in kwargs:
-                if k in opts:                    
+                if k in opts:
                     c.set(s, k, kwargs[k])
         #handle model and variable sections which can have zero or multiple
         #options
@@ -94,7 +94,7 @@ class Pipeline(object):
                 c.set('models', k, kwargs[k])
             elif k.startswith('variable'):
                 c.set('variables', k, kwargs[k])
-                    
+
         c.write(open(filename,'w'))
         self.parseConfig(filename)
         return c
@@ -118,10 +118,10 @@ class Pipeline(object):
             print 'failed to get an importer'
         #both the Importer and Pipeline object get copies of the config options
         #as attributes, convenient but probably bad..
-        Utilities.setAttributesfromConfigParser(self, cp)       
+        Utilities.setAttributesfromConfigParser(self, cp)
         print 'parsed config file ok, format is %s' %format
         return
-        
+
     def getImporter(self, format, cp):
         """Get the required importer object"""
         import Custom
@@ -184,8 +184,7 @@ class Pipeline(object):
 
         print 'opened file %s' %filename
         self.filename = filename
-        if not filename in self.queue:
-            self.queue.append(filename)
+        self.addtoQueue(filename)
         self.filename = filename
         self.lines = lines
         return lines
@@ -215,7 +214,7 @@ class Pipeline(object):
 
     def doImport(self, lines=None):
         """Import file with current setting and return a dict"""
-        
+
         if lines == None:
             if self.lines!=None:
                 lines=self.lines
@@ -235,7 +234,7 @@ class Pipeline(object):
 
     def checkImportedData(self, data):
         """Report info on imported dict"""
-        
+
         l=0
         for d in data.keys():
             if type(data[d]) is types.DictType:
@@ -243,85 +242,82 @@ class Pipeline(object):
             else: l+=1
         print 'importer returned %s datasets' %l
         return
-        
+
     def preProcess(self):
         """Prepare for data import and processing"""
         if not os.path.exists(self.workingdir):
             os.mkdir(self.workingdir)
         else:
             print 'clearing working directory..'
-            Utilities.clearDirectory(self.workingdir)        
+            Utilities.clearDirectory(self.workingdir)
         return
-        
+
     def run(self, callback=None):
         """Do initial import/fitting run with the current config"""
 
-        self.preProcess()    
-        print 'processing files in queue..'        
-        
-        if self.parsenumericvalues == 1:
-            filelabels = self.parseFileNames(self.queue, ind=self.parsevaluesindex)
-        else:
-            filelabels = self.queue
-            
-        total = len(self.queue)
-        c=0.0       
-        imported = {}   #raw data
-        results = {}    #fitted data 
+        self.preProcess()
+        print 'processing files in queue..'
 
-        print 'queue'
-        print self.queue
-        #print 'folderstructure'
-        #print self.folderstructure
-        print '--------------------'
-            
-        for filename in self.queue:
+        if self.groupbyname == 1:
+            labels = self.parseFileNames(self.queue, ind=self.parsenamesindex)
+        else:
+            labels = self.queue
+
+        total = len(self.queue)
+        c=0.0
+        imported = {}   #raw data
+        results = {}    #fitted data
+
+        #print 'queue'
+        #print self.queue
+        #print filelabels
+
+        for key in self.queue:
+            filename = self.queue[key]
             lines = self.openRaw(filename)
             data = self.doImport(lines)
-            imported[filename] = data
-            
+            imported[key] = data
+
         for key in imported:
             #set filename
             fname = os.path.basename(key)
-            fname = os.path.join(self.workingdir, fname)            
+            fname = os.path.join(self.workingdir, fname)
             data = imported[key]
-            if self.parsenumericvalues == 1:
-                label = filelabels[key]
-            else:
-                label = key
-            
-            #if we have models to fit this means we might need to propagate fit data          
-            if self.model1 != '':                
+            label = labels[key]
+            print key,fname,label
+
+            #if we have models to fit this means we might need to propagate fit data
+            if self.model1 != '':
                 Em = EkinProject()
-                if self.parsenumericvalues == 1:      
+                if self.groupbyname == 1:
                     #we don't pass the last model if it has to be
                     #reserved for a final round of fitting from the files dict
                     models = self.models[:-1]
                     variables = self.variables[:-1]
-                    E,fits = self.processFits(rawdata=data, Em=Em, 
+                    E,fits = self.processFits(rawdata=data, Em=Em,
                                                models=models,variables=variables)
                 else:
-                    E,fits = self.processFits(rawdata=data, Em=Em)                
+                    E,fits = self.processFits(rawdata=data, Em=Em)
                 results[label] = fits
             else:
-                 #if no fitting we just put the data in ekin                
+                 #if no fitting we just put the data in ekin
                 Em = self.getEkinProject(data)
             Em.saveProject(fname)
-            
-            if self.saveplots == 1:               
+
+            if self.saveplots == 1:
                 self.saveEkinPlotstoImages(Em, fname)
             c+=1.0
             if callback != None:
                 callback(c/total*100)
-              
+
         #if groupby files then we process that here from results
-        if self.groupby == 'file':            
-            if self.parsenumericvalues == 1:
-                results = self.extractSecondaryKeysFromDict(results)
-                #print results
-                Em = EkinProject()
-                E,fits = self.processFits(rawdata=results, Em=Em)
-                fname = os.path.join(self.workingdir, 'final')
+        if self.groupbyname == 1:
+            results = self.extractSecondaryKeysFromDict(results)
+            #print results
+            Em = EkinProject()
+            E,fits = self.processFits(rawdata=results, Em=Em)
+            fname = os.path.join(self.workingdir, 'final')
+
             Em.saveProject(os.path.join(self.workingdir, fname))
             if self.saveplots == 1:
                 self.saveEkinPlotstoImages(Em, fname)
@@ -334,68 +330,68 @@ class Pipeline(object):
                  and variable
             parentkey: the label from the parent dict that will be matched to the fits
             returns: final set of fits"""
-            
+
         nesting = self.getDictNesting(rawdata)
         if models == None:
             models = self.models
             variables = self.variables
-       
+
         if len(models) == 0:
             print 'no models found for fitting!'
             return None, None
         if ind == None:
             ind = len(models)-1
-    
+
         def getmodelinfo():
             model = models[ind][1]
             try:
                 var = variables[ind][1]
             except:
                 var = ''
-            if var == '':    
+            if var == '':
                 var = self.findVariableName(model)
             return model, var
-            
+
         currmodel,currvariable = getmodelinfo()
         #print models, variables
-        #print nesting,currmodel,currvariable        
-        
+        #print nesting,currmodel,currvariable
+
         if nesting == 0:
-            #final level of nesting, we just fit            
+            #final level of nesting, we just fit
             xerror = float(self.xerror); yerror = float(self.yerror)
-            E = self.getEkinProject(rawdata, xerror=xerror, yerror=yerror)            
-            E,fit = self.getFits(E, currmodel, currvariable, str(parentkey))           
-            Em.addProject(E, label=parentkey)            
+            E = self.getEkinProject(rawdata, xerror=xerror, yerror=yerror)
+            E,fit = self.getFits(E, currmodel, currvariable, str(parentkey))
+            Em.addProject(E, label=parentkey)
             return E,fit
         else:
-            #if there is nesting we pass the subdicts recursively and get their fits 
+            #if there is nesting we pass the subdicts recursively and get their fits
             fitdata = {}
-            for l in rawdata.keys():                
+            for l in rawdata.keys():
                 if parentkey != '':
                     lbl = str(l)+'_'+str(parentkey)
                 else:
-                    lbl = l               
-                #now we pass each child node to the same function    
+                    lbl = l
+                #now we pass each child node to the same function
                 E,fit = self.processFits(rawdata[l], ind=ind-1, parentkey=lbl, Em=Em)
                 fitdata[l] = fit
             E = self.getEkinProject(fitdata)
             if parentkey == '': parentkey = 'final'
-            E,fit = self.getFits(E, currmodel, currvariable, str(parentkey))           
+            E,fit = self.getFits(E, currmodel, currvariable, str(parentkey))
             Em.addProject(E,label=parentkey)
             return E,fit
-    
+
     def handleReplicates(self):
-        """If the configuration specifies replicates than we average the 
-        corresponding data points in the raw dict or we fit first then 
+        """If the configuration specifies replicates than we average the
+        corresponding data points in the raw dict or we fit first then
         average the results"""
         print self.replicates
         return
-        
+
     def getFits(self, E, model, varname='a', filename=None):
-        """Fit an Ekin project   
+        """Fit an Ekin project
            model: model to fit
            varname: variable to extract"""
-           
+
         fits = []
         xerrors = []
         yerrors = []
@@ -407,29 +403,29 @@ class Pipeline(object):
             self.expUncert(E, xerr=float(self.xerror))
             for d in labels:
                 yerrors.append(E.getMeta(d,'exp_errors')[varname][1])
-        
-        for d in labels:            
+
+        for d in labels:
             fits.append(E.getMetaData(d)[varname])
-        if self.saveplots == 1 and filename != None and filename != '':                       
+        if self.saveplots == 1 and filename != None and filename != '':
             self.saveEkinPlotstoImages(E, filename)
         return E,(labels,fits,xerrors,yerrors)
-        
+
     def findVariableName(self, model, i=0):
         """Find a parameter name for the given model at index i,
            used so we don't cause an error when doing processFits when no
            variable is given in the conf file"""
-            
-        import PEATDB.Ekin.Fitting as Fitting    
+
+        import PEATDB.Ekin.Fitting as Fitting
         X = Fitting.getFitter(model)
         if X==None:
             print 'no fitter found for this model name'
             return 'a'
         varname = X.getVarNames()[i]
         return varname
-        
+
     def expUncert(self, E, xerr=0, yerr=0):
         """Get fitted variable errors using the iterative method"""
-    
+
         for d in E.datasets:
             ferrs = E.estimateExpUncertainty(d, runs=10, xuncert=xerr, yuncert=yerr)
             E.addMeta(d, 'exp_errors', ferrs)
@@ -443,7 +439,7 @@ class Pipeline(object):
                 return 1
             else:
                 return 0
-                
+
     def parseFileNames(self, filenames, ind=0):
         """Parse file names to extract a numerical value
            ind: extract the ith instance of a number in the filename"""
@@ -452,49 +448,59 @@ class Pipeline(object):
             bname = os.path.basename(f)
             l = re.findall("([0-9.]*[0-9]+)", bname)[ind]
             labels[f] = l
-            #print f, labels[f]
+            print f, labels[f]
         return labels
-        
+
+    def parseString(self, filename):
+        """Parse string to extract a pattern"""
+
+        return
+
     def addFolder(self, path, ext='.txt'):
         """Add a folder to the queue"""
-        
-        print 'checking folder %s for files' %path
-        #self.folderstructure = Utilities.getdirectoryStructure(path)
-        #print self.folderstructure
-        for root, dirs, files in os.walk(path):            
-            for d in dirs:               
+
+        D = {}
+        #print os.path.basename(path), os.path.normpath(path)
+        for root, dirs, files in os.walk(path):
+            for d in dirs:
                 if d.startswith('.'):
                     dirs.remove(d)
-            #print root, dirs, files
             for f in files:
                 fname = os.path.join(root,f)
-                #print fname, os.path.splitext(fname)[1], ext
+                #absname = os.path.abspath(fname)
                 if ext in os.path.splitext(fname)[1]:
-                    self.addtoQueue([fname])
-        #print self.queue      
-        return
+                    #print root,fname
+                    label = os.path.relpath(fname,  os.path.normpath(path))
+                    label = label.replace(os.path.sep,'_')
+                    #print label
+                    D[label] = fname
+        #self.addtoQueue(D.values())
+        self.queue = D
+        return D
 
     def addtoQueue(self, files):
         """Add files"""
+        if type(files) is types.StringType:
+            files = [files]
         for f in files[:]:
-            if f not in self.queue:
-                self.queue.append(f)
+            if f not in self.queue.values():
+                self.queue[f] = f
         return
 
     def saveEkinPlotstoImages(self, E, filename):
         """Save the ekin plots to png images"""
         title = os.path.basename(filename)
         filename = os.path.join(self.workingdir, filename)
-        filename = filename + '.png'        
+        filename = filename + '.png'
         #limit to 25 plots per image
-        d = E.datasets        
+        d = E.datasets
         if len(d) > 25: d = E.datasets[:25]
         E.plotDatasets(d, filename=filename, plotoption=2,
-                       dpi=self.dpi, size=(10,8), showerrorbars=True, 
+                       dpi=self.dpi, size=(10,8), showerrorbars=True,
                        title=title, normalise=self.normaliseplots,
                        grayscale=self.grayscale)
         return
-        
+
     @classmethod
     def getEkinProject(self, data, xerror=None, yerror=None):
         """Get an ekin project from a dict of the form
@@ -519,23 +525,23 @@ class Pipeline(object):
                     if xerror!=None:
                         xerrs=[xerror for i in x]
                     if yerror!=None:
-                        yerrs=[yerror for i in y]                   
+                        yerrs=[yerror for i in y]
                 ek = EkinDataset(xy=[x,y], xerrs=xerrs, yerrs=yerrs)
-                E.insertDataset(ek, d)                
+                E.insertDataset(ek, d)
                 #print ek.errors
         return E
-              
+
     @classmethod
     def extractSecondaryKeysFromDict(self, data):
         """Re-arrange a dict of the form {key1:([names],[values]),..
            into the form {name1:([keys],[values]),..}"""
-           
+
         newdata = {}
         kys = data.keys()
         datasets = data[kys[0]][0]
         for d in datasets:
             newdata[d] = []
-        for l in data:                
+        for l in data:
             names, vals, xerr, yerr = data[l]
             #print zip(names, vals)
             for d,v in zip(names, vals):
@@ -543,16 +549,31 @@ class Pipeline(object):
         for d in newdata:
             newdata[d] = zip(*newdata[d])
         return newdata
-        
+
 class FolderStructure(object):
     """Class to hold structure rawdata that makes handling it easier"""
-    
-    def __init__(self):
-        self.info = {}
-        return
-    
-    def add(self, data, key, filename):     
-        self.info[key] = filename
+
+    def __init__(self, path):
+        self.path = path
+        self.rootdir = os.path.basename(path)
+        self.info = Utilities.getdirectoryStructure(path)
+        print self.rootdir
+        print '------------------'
+        print self.info
+        self.traverse(self.info)
         return
 
-     
+    def traverse(self, data):
+        for i in data:
+            if type(data[i]) is types.DictType:
+                self.traverse(data[i])
+            else:
+                print i, data[i]
+
+    def report(self):
+        """report on structure found in path"""
+        print 'rootdir is %s' %self.rootdir
+        folders = len(self.info)
+        print '%s files found in %s folders' %(self.p)
+        return
+
