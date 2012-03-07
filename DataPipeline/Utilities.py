@@ -47,8 +47,7 @@ def getListFromConfigItems(items):
     return lst
 
 def clearDirectory(path):
-    """Remove all files in folder"""
-    
+    """Remove all files in folder"""    
     for f in os.listdir(path):
         filepath = os.path.join(path, f)
         try:
@@ -58,8 +57,7 @@ def clearDirectory(path):
             print e
     return
     
-def createDirectory(path):
-    
+def createDirectory(path):    
     """Create or clear a directory"""
     if not os.path.exists(path):
         os.mkdir(path)
@@ -95,9 +93,9 @@ def createTempData(fname, names, slope):
     """Create some simulated linear data with noise as a function of temp"""
     
     cw = csv.writer(open(fname,'w'))
-    cw.writerow(['temp']+names)   
+    cw.writerow(['temp']+names)
     for x in range(250,360,2):
-        vals = [round(slope*x/random.normalvariate(10,0.2),2) for j in range(len(names))]
+        vals = [round(slope*x/random.normalvariate(10,0.5),2) for j in range(len(names))]
         vals.insert(0,x)
         cw.writerow(vals)
     return

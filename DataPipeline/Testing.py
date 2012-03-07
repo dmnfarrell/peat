@@ -27,7 +27,7 @@
 
 """Tests for data pipeline."""
 from Base import Pipeline
-import os, random, time, string
+import os, random, time, string, datetime
 import numpy as np
 from math import *
 import csv
@@ -98,22 +98,23 @@ class Tester(object):
         """Handling of multiple folders in a hierarchy"""
         p = Pipeline()
         conf = {'format':'databycolumn','groupbyname':1,
-                'saveplots':1,'hasreplicates':0,
+                'saveplots':1,'replicates':1,
                 'model1':'linear','variable1':'a','model2':'sigmoid','variable2':'tm'}
         p.createConfig('temp.conf',**conf)
         path = 'testfiles/multifolders'
         Utilities.createDirectory(path)
-        phs = range(3,10)
-        reps = range(1,3)   #replicates
+        phs = range(2,10)
+        reps = range(1,4)   #replicates
         names = Utilities.createRandomStrings(3,6)
+        today = str(datetime.date.today())
         for i in phs:
             #sigmoid dependence of the slopes on 'ph'
             #so we know we are getting the right results
-            val = 1/(1+exp((i-5)/1.2))
+            val = 1/(1+exp((i-4)/1.2))
             folder = os.path.join(path,'ph'+str(i))
             Utilities.createDirectory(folder)
             for r in reps:
-                fname = os.path.join(folder,'r'+str(r)+'.txt')
+                fname = os.path.join(folder,'r'+str(r)+'_'+today+'.txt')
                 Utilities.createTempData(fname, names, val)
 
         p.addFolder(path, ext='txt')

@@ -46,7 +46,7 @@ class Pipeline(object):
             self.createConfig('default.conf')
         self.savedir = os.getcwd()
         self.filename = ''
-        self.lines  =None
+        self.lines = None
         self.queue = {}
         self.results = []
         self.sep = '__'   #symbol for internal separator
@@ -63,8 +63,8 @@ class Pipeline(object):
                         ('rowrepeat', 0), ('colrepeat', 0), ('delimeter', ','),
                         ('workingdir', wdir),  ('ignorecomments', 1),
                         ('checkunicode', 0), ('decimalsymbol', '.')],
-                    'files': [('groupbyname', 0), ('parsenamesindex', 0),],
-                    'replicates':[('perfolder','')],
+                    'files': [('groupbyname', 0), ('parsenamesindex', 0),
+                                ('replicates',0)],
                     'models': [('model1', '')], 'variables': [('variable1', '')],
                     'excel': [('sheet', 0), ('numsheets', 1)],
                     'plotting': [('saveplots', 0), ('normaliseplots', 0), ('grayscale', 0),
@@ -72,7 +72,7 @@ class Pipeline(object):
                     'custom': [],
                     'fitting': [('xerror', 0), ('yerror', 0), ('iterations', 30), ('modelsfile','')],
                     }
-        order = ['base','files','fitting','models','variables','replicates',
+        order = ['base','files','fitting','models','variables',
                  'excel','plotting','custom']
 
         for s in order:
@@ -189,6 +189,12 @@ class Pipeline(object):
         self.lines = lines
         return lines
 
+    def closeFile(self):
+        """Close current file"""
+        self.filename = ''
+        self.lines = None
+        return
+
     def openExcel(self, filename):
         """Open raw excel file"""
 
@@ -219,7 +225,7 @@ class Pipeline(object):
             if self.lines!=None:
                 lines=self.lines
             else:
-                print 'no file loaded yet'
+                print 'no file loaded'
                 return None
 
         #self.parseConfig(self.conffile)
@@ -263,6 +269,7 @@ class Pipeline(object):
         else:
             labels = self.queue
 
+        self.labels = labels
         total = len(self.queue)
         c=0.0
         imported = {}   #raw data
@@ -278,13 +285,20 @@ class Pipeline(object):
             data = self.doImport(lines)
             imported[key] = data
 
+        #try to average replicates here before we process
+        if self.replicates == 1:
+            imported = self.handleReplicates(imported)
+
         for key in imported:
             #set filename
             fname = os.path.basename(key)
             fname = os.path.join(self.workingdir, fname)
             data = imported[key]
-            label = labels[key]
-            print key,fname,label
+            if labels.has_key(key):
+                label = labels[key]
+            else:
+                label = key
+            #print key,fname,label
 
             #if we have models to fit this means we might need to propagate fit data
             if self.model1 != '':
@@ -380,12 +394,43 @@ class Pipeline(object):
             Em.addProject(E,label=parentkey)
             return E,fit
 
-    def handleReplicates(self):
+    def handleReplicates(self, data):
         """If the configuration specifies replicates than we average the
-        corresponding data points in the raw dict or we fit first then
-        average the results"""
-        print self.replicates
-        return
+           corresponding data points in the raw dict """
+
+        print 'processing replicates..'
+        import operator
+        from itertools import groupby
+        newdata = {}
+        labels = self.labels
+        sorteditems = sorted(labels.iteritems(), key=operator.itemgetter(1))
+
+        for key, group in groupby(sorteditems, lambda x: x[1]):
+            c = 0
+            subdata = []
+            for g in group:
+                f = g[0]    #key in corresponding data dict
+                c+=1
+                subdata.append(data[f])
+                print f
+            newdata[key] = self.averageDicts(subdata)
+            print '%s replicates for label %s' %(c, key)
+        #print newdata
+        return newdata
+
+    def averageDicts(self, dictslist):
+        """Average dicts of the form
+           {label1: [[x1],[y1]],..],label2:[[x2],[y2]]...}"""
+
+        newdata = {}
+        names = dictslist[0].keys()
+        for n in names:
+            arrs = []
+            for D in dictslist:
+                arrs.append(numpy.array(D[n]))
+            #print sum(arrs)/len(arrs)
+            newdata[n] = list(sum(arrs)/len(arrs))
+        return newdata
 
     def getFits(self, E, model, varname='a', filename=None):
         """Fit an Ekin project
@@ -448,7 +493,7 @@ class Pipeline(object):
             bname = os.path.basename(f)
             l = re.findall("([0-9.]*[0-9]+)", bname)[ind]
             labels[f] = l
-            print f, labels[f]
+            #print f, labels[f]
         return labels
 
     def parseString(self, filename):

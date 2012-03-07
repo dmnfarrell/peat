@@ -232,7 +232,7 @@ class PipeApp(Frame, GUI_help):
         """Show raw file contents"""
         #if self.p.rowend>len(lines):
         #    self.p.rowend=len(lines)
-        c=self.rawcontents
+        c = self.rawcontents
         c.delete("1.0",END)
         c.component('columnheader').delete("1.0",END)
         c.component('rowheader').delete("1.0",END)
@@ -273,6 +273,20 @@ class PipeApp(Frame, GUI_help):
         self.queueFrame.update()
         return
 
+    def updateFromQueue(self):
+        """Check current file open after a queue deletion"""
+        if self.p.filename not in self.p.queue.values():
+            self.clearCurrentFile()
+        return
+
+    def clearCurrentFile(self):
+        """Clear current file"""
+        self.p.closeFile()
+        self.updateinfoPane()
+        self.rawcontents.clear()
+        self.previewer.clear()
+        return
+
     def addFolder(self, path=None):
         if path==None:
             path = self.openDirectory()
@@ -284,7 +298,7 @@ class PipeApp(Frame, GUI_help):
     def clearQueue(self):
         self.queueFrame.clear()
         return
-        
+
     def runTests(self):
         """Run tests"""
         from Testing import Tester
@@ -414,9 +428,10 @@ class PlotPreviewer(Frame):
         return
 
     def replot(self):
+        """Replot"""
         p = int(self.numplotscounter.getvalue())
         if p>1:
-            dsets=self.E.datasets[self.dsindex:self.dsindex+p]
+            dsets = self.E.datasets[self.dsindex:self.dsindex+p]
             c=p/2
         else:
             dsets = self.E.datasets[self.dsindex]
@@ -433,16 +448,16 @@ class PlotPreviewer(Frame):
 
     def update(self, evt=None):
         """Reload data dict from main app"""
-        '''try:
-            data = self.p.doImport()
-        except:
-            print 'could not do import with current config'
-            data=None'''
         data = self.p.doImport()
         if data == None: return
         self.dsindex = 0
         self.loadData(data)
         self.replot()
+        return
+
+    def clear(self):
+        self.E = None
+        self.plotframe.clear()
         return
 
     def prev(self):
@@ -497,16 +512,21 @@ class queueManager(Frame):
         self.p.queue = []
 
     def removeSelected(self):
-        items = self.listbox.getcurselection()
-        pos = 0
-        for i in items:
-            idx = items.index(i)
-            self.listbox.delete( idx,idx )
-            pos = pos + 1
+        """Remove selected items from queue"""
+        if len(self.p.queue) == 0:
+            return
+        self.p.queue.values()
+        selected = self.listbox.getcurselection()
+        for key, value in self.p.queue.items():
+            if value in selected:
+                del self.p.queue[key]
+        self.update()
+        self.app.updateFromQueue()
         return
 
     def update(self):
-        flist=self.p.queue
+        """Update queue listbox"""
+        flist = self.p.queue.values()
         self.listbox.setlist(flist)
 
     def setFile(self):
