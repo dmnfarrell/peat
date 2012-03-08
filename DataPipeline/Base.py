@@ -270,8 +270,6 @@ class Pipeline(object):
             labels = self.queue
 
         self.labels = labels
-        total = len(self.queue)
-        c=0.0
         imported = {}   #raw data
         results = {}    #fitted data
 
@@ -289,6 +287,8 @@ class Pipeline(object):
         if self.replicates == 1:
             imported = self.handleReplicates(imported)
 
+        total = len(imported)
+        c=0.0
         for key in imported:
             #set filename
             fname = os.path.basename(key)
@@ -488,12 +488,12 @@ class Pipeline(object):
     def parseFileNames(self, filenames, ind=0):
         """Parse file names to extract a numerical value
            ind: extract the ith instance of a number in the filename"""
-        labels = {}
+        labels = {}        
         for f in filenames:
-            bname = os.path.basename(f)
+            bname = os.path.basename(f)            
             l = re.findall("([0-9.]*[0-9]+)", bname)[ind]
             labels[f] = l
-            #print f, labels[f]
+            print f, labels[f]
         return labels
 
     def parseString(self, filename):
@@ -510,7 +510,7 @@ class Pipeline(object):
             for d in dirs:
                 if d.startswith('.'):
                     dirs.remove(d)
-            for f in files:
+            for f in files:                
                 fname = os.path.join(root,f)
                 #absname = os.path.abspath(fname)
                 if ext in os.path.splitext(fname)[1]:
@@ -525,9 +525,10 @@ class Pipeline(object):
 
     def addtoQueue(self, files):
         """Add files"""
-        if type(files) is types.StringType:
+        
+        if type(files) is types.StringType or type(files) is types.UnicodeType:
             files = [files]
-        for f in files[:]:
+        for f in files[:]:          
             if f not in self.queue.values():
                 self.queue[f] = f
         return
