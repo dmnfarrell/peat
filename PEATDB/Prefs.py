@@ -3,6 +3,7 @@
 # (C) Copyright Jens Erik Nielsen, University College Dublin 2005
 #
 
+import os
 from Tkinter import *
 import Pmw
 
@@ -10,14 +11,14 @@ class Preferences:
     """Manage personal preferences"""
     def __init__(self,program,defaults):
         """Find and load the preferences file"""
-
-        import os
-        filename='.'+program+'_preferences'
-        dirs=self.get_dirs()
+        
+        filename = '.'+program+'_preferences'
+        dirs = self.get_dirs()
         self.noprefs = False
         try:
             for ldir in dirs:
-                fn=os.path.join(ldir,filename)
+                self.peatpath = os.path.join(ldir, '.peatdb')
+                fn=os.path.join(self.peatpath, filename)
 
                 if os.path.isfile(fn):
                     self.load_prefs(fn)
@@ -30,10 +31,11 @@ class Preferences:
         except:
             # If we didn't find a file then set to default and save
             print 'Did not find preferences!'
-            self.prefs=defaults.copy()
+            self.prefs = defaults.copy()
             print dirs
-            self.pref_file = os.path.join(dirs[0],filename)
-            self.prefs['_prefdir']=dirs[0]
+            self.peatpath = os.path.join(dirs[0], '.peatdb')
+            self.pref_file = os.path.join(self.peatpath,filename)
+            self.prefs['_prefdir'] = self.peatpath
             self.prefs['_preffile'] = self.pref_file
             self.save_prefs()
 
@@ -125,8 +127,10 @@ class Preferences:
             fd.close()
         return
 
-    def save_prefs(self):        
-        # Save prefs        
+    def save_prefs(self):
+        # Save prefs
+        if not os.path.exists(self.peatpath):
+            os.mkdir(self.peatpath)            
         import pickle
         fd=open(self.pref_file,'w')
         pickle.dump(self.prefs,fd)
