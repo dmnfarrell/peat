@@ -45,7 +45,7 @@ try:
 except:
     pass
 
-from Pylab import Options
+from Plotting import Options
 
 
 class EkinProject(object):
