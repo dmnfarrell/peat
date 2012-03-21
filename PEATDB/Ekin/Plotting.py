@@ -599,15 +599,13 @@ class PlotPanel(Frame):
 
     def plotOptions(self):
         """Create options for plotting using Pylab class"""
-
         if self.Opts == None:
             self.Opts = Options(redraw=self.plotCurrent)
         self.Opts.plotSetup()
         return
 
     def addSelectionHandler(self):
-        """Add selection handler"""
-        from Pylab import MouseMonitor
+        """Add selection handler"""      
         if self.m != None:
             try:
                 self.m.disconnect()
