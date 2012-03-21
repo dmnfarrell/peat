@@ -18,7 +18,7 @@ from PEATDB.Base import PDatabase
 from PEATDB.Ekin.Base import EkinProject
 from PEATDB.Tables import TableCanvas, ColumnHeader
 from PEATDB.Ekin.Tables import EkinProjModel, EkinProjTable
-from PEATDB.Ekin.Ekin_main import PlotPanel
+from PEATDB.Ekin.Plotting import PlotPanel
 from PEATDB.DictEdit import DictEditor
 import os
 import pickle

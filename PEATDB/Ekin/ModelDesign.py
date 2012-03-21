@@ -30,9 +30,9 @@ import csv
 import pickle
 import numpy as np
 from Tkinter import *
-import tkFileDialog, tkSimpleDialog
+import tkFileDialog, tkSimpleDialog, tkMessageBox
 import Pmw
-from PEATDB.Ekin.Ekin_main import EkinApp, PlotPanel
+from PEATDB.Ekin.Plotting import PlotPanel
 from PEATDB.Ekin.Base import EkinProject, EkinDataset
 import PEATDB.Ekin.Fitting as Fitting
 
@@ -47,7 +47,7 @@ class ModelDesignApp(Frame):
             self.main=self.master
         else:
             self.main=Toplevel()
-            self.master=self.main
+            #self.master=self.main
         self.main.title('Model Design')
         ws = self.main.winfo_screenwidth()
         hs = self.main.winfo_screenheight()
@@ -61,7 +61,7 @@ class ModelDesignApp(Frame):
         self.filename = None
         self.modelsdict = Fitting.createModels()
         self.setupGUI()
-        self.currentname = 'Linear' 
+        self.currentname = 'Linear'
         self.loadModel(self.currentname)
         return
 
@@ -176,6 +176,10 @@ class ModelDesignApp(Frame):
 
     def save(self):
         """Save current models"""
+        if not tkMessageBox.askyesno('Overwrite Models?',
+                                      'Are you sure you want to save?',
+                                      parent=self.main):
+            return
         if self.filename == None:
             self.filename = tkFileDialog.asksaveasfilename(defaultextension='.dict',
                                               initialdir=os.getcwd(),
@@ -212,7 +216,8 @@ class ModelDesignApp(Frame):
         return
 
     def updateModelSelector(self):
-        self.modelselector.setlist(self.modelsdict.keys())
+        modelnames = sorted(self.modelsdict.keys())
+        self.modelselector.setlist(modelnames)
         return
 
     def updateGuessEntryWidgets(self, model):
@@ -253,21 +258,23 @@ class ModelDesignApp(Frame):
         self.previewer.replot()
         return
 
-    def createFitter(self, model):
+    def createFitter(self, model, name):
         """Create fitter from the current model entry values"""
         fitclass = Fitting.createClass(**model)
         x,y = self.previewer.getCurrentData()
         X = fitclass(exp_data=zip(x,y),variables=None,
-                     callback=self.previewer.updateFit)
+                     callback=self.previewer.updateFit,
+                     name=name)
         return X
 
     def testFitter(self):
         """Parse the entry fields and create the fitter"""
         self.currentmodel = self.parseValues()
-        X = self.createFitter(self.currentmodel)
+        X = self.createFitter(self.currentmodel, self.currentname)
         X.guess_start()
         X.fit(rounds=60)
         self.updateModelsDict()
+        self.previewer.finishFit(X)
         return
 
     def parseValues(self):
@@ -319,20 +326,42 @@ class FitPreviewer(Frame):
 
     def sampleData(self):
         E=self.E = EkinProject()
+        #linear
         x=range(30)
-        y=[i+np.random.normal(.2) for i in x]
+        y=[i+np.random.normal(0,.6) for i in x]
         ek = EkinDataset(xy=[x,y])
         self.E.insertDataset(ek,'testdata1')
+        #power law
         x=np.arange(0,5,0.1)
         y=[math.pow(i,3)+np.random.normal(5) for i in x]
         ek = EkinDataset(xy=[x,y])
         self.E.insertDataset(ek,'testdata2')
+        #gaussian
+        x=np.arange(0,5,0.1)
+        y=[1*math.exp(-(pow((i-2),2)/(pow(.5,2)))) for i in x]
+        ek = EkinDataset(xy=[x,y])
+        self.E.insertDataset(ek,'testdata3')
+        #MM
+        x=np.arange(0.1,5,0.2)
+        y=[(2 * i)/(i + .6)+np.random.normal(0,.04) for i in x]
+        ek = EkinDataset(xy=[x,y])
+        self.E.insertDataset(ek,'testdata4')
         self.plotframe.setProject(E)
         self.replot()
+        return
 
     def replot(self):
         dset = self.E.datasets[self.dsindex]
         self.plotframe.plotCurrent(dset,options=self.opts)
+        return
+
+    def finishFit(self, X):
+        """Call when fitting done"""
+        d = self.E.datasets[self.dsindex]
+        fitresult = X.getResult()
+        self.E.setFitData(d, fitresult)
+        self.replot()
+        return
 
     def getCurrentData(self):
         dset = self.E.datasets[self.dsindex]

@@ -46,7 +46,7 @@ def loadModelsFile(modelsfile=None):
         modelsdict = createModels()
         writeModelsFile(modelsfile, modelsdict)
     currentmodels = pickle.load(open(modelsfile,'r'))
-    return currentmodels
+    return currentmodels, modelsfile
 
 def createModels():
     """Create default models file"""
@@ -87,8 +87,8 @@ def createClass(equation, varnames,
     """Dynamically create an instance of LM_fitter class using presets
        this function requires we pass varnames and equation at minimum"""
     class tempfitter(LM_Fitter):
-        def __init__(self, variables, exp_data, callback):
-            LM_Fitter.__init__(self,variables,exp_data,callback)
+        def __init__(self, variables, exp_data, callback, name=None):
+            LM_Fitter.__init__(self,variables,exp_data,callback, name=None)
             
             self.name = name
             self.varnames = varnames
@@ -450,7 +450,7 @@ def getErrDistribution():
 
 #create module level properties
 #Load models if available and create a set of fitters
-currentmodels = loadModelsFile()
+currentmodels, modelsfile = loadModelsFile()
 createFitters()
                  
 if __name__=='__main__':

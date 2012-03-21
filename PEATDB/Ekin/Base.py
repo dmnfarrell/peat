@@ -56,6 +56,9 @@ class EkinProject(object):
     """
     
     fitmodels = Fitting.getCurrentModels()
+    #modelsdict, modelsfile = Fitting.loadModelsFile()
+    #fitmodels = sorted(modelsdict.keys())
+    
     ekinfields = ['__datatabs_fits__', '__fit_matches__', '__Exp_Meta_Dat__',
                   '__distance_matches__', '__datatab_structmapping__', '__meta_data__',
                   '__plotopts__', '__currentdataset__', '__displaymultiple__']
@@ -415,8 +418,8 @@ class EkinProject(object):
                 return
             else:
                 filename=self.filename
-        self.filename = filename
-        if os.path.splitext(filename)[1] != 'ekinprj':
+        self.filename = filename        
+        if os.path.splitext(filename)[1] != '.ekinprj':
             filename = filename + '.ekinprj'
         data = self.prepare_data()
         fd=open(filename,'w')
@@ -756,6 +759,7 @@ class EkinProject(object):
             xerr = xerrors[name]
             yerr = yerrors[name]
             self.currxdata = x
+            self.currydata = y
             if len(x) == 0:
                 continue
             if prms.normalise == True:
@@ -878,11 +882,11 @@ class EkinProject(object):
             self.fitline, = ax.plot(xx, fity, clr, linewidth=2.5, alpha=0.8)
         else:
             self.fitline.set_data(xx, fity)
-
+            
         if showfitvars == True:
             self.showfitResults(X, ax)
         return xx, fity
-
+        
     def _getlineColor(self, line):
         """Private method - get a lines' color"""
         clr = '#cccccc'

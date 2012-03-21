@@ -17,13 +17,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Contact information:
-# Email: Jens.Nielsen_at_gmail.com 
+# Email: Jens.Nielsen_at_gmail.com
 # Normal mail:
 # Jens Nielsen
 # SBBS, Conway Institute
 # University College Dublin
 # Dublin 4, Ireland
-# 
+#
 
 import pickle, os, math
 from Tkinter import*
@@ -43,7 +43,9 @@ import PEATDB.Ekin.Fitting as Fitting
 from PEATDB.Ekin.Convert import EkinConvert
 from PEATDB.Ekin.Ekin_map import *
 from PEATDB.Ekin.IO import *
+from PEATDB.Ekin.Plotting import PlotPanel
 import Ekin_images
+from PEATDB.Ekin.ModelDesign import ModelDesignApp
 from PEATDB.Ekin.Titration import TitrationAnalyser
 from PEATDB.GUI_helper import *
 
@@ -67,7 +69,7 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
         self.modes = EkinProject.modes
         self.mode_definition = EkinProject.mode_definition
         self.path = os.getcwd()
-       
+
         self.protein=protein
         self.filename=None
         self.allowreturntoDB = None
@@ -108,7 +110,7 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
         else:
             #just load the data
             self.loadProject(data=data, mode=mode)
-            pass
+
         return
 
     def setupGUI(self):
@@ -117,10 +119,10 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
         self.m = PanedWindow(self.ekin_win,
                            orient=HORIZONTAL,
                            sashwidth=3,
-                           showhandle=True)        
-        self.m.pack(side=RIGHT, fill=BOTH,expand=1)        
+                           showhandle=True)
+        self.m.pack(side=RIGHT, fill=BOTH,expand=1)
         self.sidepane = Frame(self.m)
-        self.m.add(self.sidepane)         
+        self.m.add(self.sidepane)
         plotpane = Frame(self.m)
         self.m.add(plotpane)
         #add tabular data view frame
@@ -136,7 +138,7 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
         self.createFitFrame()
         #a small toolbar
         self.apptoolBar = ToolBar(plotpane, self)
-        self.apptoolBar.pack(side=TOP,fill=X)       
+        self.apptoolBar.pack(side=TOP,fill=X)
         if self.parent and self.allowreturntoDB == 1:
             self.apptoolBar.add_button('Return Data to DB', self.return_data,
                                         help='Return current data in table to DB',
@@ -154,17 +156,17 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
 
     def showDatasetsTable(self):
         """Show a list of all datasets in a table"""
-        if self.showdatasetstable.get() == 1:              
+        if self.showdatasetstable.get() == 1:
             from PEATDB.Ekin.Tables import EkinProjModel, EkinProjTable
 
             def plotselected():
-                datasets = self.datasetstable.get_selectedRecordNames()        
+                datasets = self.datasetstable.get_selectedRecordNames()
                 self.plotframe.plotCurrent(datasets=datasets, plotoption=self.overlayPlots.get())
             def createTable():
                 self.currentmodel = EkinProjModel(self.E)
                 self.datasetsframe = Frame(self.m)
                 self.m.add(self.datasetsframe,minsize=250)
-                self.datasetstable = EkinProjTable(self.datasetsframe, self.currentmodel)       
+                self.datasetstable = EkinProjTable(self.datasetsframe, self.currentmodel)
                 self.datasetstable.createTableFrame()
             def refresh():
                 self.currentmodel = EkinProjModel(self.E)
@@ -179,7 +181,7 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
         return
 
     def setupVars(self):
-       
+
         self.displaytabs={}
         self.currentdataset = StringVar()
         self.currenttable=None
@@ -205,7 +207,7 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
         self.showfitpanel.set(1)
         self.showdatasetstable=IntVar()
         self.showdatasetstable.set(0)
-        
+
         self.kcat=StringVar()
         self.substr_conc=StringVar()
         self.enzyme_conc=StringVar()
@@ -297,24 +299,24 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
         self.plot_menu.add_command(label='Enable selected',
                                         command=lambda: self.disableSelected(1))
         self.plot_menu.add_command(label='Delete selected',
-                                        command=lambda: self.deleteSelected(1))        
+                                        command=lambda: self.deleteSelected(1))
         self.menu.add_cascade(label='Plot',menu=self.plot_menu)
 
         # Fit menu
         self.fit_menu=Menu(self.menu,tearoff=0)
         self.fit_menu={ '01Find best model':{'cmd':self.fitframe.showBestModelDialog},
                         '02Fit all datasets':{'cmd':self.fitAll},
-                        '03Edit/create models':{'cmd':self.createFitModel}}
+                        '03Model Designer':{'cmd':self.modelDesigner}}
         self.fit_menu=self.create_pulldown(self.menu,self.fit_menu)
-        self.menu.add_cascade(label='Fit',menu=self.fit_menu['var'])
+        self.menu.add_cascade(label='Fitting',menu=self.fit_menu['var'])
 
-        self.view_menu=Menu(self.menu,tearoff=0)       
+        self.view_menu=Menu(self.menu,tearoff=0)
         self.view_menu.add_checkbutton(label='Show fit panel',command=self.updateView,
-                                       variable=self.showfitpanel,onvalue=1,offvalue=0)        
+                                       variable=self.showfitpanel,onvalue=1,offvalue=0)
         self.view_menu.add_checkbutton(label='Show datasets in table',command=self.showDatasetsTable,
-                                       variable=self.showdatasetstable,onvalue=1,offvalue=0)     
+                                       variable=self.showdatasetstable,onvalue=1,offvalue=0)
         self.menu.add_cascade(label='View',menu=self.view_menu)
-        
+
         # Help menu
         self.help_menu={'01Online Help':{'cmd':self.online_documentation},
                         '02About':{'cmd':self.about}}
@@ -432,7 +434,7 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
         if not hasattr(self, 'E'):
             return
         self.mode_menu.delete(0, self.mode_menu.index('last'))
-        count=0        
+        count=0
         for mode in self.modes:
             #If a mode was set AND we are in PEAT, lock it in
             #if self.parent!=None and not self.E.currentmode or (self.E.currentmode and self.E.currentmode==mode):
@@ -440,7 +442,7 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
                                variable=self.mode_var,
                                value=count,
                                indicatoron=1,
-                               command=self.updateMode)            
+                               command=self.updateMode)
             count=count+1
         #print self.E.currentmode, self.E.mode
         if self.E.currentmode == None:
@@ -454,7 +456,7 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
         # Usually only update currentmode when menu changed
         if setmode == 1 or not self.E.currentmode:
             self.E.currentmode = self.modes[self.mode_var.get()]
-            self.fitframe.setMode(self.E.currentmode)           
+            self.fitframe.setMode(self.E.currentmode)
 
         if current == None:
             return
@@ -466,11 +468,11 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
     def updateView(self):
         if self.showfitpanel.get() == 1:
             self.createFitFrame()
-            self.updateAll()             
+            self.updateAll()
         else:
             self.fitframe.destroy()
         return
-        
+
     def updateAll(self, d=None):
         """Update all elements to reflect current dataset"""
         if len(self.E.datasets) == 0:
@@ -487,7 +489,7 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
         if hasattr(self, 'M') and self.M != None:
             self.M.applyCurrent()
             self.M.updateFields(dataset=self.currentdataset.get())
-        #self.showDatasetsTable()    
+        #self.showDatasetsTable()
         return
 
     def update_dataset(self):
@@ -546,7 +548,7 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
 
         # Add the names of all datasets
         names=self.E.datasets
-        if self.sortby_var.get() == 'firstnum':        
+        if self.sortby_var.get() == 'firstnum':
             resorted = self.sort_by_Num(names)
         else:
             names.sort()
@@ -590,7 +592,7 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
             flbl.grid(row=0,column=7,sticky='news',padx=4,pady=2)
         elif self.filename!=None:
             filenamelbl=Label(parent,text=self.filename,fg='Blue')
-            filenamelbl.grid(row=0,column=8,columnspan=1,sticky='news',padx=4,pady=2)             
+            filenamelbl.grid(row=0,column=8,columnspan=1,sticky='news',padx=4,pady=2)
         return
 
     def sort_by_Num(self, p):
@@ -612,7 +614,7 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
         items = [(v, k) for (k, v) in items]
         items.sort()
         return items
-        
+
     def redrawGraph(self, event=None):
         """Replot"""
         if self.display_all.get() == 1:
@@ -651,7 +653,7 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
             c = int(math.ceil(math.sqrt(len(selecteddatasets))))
             self.plotframe.plotCurrent(datasets=selecteddatasets,
                                                 plotoption=self.overlayPlots.get(), cols=c)
-        else:           
+        else:
             self.plotframe.plotCurrent(datasets=self.currentdataset.get())
         return
 
@@ -664,7 +666,7 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
             if tkMessageBox.askyesno('Overwrite Dataset?',name+' is already present.\n'
                                       'Do you want to overwrite it?',
                                       parent=self.ekin_win):
-                self.deleteDataset(name, confirm=None)                
+                self.deleteDataset(name, confirm=None)
             else:
                 name = tkSimpleDialog.askstring("Dataset name?",
                                    "Enter a dataset name:",
@@ -748,7 +750,7 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
                                              parent=self.ekin_win)
         if newname == None or newname == currname:
             return
-        print newname    
+        print newname
         self.E.copyDataset(currname, newname)
         self.deleteDataset(currname, confirm=None, update=False)
         self.currentdataset.set(newname)
@@ -791,7 +793,7 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
     def prev_dataset(self):
         name=self.currentdataset.get()
         names=self.E.datasets
-        if self.sortby_var.get() == 'firstnum':           
+        if self.sortby_var.get() == 'firstnum':
             resorted = self.sort_by_Num(names)
             index=0
             for nowname in resorted:
@@ -816,7 +818,7 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
     def next_dataset(self):
         name=self.currentdataset.get()
         names=self.E.datasets
-        if self.sortby_var.get() == 'firstnum':           
+        if self.sortby_var.get() == 'firstnum':
             resorted = self.sort_by_Num(names)
             index=0
             for nowname in resorted:
@@ -867,8 +869,8 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
             # Add the data tab with a filename
             showname=os.path.split(filename)[1]
             showname=showname.replace('_','-')
-            
-        #old format      
+
+        #old format
         if type(newdata) is types.DictType and newdata.has_key('data'):
             newdata=newdata['data']
         self.insertDataset(newdata, showname)
@@ -994,7 +996,7 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
 
     def updateModeSpecificData(self):
         """Set specific mode data widgets when dataset changed"""
-        d = self.currentdataset.get()            
+        d = self.currentdataset.get()
         meta = self.E.getMetaData(d)
         if self.E.currentmode=='Simple enzyme kinetic' or self.E.currentmode == 'Enzyme pH-activity':
             if meta.has_key('enzyme_conc'):
@@ -1067,36 +1069,36 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
         return
 
     def set_residue_type(self, event=None):
-        d = self.currentdataset.get()     
+        d = self.currentdataset.get()
         if d == None:
             return
         self.E.addMeta(d,'residue',self.residue_type.get())
         return
 
     def set_residue_num(self, event=None):
-        d = self.currentdataset.get()        
+        d = self.currentdataset.get()
         if d == None:
-            return     
+            return
         self.E.addMeta(d,'res_num',self.residue_num.get())
         return
 
     def set_atom_type(self, event=None):
-        d = self.currentdataset.get()       
+        d = self.currentdataset.get()
         if d == None:
             return
         self.E.addMeta(d,'atom_type',self.atom_type.get())
         return
 
     def set_chain_id(self, event=None):
-        d = self.currentdataset.get()       
+        d = self.currentdataset.get()
         if d == None:
-            return       
+            return
         self.E.addMeta(d,'chain_id',self.chain_id.get())
         return
 
     def save_comments(self,event=None):
         """Set comments for this dataset"""
-        d = self.currentdataset.get()     
+        d = self.currentdataset.get()
         if d != None:
             self.E.addMeta(d, 'comment', self.details.get(1.0, END))
         self.commentframe.destroy()
@@ -1152,7 +1154,7 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
             self.M.autoCreate(mode = self.E.mode)
         d=self.currentdataset.get()
         self.mwin = self.M.createDialog(dataset=d, parent=self.ekin_win)
-        self.ekin_win.wait_window(self.mwin)        
+        self.ekin_win.wait_window(self.mwin)
         return
 
     def viewMetaData(self):
@@ -1163,7 +1165,7 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
 
     def fitAll(self):
         """Fit all datasets"""
-    
+
         self.stopfit = False
         def go():
             #if findbestvar.get() == 1:
@@ -1179,7 +1181,7 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
                         fdata, X = self.E.fitDataset(d, model=models[0],silent=True,noiter=no_itervar.get(),
                                                 conv=converg_diff.get())#,callback=self.fitall_win.update)
                     except:
-                        pass                    
+                        pass
                 else:
                     fdata, p = self.E.findBestModel(d, models=models)#, checkfunc=checkfunc)
                 thistab=p
@@ -1214,7 +1216,7 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
 
         lbl1=Label(self.fitall_win,text='Convergence at:')
         lbl1.grid(row=2,column=0,padx=3,pady=2)
-        converg_diff = DoubleVar(); converg_diff.set(1e-9)
+        converg_diff = DoubleVar(); converg_diff.set(1e-6)
         entry1=Entry(self.fitall_win,textvariable=converg_diff,bg='white')
         entry1.grid(row=2,column=1,padx=3,pady=2)
 
@@ -1254,7 +1256,7 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
         self.update_dataset()
         self.redrawGraph()
         return
-        
+
     def deleteSelected(self, evt=None):
         """Delete selected points"""
         bounds = self.plotframe.selection
@@ -1262,27 +1264,20 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
         ek = self.E.getDataset(name)
         ek.removeBounded(bounds)
         self.update_dataset()
-        self.redrawGraph()        
-        return        
-
-    def createFitModel(self):
-        #from ModelDesign import ModelDesignApp
-        #app = ModelDesignApp(parent=self)
-        #self.ekin_win.wait_window(app)
-        
-        from PEATDB.DictEdit import DictEditor
-        app = DictEditor(self.ekin_win)
-        app.loadDict(Fitting.modelsfile)
-        #self.ekin_win.wait_window(app)
-        #update models
-        #print 'model file',Fitting.modelsfile
-        #Fitting.presetmodels = pickle.load(open(Fitting.modelsfile,'r'))  
-        return    
-    
-    def reloadModels(self):
-        """load a models file"""
+        self.redrawGraph()
         return
-        
+
+    def modelDesigner(self):
+        """Launch model designer"""
+        self.redrawGraph()  #prevents weird crash on launch
+        self.modelapp = ModelDesignApp(parent=self)
+        self.modelapp.loadModelsFile(Fitting.modelsfile)
+        return
+
+    def reloadModels(self):
+        """load a new models file"""
+        return
+
     #
     # Import and export functions, most should use the Importer class to do the actual
     # importing stuff and get the returned dataset that we simply insert
@@ -1290,7 +1285,7 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
     def import_csv(self, event=None):
         """Will allow import of multiple or single text files"""
         self.importer.path = self.path
-        newdatasets = self.importer.import_multiple()        
+        newdatasets = self.importer.import_multiple()
         self.insertMultipleDatasets(newdatasets)
 
         return
@@ -1333,7 +1328,7 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
         self.E.checkDatasets()
         self.E.checkMeta()
         self.data = self.E.data
-        
+
         if not hasattr(self.E, 'mode'):
             self.E.currentmode = self.E.mode = mode
 
@@ -1345,7 +1340,7 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
         self.updateDatasetSelector()
         self.plotframe.setProject(self.E)
         self.doModeMenu()
-        self.updateMode(setmode=1)        
+        self.updateMode(setmode=1)
         if hasattr(self.E,'__currentdataset__'):
             self.currentdataset.set(self.E.__currentdataset__)
         elif len(self.E.datasets)>0:
@@ -1359,7 +1354,7 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
 
     def loadProject(self, project=None, data=None, mode=None):
         """Load ekin project and update GUI"""
- 
+
         if mode == None:
             self.mode = mode ='General'
         if project != None and os.path.exists(project):
@@ -1373,7 +1368,7 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
         else:
             self.E = EkinProject(mode=mode)
             self.E.addDataset('data')
-        self.data = self.E.data   
+        self.data = self.E.data
         self.M = None
         if not hasattr(self.E, 'mode'):
             self.E.mode = mode
@@ -1493,7 +1488,7 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
                 return
 
         self.project_open = 0
-        self.filename=None        
+        self.filename=None
         self.newProject()
         return
 
@@ -1625,7 +1620,7 @@ class FitterPanel(Frame):
     def setData(self, E, dataset):
         """Set current ekin fit data"""
         self.fitdata = E.__datatabs_fits__[dataset]
-        self.data = E.data[dataset]      
+        self.data = E.data[dataset]
         return
 
     def setPlotter(self, plotter):
@@ -1638,13 +1633,13 @@ class FitterPanel(Frame):
         self.model_type=StringVar()
         self.model_type.set('Linear')
         self.no_iter=IntVar()
-        self.no_iter.set(300)
+        self.no_iter.set(100)
         self.converg_diff=DoubleVar()
-        self.converg_diff.set(1e-9)
+        self.converg_diff.set(1e-6)
         self.guess_converg_diff=IntVar()
         self.guess_converg_diff.set(0)
         self.grad_crit=DoubleVar()
-        self.grad_crit.set(1e-12)
+        self.grad_crit.set(1e-8)
         self.LM_damper = DoubleVar()
         self.LM_damper.set(2.0)
         self.guess_startparms=IntVar()
@@ -1754,7 +1749,7 @@ class FitterPanel(Frame):
         # Radio button to select fitting method
         self.fitting_method = IntVar()
         row=row+1
- 
+
         n=Frame(self)
         Label(n,text='Rounds:').pack(side=LEFT)
         Entry(n,textvariable=self.no_iter,width=6).pack(side=LEFT)
@@ -1817,6 +1812,7 @@ class FitterPanel(Frame):
         """Stop the fit"""
         self.count_win.destroy()
         self.stopfit=True
+        self.plotter.plotCurrent()
         return
 
     def doFit(self):
@@ -1835,7 +1831,7 @@ class FitterPanel(Frame):
 
         def updatenow(diff, vrs, fitvals, c, X):
             """callback for fit update"""
-            fdata=Fitting.makeFitData(model, vrs, diff) #get ekin fitdata from vars            
+            fdata=Fitting.makeFitData(model, vrs, diff) #get ekin fitdata from vars
             self.update(fitdata=fdata, startvars=False, X=X)
             self.update_idletasks()
             self.plotter.updateFit(X)
@@ -1863,8 +1859,8 @@ class FitterPanel(Frame):
 
         if fitresult == None:
             self.stopFit()
-            return         
-        
+            return
+
         #send new fit to current ekin dataset
         self.parentapp.updateFittedData(self.fitdata)
         #update fitting frame when finished fit?
@@ -1879,18 +1875,18 @@ class FitterPanel(Frame):
             if self.tempmodelvars[m].get() == 1:
                 models.append(m)
         if len(models)==0:
-            return None        
+            return None
         if doall == False:
             d = self.parentapp.currentdataset.get()
             res, p = E.findBestModel(d, models=models, silent=True)
             callback(res, d)
-        else:             
+        else:
             for d in E.datasets:
                 if self.stopvar.get()==1:
                     break
                 res, p = E.findBestModel(d, models=models, silent=True)
-                callback(res, d)            
-        return 
+                callback(res, d)
+        return
 
     def showBestModelDialog(self):
         """Find the best model using f-test criteria"""
@@ -1914,7 +1910,7 @@ class FitterPanel(Frame):
         for m in models:
             self.tempmodelvars[m]=IntVar(); self.tempmodelvars[m].set(0)
             Label(frame1,text=m).grid(row=r,column=0)
-            X = Fitting.getFitter(model=m)            
+            X = Fitting.getFitter(model=m)
             n = len(X.variables)
             Label(frame1,text=n).grid(row=r,column=1)
             Checkbutton(frame1,variable=self.tempmodelvars[m],
@@ -1930,7 +1926,7 @@ class FitterPanel(Frame):
         # buttons
         frame3 = Frame(self.fbm_win)
         frame3.grid(row=1,column=0,columnspan=2)
-        
+
         def update(res, d):
             print 'res',res
             if res == None:
@@ -1938,26 +1934,26 @@ class FitterPanel(Frame):
             else:
                 self.fbresults.insert(END, '%s: %s' %(d,res['model']))
                 self.fbresults.insert(END, '\n')
-            self.fbresults.yview("moveto",1.0)   
-            #we dont update atm because of memory leak    
+            self.fbresults.yview("moveto",1.0)
+            #we dont update atm because of memory leak
             #self.parentapp.updateAll(d)
             self.update_idletasks()
             frame1.update()
-            
+
         def go():
             self.stopvar.set(0)
-            self.findBestModel(doall=doallvar.get(), callback=update)             
+            self.findBestModel(doall=doallvar.get(), callback=update)
 
         def stop():
             self.stopvar.set(1)
-            
+
         Button(frame3, text='Go', relief=GROOVE, bg='#B0C4DE',
                command=go).pack(side=LEFT)
         def close():
             self.fbm_win.destroy()
         Button(frame3,text='Close', relief=GROOVE, bg='#B0C4DE',
                command=close).pack(side=LEFT)
-        
+
         Button(frame3,text='Stop', relief=GROOVE, bg='red',
                command=stop).pack(side=LEFT)
         doallvar = IntVar(); doallvar.set(0)
@@ -1973,7 +1969,7 @@ class FitterPanel(Frame):
 
         if reset == True:
             model = self.model_type.get()
-            #resets current fitdata to generic start values for that model            
+            #resets current fitdata to generic start values for that model
             self.fitdata = Fitting.makeFitData(model=model)
 
         if fitdata != None:
@@ -1993,7 +1989,7 @@ class FitterPanel(Frame):
     def updateVars(self, fitdata, reset=True, X=None):
         """Update with current fitdata, only done when we load the dataset"""
         if fitdata != None and fitdata.has_key('model'):
-            model = fitdata['model']            
+            model = fitdata['model']
             self.model_type.set(model)
             if X==None: X = Fitting.getFitter(model=model)
             if fitdata.has_key('error'):
@@ -2049,7 +2045,7 @@ class FitterPanel(Frame):
         """Show dialog for doing Exp Uncertainty"""
         data = self.data; fitdata = self.fitdata
         model = fitdata['model']
-        X = Fitting.getFitter(model)        
+        X = Fitting.getFitter(model)
         vrs = X.variables
         names = X.getVarNames()
         self.eeu_win = Toplevel(self.parent.master)
@@ -2166,7 +2162,7 @@ class FitterPanel(Frame):
     def previewFit(self):
         """Just update fit curve to reflect current paramenters in start vars"""
         vrs = self.getStartVars()
-        model = self.model_type.get()        
+        model = self.model_type.get()
         x,y = self.data.getxy()
         X=Fitting.getFitter(model, vrs=vrs, expdata=zip(x,y))
         self.plotter.updateFit(X)
@@ -2181,204 +2177,10 @@ class FitterPanel(Frame):
 
     def send_fit_to_comments(self):
         return
-    
-class PlotPanel(Frame):
-    """Plotter for ekin data using pylab - resuable"""
-    def __init__(self, parent=None, width=400, height=100, side=TOP, tools=False):
-        Frame.__init__(self, parent=None, width=400, height=100)
 
-        self.parent = parent
-        self.setupCanvas(side, tools)
-        self.normalise = IntVar()
-        self.normalise.set(0)
-        self.show_legend = IntVar()
-        self.show_legend.set(0)
-        self.viewoption = IntVar()
-        self.viewoption.set(0)
-        self.options = None
-        self.Opts = Options(redraw=self.plotCurrent) 
-        self.selection = None
-        self.m = None
-        self.plotoption = 2
-        self.datasets = None
-        return
 
-    def setupCanvas(self, side, tools):
-        plt.close()
-        from matplotlib import figure
-        self.fig = figure.Figure(figsize=(5,4), dpi=80)       
-        # create a tk.DrawingArea
-        self.canvas = FigureCanvasTkAgg(self.fig, master=self.parent)
-        #self.canvas.show()
-        self.canvas.get_tk_widget().pack(side=side, fill=BOTH, expand=1)
-        self.canvas._tkcanvas.pack(side=side, fill=BOTH, expand=1)
-        mtoolbar = NavigationToolbar2TkAgg( self.canvas, self.parent )
-        mtoolbar.update()
-        if tools == True:
-            self.addToolBar()
-        return
-    
-    def addToolBar(self):
-        """Extra toolbar with save button etc"""        
-        t=Frame(self.parent)
-        t.pack(fill=X)
-        dpivar=IntVar()
-        dpivar.set(300)
-        Label(t, text='dpi:').pack(side=LEFT)
-        Entry(t, textvariable=dpivar).pack(side=LEFT)
-        b=Button(t, text='Save',width=5,command=lambda:self.saveFigure(dpivar.get()))
-        b.pack(side=LEFT,padx=2,pady=2)
-        b=Button(t, text='Options',command=self.plotOptions)
-        b.pack(side=LEFT,padx=2,pady=2)
-        b=Button(t, text='Annotate',command=self.annotate)
-        b.pack(side=LEFT,padx=2,pady=2)        
-        return
-        
-    def setProject(self, E):
-        self.E = E
-        if hasattr(self.E, '__plotopts__') and self.E.__plotopts__ != None:
-            self.Opts = Options(redraw=self.plotCurrent, opts=self.E.__plotopts__)
-            self.options = self.E.__plotopts__
-        if hasattr(self.E, '__currentdataset__'):
-            self.setCurrent(self.E.__currentdataset__)
-        return
 
-    def setCurrent(self, dataset):
-        self.datasets = dataset
-        return
 
-    def plotCurrent(self, datasets=None, cols=0,
-                    plotoption=None, options=None):
-        """Plot current datapoints and fits"""
-        
-        if options==None:
-            options = self.Opts.opts
-
-        #remember for next time if we plot multiple - hacky  
-        if datasets == None:
-            datasets = self.datasets
-        else:
-            self.datasets = datasets
-        if plotoption == None:
-            plotoption = self.plotoption
-        else:
-            self.plotoption = plotoption
-        if datasets == None: return
-
-        #Note: TkAgg backend causes memory leak with repeated calls to plot
-        self.fig.clear()
-        #plt.close(self.fig)
-        
-        if type(datasets) is types.ListType and len(datasets) > 1:
-            self.ax = self.E.plotDatasets(datasets, figure=self.fig, plotoption=plotoption, cols=cols,                           
-                                **options)
-        else:
-            self.ax = self.E.plotDatasets(datasets, figure=self.fig, **options)
-            self.addSelectionHandler()
-        self.canvas.draw()
-        #self.ax.hold(False)
-        return
-
-    def plotData(self, ekindata, fitdata):
-        """Just plot supplied ekin data"""
-        self.canvas.draw()
-        return
-
-    def updateFit(self, X, showfitvars=False):
-        """Just update fit line"""
-        self.E.updateFit(X, showfitvars=showfitvars)
-        self.canvas.draw()
-        return
-
-    def updatePoints(self):
-        """Update current points"""
-        print 'update'
-        self.E.updatePlot()
-        self.canvas.draw()
-        return
-
-    def plotOptions(self):
-        """Create options for plotting using Pylab class"""
-        from Pylab import Options        
-        if self.Opts == None:            
-            self.Opts = Options(redraw=self.plotCurrent)            
-        self.Opts.plotSetup()
-        return
-
-    def addSelectionHandler(self):
-        """Add selection handler"""
-        from Pylab import MouseMonitor
-        if self.m != None:
-            try:
-                self.m.disconnect()
-            except:
-                pass
-        self.m = MouseMonitor(self.ax, self)
-        self.m.connect()
-        return
-
-    def saveFigure(self, dpi):
-        """Save current figure"""
-        import tkFileDialog, os
-        filename=tkFileDialog.asksaveasfilename(parent=self.parent,
-                                                defaultextension='.png',
-                                                initialdir=os.getcwd(),
-                                                filetypes=[("png","*.png"),
-                                                           ("jpg","*.jpg"),
-                                                           ("tiff","*.tif"),
-                                                           ("All files","*.*")])        
-        if not filename:
-            return                 
-        self.fig.savefig(filename, dpi=dpi)
-        return    
-
-    def annotate(self):
-        """Basic adding of annotation to a plot"""
-
-        axes = self.fig.get_axes()
-        def addObject(objtype='text',text='test',x=1,y=1):
-            
-            bbox_props = dict(boxstyle="round", fc="#FFFC17", ec="0.4", alpha=0.8)
-            if objtype == 'text':
-                axes[0].text(x,y, text, ha="center", va="center", size=12, bbox=bbox_props)
-            elif objtype == 'arrow':
-                axes[0].annotate("",
-                        xy=(x,y), xycoords='data',
-                        xytext=(x,y), textcoords='data',
-                        arrowprops=dict(arrowstyle="->", facecolor='black',
-                                        connectionstyle="arc3"),
-                        )
-            self.canvas.draw()
-
-        main = Toplevel()
-        main.geometry('100x200+100+100')
-        x=DoubleVar(); y=DoubleVar()
-        txt=StringVar()
-        objtype=StringVar()
-
-        x=Pmw.EntryField(main,labelpos = 'w',
-                label_text = 'x:',
-                value = '0')
-        x.pack()
-        y=Pmw.EntryField(main,labelpos = 'w',
-                label_text = 'y:',
-                value = '0')
-        y.pack()
-        txt=Pmw.EntryField(main,labelpos = 'w',
-                label_text = 'text:',
-                value = '0')
-        txt.pack()        
-        Pmw.OptionMenu(main,labelpos = 'w',
-                            label_text = 'type:',
-                            menubutton_textvariable = objtype,
-                            items = ['text','arrow'],
-                            menubutton_width = 8).pack()
-        Button(main,text='Add',command=lambda: addObject(objtype=objtype.get(),
-                                                    text=txt.getvalue(),
-                                                    x=x.getvalue(),y=y.getvalue())).pack()
-        return
-
-    
 class DataPanel(Frame):
     """Display ekin data"""
     def __init__(self, parent):
@@ -2397,7 +2199,7 @@ class DataPanel(Frame):
 
         self.currentmodel = EkinDataModel(ekindata)
         self.currenttable = EkinDataTable(self.main, model=self.currentmodel,
-                                             width=250, height=220) 
+                                             width=250, height=220)
         self.currenttable.loadPrefs()
         self.currenttable.createTableFrame()
 
@@ -2534,7 +2336,7 @@ def main():
     parser.add_option("-a", "--show all", dest="ekinfile",
                         help="Show all plots", metavar="BOOLEAN")
     opts, remainder = parser.parse_args()
-    
+
     if opts.ekinfile != None:
         print opts.ekinfile
         app=EkinApp(project=opts.ekinfile)

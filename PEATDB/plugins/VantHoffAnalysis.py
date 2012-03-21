@@ -17,13 +17,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Contact information:
-# Email: Jens.Nielsen_at_gmail.com 
+# Email: Jens.Nielsen_at_gmail.com
 # Normal mail:
 # Jens Nielsen
 # SBBS, Conway Institute
 # University College Dublin
 # Dublin 4, Ireland
-# 
+#
 
 try:
     from Plugins import Plugin
@@ -38,7 +38,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
 from PEATDB.Ekin.Base import EkinProject,EkinDataset
-from PEATDB.Ekin.Fitting import Fitting
+import PEATDB.Ekin.Fitting
 
 class VantHoff(Plugin):
     """A plugin to do Van't Hoff Analysis of temperature melting curves"""
@@ -52,11 +52,11 @@ class VantHoff(Plugin):
                     'loadEkin':'Load Ekin Proj',
                     'saveEkin':'Save Ekin Proj',
                     'doAnalysis':"Do Analysis",
-                    #'benchmark': 'Do Benchmark',                  
+                    #'benchmark': 'Do Benchmark',
                     'close':'Close' }
     about = "A plugin to do Van't Hoff Analysis of temperature melting curves"
     R = 8.3144
-    
+
     def __init__(self):
         self.path = os.path.expanduser("~")
         self.pltConfig()
@@ -67,9 +67,9 @@ class VantHoff(Plugin):
         if parent==None:
             return
         self.parent = parent
-        self.DB = parent.DB        
-        self.xydata = None        
-        self._doFrame()        
+        self.DB = parent.DB
+        self.xydata = None
+        self._doFrame()
         return
 
     def _doFrame(self):
@@ -79,7 +79,7 @@ class VantHoff(Plugin):
             self.mainwin=Toplevel()
             self.mainwin.title(self.menuentry)
             self.mainwin.geometry('800x600+200+100')
-         
+
         methods = self._getmethods()
         fr = Frame(self.mainwin)
         fr.pack(side=LEFT,fill=BOTH)
@@ -97,26 +97,26 @@ class VantHoff(Plugin):
                 orient = 'horizontal',
                 labelpos = 'w')
         self.conversions.add('Convert Celsius-Kelvin')
-        self.conversions.pack()        
+        self.conversions.pack()
         self.methods = Pmw.RadioSelect(fr,
                 buttontype = 'checkbutton',
                 orient = 'horizontal',
-                labelpos = 'w',               
-                label_text = 'Methods:')        
+                labelpos = 'w',
+                label_text = 'Methods:')
         for m in ['method 1','method 2','method 3']:
             self.methods.add(m)
-        self.methods.invoke('method 1')    
-        self.methods.pack() 
+        self.methods.invoke('method 1')
+        self.methods.pack()
         self.sm = Pmw.EntryField(fr,
                 labelpos = 'w',
                 value = 5,
-                label_text = 'Smoothing:')        
+                label_text = 'Smoothing:')
         self.sm.pack()
         self.tw = Pmw.EntryField(fr,
                 labelpos = 'w',
                 value = 60,
                 label_text = 'Width of transition:')
-        self.tw.pack()       
+        self.tw.pack()
         return
 
     def _getmethods(self):
@@ -129,16 +129,16 @@ class VantHoff(Plugin):
     def _createButtons(self, methods, fr=None):
         """Dynamically create buttons for supplied methods, which is a tuple
             of (method name, label)"""
-        for m in methods:           
+        for m in methods:
             b=Button(fr,text=self.gui_methods[m[0]],command=m[1])
             b.pack(side=TOP,fill=BOTH)
         return
-    
+
     def close(self):
         self.mainwin.destroy()
         self.plotframe = None
         return
-        
+
     def showDatasetSelector(self):
         if self.E==None:
             return
@@ -150,23 +150,23 @@ class VantHoff(Plugin):
                 items = sorted(self.E.datasets),
                 command=self.showPreview,
                 menubutton_width = 8)
-        self.dmenu.pack(side=TOP,fill=BOTH)        
+        self.dmenu.pack(side=TOP,fill=BOTH)
         return
-        
+
     def showPreview(self,event=None):
         if self.E == None:
             return
-        if not hasattr(self, 'plotframe') or self.plotframe == None:               
-            from Ekin.Ekin_main import PlotPanel
-            self.plotframe = PlotPanel(parent=self.mainwin, side=BOTTOM)         
+        if not hasattr(self, 'plotframe') or self.plotframe == None:
+            from Ekin.Plotting import PlotPanel
+            self.plotframe = PlotPanel(parent=self.mainwin, side=BOTTOM)
         self.plotframe.setProject(self.E)
         d = self.dmenu.getcurselection()
         self.plotframe.plotCurrent(d)
         #plt.close(1)
         return
-        
+
     def getCSV(self):
-        """Import a csv file"""        
+        """Import a csv file"""
         self.E = EkinProject()
         from PEATDB.Ekin.IO import Importer
         importer = Importer(self,parent_win=self.mainwin)
@@ -174,7 +174,7 @@ class VantHoff(Plugin):
         if newdata == None: return
         for n in newdata.keys():
             self.E.insertDataset(newdata[n], n, update=None)
-        print 'imported %s datasets' %len(self.E.datasets)            
+        print 'imported %s datasets' %len(self.E.datasets)
         self.showDatasetSelector()
         self.showPreview()
         return
@@ -188,15 +188,15 @@ class VantHoff(Plugin):
                                                              ("All files","*.*")],
                                                   parent=self.mainwin)
         if not os.path.isfile(filename):
-            return         
+            return
         self.E = EkinProject()
         self.E.openProject(filename)
         self.showDatasetSelector()
         self.showPreview()
         return
-        
+
     def saveEkin(self):
-        """save proj"""        
+        """save proj"""
         if self.E != None:
             if self.E.filename == None:
                 import tkFileDialog
@@ -205,26 +205,26 @@ class VantHoff(Plugin):
                                                           filetypes=[("ekinprj","*.ekinprj"),
                                                                      ("All files","*.*")],
                                                           parent=self.mainwin)
-            
+
             self.E.saveProject()
             print 'saved ekin proj'
         return
-        
+
     def doAnalysis(self):
         """Execute from GUI"""
-        if self.E == None:            
-            return        
+        if self.E == None:
+            return
         methods = self.methods.getcurselection()
-        if 'Process All' in self.doall.getcurselection():        
+        if 'Process All' in self.doall.getcurselection():
             self.doAll(methods=methods)
-        else:            
+        else:
             if 'method 1' in methods:
                 self.fitVantHoff(E=self.E,d=self.dmenu.getcurselection(),
                         transwidth=int(self.tw.getvalue()))
-            if 'method 2' in methods:              
+            if 'method 2' in methods:
                 self.fitDifferentialCurve(E=self.E,d=self.dmenu.getcurselection(),
                                             smooth=int(self.sm.getvalue()))
-            if 'method 3' in methods:              
+            if 'method 3' in methods:
                 self.fitElwellSchellman(E=self.E,d=self.dmenu.getcurselection(),
                                             transwidth=int(self.tw.getvalue()))
         return
@@ -240,7 +240,7 @@ class VantHoff(Plugin):
                 midx=x[i]
                 closest=c
         return midx
-        
+
     def transformCD(self,x,y,transwidth=None,ax=None):
         """Transform raw data into fraction unfolded per temp value, by fitting to
             a general unfolding equation that extracts baseline/slopes"""
@@ -251,20 +251,20 @@ class VantHoff(Plugin):
         A,X=Fitting.doFit(expdata=zip(x,y),model='Unfolding',noiter=50,silent=True,
                            guess=False,startvalues=[1,1,1,1,1,d50])
         #print X.getResult()
-        fity = X.getFitLine(x)        
+        fity = X.getFitLine(x)
         fd=X.getFitDict()
         if ax!=None:
             p=ax.plot(x,fity,'r',lw=2)
             self.drawParams(ax,fd)
-        #we then use slopes and intercepts get frac unfolded at each temp        
+        #we then use slopes and intercepts get frac unfolded at each temp
         mn = fd['bn']; mu = fd['bd'] #slopes
         #if mu>0.01: mu = 0.01
         yn = fd['an']; yu = fd['ad'] #intercepts
         d50 = fd['d50']; m = fd['m']
-                
+
         t=[]; f=[]
         #print mu, mn
-        for T,yo in zip(x,y):            
+        for T,yo in zip(x,y):
             fu = (yo-(yn+mn*T)) / ((yu+mu*T)-(yn+mn*T))
             #print fu, (yo-(yn+mn*T)), (m), mu, mn
             #if f>0:
@@ -274,17 +274,17 @@ class VantHoff(Plugin):
         #try to take useful transition region of data
         at,af=t,f
         diff=1e5
-        if transwidth != None:            
+        if transwidth != None:
             for i in t:
                 d=abs(i-d50)
                 if d<diff:
                     mid = t.index(i)
-                    diff=d                    
-            L=int(mid-transwidth); U=int(mid+transwidth)            
-            t,f = t[L:U], f[L:U]        
-        
+                    diff=d
+            L=int(mid-transwidth); U=int(mid+transwidth)
+            t,f = t[L:U], f[L:U]
+
         return at,af,t,f
-    
+
     def fitVantHoff(self, E=None, d=None, xy=None, transwidth=80, invert=False,
                         show=True, figname=None):
         """Derive fraction unfolded, get K and fit to Van't Hoff.
@@ -295,32 +295,32 @@ class VantHoff(Plugin):
             if not d in E.datasets:
                 print 'no such dataset, %s' %d
                 print 'available datasets:', E.datasets
-                return            
-            ek = E.getDataset(d)          
+                return
+            ek = E.getDataset(d)
             x,y = ek.getxySorted()
         elif xy!=None:
             x,y = xy
-        
+
         if 'Convert Celsius-Kelvin' in self.conversions.getcurselection():
             x = [i+273 for i in x]
         if invert == True:
-            y = [max(y)-i for i in y[:]] 
-            
+            y = [max(y)-i for i in y[:]]
+
         f=plt.figure(figsize=(18,6))
         ax=f.add_subplot(131)
         p=ax.plot(x,y,'o',alpha=0.6)
         ax.set_xlabel('T(K)'); ax.set_ylabel('mdeg')
         ax.set_title('raw data')
 
-        x1,y1,x,y = self.transformCD(x,y,transwidth,ax)        
+        x1,y1,x,y = self.transformCD(x,y,transwidth,ax)
         cw=csv.writer(open('frac_unfolded_'+d+'.csv','w'))
         cw.writerow(['temp','frac'])
         for i in zip(x1,y1):
             cw.writerow(i)
-            
+
         #derive lnK vs 1/T
         t=[]; k=[]
-        
+
         for T,fu in zip(x,y):
             if fu>=1 or fu<=0:
                 continue
@@ -328,39 +328,39 @@ class VantHoff(Plugin):
             klog = math.log(K)
             k.append(klog)
             t.append(1/T)
-        
+
         if len(t)<2: return None, None, None
-         
+
         ax=f.add_subplot(132)
         p=ax.plot(x1,y1,'o',color='g',alpha=0.6)
-        ax.set_xlabel('T(K)'); ax.set_ylabel('fu') 
+        ax.set_xlabel('T(K)'); ax.set_ylabel('fu')
         ax.set_title('fraction unfolded')
-        
+
         ax=f.add_subplot(133)
         p=ax.plot(t,k,'x',mew=2,color='black')
-        ax.set_xlabel('1/T')#(r'$1/T ($K^-1)$') 
-        ax.set_ylabel('ln K') 
-        
+        ax.set_xlabel('1/T')#(r'$1/T ($K^-1)$')
+        ax.set_ylabel('ln K')
+
         formatter = matplotlib.ticker.ScalarFormatter()
-        formatter.set_scientific(True) 
+        formatter.set_scientific(True)
         formatter.set_powerlimits((0,0))
         ax.xaxis.set_major_formatter(formatter)
         for l in ax.get_xticklabels():
             l.set_rotation(30)
-            
+
         #fit this van't hoff plot
         A,X=Fitting.doFit(expdata=zip(t,k),model='Linear')
-        fitk = X.getFitLine(t)      
+        fitk = X.getFitLine(t)
         p=ax.plot(t,fitk,'r',lw=2)
         fd=X.getFitDict()
         #self.drawParams(ax,fd)
-        
+
         #slope is deltaH/R/1000 in kJ
         deltaH = -fd['a']*self.R/1000
         deltaS = fd['b']*self.R/1000
-        f.suptitle("Method 1 - deltaH: %2.2f deltaS: %2.2f" %(deltaH,deltaS),size=18)        
+        f.suptitle("Method 1 - deltaH: %2.2f deltaS: %2.2f" %(deltaH,deltaS),size=18)
         f.subplots_adjust(bottom=0.15,top=0.85)
-        
+
         if show==True:
             self.showTkFigure(f)
 
@@ -370,7 +370,7 @@ class VantHoff(Plugin):
         f.savefig(fname,dpi=300)
         print 'plot saved to %s' %os.path.abspath(fname)
         #plt.close()
-        if E!=None:          
+        if E!=None:
             fdata = Fitting.makeFitData(X.name,vrs=X.variables)
             E.insertDataset(xydata=[t,k], newname=d+'_vanthoff',replace=True,fit=fdata)
             #E.saveProject()
@@ -381,7 +381,7 @@ class VantHoff(Plugin):
         """Fit entire raw data simultaneously to the three main thermodynamic
            parameters using Elwell/Schellman method"""
         if E !=None:
-            ek = E.getDataset(d)       
+            ek = E.getDataset(d)
             x,y,a, xerr,yerr = ek.getAll()
         elif xy!=None:
             x,y = xy
@@ -390,19 +390,19 @@ class VantHoff(Plugin):
         if invert == True:
             y = [max(y)-i for i in y[:]]
         f=plt.figure(figsize=(10,5))
-        ax=f.add_subplot(121)                
+        ax=f.add_subplot(121)
         p=ax.plot(x,y,'o',alpha=0.5)
         ax.set_xlabel('T');ax.set_xlabel('mdeg')
         ax.set_title('raw data')
 
         x1,y1,x,y = self.transformCD(x,y,transwidth,ax)
-        
+
         t=[];dg=[]
         R=8.3144e-3
         for T,fu in zip(x,y):
             if fu>=1 or fu<=0:
-                continue            
-            K = fu/(1-fu)            
+                continue
+            K = fu/(1-fu)
             deltaGt = -R * T * math.log(K)
             dg.append(deltaGt)
             t.append(T)
@@ -411,7 +411,7 @@ class VantHoff(Plugin):
         p=ax1.plot(t,dg,'x',mew=2,color='black')
         ax1.set_xlabel('T'); ax1.set_ylabel('dG(T)')
         ax.set_title('stability curve')
-        
+
         A,X=Fitting.doFit(expdata=zip(t,dg),model='schellman',grad=1e-9,conv=1e-9)
         fity = X.getFitLine(t)
         p=ax1.plot(t,fity,'r',lw=2)
@@ -421,25 +421,25 @@ class VantHoff(Plugin):
         f.suptitle("Method 2 - deltaH: %2.2f deltaCp: %2.2f Tm: %2.2f" %(deltaH,deltacp,Tm),size=18)
         if show == True:
             self.showTkFigure(f)
-            
-        if figname == None: figname = d       
+
+        if figname == None: figname = d
         figname = figname.replace('.','_')
         fname = figname+'m1'+'.png'
         f.savefig(fname,dpi=300)
         print 'plot saved to %s' %os.path.abspath(fname)
-        if E!=None:          
+        if E!=None:
             fdata = Fitting.makeFitData(X.name,vrs=X.variables)
             E.insertDataset(xydata=[t,dg], newname=d+'_vanthoff2',replace=True,fit=fdata)
             #E.saveProject()
         return deltaH, Tm, deltacp
-    
+
     def breslauerMethod(self,E=None, d=None, xy=None,invert=False,
                         show=True,figname=None):
         """Finds slope of trans region and plugs this in to equation
         http://www.springerlink.com/content/r34n0201g30563u7/  """
         if E !=None:
-            ek = E.getDataset(d)       
-            x,y,a, xerr,yerr = ek.getAll()        
+            ek = E.getDataset(d)
+            x,y,a, xerr,yerr = ek.getAll()
         elif xy!=None:
             x,y = xy
         else:
@@ -447,40 +447,40 @@ class VantHoff(Plugin):
         f=plt.figure(figsize=(10,6))
         ax=f.add_subplot(111)
         ax.set_xlabel('T')
-        p=ax.plot(x,y,'o',alpha=0.5)       
-        A,X=Fitting.doFit(expdata=zip(x,y),model='Unfolding',conv=1e-7,noiter=40) 
-        fity = X.getFitLine(x)      
+        p=ax.plot(x,y,'o',alpha=0.5)
+        A,X=Fitting.doFit(expdata=zip(x,y),model='Unfolding',conv=1e-7,noiter=40)
+        fity = X.getFitLine(x)
         p=ax.plot(x,fity,'r',lw=2)
         fd=X.getFitDict()
-        self.drawParams(ax,fd)   
-        Tm = fd['d50']; m = fd['m']                 
+        self.drawParams(ax,fd)
+        Tm = fd['d50']; m = fd['m']
         R = 8.3144e-3
         deltaH =  R * math.pow(Tm,2) * m
         f.suptitle("Method 4 - deltaH: %2.2f Tm: %2.2f" %(deltaH,Tm),size=18)
         if show == True:
-            self.showTkFigure(f)           
+            self.showTkFigure(f)
         if figname != None:
             figname = figname.replace('.','_')
             f.savefig(figname)
             plt.close()
         return deltaH, Tm
-        
+
     def fitDifferentialCurve(self, E=None, d=None, xy=None,smooth=0,
                                 invert=False,show=True,figname=None):
         """Derive differential denaturation curve and fit to get deltaH
            We smooth the unfolding curve and then differentiate and finally
            fit to a 3 parameter equation.
            See http://www.ncbi.nlm.nih.gov/pubmed/10933511"""
-      
+
         if E !=None:
-            ek = E.getDataset(d)       
-            x,y,a, xerr,yerr = ek.getAll() 
+            ek = E.getDataset(d)
+            x,y,a, xerr,yerr = ek.getAll()
         elif xy!=None:
             x,y = xy
         else:
-            return   
+            return
         if invert == True:
-            y = [max(y)-i for i in y[:]] 
+            y = [max(y)-i for i in y[:]]
 
         leg=[]; lines=[]
         f=plt.figure(figsize=(10,5))
@@ -490,7 +490,7 @@ class VantHoff(Plugin):
         #smooth
         if smooth == 0:
             smooth=int(len(x)/15.0)
-        s=self.smoothListGaussian(y,smooth)    
+        s=self.smoothListGaussian(y,smooth)
         p=ax.plot(x[:len(s)-1],s[:-1],lw=3)
         leg.append(p); lines.append('smoothed')
         ax.set_title("original data")
@@ -507,8 +507,8 @@ class VantHoff(Plugin):
         leg.append(p); lines.append('differential')
         ax1.set_title("differential denaturation")
         ax1.set_xlabel('T'); ax1.set_ylabel('dsignal/dT')
-        
-        A,X=Fitting.doFit(expdata=zip(dx,ds),model='diffDenaturation',grad=1e-9,conv=1e-10)        
+
+        A,X=Fitting.doFit(expdata=zip(dx,ds),model='diffDenaturation',grad=1e-9,conv=1e-10)
         fity = X.getFitLine(dx)
         p=ax1.plot(dx,fity,'r',lw=2)
         leg.append(p); lines.append('fit')
@@ -524,12 +524,12 @@ class VantHoff(Plugin):
             figname = figname.replace('.','_')
             f.savefig(figname+'m3',dpi=300)
             plt.close()
-        if E!=None:          
+        if E!=None:
             fdata = Fitting.makeFitData(X.name,vrs=X.variables)
             E.insertDataset(xydata=[dx,ds], newname=d+'_diff',replace=True,fit=fdata)
             #E.saveProject()
         return t['deltaH'],t['Tm']
-    
+
     def differentiate(self, x,y):
         dy = numpy.diff(y,1)
         dx = x[:len(dy)]
@@ -538,26 +538,26 @@ class VantHoff(Plugin):
     def smoothListGaussian(self,data,degree=5):
         """Gaussian data smoothing function"""
         #buffer data to avoid offset result
-        data=list(data)        
+        data=list(data)
         data = [data[0]]*(degree-1) + data + [data[-1]]*degree
-        window=degree*2-1  
-        weight=numpy.array([1.0]*window)  
-        weightGauss=[]  
-        for i in range(window):  
-            i=i-degree+1  
-            frac=i/float(window)  
+        window=degree*2-1
+        weight=numpy.array([1.0]*window)
+        weightGauss=[]
+        for i in range(window):
+            i=i-degree+1
+            frac=i/float(window)
             gauss=1/(numpy.exp((4*(frac))**2))
-            weightGauss.append(gauss)  
-        weight=numpy.array(weightGauss)*weight  
+            weightGauss.append(gauss)
+        weight=numpy.array(weightGauss)*weight
         smoothed=[0.0]*(len(data)-window)
-        for i in range(len(smoothed)):  
-            smoothed[i]=sum(numpy.array(data[i:i+window])*weight)/sum(weight)  
+        for i in range(len(smoothed)):
+            smoothed[i]=sum(numpy.array(data[i:i+window])*weight)/sum(weight)
         return smoothed
 
     def invert(self,data):
         inv=[i for i in data]
         return inv
-        
+
     def simulateCD(self,noise=1.0):
         """Simulate some CD spec data"""
         x=list(numpy.arange(290,380,0.2)); y=[]
@@ -571,17 +571,17 @@ class VantHoff(Plugin):
         for row in zip(x,y):
             cw.writerow(row)
         return x,y
-       
+
     def drawParams(self,ax,d):
         ymin, ymax = ax.get_ylim()
         xmin, xmax = ax.get_xlim()
         inc=(ymax-ymin)/20
         xinc=(xmax-xmin)/20
         y=ymax-inc
-        for k in d:            
+        for k in d:
             s = k+'='+str(round(d[k],3))
             ax.text(xmin+xinc,y,s,fontsize=10)
-            y-=inc            
+            y-=inc
         return
 
     def pltConfig(self):
@@ -590,9 +590,9 @@ class VantHoff(Plugin):
         #plt.rc('axes',titlesize=22)
         plt.rc('font',family='monospace')
         return
-   
+
     def doAll(self, methods=['method 1']):
-        """Process all datasets in ekinprj""" 
+        """Process all datasets in ekinprj"""
         E=self.E
         vals={}
         from Dialogs import PEATDialog
@@ -600,7 +600,7 @@ class VantHoff(Plugin):
                                       message='Analysing Data..')
         pb.update_progress(0)
         total = len(E.datasets); count=0
-        for d in E.datasets: 
+        for d in E.datasets:
             if '_diff' in d or '_vanthoff' in d:
                 continue
             vals[d]={}
@@ -610,22 +610,22 @@ class VantHoff(Plugin):
                                                          transwidth=int(self.tw.getvalue()),
                                                          show=False,figname=name)
             if 'method 2' in methods:
-                vals[d]['dH2'], vals[d]['dTm2'], vals[d]['dCp2'] = self.fitElwellSchellman(E,d,show=False,figname=name)                                
+                vals[d]['dH2'], vals[d]['dTm2'], vals[d]['dCp2'] = self.fitElwellSchellman(E,d,show=False,figname=name)
             if 'method 3' in methods:
                 vals[d]['dH3'], vals[d]['dTm3'] = self.fitDifferentialCurve(E,d,show=False,figname=name)
             count += 1
-            pb.update_progress(float(count)/total*100.0)           
+            pb.update_progress(float(count)/total*100.0)
         pb.close()
         self.showTable(vals)
         return
-    
+
     def showTable(self, data):
         """Show results in table"""
-        from PEATDB.DictEdit import DictEditor       
+        from PEATDB.DictEdit import DictEditor
         D=DictEditor(self.mainwin)
         D.loadTable(data)
         return
-                
+
     def benchmark(self,E=None,d=None, method=1):
         """Test methods with varying paramaters, smoothing etc"""
         if E==None and self.E != None:
@@ -633,20 +633,20 @@ class VantHoff(Plugin):
 
         path='vh_benchmark'
         if not os.path.exists(path):
-            os.mkdir(path)        
+            os.mkdir(path)
         dHvals=[]
-        
+
         if method == 1:
             xlabel = 'width (K)'
-            title = 'method 1: deltaH variation with trans region width fit'            
+            title = 'method 1: deltaH variation with trans region width fit'
             vals=range(5,140,5)
-            for w in vals:            
+            for w in vals:
                 dH, dS, ax = self.fitVantHoff(E,d,transwidth=w,show=False,
                                               figname=os.path.join(path,'%s_%s.png' %(d,w)))
                 if dH == None: dH=0
                 dHvals.append(dH)
-            #take best values from middle    
-            #dHvals= dHvals[5:16] 
+            #take best values from middle
+            #dHvals= dHvals[5:16]
         elif method == 2:
             xlabel = 'width (K)'
             title = 'method 2: deltaH variation with width fit'
@@ -659,10 +659,10 @@ class VantHoff(Plugin):
             xlabel = 'smoothing degree'
             title = 'method 3: deltaH variation with degree of smoothing'
             vals=range(1,30,3)
-            for s in vals:            
+            for s in vals:
                 dH, dTm = self.fitDifferentialCurve(E,d,smooth=s,show=False,
                                                     figname=os.path.join(path,'%s_%s.png' %(d,s)))
-                dHvals.append(dH)                
+                dHvals.append(dH)
         mean = numpy.mean(dHvals)
         stdev = numpy.std(dHvals)
         f=plt.figure()
@@ -671,7 +671,7 @@ class VantHoff(Plugin):
         ax.set_xlabel(xlabel)
         ax.set_ylabel('deltaH (kJ)')
         ax.set_title('mean: %2.2f stdev: %2.2f'%(mean, stdev))
-        f.suptitle(title)        
+        f.suptitle(title)
         f.savefig('benchmark_%s.png' %method)
         cw=csv.writer(open('benchmark_%s.csv' %method,'w'))
         for row in zip(vals,dHvals):
@@ -685,7 +685,7 @@ class VantHoff(Plugin):
 
         path='vh_benchmark'
         if not os.path.exists(path):
-            os.mkdir(path)        
+            os.mkdir(path)
         dHvals=[]
         vals=[]
         if method == 1:
@@ -693,28 +693,28 @@ class VantHoff(Plugin):
             for w in vals:
                 dH, dS, ax = self.fitVantHoff(E,d,transwidth=w,show=False,
                                               figname=os.path.join(path,'%s_%s.png' %(d,w)))
-        return    
-    
-    @classmethod 
+        return
+
+    @classmethod
     def plotCorrelation(self,x=None,y=None,xlabel='method1',ylabel='method2'):
         if x==None:
             data=open('compared.csv','r')
             cr=csv.reader(data)
-            x=[float(r[0]) for r in cr]; data.seek(0) 
+            x=[float(r[0]) for r in cr]; data.seek(0)
             y=[float(r[1]) for r in cr]
         f=plt.figure()
         ax=f.add_subplot(111)
-     
+
         line = ax.scatter(x, y, marker='o',alpha=0.8)
         cl = numpy.arange(0,max(x)+50)
         ax.plot(cl, cl, 'g', alpha=0.5,lw=2)
         ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)
-        ax.set_xlim(150,600); ax.set_ylim(150,600)        
+        ax.set_xlim(150,600); ax.set_ylim(150,600)
         ax.set_title('Correlation')
         from scipy.stats import stats
         cc = str(round(pow(stats.pearsonr(x,y)[0],2),2))
-        ax.text(400,180, r'$r^2= %s$' %cc, fontsize=16)             
+        ax.text(400,180, r'$r^2= %s$' %cc, fontsize=16)
         self.showTkFigure(f)
         return
 
@@ -723,7 +723,7 @@ class VantHoff(Plugin):
         fr = Toplevel()
         canvas = FigureCanvasTkAgg(fig, master=fr)
         #self.canvas.show()
-        canvas.get_tk_widget().pack(side=TOP, fill=X, expand=1)        
+        canvas.get_tk_widget().pack(side=TOP, fill=X, expand=1)
         mtoolbar = NavigationToolbar2TkAgg(canvas, fr)
         mtoolbar.update()
         canvas._tkcanvas.pack(side=BOTTOM, fill=BOTH, expand=1)
@@ -740,9 +740,9 @@ def main():
     parser.add_option("-e", "--ekinprj", dest="ekinprj",
                         help="Open an ekin project")
     parser.add_option("-d", "--dataset", dest="dataset",
-                        help="Dataset name")    
+                        help="Dataset name")
     parser.add_option("-m", "--method", dest="method", default=1, type='int',
-        help="Choose method - 1: Van't Hoff plot, 2: Schellman, 3: Differential fit, 4: Breslauer")      
+        help="Choose method - 1: Van't Hoff plot, 2: Schellman, 3: Differential fit, 4: Breslauer")
     parser.add_option("-b", "--benchmark", dest="benchmark", action='store_true',
                        help="Test", default=False)
     parser.add_option("-a", "--all", dest="all", action='store_true',
@@ -753,11 +753,11 @@ def main():
                        help="Degree of smoothing to apply in method 2 (default 5)")
     parser.add_option("-i", "--invert", dest="invert", action='store_true',
                        help="Invert raw data", default=False)
-    
+
     opts, remainder = parser.parse_args()
-   
+
     if opts.file != None and os.path.exists(opts.file):
-        app.loadDB(opts.file)       
+        app.loadDB(opts.file)
     if opts.ekinprj != None and os.path.exists(opts.ekinprj):
         E = EkinProject()
         E.openProject(opts.ekinprj)
@@ -770,7 +770,7 @@ def main():
     if opts.all == True:
         self.doAll(E, methods)
     if opts.benchmark == True:
-        app.benchmark(E,d,method=opts.method)           
+        app.benchmark(E,d,method=opts.method)
 
         #app.plotCorrelation()
     else:
@@ -781,8 +781,8 @@ def main():
         elif opts.method == 3:
             app.fitDifferentialCurve(E,d,smooth=opts.smoothing,invert=opts.invert,figname=d)
         elif opts.method == 4:
-            app.breslauerMethod(E,d,invert=opts.invert)                       
-            
+            app.breslauerMethod(E,d,invert=opts.invert)
+
 if __name__ == '__main__':
     main()
 

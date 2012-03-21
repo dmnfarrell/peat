@@ -32,8 +32,7 @@ from Tkinter import *
 import Pmw
 from GUI_helper import *
 import math,re
-from Ekin.Pylab import Options
-from Ekin.Ekin_main import PlotPanel
+from Ekin.Plotting import PlotPanel, Options
 from Actions import DBActions
 from Yasara import YasaraControl
 
