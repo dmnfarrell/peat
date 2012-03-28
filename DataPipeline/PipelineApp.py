@@ -29,8 +29,8 @@ from Base import Pipeline
 from PEATDB.Ekin.Base import *
 from PEATDB.Tables import TableCanvas
 from PEATDB.TableModels import TableModel
-from PEATDB.Ekin.Ekin_main import EkinApp, PlotPanel
-from PEATDB.Ekin.Pylab import Options
+from PEATDB.Ekin.Ekin_main import EkinApp
+from PEATDB.Ekin.Plotting import PlotPanel, Options
 from PEATDB.Ekin.ModelDesign import ModelDesignApp
 import os, sys, math, random, glob, numpy, string, types
 import csv
@@ -164,8 +164,9 @@ class PipeApp(Frame, GUI_help):
         self.queue_menu=self.create_pulldown(self.menu,self.queue_menu)
         self.menu.add_cascade(label='Queue',menu=self.queue_menu['var'])
         self.utils_menu={'01Show Config Helper':{'cmd': self.launchHelper},
-                         '02Run Tests':{'cmd': self.runTests},
-                         '03Text Editor':{'cmd': self.startTextEditor}}
+                         '02Clear Log':{'cmd': self.clearLog},
+                         '03Text Editor':{'cmd': self.startTextEditor},
+                         '04Run Tests':{'cmd': self.runTests}}
         self.utils_menu=self.create_pulldown(self.menu,self.utils_menu)
         self.menu.add_cascade(label='Utilities',menu=self.utils_menu['var'])
         self.help_menu={ '01Online Help':{'cmd': self.help},
@@ -367,6 +368,10 @@ class PipeApp(Frame, GUI_help):
         self.log.update_idletasks()
         return
 
+    def clearLog(self):
+        self.log.delete(1.0,END)
+        return
+
     def help(self):
         import webbrowser
         link='http://enzyme.ucd.ie/main/index.php/DataPipeline'
@@ -421,10 +426,12 @@ class PlotPreviewer(Frame):
                 entryfield_command=self.replot,
                 entryfield_validate={'validator':'numeric', 'min':1,'max':8})
         self.numplotscounter.pack()
+        self.overlayvar = BooleanVar(); self.overlayvar.set(False)
+        Checkbutton(fr, text='overlay plots', variable=self.overlayvar, command=self.replot).pack(side=TOP,fill=BOTH)
         fr.pack(side=LEFT)
-        self.plotframe = PlotPanel(parent=self, side=BOTTOM, height=200)
+        self.plotframe = PlotPanel(parent=self, side=BOTTOM, height=200, tools=True)
         self.dsindex = 0
-        self.opts = {'markersize':15,'fontsize':9}
+        self.plotframe.Opts.opts['fontsize']=10
         return
 
     def replot(self):
@@ -436,12 +443,21 @@ class PlotPreviewer(Frame):
         else:
             dsets = self.E.datasets[self.dsindex]
             c=1
-        self.plotframe.plotCurrent(dsets,options=self.opts,cols=c)
+
+        print self.overlayvar.get()
+        if self.overlayvar.get() == True:
+            plotopt = 3
+            self.plotframe.Opts.opts['title']=' '
+            self.plotframe.Opts.opts['legend'] = 1
+        else:
+            plotopt = 2
+            self.plotframe.Opts.opts['title']=None
+        self.plotframe.plotCurrent(dsets,
+                                    cols=c, plotoption=plotopt)
+        return
 
     def loadData(self, data):
         """Load dict into datasets"""
-        #table=self.previewTable = TableCanvas(frame, **self.tableformat)
-        #table.createTableFrame()
         E = self.E = Pipeline.getEkinProject(data)
         self.plotframe.setProject(E)
         return

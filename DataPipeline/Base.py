@@ -62,7 +62,7 @@ class Pipeline(object):
                         ('colend', 0), ('rowheader', ''), ('colheader', ''),
                         ('rowrepeat', 0), ('colrepeat', 0), ('delimeter', ','),
                         ('workingdir', wdir),  ('ignorecomments', 1),
-                        ('checkunicode', 0), ('decimalsymbol', '.')],
+                        ('checkunicode', 0), ('decimalsymbol', '.'), ('timeformat','%M:%S')],
                     'files': [('groupbyname', 0), ('parsenamesindex', 0),
                                 ('replicates',0)],
                     'models': [('model1', '')], 'variables': [('variable1', '')],
@@ -128,12 +128,13 @@ class Pipeline(object):
         import inspect
         #try to find a custom importer first
         customclasses = inspect.getmembers(Custom, inspect.isclass)
-        for f in Custom.importers:
-            if f == format:
-                classname = Custom.importers[f]
-                importerclass = getattr(Custom, classname)
-                print 'found custom importer %s' %classname
-                return importerclass(cp)
+        for c in customclasses:
+            name, cls = c
+            if not hasattr(cls, 'name'):
+                pass
+            elif cls.name == format:
+                print 'found custom importer %s' %name
+                return cls(cp)
 
         if format == 'databyrow':
             importer = DatabyRowImporter(cp)
@@ -234,6 +235,10 @@ class Pipeline(object):
         except Exception, e:
             print 'Importer returned an error:'
             print e
+            #debugging
+            import traceback
+            tr = sys.exc_info()[2]
+            traceback.print_tb(tr)
             data = {}
         self.checkImportedData(data)
         return data
@@ -326,6 +331,7 @@ class Pipeline(object):
 
         #if groupby files then we process that here from results
         if self.groupbyname == 1:
+            print results
             results = self.extractSecondaryKeysFromDict(results)
             #print results
             Em = EkinProject()
@@ -428,7 +434,6 @@ class Pipeline(object):
             arrs = []
             for D in dictslist:
                 arrs.append(numpy.array(D[n]))
-            #print sum(arrs)/len(arrs)
             newdata[n] = list(sum(arrs)/len(arrs))
         return newdata
 
@@ -488,12 +493,12 @@ class Pipeline(object):
     def parseFileNames(self, filenames, ind=0):
         """Parse file names to extract a numerical value
            ind: extract the ith instance of a number in the filename"""
-        labels = {}        
+        labels = {}
         for f in filenames:
-            bname = os.path.basename(f)            
+            bname = os.path.basename(f)
             l = re.findall("([0-9.]*[0-9]+)", bname)[ind]
             labels[f] = l
-            print f, labels[f]
+            print ind, f, labels[f]
         return labels
 
     def parseString(self, filename):
@@ -510,7 +515,7 @@ class Pipeline(object):
             for d in dirs:
                 if d.startswith('.'):
                     dirs.remove(d)
-            for f in files:                
+            for f in files:
                 fname = os.path.join(root,f)
                 #absname = os.path.abspath(fname)
                 if ext in os.path.splitext(fname)[1]:
@@ -525,10 +530,10 @@ class Pipeline(object):
 
     def addtoQueue(self, files):
         """Add files"""
-        
+
         if type(files) is types.StringType or type(files) is types.UnicodeType:
             files = [files]
-        for f in files[:]:          
+        for f in files[:]:
             if f not in self.queue.values():
                 self.queue[f] = f
         return
@@ -548,7 +553,7 @@ class Pipeline(object):
         return
 
     @classmethod
-    def getEkinProject(self, data, xerror=None, yerror=None):
+    def getEkinProject(self, data, xerror=None, yerror=None, sep='__'):
         """Get an ekin project from a dict of the form
              {label:([x],[y]),..} or
              {label:([x],[y],[xerr],[yerr]),..}"""
@@ -557,7 +562,7 @@ class Pipeline(object):
         for d in data.keys():
             if type(data[d]) is types.DictType:
                 for lbl in data[d]:
-                    name = d+sep+lbl
+                    name = str(d)+sep+str(lbl)
                     xy = data[d][lbl]
                     ek=EkinDataset(xy=xy)
                     E.insertDataset(ek, name)

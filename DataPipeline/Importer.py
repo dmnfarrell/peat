@@ -25,14 +25,15 @@
 # Dublin 4, Ireland
 #
 
-import string
+import string, time, datetime
 import Base, Utilities
 
 class BaseImporter(object):
     """Base Importer class, sub-class this to define methods specific to each kind of
        import format. At minimum we override the doImport method to get specific
-       functionality"""
+       format functionality. This class should not be instantiated directly."""
 
+    name = 'base'
     def __init__(self, cp):
         """Arguments:
             cp - a ConfigParser object that has been loaded in the parent app"""
@@ -111,28 +112,31 @@ class BaseImporter(object):
         """group a list into chunks of n size"""
         return [l[i:i+n] for i in range(0, len(l), n)]
 
-    def getXYValues(self, xd, yd, start=0):
+    def getXYValues(self, xd, yd, start=0, xformat=None, yformat=None):
         """Return a lists of floats from lists of vals whilst doing
            various checks to remove errors etc."""
 
         x=[]; y=[]
-        #print xd, yd
         for i in range(start,len(xd)):
             if i>=len(yd): break
-            xval = self.checkValue(xd[i])
-            yval = self.checkValue(yd[i])
+            xval = self.checkValue(xd[i], xformat)
+            yval = self.checkValue(yd[i], yformat)
+            #print xval, yval
             if xval==None or yval==None:
                 continue
             x.append(xval)
             y.append(yval)
         if len(x)<=1:
-            return None
+            return None, None
         return x,y
 
-    def checkValue(self, val):
+    def checkValue(self, val, format='number'):
         """Coerce a string to float if possible"""
         #add code to handle commas in thousand separators
         dec = self.decimalsymbol
+
+        if format == 'time':
+            return self.checkTime(val, self.timeformat)
         if dec == '.':
             try:
                 return float(val)
@@ -141,15 +145,28 @@ class BaseImporter(object):
         else:
             try:
                 return float(val.replace(".","").replace(dec,"."))
-            except ValueError:
+            except ValueError, e:
+                #print e
                 return None
 
     def checkTime(self, val, timeformat):
-        """Coerce to a datetime object"""
+        """Coerce to a datetime object and return a value in seconds
+           from some reference"""
         try:
-            datetime.strptime(val,timeformat)
-        except:
+            dt = datetime.datetime.strptime(val,timeformat)
+            return dt
+        except ValueError, e:
+            print e
             return None
+
+    def convertTimeValues(self, vals):
+        """Assumes datetime objects"""
+        result=[]
+        ref = vals[0]
+        for v in vals:
+            delta = v-ref
+            result.append(delta.seconds)
+        return result
 
     def checkUnicode(self, s):
         """Check for unicode string"""
@@ -167,6 +184,9 @@ class DatabyColImporter(BaseImporter):
     """This importer handles data formatted in columns with common x values
        in a specified column, it also handles multiple sets of data grouped
        in evenly spaced distances down each column"""
+
+    name = 'databycolumn'
+
     def __init__(self, cp):
         BaseImporter.__init__(self, cp)
         return
@@ -198,6 +218,9 @@ class DatabyRowImporter(BaseImporter):
     """This importer handles data formatted in rows with common x values
        along the top (or specified in a specific row), it also handles
        multiple sets of data grouped in evenly spaced distances along the row"""
+
+    name = 'databyrow'
+
     def __init__(self, cp):
         BaseImporter.__init__(self, cp)
         return
@@ -229,6 +252,9 @@ class DatabyRowImporter(BaseImporter):
 class PairedDatabyColImporter(BaseImporter):
     """This importer handles data formatted in rows with paired x-y values,
        there are therefore no common x-values in the header """
+
+    name = 'paireddatabycolumn'
+
     def __init__(self, cp):
         BaseImporter.__init__(self, cp)
         return
@@ -255,6 +281,9 @@ class PairedDatabyColImporter(BaseImporter):
 class PairedDatabyRowImporter(BaseImporter):
     """This importer handles data formatted in rows with paired x-y values,
        there are therefore no common x-values in the header """
+
+    name = 'paireddatabyrow'
+
     def __init__(self, cp):
         BaseImporter.__init__(self, cp)
         return
@@ -282,6 +311,9 @@ class GroupedDatabyRowImporter(BaseImporter):
        each column, each dataset is then repeated in groups every x rows, specified in
        the rowrepeat option. The importer therefore returns dictionary with multiple sets of
        x-y values for each label/dataset"""
+
+    name = 'groupeddatabyrow'
+
     def __init__(self, cp):
         BaseImporter.__init__(self, cp)
         return
@@ -297,16 +329,15 @@ class GroupedDatabyRowImporter(BaseImporter):
         if self.colend == 0:
             self.colend = len(labels)
 
-        grouplen = (self.rowend - self.rowstart) / self.rowrepeat
-        step = self.rowrepeat
-
-        for d in range(1,grouplen):
-            for row in range(self.rowstart, self.rowend, step):
+        #grouplen = (self.rowend - self.rowstart) / self.rowrepeat
+        step = self.rowrepeat       
+        for d in range(1, self.rowrepeat):            
+            for row in range(self.rowstart, self.rowend, step):     
                 if row>=len(lines):
                     break
                 xdata = self.getRow(lines, row)
                 rowdata = self.getRow(lines, row+d)
-                name = rowdata[0]
+                name = rowdata[0]                
                 if not data.has_key(name):
                     data[name] = {}
 
@@ -333,6 +364,9 @@ class GroupedDatabyColImporter(BaseImporter):
        each row, each dataset is then repeated in groups every x columns, specified in
        the colrepeat option. The importer therefore returns dictionary with multiple sets of
        x-y values for each label/dataset"""
+
+    name = 'groupeddatabycolumn'
+
     def __init__(self, cp):
         BaseImporter.__init__(self, cp)
         return

@@ -53,10 +53,10 @@ class Tester(object):
                   #fitting models included
                   'test8':({'format':'groupeddatabyrow','rowrepeat':4,'rowheader':0,'rowstart':1,
                              'model1':'Linear'}, 'databyrow_grouped.txt'),
-                  'test9':({'format':'groupeddatabycolumn','colrepeat':4,'colheader':0,'colstart':1,
-                            'model1':'Linear','model2':'sigmoid','variable1':'a','variable2':'tm',
-                            'xerror':0.2,'yerror':0.3},
-                            'databycol_grouped.txt'),
+                  #'test9':({'format':'groupeddatabycolumn','colrepeat':4,'colheader':0,'colstart':1,
+                  #          'model1':'Linear','model2':'sigmoid','variable1':'a','variable2':'tm',
+                  #          'xerror':0.2,'yerror':0.3},
+                  #          'databycol_grouped.txt'),
                   #'test10':({'format':'databyrow','rowheader':"aaa,bbb,ccc,ddd"},
                   #          'databyrow_noheader.txt')
                   }
@@ -75,18 +75,32 @@ class Tester(object):
         p.run()
         print '%s completed' %name
         print '-------------------'
+        return
 
     def formatTests(self, testinfo):
         """Test basic standard format handling"""
         for t in sorted(testinfo.keys()):
             self.doTest(testinfo[t], t)
 
-    def groupedFileTest(self):
-        """Tests the processing and grouping of multiple files"""
+    def multiFileTest(self):
+        """Test handling of single datasets per file with grouping per filename"""
+        path = 'testfiles/singlefiles'
+        Utilities.createSingleFileData(path)
+        conf = {'format':'databycolumn','groupbyname':1,  'parsenamesindex':1,
+                'saveplots':1,
+                'model1':'linear','variable1':'a','model2':'sigmoid','variable2':'tm'}
+        p = Pipeline()
+        p.createConfig('temp.conf',**conf)
+        p.addFolder(path, ext='txt')
+        p.run()
+        return
+
+    def groupedFilesTest(self):
+        """Tests the processing and grouping of multiple files with the same
+             sets of datasets in all files"""
         path = 'testfiles/grouped'
-        self.createGroupedData(path)
-        conf = {'format':'databycolumn','groupbyname':1,
-                'parsevaluesindex':0,'saveplots':1,
+        Utilities.createGroupedData(path)
+        conf = {'format':'databycolumn','groupbyname':1,  'parsenamesindex':0, 'saveplots':1,
                 'model1':'linear','variable1':'a','model2':'sigmoid','variable2':'tm'}
         p = Pipeline()
         p.createConfig('temp.conf',**conf)
@@ -95,7 +109,7 @@ class Tester(object):
         return
 
     def multiFolderTest(self):
-        """Handling of multiple folders in a hierarchy"""
+        """Handling of multiple folders in a hierarchy with replicates"""
         p = Pipeline()
         conf = {'format':'databycolumn','groupbyname':1,
                 'saveplots':1,'replicates':1,
@@ -116,7 +130,6 @@ class Tester(object):
             for r in reps:
                 fname = os.path.join(folder,'r'+str(r)+'_'+today+'.txt')
                 Utilities.createTempData(fname, names, val)
-
         p.addFolder(path, ext='txt')
         p.run()
         return
@@ -125,15 +138,17 @@ class Tester(object):
         """Tests handling of replicates"""
 
         p = Pipeline()
-        conf = {'format':'databycolumn','groupby':'file', 'parsenumericvalues':1,
-                'saveplots':1,'hasreplicates':1,
+        conf = {'format':'databycolumn','groupbyname':1, 'parsenamesindex':1,
+                'saveplots':1, 'replicates':1,
                 'model1':'linear','variable1':'a','model2':'sigmoid','variable2':'tm'}
         p.createConfig('temp.conf',**conf)
         reps = ['rep1','rep2','rep3']
         path = 'testfiles/replicates'
+        Utilities.createDirectory(path)
+        names = Utilities.createRandomStrings(3,6)
         for r in reps:
             rpath = os.path.join(path, r)
-            self.createGroupedData(rpath)
+            Utilities.createGroupedData(rpath,names=names)
         p.addFolder(path, ext='txt')
         p.run()
         return
@@ -159,56 +174,40 @@ class Tester(object):
         print '-------------------'
         return
 
-    def customTests(self):
+    def customTest(self):
         """Tests kinetics data for paper"""
 
-        info = ({'format':'kineticsdata','colrepeat':4,'colheader':0,'colstart':1,
-                  'model1':'Linear'},'setG_110309_1_pH7,5.txt')
-        self.doTest(info, 'kinetics test', 'novo_setG/rep1')
-
-    def createGroupedData(self, path='testfiles', clear=False):
-        """Create sets of grouped data to test queuing and file grouping"""
-
-        Utilities.createDirectory(path)
-        names = Utilities.createRandomStrings(3,6)
-        for i in np.arange(2,10,1.0):
-            val = 1/(1+exp((i-5)/1.2))
-            fname = os.path.join(path,'ph_'+str(i)+'__xx_'+str(i*3)+'.txt')
-            Utilities.createTempData(fname, names, val)
+        p = Pipeline()       
+        colheaderlabels = '2c9,5f4,fr2,tf5,3s2,be5,fd3,2c6,6f4,3dc,5gt,3cf'
+        rowheaderlabels = '0.025,0.05,0.1,0.2,0.4,0.8,1.6,3.2'
+        conf = {'format':'kineticsdata', 'delimeter':'tab','rowstart':3,'colend':12,
+                'rowrepeat':9,
+                'colheader':colheaderlabels, 'rowheader':rowheaderlabels,
+                'decimalsymbol':',',
+                #'groupbyname':1, 'parsenamesindex':1,
+                'model1':'linear','model2':'Michaelis-Menten','model3':'sigmoid',
+                'variable1':'a','variable2':'Km','variable3':'tm',#'xerror':.1,'yerror':0.05,
+                'saveplots':1}
+        p = Pipeline()
+        p.createConfig('temp.conf',**conf)
+        p.addFolder('/local/novodata/jan/setB/MM', ext='txt')
+        #p.run()
+        #filename ='/local/novodata/jan/setB/MM/setB_120109_1_pH10.txt'
+        #p.openRaw(filename)
+        #data = p.doImport()
+        p.run()
         return
 
-    def createNestedData(self):
-        """Create simulated nested data similar to our kinetics data"""
-        data={}
-        names = ['aaa','bbb','ccc']
-        tms = [7.5,8.0,8.5]
-        phs = range(2,14) #e.g. a ph range
-        concs = [0.01,0.1,0.2,0.3,0.5,1.0,2.0,5.0]
-        x = range(0,100,10)
-
-        for n in names:
-            i=names.index(n)
-            tm=tms[i]#+random.normalvariate(0,0.1)
-            data[n]={}
-            for p in phs:
-                km = 2/(1+exp((p-tm)/1.2))
-                #print p,km
-                data[n][p]={}
-                for s in concs:
-                    vel = (10 * s)/(s + km)
-                    y = [round(i*vel,3) for i in x]
-                    y = [i * random.normalvariate(1,0.03) for i in y]
-                    data[n][p][s] = (x,y)
-        return data
 
 def main():
     t=Tester()
     #t.formatTests(t.basictests)
+    #t.multiFileTest()
     #t.groupedFileTest()
-    t.multiFolderTest()
+    #t.multiFolderTest()
     #t.replicatesTest()
     #t.fitPropagationTest()
-    #t.customTests()
+    t.customTest()
 
 if __name__ == '__main__':
     main()
