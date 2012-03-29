@@ -153,9 +153,7 @@ class PipeApp(Frame, GUI_help):
         self.file_menu=self.create_pulldown(self.menu,self.file_menu)
         self.menu.add_cascade(label='File',menu=self.file_menu['var'])
         self.presetsMenu()
-        self.run_menu={'01Execute':{'cmd': self.execute},
-                        '02Model Design':{'cmd': self.launchModelDesigner},
-                        '03Launch Ekin':{'cmd':self.openEkin}}
+        self.run_menu={'01Execute':{'cmd': self.execute}}
         self.run_menu=self.create_pulldown(self.menu,self.run_menu)
         self.menu.add_cascade(label='Run',menu=self.run_menu['var'])
         self.queue_menu={'01Add files to queue':{'cmd': self.addtoQueue},
@@ -164,9 +162,12 @@ class PipeApp(Frame, GUI_help):
         self.queue_menu=self.create_pulldown(self.menu,self.queue_menu)
         self.menu.add_cascade(label='Queue',menu=self.queue_menu['var'])
         self.utils_menu={'01Show Config Helper':{'cmd': self.launchHelper},
-                         '02Clear Log':{'cmd': self.clearLog},
-                         '03Text Editor':{'cmd': self.startTextEditor},
-                         '04Run Tests':{'cmd': self.runTests}}
+                         '02Model Design':{'cmd': self.launchModelDesigner},
+                         '03Launch Ekin':{'cmd':self.openEkin},
+                         '04Text Editor':{'cmd': self.startTextEditor},
+                         '05Batch File Rename':{'cmd': self.batchFileRename},
+                         '06Clear Log':{'cmd': self.clearLog},
+                         '07Run Tests':{'cmd': self.runTests}}
         self.utils_menu=self.create_pulldown(self.menu,self.utils_menu)
         self.menu.add_cascade(label='Utilities',menu=self.utils_menu['var'])
         self.help_menu={ '01Online Help':{'cmd': self.help},
@@ -361,6 +362,9 @@ class PipeApp(Frame, GUI_help):
         t = TextEditor(parent=self)
         return
 
+    def batchFileRename(self):
+        return
+
     def write(self, txt):
         """Handle stdout"""
         self.log.yview('moveto', '1')
@@ -408,14 +412,17 @@ class PlotPreviewer(Frame):
 
         Frame.__init__(self, master)
         self.app = app
+        self.E = None
         if hasattr(self.app,'p'):
             self.p = self.app.p     #reference to pipeline object
         fr = Frame(self)
         b=Button(fr,text='update',command=self.update)
         b.pack(side=TOP,fill=BOTH)
-        b=Button(fr,text='prev',command=self.prev)
+        self.previmg = Images.prev()
+        b=Button(fr,text='prev',image=self.previmg,compound='left',command=self.prev)
         b.pack(side=TOP,fill=BOTH)
-        b=Button(fr,text='next',command=self.next)
+        self.nextimg = Images.next()
+        b=Button(fr,text='next',image=self.nextimg,compound='left',command=self.next)
         b.pack(side=TOP,fill=BOTH)
         self.numplotscounter = Pmw.Counter(fr,
                 labelpos='w',
@@ -432,6 +439,9 @@ class PlotPreviewer(Frame):
         self.plotframe = PlotPanel(parent=self, side=BOTTOM, height=200, tools=True)
         self.dsindex = 0
         self.plotframe.Opts.opts['fontsize']=10
+
+        b=Button(fr,text='open in Ekin',command=self.loadEkin)
+        b.pack(side=TOP,fill=BOTH)
         return
 
     def replot(self):
@@ -444,7 +454,6 @@ class PlotPreviewer(Frame):
             dsets = self.E.datasets[self.dsindex]
             c=1
 
-        print self.overlayvar.get()
         if self.overlayvar.get() == True:
             plotopt = 3
             self.plotframe.Opts.opts['title']=' '
@@ -477,6 +486,7 @@ class PlotPreviewer(Frame):
         return
 
     def prev(self):
+        if self.E == None: return
         if self.dsindex <= 0:
             self.dsindex = 0
         else:
@@ -485,11 +495,17 @@ class PlotPreviewer(Frame):
         return
 
     def next(self):
+        if self.E == None: return
         if self.dsindex >= self.E.length-1:
             self.dsindex = self.E.length-1
         else:
             self.dsindex += 1
         self.replot()
+        return
+
+    def loadEkin(self):
+        if self.E != None:
+            EK = EkinApp(parent=self, project=self.E)
         return
 
 class queueManager(Frame):

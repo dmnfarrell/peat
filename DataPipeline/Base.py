@@ -329,19 +329,20 @@ class Pipeline(object):
             if callback != None:
                 callback(c/total*100)
 
-        #if groupby files then we process that here from results
+        #if grouped by file names then we process that here from results
         if self.groupbyname == 1:
-            print results
+            print results.keys()
             results = self.extractSecondaryKeysFromDict(results)
-            #print results
+            print results
             Em = EkinProject()
             E,fits = self.processFits(rawdata=results, Em=Em)
             fname = os.path.join(self.workingdir, 'final')
 
             Em.saveProject(os.path.join(self.workingdir, fname))
-            if self.saveplots == 1:
-                self.saveEkinPlotstoImages(Em, fname)
+            #if self.saveplots == 1:
+            self.saveEkinPlotstoImages(Em, fname)
         print 'processing done'
+        print 'results saved to %s' %self.workingdir
         return
 
     def processFits(self, rawdata, models=None, variables=None, ind=None, parentkey='', Em=None):
@@ -446,7 +447,7 @@ class Pipeline(object):
         xerrors = []
         yerrors = []
         E.fitDatasets('ALL', models=[model], noiter=self.iterations,
-                      conv=1e-6, grad=1e-6, silent=True)
+                      conv=1e-9, grad=1e-6, silent=True)
         labels = E.datasets
         if self.xerror != 0 or self.yerror != 0:
             print 'getting exp uncert'
@@ -495,7 +496,7 @@ class Pipeline(object):
            ind: extract the ith instance of a number in the filename"""
         labels = {}
         for f in filenames:
-            bname = os.path.basename(f)
+            bname = os.path.basename(f)            
             l = re.findall("([0-9.]*[0-9]+)", bname)[ind]
             labels[f] = l
             print ind, f, labels[f]

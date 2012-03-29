@@ -160,7 +160,9 @@ class BaseImporter(object):
             return None
 
     def convertTimeValues(self, vals):
-        """Assumes datetime objects"""
+        """Convert datetime values to decimal"""
+        if vals == None or len(vals)<1:
+            return None
         result=[]
         ref = vals[0]
         for v in vals:

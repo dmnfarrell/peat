@@ -58,7 +58,7 @@ class KineticsDataImporter(BaseImporter):
         #labels = self.getColumnHeader(lines)
         names = self.colheader.split(',')
         rowlabels = self.rowheader.split(',')
-        print names
+        #print names
 
         if self.rowend == 0:
             self.rowend=len(lines)-12
@@ -67,12 +67,12 @@ class KineticsDataImporter(BaseImporter):
 
         #grouplen = (self.rowend - self.rowstart) / self.rowrepeat
         rowstep = self.rowrepeat
-        print self.rowend,self.rowstart,self.rowrepeat
-        for col in range(self.colstart+1, self.colend):
-            name = names[col-1]
+        #print self.rowend,self.rowstart,self.rowrepeat
+        for col in range(self.colstart, self.colend):
+            name = names[col]
             if not data.has_key(name):
                 data[name] = {}
-            #print name, col, rowlabels
+            #print name, col
             for d in range(0, rowstep):
                 xdata=[]; ydata=[]
                 if d < len(rowlabels):
@@ -85,17 +85,25 @@ class KineticsDataImporter(BaseImporter):
                     rowdata = self.getRow(lines, row+d)
                     if len(rowdata) <= col: continue
                     xdata.append(xval)
-                    #print row+d, len(rowdata), col
-                    ydata.append(rowdata[col])
+                    #print d,row+d, len(rowdata), col
+                    if d==0: ind=col+2
+                    else: ind = col
+                    ydata.append(rowdata[ind])
 
                 #print xdata, ydata
                 if len(xdata)<=1: continue
                 x,y = self.getXYValues(xdata,ydata,xformat='time')
                 #if xformat=='time':
                 x = self.convertTimeValues(x)
+                if x== None or y==None:
+                    continue
                 #print x,y
                 if not data[name].has_key(label):
                     data[name][label]=[x,y]
 
         return data
+
+    def postProcess(self):
+        """Post process raw data"""
+        return
 

@@ -178,23 +178,25 @@ class Tester(object):
         """Tests kinetics data for paper"""
 
         p = Pipeline()       
-        colheaderlabels = '2c9,5f4,fr2,tf5,3s2,be5,fd3,2c6,6f4,3dc,5gt,3cf'
-        rowheaderlabels = '0.025,0.05,0.1,0.2,0.4,0.8,1.6,3.2'
+        colheaderlabels =  '7 f5,7 h12,31 d9,2 h9,6 b7,36 b12,44 c6,36 b6,2 e4,48 g3,3 c3,3 c1'      
+        rowheaderlabels = '3.2,1.6,0.8,0.4,0.2,0.1,0.05,0.025'
         conf = {'format':'kineticsdata', 'delimeter':'tab','rowstart':3,'colend':12,
                 'rowrepeat':9,
                 'colheader':colheaderlabels, 'rowheader':rowheaderlabels,
                 'decimalsymbol':',',
-                #'groupbyname':1, 'parsenamesindex':1,
+                'groupbyname':1, 'parsenamesindex':2,
+                #'replicates':1, 'saveplots':1,
                 'model1':'linear','model2':'Michaelis-Menten','model3':'sigmoid',
                 'variable1':'a','variable2':'Km','variable3':'tm',#'xerror':.1,'yerror':0.05,
-                'saveplots':1}
+                }
         p = Pipeline()
         p.createConfig('temp.conf',**conf)
-        p.addFolder('/local/novodata/jan/setB/MM', ext='txt')
-        #p.run()
+        p.addFolder('/local/novodata/march/MM/setG/rep1', ext='txt')
         #filename ='/local/novodata/jan/setB/MM/setB_120109_1_pH10.txt'
         #p.openRaw(filename)
         #data = p.doImport()
+        #E=p.getEkinProject(data)
+        #E.saveProject('customtest')
         p.run()
         return
 
