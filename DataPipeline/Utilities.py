@@ -28,6 +28,7 @@
 '''Module containing utility classes and functions'''
 
 import os, random, string
+import re, glob
 import csv
 
 def setAttributesfromConfigParser(obj, cp):
@@ -151,3 +152,4 @@ def createNestedData():
                 data[n][p][s] = (x,y)
     return data
 
+        

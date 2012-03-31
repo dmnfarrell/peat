@@ -177,8 +177,8 @@ class Tester(object):
     def customTest(self):
         """Tests kinetics data for paper"""
 
-        p = Pipeline()       
-        colheaderlabels =  '7 f5,7 h12,31 d9,2 h9,6 b7,36 b12,44 c6,36 b6,2 e4,48 g3,3 c3,3 c1'      
+        p = Pipeline()
+        colheaderlabels = 'wt 5,wt 3,wt 2,68 5,68 3,68 2,138 5,138 3,138 2,248 5,248 3,248 2'
         rowheaderlabels = '3.2,1.6,0.8,0.4,0.2,0.1,0.05,0.025'
         conf = {'format':'kineticsdata', 'delimeter':'tab','rowstart':3,'colend':12,
                 'rowrepeat':9,
@@ -187,11 +187,11 @@ class Tester(object):
                 'groupbyname':1, 'parsenamesindex':2,
                 #'replicates':1, 'saveplots':1,
                 'model1':'linear','model2':'Michaelis-Menten','model3':'sigmoid',
-                'variable1':'a','variable2':'Km','variable3':'tm',#'xerror':.1,'yerror':0.05,
+                'variable1':'a','variable2':'Km','variable3':'tm','xerror':.1,'yerror':0.05,
                 }
         p = Pipeline()
         p.createConfig('temp.conf',**conf)
-        p.addFolder('/local/novodata/march/MM/setG/rep1', ext='txt')
+        p.addFolder('/local/novodata/jan/setF/MM/rep1', ext='txt')
         #filename ='/local/novodata/jan/setB/MM/setB_120109_1_pH10.txt'
         #p.openRaw(filename)
         #data = p.doImport()
@@ -200,6 +200,19 @@ class Tester(object):
         p.run()
         return
 
+    def renameFilesTest(self):
+        import glob
+        path = "testfiles/renametest"
+        Utilities.createDirectory(path)
+        for fname in Utilities.createRandomStrings(5,5):
+            f=(open(os.path.join(path,fname)+'.txt','w'))
+            f.close()
+        print glob.glob(os.path.join(path,'*.txt'))
+        import Rename
+        B=Rename.doFindReplace(wildcard=os.path.join(path,'*.txt'),
+                          find=".", replace='_',rename=True)
+        print glob.glob(os.path.join(path,'*'))
+        return
 
 def main():
     t=Tester()
@@ -210,6 +223,7 @@ def main():
     #t.replicatesTest()
     #t.fitPropagationTest()
     t.customTest()
+    #t.renameFilesTest()
 
 if __name__ == '__main__':
     main()

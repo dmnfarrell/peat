@@ -70,7 +70,7 @@ class Pipeline(object):
                     'plotting': [('saveplots', 0), ('normaliseplots', 0), ('grayscale', 0),
                         ('dpi', 100)],
                     'custom': [],
-                    'fitting': [('xerror', 0), ('yerror', 0), ('iterations', 30), ('modelsfile','')],
+                    'fitting': [('xerror', 0), ('yerror', 0), ('iterations', 50), ('modelsfile','')],
                     }
         order = ['base','files','fitting','models','variables',
                  'excel','plotting','custom']
@@ -447,7 +447,7 @@ class Pipeline(object):
         xerrors = []
         yerrors = []
         E.fitDatasets('ALL', models=[model], noiter=self.iterations,
-                      conv=1e-9, grad=1e-6, silent=True)
+                      conv=1e-10, grad=1e-8, silent=True)
         labels = E.datasets
         if self.xerror != 0 or self.yerror != 0:
             print 'getting exp uncert'
@@ -496,7 +496,7 @@ class Pipeline(object):
            ind: extract the ith instance of a number in the filename"""
         labels = {}
         for f in filenames:
-            bname = os.path.basename(f)            
+            bname = os.path.basename(f)    
             l = re.findall("([0-9.]*[0-9]+)", bname)[ind]
             labels[f] = l
             print ind, f, labels[f]

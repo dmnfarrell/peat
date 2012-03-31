@@ -40,6 +40,7 @@ import tkFileDialog
 from PEATDB.GUI_helper import *
 from Helper import HelperDialog
 from Editor import TextEditor
+from Rename import BatchRenameApp
 import Images
 
 class PipeApp(Frame, GUI_help):
@@ -363,6 +364,7 @@ class PipeApp(Frame, GUI_help):
         return
 
     def batchFileRename(self):
+        B = BatchRenameApp(parent=self)
         return
 
     def write(self, txt):
