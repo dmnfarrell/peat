@@ -183,9 +183,8 @@ class Tester(object):
         conf = {'format':'kineticsdata', 'delimeter':'tab','rowstart':3,'colend':12,
                 'rowrepeat':9,
                 'colheader':colheaderlabels, 'rowheader':rowheaderlabels,
-                'decimalsymbol':',',
+                'decimalsymbol':',','xformat':'%M:%S',
                 'groupbyname':1, 'parsenamesindex':2,
-                #'replicates':1, 'saveplots':1,
                 'model1':'linear','model2':'Michaelis-Menten','model3':'sigmoid',
                 'variable1':'a','variable2':'Km','variable3':'tm','xerror':.1,'yerror':0.05,
                 }

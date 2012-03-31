@@ -52,22 +52,17 @@ class KineticsDataImporter(BaseImporter):
     def doImport(self, lines):
         """Common x values for every substrate concentration"""
 
-        reftime = None
         data = {}
-        #assumes the column header has labels for each set of xy vals
-        #labels = self.getColumnHeader(lines)
+        #assumes the column header has labels
         names = self.colheader.split(',')
         rowlabels = self.rowheader.split(',')
-        #print names
 
         if self.rowend == 0:
             self.rowend=len(lines)-12
         if self.colend == 0:
             self.colend = len(labels)
 
-        #grouplen = (self.rowend - self.rowstart) / self.rowrepeat
         rowstep = self.rowrepeat
-        #print self.rowend,self.rowstart,self.rowrepeat
         for col in range(self.colstart, self.colend):
             name = names[col]
             if not data.has_key(name):
@@ -85,16 +80,16 @@ class KineticsDataImporter(BaseImporter):
                     rowdata = self.getRow(lines, row+d)
                     if len(rowdata) <= col: continue
                     xdata.append(xval)
-                    #print d,row+d, len(rowdata), col
                     if d==0: ind=col+2
                     else: ind = col
                     ydata.append(rowdata[ind])
 
-                #print xdata, ydata
                 if len(xdata)<=1: continue
-                x,y = self.getXYValues(xdata,ydata,xformat='time')
-                #if xformat=='time':
-                x = self.convertTimeValues(x)
+                x,y = self.getXYValues(xdata,ydata,xformat=self.xformat)
+                if self.xformat != '':
+                    x = self.convertTimeValues(x)
+                if self.yformat != '':
+                    y = self.convertTimeValues(y)
                 if x== None or y==None:
                     continue
                 #print x,y

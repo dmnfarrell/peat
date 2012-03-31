@@ -62,7 +62,8 @@ class Pipeline(object):
                         ('colend', 0), ('rowheader', ''), ('colheader', ''),
                         ('rowrepeat', 0), ('colrepeat', 0), ('delimeter', ','),
                         ('workingdir', wdir),  ('ignorecomments', 1),
-                        ('checkunicode', 0), ('decimalsymbol', '.'), ('timeformat','%M:%S')],
+                        ('checkunicode', 0), ('decimalsymbol', '.'),
+                        ('xformat',''),('yformat','')],
                     'files': [('groupbyname', 0), ('parsenamesindex', 0),
                                 ('replicates',0)],
                     'models': [('model1', '')], 'variables': [('variable1', '')],
@@ -322,6 +323,7 @@ class Pipeline(object):
                  #if no fitting we just put the data in ekin
                 Em = self.getEkinProject(data)
             Em.saveProject(fname)
+            self.saveFitstoCSV(Em, fname)
 
             if self.saveplots == 1:
                 self.saveEkinPlotstoImages(Em, fname)
@@ -339,6 +341,7 @@ class Pipeline(object):
             fname = os.path.join(self.workingdir, 'final')
 
             Em.saveProject(os.path.join(self.workingdir, fname))
+            self.saveFitstoCSV(Em, fname)
             #if self.saveplots == 1:
             self.saveEkinPlotstoImages(Em, fname)
         print 'processing done'
@@ -375,7 +378,7 @@ class Pipeline(object):
 
         currmodel,currvariable = getmodelinfo()
         #print models, variables
-        #print nesting,currmodel,currvariable
+        #print nesting,currmodel,currvariable,parentkey
 
         if nesting == 0:
             #final level of nesting, we just fit
@@ -458,6 +461,7 @@ class Pipeline(object):
         for d in labels:
             fits.append(E.getMetaData(d)[varname])
         if self.saveplots == 1 and filename != None and filename != '':
+            print 'plotting %s' %filename
             self.saveEkinPlotstoImages(E, filename)
         return E,(labels,fits,xerrors,yerrors)
 
@@ -553,6 +557,16 @@ class Pipeline(object):
                        grayscale=self.grayscale)
         return
 
+    def saveFitstoCSV(self, E, filename):
+        """Save results to a csv file"""
+        title = os.path.basename(filename)
+        filename = os.path.join(self.workingdir, filename)
+        filename = filename + '.csv'
+        from PEATDB.Ekin.Tables import EkinProjModel
+        EM = EkinProjModel(E)
+        EM.exportCSV(filename)
+        return
+        
     @classmethod
     def getEkinProject(self, data, xerror=None, yerror=None, sep='__'):
         """Get an ekin project from a dict of the form

@@ -112,7 +112,7 @@ class BaseImporter(object):
         """group a list into chunks of n size"""
         return [l[i:i+n] for i in range(0, len(l), n)]
 
-    def getXYValues(self, xd, yd, start=0, xformat=None, yformat=None):
+    def getXYValues(self, xd, yd, start=0, xformat='', yformat=''):
         """Return a lists of floats from lists of vals whilst doing
            various checks to remove errors etc."""
 
@@ -130,13 +130,13 @@ class BaseImporter(object):
             return None, None
         return x,y
 
-    def checkValue(self, val, format='number'):
+    def checkValue(self, val, format=''):
         """Coerce a string to float if possible"""
         #add code to handle commas in thousand separators
         dec = self.decimalsymbol
 
-        if format == 'time':
-            return self.checkTime(val, self.timeformat)
+        if format != '':
+            return self.checkTime(val, format)
         if dec == '.':
             try:
                 return float(val)
