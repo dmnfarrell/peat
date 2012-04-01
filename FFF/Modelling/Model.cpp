@@ -131,6 +131,7 @@ void model_class::_mutate(int chainnumber,int resnumber,string newresidue) {
     vector<atom_class> oldatoms;
     for (unsigned int oldatom=0;oldatom<_P.chains[chainnumber].residues[resnumber].atoms.size();oldatom++) {
         oldatoms.push_back(_P.chains[chainnumber].residues[resnumber].atoms[oldatom]);
+        }
   //
   // Deal with the simple cases
   // Asp <-> Asn, Gln <-> Glu and so on ..

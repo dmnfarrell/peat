@@ -29,7 +29,7 @@ class FFF:
         import Protool
         self.PI=Protool.structureIO()
         self.aas=self.PI.trueaminoacids.keys()
-        self.PI.readpdb('2lzt.pdb')
+        self.PI.readpdb('test.pdb')
         #
         import FFF.FFFcontrol as FFFC
         import os, sys
@@ -37,8 +37,9 @@ class FFF:
         FFFdir=os.path.split(scriptdir)[0]
         Rotamerlib=FFFC.Rotamer_class(os.path.join(FFFdir,'parameters/small_lib'))
         self.FFF=FFFC.FFF()
-        self.FFF.read_pdb('2lzt.pdb')
-        self.Model=FFFC.pKa_class(self.FFF,Rotamerlib,os.path.join(FFFdir,'parameters'))
+        self.FFF.read_pdb('test.pdb')
+        #self.Model=FFFC.pKa_class(self.FFF,Rotamerlib,os.path.join(FFFdir,'parameters'))
+        self.Model=FFFC.model_class(self.FFF,Rotamerlib,os.path.join(FFFdir,'parameters'))
         #
         # Test mutations
         #
@@ -68,11 +69,11 @@ class FFF:
                 energy=self.Model.Mutate(resid,aa,3,max_clash)
                 energies[resid][aa]=energy
                 print 'Acc for %s is %5.3f' %(resid,self.Model.get_accessibility(resid))
-                #print 'Mutate done'
-                #self.FFF.write_pdb('alascan/2lzt_%d_%s.pdb' %(count,aa))
-                #print 'PDB file written'
+                print 'Mutate done'
+                self.FFF.write_pdb('alascan/2lzt_%d_%s.pdb' %(count,aa))
+                print 'PDB file written'
                 self.Model.undo_mutation()
-                #print 'Undid mutation'
+                print 'Undid mutation'
         #
         # Analyse the energies
         #
