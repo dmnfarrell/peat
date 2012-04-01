@@ -51,7 +51,8 @@ class inputGen:
                   'finegridpoints':[65,65,65],
                   'coarsedim':[],
                   'method':'mg-auto',
-                  'ions':[[-1,0.0,2.0],[1,0.0,2.0]]}
+                  'ions':[[-1,0.0,2.0],[1,0.0,2.0]],
+                  'use_epsmap':False}
 
         if settings:
             for k in settings.keys():

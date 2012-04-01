@@ -27,6 +27,19 @@
 __date__  = "16 August 2005"
 __author__ = "Todd Dolinsky, Jens Erik Nielsen"
 
+APBSpath='/home/nielsen/bin/APBS/'
+import os, sys
+vgrid_path=os.path.join(APBSpath,'tools/python/vgrid')
+sys.path.append(vgrid_path)
+try:
+    import vgrid
+except:
+    print 'APBS path wrong in apbs.py. Pls reconfigure'
+    print vgrid_path
+    import os
+    os._exit(0)
+
+
 import sys
 import time
 try:
@@ -241,8 +254,8 @@ class runAPBS:
                 raise APBSError, "Error setting up MG calculation!"
 
             # Print problem parameters 
-            print self.dielXMap
-            sys.path.append('/Users/nielsen/bin/APBS/tools/python/vgrid')
+            #print self.dielXMap
+
             import vgrid 
             title='test'
             #vgrid.Vgrid_writeDX(self.dielXMap, "FILE", "ASC", "", 'Xeps.dx',title, vgrid.null_array());
@@ -292,7 +305,6 @@ class runAPBS:
                 count=count+1
             import os
             print 'Running in %s' %(os.getcwd())
-            stop
         #
         # Cleanup
         #

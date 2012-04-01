@@ -98,7 +98,7 @@ class ligand:
                 resname=resname[:3]
 
             sybyltype=sline[5]
-            charge=sline[-1]
+            charge=float(sline[-1])
             uniqueid='%s:%s:%s' %(cid,resnumber,atomname)
             self.PI.add_atom(uniqueid,
                              atomnumber=atomnumber,atomname=atomname,
