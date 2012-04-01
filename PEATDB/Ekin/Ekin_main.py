@@ -51,7 +51,7 @@ from PEATDB.GUI_helper import *
 
 class EkinApp(Frame, Ekin_map_annotate, GUI_help):
 
-    def __init__(self, parent=None, project=None, data=None, mode=None,
+    def __init__(self, parent=None, project=None, data=None, mode='General',
                   protein=None, field=None, allowreturntoDB=None):
         "Initialize the application."
         self.parent=parent

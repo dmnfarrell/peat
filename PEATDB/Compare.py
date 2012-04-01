@@ -545,7 +545,7 @@ class ComparatorWin(Frame):
         self.pw.add(fr)
         plotframe = PlotPanel(parent=fr, side=BOTTOM, tools=True)
         plotframe.setProject(E)
-        plotframe.Opts.opts = self.Opt.opts            
+        plotframe.Opts.opts = self.Opt.opts
         plotframe.Opts.opts['title'] = E.name
         plotframe.Opts.opts['normalise']=overlay
         plotframe.plotCurrent(datasets=datasets, plotoption=plotopt)

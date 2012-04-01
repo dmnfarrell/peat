@@ -157,9 +157,8 @@ class TableImporter:
         
 class TableExporter:
     def __init__(self):
-        """Provides export utility methods for the Table and Table Model classes"""
-        
-        return        
+        """Provides export utility methods for the Table and Table Model classes"""        
+        return
    
     def ExportTableData(self, table, sep=None):
         """Export table data to a comma separated file"""
@@ -167,26 +166,12 @@ class TableExporter:
         parent=table.parentframe                        
         import tkFileDialog
         filename = tkFileDialog.asksaveasfilename(parent=parent,defaultextension='.csv',                                                  
-                                                  filetypes=[("CSV files","*.csv")]
-                                                  )
+                                                  filetypes=[("CSV files","*.csv")])
         if not filename:                                                 
             return
         if sep == None:
-            sep = ','                
-        writer = csv.writer(file(filename, "w"), delimiter=sep)
-        #writer = csv.writer(sys.stdout, delimiter=sep)
-        model=table.getModel()
-        recs = model.getAllCells()          
-        #take column labels as field names            
-        colnames = model.columnNames
-        collabels = model.columnlabels
-        row=[]
-        for c in colnames:
-            row.append(collabels[c])
-        writer.writerow(row)
-
-        for row in recs.keys():            
-            writer.writerow(recs[row])
-        
+            sep = ','
+        model=table.getModel()    
+        model.exportCSV(filename, sep)        
         return 
    

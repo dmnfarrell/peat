@@ -525,8 +525,8 @@ class PlotPanel(Frame):
         b.pack(side=LEFT,padx=2,pady=2)
         b=Button(t, text='Options',command=self.plotOptions)
         b.pack(side=LEFT,padx=2,pady=2)
-        b=Button(t, text='Annotate',command=self.annotate)
-        b.pack(side=LEFT,padx=2,pady=2)
+        #b=Button(t, text='Annotate',command=self.annotate)
+        #b.pack(side=LEFT,padx=2,pady=2)
         return
 
     def setProject(self, E):
@@ -547,7 +547,7 @@ class PlotPanel(Frame):
         """Plot current datapoints and fits"""
 
         if options==None:
-            options = self.Opts.opts
+            options = self.Opts.opts       
 
         #remember for next time if we plot multiple - hacky
         if datasets == None:

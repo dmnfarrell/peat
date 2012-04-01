@@ -845,7 +845,7 @@ class EkinProject(object):
                 self.showfitResults(X, ax)
             if prms.grid == True:
                 ax.grid(True)
-            if prms.legend == True:
+            if prms.legend == True:                
                 l=ax.legend(legendlines, datasets, numpoints=1,
                             loc=prms.legendloc, prop=FontProperties(size="smaller"))
                 l.get_frame().set_alpha(0.8)

@@ -809,5 +809,22 @@ class TableModel(object):
         M.setupModel(data)
         return M
     
+    def exportCSV(self, filename=None, sep=','):
+        """Export directly from model"""
+        import csv
+        if filename==None: return
+        #take column labels as field names 
+        writer = csv.writer(file(filename, "w"), delimiter=sep)
+        colnames = self.columnNames
+        collabels = self.columnlabels
+        recs = self.getAllCells()
+        row=[]
+        for c in colnames:
+            row.append(collabels[c])
+        writer.writerow(row)
+        for row in recs.keys():            
+            writer.writerow(recs[row])            
+        return
+        
     def __repr__(self):
         return 'Table Model with %s rows' %len(self.reclist)
