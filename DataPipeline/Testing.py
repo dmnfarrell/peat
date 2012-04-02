@@ -215,13 +215,13 @@ class Tester(object):
 
 def main():
     t=Tester()
-    #t.formatTests(t.basictests)
+    t.formatTests(t.basictests)
     #t.multiFileTest()
     #t.groupedFileTest()
     #t.multiFolderTest()
     #t.replicatesTest()
     #t.fitPropagationTest()
-    t.customTest()
+    #t.customTest()
     #t.renameFilesTest()
 
 if __name__ == '__main__':

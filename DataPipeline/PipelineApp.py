@@ -33,7 +33,7 @@ from PEATDB.Ekin.Ekin_main import EkinApp
 from PEATDB.Ekin.Plotting import PlotPanel, Options
 from PEATDB.Ekin.ModelDesign import ModelDesignApp
 import os, sys, math, random, glob, numpy, string, types
-import csv
+import pickle
 from Tkinter import *
 import Pmw
 import tkFileDialog
@@ -138,7 +138,7 @@ class PipeApp(Frame, GUI_help):
 
     def updateinfoPane(self):
         if hasattr(self.p, 'conffile'):
-            self.conffilevar.set(self.p.conffile)
+            self.conffilevar.set(self.p.configurationfile)
         self.queuefilesvar.set(len(self.p.queue))
         self.currfilevar.set(self.p.filename)
         return
@@ -153,7 +153,10 @@ class PipeApp(Frame, GUI_help):
                          '05Quit':{'cmd':self.quit}}
         self.file_menu=self.create_pulldown(self.menu,self.file_menu)
         self.menu.add_cascade(label='File',menu=self.file_menu['var'])
-        self.presetsMenu()
+        self.project_menu={'01Load Project':{'cmd': self.loadProject},
+                            '02Save Project':{'cmd': self.saveProject}}
+        self.project_menu=self.create_pulldown(self.menu,self.project_menu)
+        self.menu.add_cascade(label='Project',menu=self.project_menu['var'])
         self.run_menu={'01Execute':{'cmd': self.execute}}
         self.run_menu=self.create_pulldown(self.menu,self.run_menu)
         self.menu.add_cascade(label='Run',menu=self.run_menu['var'])
@@ -178,23 +181,10 @@ class PipeApp(Frame, GUI_help):
         self.main.config(menu=self.menu)
         return
 
-    def presetsMenu(self):
-        """Create preset entries"""
-        self.preset_menu=Menu(self.menu,tearoff=0)
-        self.menu.add_cascade(label='Presets',menu=self.preset_menu)
-        presets = ['J-810_cd_bywavelength', 'J-810_cd_bytemp', 'nmr_titration_sparky']
-        for name in presets:
-            def func(p):
-                def new():
-                    self.p.loadPreset(preset=p)
-                return new
-            self.preset_menu.add_command(label=name,command=func(name))
-        return
-
     def openRaw(self, filename=None):
         """Open a raw file, if more than one file we add them to queue"""
         if filename==None:
-            filename = self.openFilename('.csv')
+            filename = self.openFilename()
         if not os.path.exists(filename): return
         #now we open the first file only
         lines = self.p.openRaw(filename)
@@ -210,20 +200,20 @@ class PipeApp(Frame, GUI_help):
 
     def loadConfig(self, filename=None):
         if filename == None:
-            filename = self.openFilename('.conf')
+            filename = self.openFilename('conf')
         if not filename: return
         self.p.parseConfig(filename)
         self.updateinfoPane()
         return
 
     def editConfig(self):
-        self.editFile(self.p.conffile)
+        self.editFile(self.p.configurationfile)
         return
 
     def editFile(self, filename=None):
         """Edit a file"""
         if filename==None:
-            filename = self.openFilename('.conf')
+            filename = self.openFilename('conf')
         if not filename:
             return
 
@@ -325,31 +315,37 @@ class PipeApp(Frame, GUI_help):
         wz = HelperDialog(parent=self)
         return
 
-    def openFilename(self, ext='.txt'):
+    def openFilename(self, ext=['txt','csv','xls']):
+        if not type(ext) is types.ListType:
+            ext=[ext]
+        filetypes=[]
+        for e in ext:
+            filetypes.append(('%s files' %e,'*.%s' %e))
+        filetypes.append(("All files","*.*"))
         filename=tkFileDialog.askopenfilename(defaultextension=ext,
                                               initialdir=self.p.savedir,
-                                              filetypes=[("text files","*.txt"),
-                                                         ("csv files","*.csv"),
-                                                         ("csvx files","*.csvx"),
-                                                         ("excel files","*.xls"),
-                                                         ("conf files","*.conf"),
-                                                         ("All files","*.*")],
+                                              filetypes=filetypes,
                                               parent=self.main)
         return filename
 
-    def openFilenames(self, ext='.txt'):
+    def openFilenames(self, ext='txt'):
+        filetypes = [('%s files' %ext,'*.%s' %ext)]
+        filetypes.append(("All files","*.*"))
         filename=tkFileDialog.askopenfilenames(defaultextension=ext,
                                               initialdir=self.p.savedir,
-                                              filetypes=[("text files","*.txt"),
-                                                         ("All files","*.*")],
+                                              filetypes=filetypes,
                                               parent=self.main)
         return filename
 
-    def saveFilename(self, ext='.conf'):
-        filename=tkFileDialog.asksaveasfilename(defaultextension=ext,
+    def saveFilename(self, ext=''):
+        if ext!='':
+            filetypes = [('%s files' %ext,'*.%s' %ext)]
+        else:
+            filetypes = []
+        filetypes.append(("All files","*.*"))
+        filename=tkFileDialog.asksaveasfilename(defaultextension='.'+ext,
                                               initialdir=self.p.savedir,
-                                              filetypes=[("conf files","*.conf"),
-                                                         ("All files","*.*")],
+                                              filetypes=filetypes,
                                               parent=self.main)
         return filename
 
@@ -358,6 +354,34 @@ class PipeApp(Frame, GUI_help):
                                             initialdir=os.getcwd(),
                                             title='Select folder')
         return folder
+
+    def loadProject(self, filename=None):
+        if filename == None:
+            filename = self.openFilename('proj')
+        f = open(filename,'r')
+        try:
+            self.p = pickle.load(f)
+        except Exception,e:
+            print 'failed to load project'
+            print 'Error returned:', e
+            return
+        print 'loaded project', filename
+        name = os.path.splitext(filename)[1]
+        self.p.writeConfig(filename='%s.conf' %name)
+        self.updateinfoPane()
+        self.queueFrame.update()
+        self.previewer.update()
+
+        return
+
+    def saveProject(self, filename=None):
+        """Save project file"""
+        if filename == None:
+            filename = self.saveFilename('proj')
+        f = open(filename,'w')
+        pickle.dump(self.p,f)
+        f.close()
+        return
 
     def startTextEditor(self):
         t = TextEditor(parent=self)
@@ -475,6 +499,7 @@ class PlotPreviewer(Frame):
 
     def update(self, evt=None):
         """Reload data dict from main app"""
+        self.p = self.app.p
         data = self.p.doImport()
         if data == None: return
         self.dsindex = 0
@@ -515,7 +540,7 @@ class queueManager(Frame):
     def __init__(self, parent=None, app=None):
         self.parent = parent
         self.app = app
-        self.p = self.app.p #reference to pipeline object
+        #self.p = self.app.p #reference to pipeline object
         if not self.parent:
             Frame.__init__(self)
         self.listbox = Pmw.ScrolledListBox(self,
@@ -542,16 +567,19 @@ class queueManager(Frame):
         return
 
     def clear(self):
+        p = self.app.p
         self.listbox.delete(0,END)
-        self.p.queue = []
+        p.queue = []
+        return
 
     def removeSelected(self):
         """Remove selected items from queue"""
+        p = self.app.p
         if len(self.p.queue) == 0:
             return
-        self.p.queue.values()
+        p.queue.values()
         selected = self.listbox.getcurselection()
-        for key, value in self.p.queue.items():
+        for key, value in p.queue.items():
             if value in selected:
                 del self.p.queue[key]
         self.update()
@@ -560,13 +588,15 @@ class queueManager(Frame):
 
     def update(self):
         """Update queue listbox"""
-        flist = self.p.queue.values()
+        p = self.app.p
+        flist = p.queue.values()
         self.listbox.setlist(flist)
+        return
 
     def setFile(self):
         sel = self.listbox.getcurselection()[0]
-        print sel
         self.app.openRaw(sel)
+        return
 
 def main():
     from optparse import OptionParser
@@ -577,6 +607,8 @@ def main():
                         help="Raw file", metavar="FILE")
     parser.add_option("-d", "--dir", dest="directory",
                         help="Folder of raw files")
+    parser.add_option("-p", "--project", dest="project",
+                        help="Project file", metavar="FILE")
 
     opts, remainder = parser.parse_args()
     app = PipeApp(rawfile=opts.file)
@@ -586,6 +618,8 @@ def main():
         app.openRaw(opts.file)
     if opts.directory != None:
         app.addFolder(opts.directory)
+    if opts.project != None:
+        app.loadProject(opts.project)
     app.mainloop()
 
 if __name__ == '__main__':

@@ -38,8 +38,10 @@ from PEATDB.Ekin.Base import EkinProject, EkinDataset
 class Pipeline(object):
     """This class does all the pipeline processing and configuration"""
 
-    sections = ['base','fitting','excel']
-
+    __version__ = '1.0.0'   
+    configsections = ['base','files','fitting','models','variables',
+                      'excel','plotting','custom']
+                 
     def __init__(self, conffile=None):
 
         if conffile==None:
@@ -52,12 +54,11 @@ class Pipeline(object):
         self.sep = '__'   #symbol for internal separator
         return
 
-    def createConfig(self, filename, **kwargs):
+    def createConfig(self, conffile='default.conf', **kwargs):
         """Create a basic config file with default options and/or custom values"""
 
         c = ConfigParser.ConfigParser()
         wdir = os.path.join(os.getcwd(),'workingdir')
-
         defaults = {'base': [('format', 'databyrow'), ('rowstart', 0), ('colstart', 0), ('rowend', 0),
                         ('colend', 0), ('rowheader', ''), ('colheader', ''),
                         ('rowrepeat', 0), ('colrepeat', 0), ('delimeter', ','),
@@ -73,32 +74,13 @@ class Pipeline(object):
                     'custom': [],
                     'fitting': [('xerror', 0), ('yerror', 0), ('iterations', 50), ('modelsfile','')],
                     }
-        order = ['base','files','fitting','models','variables',
-                 'excel','plotting','custom']
-
-        for s in order:
-            c.add_section(s)
-            for i in defaults[s]:
-                name,val = i
-                c.set(s, name, val)
-
-        #use kwargs to create specific settings in the appropriate section
-        for s in c.sections():
-            opts = c.options(s)
-            for k in kwargs:
-                if k in opts:
-                    c.set(s, k, kwargs[k])
-        #handle model and variable sections which can have zero or multiple
-        #options
-        for k in sorted(kwargs):
-            if k.startswith('model'):
-                c.set('models', k, kwargs[k])
-            elif k.startswith('variable'):
-                c.set('variables', k, kwargs[k])
-
-        c.write(open(filename,'w'))
-        self.parseConfig(filename)
-        return c
+                    
+        cp = Utilities.createConfigParserfromDict(defaults, self.configsections ,**kwargs)
+        #print cp.sections()
+        
+        cp.write(open(conffile,'w'))
+        self.parseConfig(conffile)
+        return cp
 
     def parseConfig(self, conffile=None):
         """Parse the config file"""
@@ -107,10 +89,11 @@ class Pipeline(object):
 
         try:
             cp.read(conffile)
-        except:
+        except Exception,e:
             print 'failed to read config file! check format'
+            print 'Error returned:', e
             return
-        self.conffile = conffile
+        self.configurationfile = conffile
 
         #get format so we can create the right Importer
         format = cp.get('base', 'format')
@@ -123,6 +106,15 @@ class Pipeline(object):
         print 'parsed config file ok, format is %s' %format
         return
 
+    def writeConfig(self, filename=None):
+        """Save a config file from the current object"""
+        if filename == None:
+            filename = self.configurationfile
+        data = self.__dict__       
+        cp = Utilities.createConfigParserfromDict(data, self.configsections)
+        cp.write(open(filename,'w'))        
+        return
+        
     def getImporter(self, format, cp):
         """Get the required importer object"""
         import Custom
@@ -224,13 +216,12 @@ class Pipeline(object):
         """Import file with current setting and return a dict"""
 
         if lines == None:
-            if self.lines!=None:
+            if self.lines != None:
                 lines=self.lines
             else:
                 print 'no file loaded'
                 return None
 
-        #self.parseConfig(self.conffile)
         try:
             data = self.importer.doImport(lines)
         except Exception, e:
@@ -241,7 +232,7 @@ class Pipeline(object):
             tr = sys.exc_info()[2]
             traceback.print_tb(tr)
             data = {}
-        self.checkImportedData(data)
+        self.checkImportedData(data)       
         return data
 
     def checkImportedData(self, data):

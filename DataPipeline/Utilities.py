@@ -30,6 +30,7 @@
 import os, random, string
 import re, glob
 import csv
+import ConfigParser
 
 def setAttributesfromConfigParser(obj, cp):
     """A helper method that makes the options in a ConfigParser object
@@ -42,6 +43,31 @@ def setAttributesfromConfigParser(obj, cp):
             except: val=f[1]
             obj.__dict__[f[0]] = val
 
+def createConfigParserfromDict(data, sections, **kwargs):
+    """Helper method to create a ConfigParser from a dict and/or keywords"""
+    
+    cp = ConfigParser.ConfigParser()
+    for s in sections:
+        cp.add_section(s)
+        for i in data[s]:
+            name,val = i
+            cp.set(s, name, val)
+    
+    #use kwargs to create specific settings in the appropriate section
+    for s in cp.sections():
+        opts = cp.options(s)
+        for k in kwargs:
+            if k in opts:
+                cp.set(s, k, kwargs[k])
+    #handle model and variable sections which can have zero or multiple
+    #options
+    for k in sorted(kwargs):
+        if k.startswith('model'):
+            cp.set('models', k, kwargs[k])
+        elif k.startswith('variable'):
+            cp.set('variables', k, kwargs[k])                
+    return cp
+        
 def getListFromConfigItems(items):
     """Get a list from a set of ConfigParser key-value pairs"""
     lst = [i[1] for i in sorted(items) if i[1] != '']
