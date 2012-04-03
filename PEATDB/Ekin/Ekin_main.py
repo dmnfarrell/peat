@@ -1175,7 +1175,7 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
             for d in self.E.datasets:
                 if self.stopfit == True:
                     return
-                self.fitall_win.update_idletasks()
+                
                 if len(models)==1:
                     try:
                         fdata, X = self.E.fitDataset(d, model=models[0],silent=True,noiter=no_itervar.get(),
@@ -1188,6 +1188,8 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
                 p=p+1
                 m=(p/float(tot))*100
                 fitbar.updateProgress(newValue=m)
+                self.update_idletasks()
+                self.fitall_win.update()
             self.updateAll()
             return
 

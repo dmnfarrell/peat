@@ -575,7 +575,7 @@ class EkinProject(object):
         return fitresult, X
 
     def fitDatasets(self, datasets='ALL', update=True, findbest=False, models=None,
-                        noiter=300, conv=1e-6, grad=1e-6, silent=False):
+                        noiter=300, conv=1e-6, grad=1e-6, silent=False, callback=None):
         """Fit multiple datasets in this project, if no datasets are given, we
            fit all of them.
            If findbest=True, finds the best fit model using f-testing for the given
@@ -592,6 +592,8 @@ class EkinProject(object):
                 self.fitDataset(name, update=update, model=models[0],
                                 noiter=noiter, conv=conv, grad=grad,
                                 silent=silent)
+                if callback != None:
+                    callback()
         return
 
     def findBestModel(self, dataset, update=True, models=None, mode=None,
@@ -982,6 +984,30 @@ class EkinProject(object):
                     self.__dict__[field][name] = copy.deepcopy(E.__dict__[field][name])
         return
 
+    def createSampleData(self):            
+       
+        #linear
+        x=range(30)
+        y=[i+numpy.random.normal(0,.6) for i in x]
+        ek = EkinDataset(xy=[x,y])
+        self.insertDataset(ek,'testdata1')
+        #power law
+        x=numpy.arange(0,5,0.1)
+        y=[math.pow(i,3)+numpy.random.normal(5) for i in x]
+        ek = EkinDataset(xy=[x,y])
+        self.insertDataset(ek,'testdata2')
+        #gaussian
+        x=numpy.arange(0,5,0.1)
+        y=[1*math.exp(-(pow((i-2),2)/(pow(.5,2)))) for i in x]
+        ek = EkinDataset(xy=[x,y])
+        self.insertDataset(ek,'testdata3')
+        #MM
+        x=numpy.arange(0.1,5,0.2)
+        y=[(2 * i)/(i + .6)+numpy.random.normal(0,.04) for i in x]
+        ek = EkinDataset(xy=[x,y])
+        self.insertDataset(ek,'testdata4')
+        return
+        
 #
 # These methods are dataset based and could be handled by the ekindataset class
 #
