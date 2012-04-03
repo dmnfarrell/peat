@@ -190,8 +190,8 @@ class Tester(object):
                 }
         p = Pipeline()
         p.createConfig('temp.conf',**conf)
-        p.addFolder('/local/novodata/jan/setF/MM/rep1', ext='txt')
-        #filename ='/local/novodata/jan/setB/MM/setB_120109_1_pH10.txt'
+        p.addFolder('/local/ndata/jan/setF/MM/rep1', ext='txt')
+        #filename ='/local/ndata/jan/setB/MM/setB_120109_1_pH10.txt'
         #p.openRaw(filename)
         #data = p.doImport()
         #E=p.getEkinProject(data)
@@ -215,13 +215,13 @@ class Tester(object):
 
 def main():
     t=Tester()
-    t.formatTests(t.basictests)
+    #t.formatTests(t.basictests)
     #t.multiFileTest()
     #t.groupedFileTest()
     #t.multiFolderTest()
     #t.replicatesTest()
     #t.fitPropagationTest()
-    #t.customTest()
+    t.customTest()
     #t.renameFilesTest()
 
 if __name__ == '__main__':

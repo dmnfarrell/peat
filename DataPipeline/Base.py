@@ -38,10 +38,10 @@ from PEATDB.Ekin.Base import EkinProject, EkinDataset
 class Pipeline(object):
     """This class does all the pipeline processing and configuration"""
 
-    __version__ = '1.0.0'   
+    __version__ = '1.0.0'
     configsections = ['base','files','fitting','models','variables',
                       'excel','plotting','custom']
-                 
+
     def __init__(self, conffile=None):
 
         if conffile==None:
@@ -74,10 +74,10 @@ class Pipeline(object):
                     'custom': [],
                     'fitting': [('xerror', 0), ('yerror', 0), ('iterations', 50), ('modelsfile','')],
                     }
-                    
+
         cp = Utilities.createConfigParserfromDict(defaults, self.configsections ,**kwargs)
         #print cp.sections()
-        
+
         cp.write(open(conffile,'w'))
         self.parseConfig(conffile)
         return cp
@@ -110,11 +110,11 @@ class Pipeline(object):
         """Save a config file from the current object"""
         if filename == None:
             filename = self.configurationfile
-        data = self.__dict__       
+        data = self.__dict__
         cp = Utilities.createConfigParserfromDict(data, self.configsections)
-        cp.write(open(filename,'w'))        
+        cp.write(open(filename,'w'))
         return
-        
+
     def getImporter(self, format, cp):
         """Get the required importer object"""
         import Custom
@@ -232,7 +232,7 @@ class Pipeline(object):
             tr = sys.exc_info()[2]
             traceback.print_tb(tr)
             data = {}
-        self.checkImportedData(data)       
+        self.checkImportedData(data)
         return data
 
     def checkImportedData(self, data):
@@ -339,7 +339,8 @@ class Pipeline(object):
         print 'results saved to %s' %self.workingdir
         return
 
-    def processFits(self, rawdata, models=None, variables=None, ind=None, parentkey='', Em=None):
+    def processFits(self, rawdata, models=None, variables=None, ind=None,
+                    parentkey='', Em=None):
         """Process the a dict of possibly nested dicts
             ind: the index indicating the level of recursion, used to find the right model
                  and variable
@@ -491,7 +492,7 @@ class Pipeline(object):
            ind: extract the ith instance of a number in the filename"""
         labels = {}
         for f in filenames:
-            bname = os.path.basename(f)    
+            bname = os.path.basename(f)
             l = re.findall("([0-9.]*[0-9]+)", bname)[ind]
             labels[f] = l
             print ind, f, labels[f]
@@ -557,7 +558,7 @@ class Pipeline(object):
         EM = EkinProjModel(E)
         EM.exportCSV(filename)
         return
-        
+
     @classmethod
     def getEkinProject(self, data, xerror=None, yerror=None, sep='__'):
         """Get an ekin project from a dict of the form

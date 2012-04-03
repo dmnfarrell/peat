@@ -223,8 +223,7 @@ class PipeApp(Frame, GUI_help):
 
     def showRawFile(self, lines):
         """Show raw file contents"""
-        #if self.p.rowend>len(lines):
-        #    self.p.rowend=len(lines)
+
         c = self.rawcontents
         c.delete("1.0",END)
         c.component('columnheader').delete("1.0",END)
@@ -241,14 +240,19 @@ class PipeApp(Frame, GUI_help):
 
         return
 
+    def stop(self):
+        self.stopcurrent = True
+        return
+
     def execute(self):
         """Run current files in queue"""
         if len(self.p.queue) == 0:
             return
         from Dialogs import ProgressDialog
-        pb = ProgressDialog(self.main)
-        #self.log.delete(1.0,END)
-        self.p.run(callback=pb.bar.update)
+        signal=True
+
+        pb = ProgressDialog(self.main, cancel=self.stop)
+        self.p.run(callback=pb.updateValue)
         pb.close()
         return
 
@@ -371,7 +375,8 @@ class PipeApp(Frame, GUI_help):
         self.updateinfoPane()
         self.queueFrame.update()
         self.previewer.update()
-
+        if self.p.lines != None:
+            self.showRawFile(self.p.lines)
         return
 
     def saveProject(self, filename=None):
@@ -597,6 +602,7 @@ class queueManager(Frame):
         sel = self.listbox.getcurselection()[0]
         self.app.openRaw(sel)
         return
+
 
 def main():
     from optparse import OptionParser
