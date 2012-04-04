@@ -38,7 +38,7 @@ def setAttributesfromConfigParser(obj, cp):
 
     for s in cp.sections():
         obj.__dict__[s] = cp.items(s)
-        for f in cp.items(s):
+        for f in cp.items(s):            
             try: val=int(f[1])
             except: val=f[1]
             obj.__dict__[f[0]] = val
@@ -61,7 +61,7 @@ def createConfigParserfromDict(data, sections, **kwargs):
                 cp.set(s, k, kwargs[k])
     #handle model and variable sections which can have zero or multiple
     #options
-    for k in sorted(kwargs):
+    for k in sorted(kwargs):       
         if k.startswith('model'):
             cp.set('models', k, kwargs[k])
         elif k.startswith('variable'):

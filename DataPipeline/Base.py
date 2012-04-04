@@ -103,7 +103,9 @@ class Pipeline(object):
         #both the Importer and Pipeline object get copies of the config options
         #as attributes, convenient but probably bad..
         Utilities.setAttributesfromConfigParser(self, cp)
-        print 'parsed config file ok, format is %s' %format
+        self.models = sorted(self.models)            
+        self.variables = sorted(self.variables)
+        print 'parsed config file ok, format is %s' %format        
         return
 
     def writeConfig(self, filename=None):
@@ -353,9 +355,9 @@ class Pipeline(object):
 
         nesting = self.getDictNesting(rawdata)
         if models == None:
-            models = self.models
+            models = self.models   
             variables = self.variables
-
+        
         if len(models) == 0:
             print 'no models found for fitting!'
             return None, None
@@ -446,7 +448,7 @@ class Pipeline(object):
         xerrors = []
         yerrors = []
         E.fitDatasets('ALL', models=[model], noiter=self.iterations,
-                      conv=1e-10, grad=1e-8, silent=True)
+                      conv=1e-6, grad=1e-8, silent=True)
         labels = E.datasets
         if self.xerror != 0 or self.yerror != 0:
             print 'getting exp uncert'
@@ -454,7 +456,7 @@ class Pipeline(object):
             for d in labels:
                 yerrors.append(E.getMeta(d,'exp_errors')[varname][1])
 
-        for d in labels:
+        for d in labels:           
             fits.append(E.getMetaData(d)[varname])
         if self.saveplots == 1 and filename != None and filename != '':
             print 'plotting %s' %filename

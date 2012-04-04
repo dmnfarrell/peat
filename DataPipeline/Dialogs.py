@@ -70,7 +70,7 @@ class ProgressDialog(TopLevelModalDialog):
 
     def updateValue(self, value=None):
         #print 'update'
-        self.after(100, self.updateValue)
+        #self.after(100, self.updateValue)
         self.update()
         if value!=None:
             self.bar.update(value)
