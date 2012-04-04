@@ -258,6 +258,7 @@ class Pipeline(object):
     def run(self, callback=None):
         """Do initial import/fitting run with the current config"""
 
+        self.stop=False
         self.preProcess()
         print 'processing files in queue..'
 
@@ -287,6 +288,9 @@ class Pipeline(object):
         total = len(imported)
         c=0.0
         for key in imported:
+            if self.stop == True:
+                print 'cancelled'
+                return
             #set filename
             fname = os.path.basename(key)
             fname = os.path.join(self.workingdir, fname)

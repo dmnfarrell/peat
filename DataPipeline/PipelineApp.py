@@ -240,8 +240,9 @@ class PipeApp(Frame, GUI_help):
 
         return
 
-    def stop(self):
-        self.stopcurrent = True
+    def stopCurrent(self):
+        self.p.stop = True
+        print 'cancel pressed.. please wait'
         return
 
     def execute(self):
@@ -251,9 +252,10 @@ class PipeApp(Frame, GUI_help):
         from Dialogs import ProgressDialog
         signal=True
 
-        pb = ProgressDialog(self.main, cancel=self.stop)
-        self.p.run(callback=pb.updateValue)
-        pb.close()
+        self.pb = ProgressDialog(self.main, cancel=self.stopCurrent)
+        self.pb.after(100, self.pb.updateValue())
+        self.p.run(callback=self.pb.updateValue)
+        self.pb.close()
         return
 
     def showPreview(self,lines=None):
@@ -401,6 +403,9 @@ class PipeApp(Frame, GUI_help):
         self.log.yview('moveto', '1')
         self.log.appendtext(txt)
         self.log.update_idletasks()
+        #update the progress bar aswell
+        if hasattr(self, 'pb'):
+            self.pb.updateValue()
         return
 
     def clearLog(self):

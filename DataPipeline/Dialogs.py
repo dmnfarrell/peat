@@ -56,6 +56,7 @@ class TopLevelModalDialog(Toplevel):
 class ProgressDialog(TopLevelModalDialog):
     def __init__(self, parent, message='Working', cancel=None):
         TopLevelModalDialog.__init__(self, parent)
+        self.parent=parent
         self.title(message)
         progrlbl = Label(self.body,text='Progress:')
         progrlbl.pack(fill=BOTH,padx=2,pady=4)        
@@ -63,11 +64,14 @@ class ProgressDialog(TopLevelModalDialog):
         self.bar.frame.pack(fill=Y,padx=2,pady=4)   
         if cancel != None:
             self.cancel = Button(self.body,text='cancel',command=cancel)
-            self.cancel.pack()        
+            self.cancel.pack()
+        
         return
 
     def updateValue(self, value=None):
-        self.update()        
+        #print 'update'
+        self.after(100, self.updateValue)
+        self.update()
         if value!=None:
             self.bar.update(value)
         return
