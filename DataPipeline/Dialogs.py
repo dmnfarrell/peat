@@ -28,6 +28,7 @@
 from Tkinter import *
 import tkSimpleDialog, tkFileDialog, tkMessageBox
 import Pmw
+import ProgressBar
 
 class TopLevelModalDialog(Toplevel):
     def __init__(self, parent, width=300, height=100):
@@ -57,13 +58,12 @@ class ProgressDialog(TopLevelModalDialog):
         TopLevelModalDialog.__init__(self, parent)
         self.title(message)
         progrlbl = Label(self.body,text='Progress:')
-        progrlbl.pack(fill=BOTH,padx=2,pady=4)
-        import ProgressBar
+        progrlbl.pack(fill=BOTH,padx=2,pady=4)        
         self.bar = ProgressBar.ProgressBar(self.body)
         self.bar.frame.pack(fill=Y,padx=2,pady=4)   
         if cancel != None:
             self.cancel = Button(self.body,text='cancel',command=cancel)
-            self.cancel.pack()
+            self.cancel.pack()        
         return
 
     def updateValue(self, value=None):
