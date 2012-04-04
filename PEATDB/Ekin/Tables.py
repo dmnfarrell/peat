@@ -189,8 +189,16 @@ class EkinProjModel(TableModel):
                 model = fdata['model']
             else:
                 model=''
-            self.addRecord(name=d, **M)
-                
+            self.checkDict(M)    
+            self.addRecord(name=d, **M)                
+        return
+    
+    def checkDict(self, data):
+        "Check dict"
+        for d in data.keys()[:]:
+            if type(d) is not types.StringType:
+                data[str(d)] = data[d]
+                del data[d]
         return
     
 class EkinProjTable(TableCanvas):
