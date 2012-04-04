@@ -52,6 +52,7 @@ class Pipeline(object):
         self.queue = {}
         self.results = []
         self.sep = '__'   #symbol for internal separator
+        self.stop = True
         return
 
     def createConfig(self, conffile='default.conf', **kwargs):
@@ -258,6 +259,7 @@ class Pipeline(object):
     def run(self, callback=None):
         """Do initial import/fitting run with the current config"""
 
+        self.stop = False
         self.preProcess()
         print 'processing files in queue..'
 
@@ -287,6 +289,10 @@ class Pipeline(object):
         total = len(imported)
         c=0.0
         for key in imported:
+            #used if we need to stop execution           
+            if self.stop == True:
+                print 'cancelled'
+                return
             #set filename
             fname = os.path.basename(key)
             fname = os.path.join(self.workingdir, fname)
@@ -311,7 +317,7 @@ class Pipeline(object):
                     E,fits = self.processFits(rawdata=data, Em=Em)
                 results[label] = fits
             else:
-                 #if no fitting we just put the data in ekin
+                #if no fitting we just put the data in ekin
                 Em = self.getEkinProject(data)
             Em.saveProject(fname)
             self.saveFitstoCSV(Em, fname)
@@ -320,7 +326,10 @@ class Pipeline(object):
                 self.saveEkinPlotstoImages(Em, fname)
             c+=1.0
             if callback != None:
-                callback(c/total*100)
+                try:
+                    callback(c/total*100)
+                except:
+                    pass
 
         #if grouped by file names then we process that here from results
         if self.groupbyname == 1:
@@ -433,7 +442,7 @@ class Pipeline(object):
             newdata[n] = list(sum(arrs)/len(arrs))
         return newdata
 
-    def getFits(self, E, model, varname='a', filename=None):
+    def getFits(self, E, model, varname='a', filename=None, callback=None):
         """Fit an Ekin project
            model: model to fit
            varname: variable to extract"""

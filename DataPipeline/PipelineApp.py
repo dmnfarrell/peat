@@ -33,10 +33,12 @@ from PEATDB.Ekin.Ekin_main import EkinApp
 from PEATDB.Ekin.Plotting import PlotPanel, Options
 from PEATDB.Ekin.ModelDesign import ModelDesignApp
 import os, sys, math, random, glob, numpy, string, types
+import Queue, threading
 import pickle
 from Tkinter import *
 import Pmw
-import tkFileDialog
+import tkFileDialog, tkMessageBox
+from Dialogs import ProgressDialog
 from PEATDB.GUI_helper import *
 from Helper import HelperDialog
 from Editor import TextEditor
@@ -49,15 +51,12 @@ class PipeApp(Frame, GUI_help):
        raw text data files and propagating errors.
        Uses a config file to store the pipeline settings"""
 
-    def __init__(self, parent=None, rawfile=None, conffile=None):
+    def __init__(self, master, queue, quitCommand, rawfile=None, conffile=None):
 
-        self.parent=parent
-        if not self.parent:
-            Frame.__init__(self)
-            self.main=self.master
-        else:
-            self.main=Toplevel()
-            self.master=self.main
+        #self.parent=parent        
+        Frame.__init__(self)
+        self.main=self.master
+   
         self.main.title('DataPipeline Desktop')
         ws = self.main.winfo_screenwidth()
         hs = self.main.winfo_screenheight()
@@ -70,10 +69,33 @@ class PipeApp(Frame, GUI_help):
         self.p = Pipeline(conffile)
         self.setupVars()
         self.setupGUI()
+        self.quitCommand = quitCommand        
         #redirect stdout to log win
         self.log.delete(1.0,END)
         sys.stdout = self
         #sys.stderr = self
+        return
+
+    def processIncoming(self):
+        """Handle all messages put into the thread queue"""
+        return
+
+    def launch(self, func, message=None):
+        """Launch a long process"""
+        
+        if message != None:            
+            self.pb = ProgressDialog(self.main,message=message,
+                                     cancel=self.stopCurrent)
+
+    	self.thread = threading.Thread(target=func)
+    	self.thread.setDaemon(1)
+    	self.thread.start()
+        return
+
+    def stopCurrent(self):
+        self.p.stop = True
+        if hasattr(self, 'pb'):
+            self.pb.close()
         return
 
     def setupVars(self):
@@ -157,7 +179,7 @@ class PipeApp(Frame, GUI_help):
                             '02Save Project':{'cmd': self.saveProject}}
         self.project_menu=self.create_pulldown(self.menu,self.project_menu)
         self.menu.add_cascade(label='Project',menu=self.project_menu['var'])
-        self.run_menu={'01Execute':{'cmd': self.execute}}
+        self.run_menu={'01Execute':{'cmd': lambda: self.launch(self.execute)}}
         self.run_menu=self.create_pulldown(self.menu,self.run_menu)
         self.menu.add_cascade(label='Run',menu=self.run_menu['var'])
         self.queue_menu={'01Add files to queue':{'cmd': self.addtoQueue},
@@ -240,20 +262,13 @@ class PipeApp(Frame, GUI_help):
 
         return
 
-    def stop(self):
-        self.stopcurrent = True
-        return
-
     def execute(self):
         """Run current files in queue"""
         if len(self.p.queue) == 0:
-            return
-        from Dialogs import ProgressDialog
-        signal=True
-
-        pb = ProgressDialog(self.main, cancel=self.stop)
-        self.p.run(callback=pb.updateValue)
-        pb.close()
+            return               
+        self.pb = ProgressDialog(self.main, cancel=self.stopCurrent)
+        self.p.run(callback=self.pb.updateValue)
+        self.pb.close()
         return
 
     def showPreview(self,lines=None):
@@ -433,9 +448,12 @@ class PipeApp(Frame, GUI_help):
         return
 
     def quit(self):
-        self.main.destroy()
-        if not self.parent:
-            sys.exit()
+        #check if long process running
+        if self.p.stop == False:
+            if tkMessageBox.askyesno('Close Application?',
+                        'A process is running. Do you want to quit?'):
+                self.quitCommand()
+        self.quitCommand()
         return
 
 class PlotPreviewer(Frame):
@@ -603,6 +621,52 @@ class queueManager(Frame):
         self.app.openRaw(sel)
         return
 
+class ThreadedClient:
+    """
+    Launch the main part of the GUI and the worker thread. periodicCall and
+    endApplication could reside in the GUI part, but putting them here
+    means that you have all the thread controls in a single place.
+    """
+    def __init__(self, master, opts):
+        """
+        Start the GUI and the asynchronous threads. We are in the main
+        (original) thread of the application, which will later be used by
+        the GUI. We spawn a new thread for the worker.
+        """
+        self.master = master
+        # Create the queue
+        self.queue = Queue.Queue()
+        # Start the GUI Application
+        #self.gui = App(master, self.queue, self.endApplication)
+        self.gui = app = PipeApp(master, self.queue, self.quit)#rawfile=opts.file)
+        self.running = 1
+        # Start the periodic call in the GUI to check queue
+        self.periodicCall()
+        
+        if opts.conf != None:
+            app.loadConfig(opts.conf)
+        if opts.file != None:
+            app.openRaw(opts.file)
+        if opts.directory != None:
+            app.addFolder(opts.directory)
+        if opts.project != None:
+            app.loadProject(opts.project)
+        return
+
+    def periodicCall(self):
+        """Check every 100 ms if there is something new in the queue. """
+        self.gui.processIncoming()
+        while self.running == 0:
+            # This is the brutal stop of the system. You may want to do
+            # some cleanup before actually shutting it down.
+            self.gui.stopCurrent()
+            self.master.destroy()
+            sys.exit()
+        self.master.after(100, self.periodicCall)
+        return
+
+    def quit(self):
+        self.running = 0
 
 def main():
     from optparse import OptionParser
@@ -617,16 +681,12 @@ def main():
                         help="Project file", metavar="FILE")
 
     opts, remainder = parser.parse_args()
-    app = PipeApp(rawfile=opts.file)
-    if opts.conf != None:
-        app.loadConfig(opts.conf)
-    if opts.file != None:
-        app.openRaw(opts.file)
-    if opts.directory != None:
-        app.addFolder(opts.directory)
-    if opts.project != None:
-        app.loadProject(opts.project)
-    app.mainloop()
+
+    root = Tk()
+    client = ThreadedClient(root, opts)
+    root.mainloop()
+
+    #app.mainloop()
 
 if __name__ == '__main__':
     main()
