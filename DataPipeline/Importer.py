@@ -57,15 +57,17 @@ class BaseImporter(object):
             return False
         return True
 
-    def getRow(self, lines, row, grouped=False):
+    def getRow(self, lines, row, start=None, grouped=False):
         """Return values in a row"""
         #if we have repeating cols we return multiple lists
         if self.ignorecomments==True and lines[row].startswith('#'):
             return None
         if not self.checkEmptyRow(lines[row]):
             return None
+        if start == None:
+            start = self.colstart
         vals = string.strip(lines[row]).split(self.delimeter)
-        vals = vals[self.colstart:]
+        vals = vals[start:]
         if grouped == False:
             return vals
         else:
@@ -93,19 +95,23 @@ class BaseImporter(object):
                 return self.groupList(self.rowrepeat, vals)
 
     def getColumnHeader(self, lines, grouped=False):
-        """Column headers are taken from colstart row"""
-        if self.rowheader == '':
+        """Column headers are taken from relevant row"""
+        if self.colheader == '':
             row = self.rowstart
         else:
-            row = self.rowheader
-        return self.getRow(lines, row, grouped)
+            row = self.colheader
+        if self.colheaderstart != '':
+            start = self.colheaderstart
+        else:
+            start = self.colstart
+        return self.getRow(lines, row, start=start, grouped=grouped)
 
     def getRowHeader(self, lines, grouped=False):
         """Return values in header row"""
         if self.colheader == '':
             col = self.colstart
         else:
-            col = self.colheader
+            col = self.rowheader
         return self.getColumn(lines, col, grouped)
 
     def groupList(self, n, l, padvalue=None):
@@ -121,7 +127,6 @@ class BaseImporter(object):
             if i>=len(yd): break
             xval = self.checkValue(xd[i], xformat)
             yval = self.checkValue(yd[i], yformat)
-            #print xval, yval
             if xval==None or yval==None:
                 continue
             x.append(xval)
@@ -268,16 +273,43 @@ class PairedDatabyColImporter(BaseImporter):
             self.rowend=len(lines)
         header = self.getColumnHeader(lines)
         if self.colend == 0:
-            self.colend = len(header)
+            self.colend = len(header)+1
 
-        for col in range(self.colstart+1, self.colend):
+        i=0
+        for col in range(self.colstart, self.colend):
             coldata = self.getColumn(lines, col, grouped=True)
+            name = header[i]
             for xyd in coldata:
-                name = xyd[0]
                 x = xyd[1:len(xyd):2]
                 y = xyd[2:len(xyd):2]
                 data[name] = [x,y]
+            i+=1
+        return data
 
+class PairedDatabyDoubleColImporter(BaseImporter):
+
+    name = 'paireddatabydoublecolumn'
+
+    def __init__(self, cp):
+        BaseImporter.__init__(self, cp)
+        return
+
+    def doImport(self, lines):
+
+        data = {}
+        if self.rowend == 0:
+            self.rowend=len(lines)
+        header = self.getColumnHeader(lines)
+        if self.colend == 0:
+            self.colend = len(header)
+
+        i=0
+        for col in range(self.colstart, self.colend, 2):
+            x = self.getColumn(lines, col, grouped=True)[0]
+            y = self.getColumn(lines, col+1, grouped=True)[0]
+            name = header[i]
+            data[name] = [x,y]
+            i+=2
         return data
 
 class PairedDatabyRowImporter(BaseImporter):
@@ -332,14 +364,14 @@ class GroupedDatabyRowImporter(BaseImporter):
             self.colend = len(labels)
 
         #grouplen = (self.rowend - self.rowstart) / self.rowrepeat
-        step = self.rowrepeat       
-        for d in range(1, self.rowrepeat):            
-            for row in range(self.rowstart, self.rowend, step):     
+        step = self.rowrepeat
+        for d in range(1, self.rowrepeat):
+            for row in range(self.rowstart, self.rowend, step):
                 if row>=len(lines):
                     break
                 xdata = self.getRow(lines, row)
                 rowdata = self.getRow(lines, row+d)
-                name = rowdata[0]                
+                name = rowdata[0]
                 if not data.has_key(name):
                     data[name] = {}
 

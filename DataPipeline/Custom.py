@@ -29,7 +29,7 @@ import os, sys, math, string, types
 import inspect
 from datetime import datetime
 import ConfigParser, csv
-from Base import BaseImporter
+from Importer import BaseImporter
 
 """Custom Importers should be added here. These will usually sub-classes of
 BaseImporter but can also inherit from any of the importers in Base.py

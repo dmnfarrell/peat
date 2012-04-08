@@ -31,7 +31,7 @@ import re
 from datetime import datetime
 import ConfigParser, csv
 from itertools import izip, chain, repeat
-from Importer import *
+import Importer, Custom
 import Utilities
 from PEATDB.Ekin.Base import EkinProject, EkinDataset
 
@@ -60,7 +60,8 @@ class Pipeline(object):
         c = ConfigParser.ConfigParser()
         wdir = os.path.join(os.getcwd(),'workingdir')
         defaults = {'base': [('format', 'databyrow'), ('rowstart', 0), ('colstart', 0), ('rowend', 0),
-                        ('colend', 0), ('rowheader', ''), ('colheader', ''),
+                        ('colend', 0), ('colheaderstart', 0),('rowheaderstart', 0),
+                        ('rowheader', ''), ('colheader', ''),
                         ('rowrepeat', 0), ('colrepeat', 0), ('delimeter', ','),
                         ('workingdir', wdir),  ('ignorecomments', 1),
                         ('checkunicode', 0), ('decimalsymbol', '.'),
@@ -103,9 +104,9 @@ class Pipeline(object):
         #both the Importer and Pipeline object get copies of the config options
         #as attributes, convenient but probably bad..
         Utilities.setAttributesfromConfigParser(self, cp)
-        self.models = sorted(self.models)            
+        self.models = sorted(self.models)
         self.variables = sorted(self.variables)
-        print 'parsed config file ok, format is %s' %format        
+        print 'parsed config file ok, format is %s' %format
         return
 
     def writeConfig(self, filename=None):
@@ -119,34 +120,21 @@ class Pipeline(object):
 
     def getImporter(self, format, cp):
         """Get the required importer object"""
-        import Custom
         import inspect
         #try to find a custom importer first
         customclasses = inspect.getmembers(Custom, inspect.isclass)
-        for c in customclasses:
+        defaultclasses = inspect.getmembers(Importer, inspect.isclass)
+
+        for c in customclasses+defaultclasses:
             name, cls = c
-            if not hasattr(cls, 'name'):
+            if not hasattr(cls, 'name') or name == 'BaseImporter':
                 pass
             elif cls.name == format:
-                print 'found custom importer %s' %name
+                print 'found importer %s' %name
                 return cls(cp)
 
-        if format == 'databyrow':
-            importer = DatabyRowImporter(cp)
-        elif format == 'databycolumn':
-            importer = DatabyColImporter(cp)
-        elif format == 'paireddatabyrow':
-            importer = PairedDatabyRowImporter(cp)
-        elif format == 'paireddatabycolumn':
-            importer = PairedDatabyColImporter(cp)
-        elif format == 'groupeddatabyrow':
-            importer = GroupedDatabyRowImporter(cp)
-        elif format == 'groupeddatabycolumn':
-            importer = GroupedDatabyColImporter(cp)
-        else:
-            importer = None
-            print 'no importer found!'
-        return importer
+        print 'no importer found!'
+        return None
 
     def loadPreset(self, preset=None):
         """Load preset config for specific type data"""
@@ -250,6 +238,8 @@ class Pipeline(object):
 
     def preProcess(self):
         """Prepare for data import and processing"""
+        if self.workingdir == '':
+            self.workingdir = os.path.join(os.getcwd(), 'workingdir')
         if not os.path.exists(self.workingdir):
             os.mkdir(self.workingdir)
         else:
@@ -332,7 +322,6 @@ class Pipeline(object):
         if self.groupbyname == 1:
             print results.keys()
             results = self.extractSecondaryKeysFromDict(results)
-            print results
             Em = EkinProject()
             E,fits = self.processFits(rawdata=results, Em=Em)
             fname = os.path.join(self.workingdir, 'final')
@@ -343,7 +332,7 @@ class Pipeline(object):
             self.saveEkinPlotstoImages(Em, fname)
         print 'processing done'
         print 'results saved to %s' %self.workingdir
-        return
+        return results
 
     def processFits(self, rawdata, models=None, variables=None, ind=None,
                     parentkey='', Em=None):
@@ -355,9 +344,9 @@ class Pipeline(object):
 
         nesting = self.getDictNesting(rawdata)
         if models == None:
-            models = self.models   
+            models = self.models
             variables = self.variables
-        
+
         if len(models) == 0:
             print 'no models found for fitting!'
             return None, None
@@ -456,7 +445,7 @@ class Pipeline(object):
             for d in labels:
                 yerrors.append(E.getMeta(d,'exp_errors')[varname][1])
 
-        for d in labels:           
+        for d in labels:
             fits.append(E.getMetaData(d)[varname])
         if self.saveplots == 1 and filename != None and filename != '':
             print 'plotting %s' %filename

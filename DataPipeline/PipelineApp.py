@@ -485,7 +485,7 @@ class PlotPreviewer(Frame):
         p = int(self.numplotscounter.getvalue())
         if p>1:
             dsets = self.E.datasets[self.dsindex:self.dsindex+p]
-            c=p/2
+            c=p/2            
         else:
             dsets = self.E.datasets[self.dsindex]
             c=1

@@ -42,22 +42,28 @@ class Tester(object):
                   #rows, multiple groups
                   'test3':({'format':'databyrow','colrepeat':6},'databyrow2.txt'),
                   #cols, multiple groups
-                  'test4':({'format':'databycolumn','rowrepeat':6},'databycol2.txt'),
+                  'test4':({'format':'databycolumn','rowrepeat':6}, 'databycol2.txt'),
                   #paired x-y data in rows
                   'test5':({'format':'paireddatabyrow'},'databyrow_paired.txt'),
                   #paired x-y data in cols
-                  'test6':({'format':'paireddatabycolumn'},'databycol_paired.txt'),
+                  'test6':({'format':'paireddatabycolumn','colstart':1,'colheaderstart':2},
+                             'databycol_paired.txt'),
+                  #paired x-y data in rows
+                  #'test7':({'format':'paireddatabydoublerow'},'databyrow_paired_double.txt'),                  
+                  #paired x-y data in double cols
+                  'test8':({'format':'paireddatabydoublecolumn','rowstart':2,'colheader':0},
+                      'databycol_paired_double.txt'),                  
                   #various non-default formatting
-                  'test7':({'format':'databyrow','delimeter':'tab','decimalsymbol':',',
+                  'test9':({'format':'databyrow','delimeter':'tab','decimalsymbol':',',
                             'colrepeat':6}, 'databyrow_errors.txt'),
                   #fitting models included
-                  'test8':({'format':'groupeddatabyrow','rowrepeat':4,'rowheader':0,'rowstart':1,
+                  'test10':({'format':'groupeddatabyrow','rowrepeat':4,'rowheader':0,'rowstart':1,
                              'model1':'Linear'}, 'databyrow_grouped.txt'),
-                  #'test9':({'format':'groupeddatabycolumn','colrepeat':4,'colheader':0,'colstart':1,
+                  #'test11':({'format':'groupeddatabycolumn','colrepeat':4,'colheader':0,'colstart':1,
                   #          'model1':'Linear','model2':'sigmoid','variable1':'a','variable2':'tm',
                   #          'xerror':0.2,'yerror':0.3},
                   #          'databycol_grouped.txt'),
-                  #'test10':({'format':'databyrow','rowheader':"aaa,bbb,ccc,ddd"},
+                  #'test12':({'format':'databyrow','rowheader':"aaa,bbb,ccc,ddd"},
                   #          'databyrow_noheader.txt')
                   }
 
@@ -71,9 +77,13 @@ class Tester(object):
         filename = info[1]
         p.createConfig('temp.conf',**conf)
         p.openRaw(os.path.join(path,filename))
-        #data = p.doImport()
-        p.run()
-        print '%s completed' %name
+        data = p.doImport()
+        if p.model1 != '':
+            p.run()        
+        if len(data) == 0:
+            print '%s failed' %name
+        else:            
+            print '%s completed' %name
         print '-------------------'
         return
 
@@ -215,13 +225,13 @@ class Tester(object):
 
 def main():
     t=Tester()
-    #t.formatTests(t.basictests)
+    t.formatTests(t.basictests)
     #t.multiFileTest()
     #t.groupedFileTest()
     #t.multiFolderTest()
     #t.replicatesTest()
     #t.fitPropagationTest()
-    t.customTest()
+    #t.customTest()
     #t.renameFilesTest()
 
 if __name__ == '__main__':
