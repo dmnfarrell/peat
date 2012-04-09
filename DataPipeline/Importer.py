@@ -340,6 +340,33 @@ class PairedDatabyRowImporter(BaseImporter):
 
         return data
 
+class PairedDatabyDoubleRowImporter(BaseImporter):
+    """This importer handles data formatted in rows with paired x-y values,
+       there are therefore no common x-values in the header """
+
+    name = 'paireddatabydoublerow'
+
+    def __init__(self, cp):
+        BaseImporter.__init__(self, cp)
+        return
+
+    def doImport(self, lines):
+
+        data = {}
+        if self.rowend == 0:
+            self.rowend=len(lines)
+        header = self.getRowHeader(lines)
+        i=0
+        for row in range(self.rowstart, self.rowend, 2):
+            if row>=len(lines):
+                break
+            x = self.getRow(lines,row, grouped=True)[0]
+            y = self.getRow(lines,row+1, grouped=True)[0]
+            name = header[i]
+            data[name] = [x,y]
+            i+=2
+        return data
+
 class GroupedDatabyRowImporter(BaseImporter):
     """This importer handles data formatted in rows with multiple independent x values in
        each column, each dataset is then repeated in groups every x rows, specified in
@@ -363,7 +390,6 @@ class GroupedDatabyRowImporter(BaseImporter):
         if self.colend == 0:
             self.colend = len(labels)
 
-        #grouplen = (self.rowend - self.rowstart) / self.rowrepeat
         step = self.rowrepeat
         for d in range(1, self.rowrepeat):
             for row in range(self.rowstart, self.rowend, step):

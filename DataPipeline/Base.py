@@ -64,7 +64,7 @@ class Pipeline(object):
                         ('rowheader', ''), ('colheader', ''),
                         ('rowrepeat', 0), ('colrepeat', 0), ('delimeter', ','),
                         ('workingdir', wdir),  ('ignorecomments', 1),
-                        ('checkunicode', 0), ('decimalsymbol', '.'),
+                        ('decimalsymbol', '.'), #('checkunicode', 0),
                         ('xformat',''),('yformat','')],
                     'files': [('groupbyname', 0), ('parsenamesindex', 0),
                                 ('replicates',0)],
@@ -310,7 +310,8 @@ class Pipeline(object):
                  #if no fitting we just put the data in ekin
                 Em = self.getEkinProject(data)
             Em.saveProject(fname)
-            self.saveFitstoCSV(Em, fname)
+            if self.model1 != '':
+                self.saveFitstoCSV(Em, fname)
 
             if self.saveplots == 1:
                 self.saveEkinPlotstoImages(Em, fname)
@@ -327,7 +328,8 @@ class Pipeline(object):
             fname = os.path.join(self.workingdir, 'final')
 
             Em.saveProject(os.path.join(self.workingdir, fname))
-            self.saveFitstoCSV(Em, fname)
+            if self.model1 != '':
+                self.saveFitstoCSV(Em, fname)
             #if self.saveplots == 1:
             self.saveEkinPlotstoImages(Em, fname)
         print 'processing done'
@@ -548,7 +550,7 @@ class Pipeline(object):
         """Save results to a csv file"""
         title = os.path.basename(filename)
         filename = os.path.join(self.workingdir, filename)
-        filename = filename + '.csv'
+        filename = filename + '_fits.csv'
         from PEATDB.Ekin.Tables import EkinProjModel
         EM = EkinProjModel(E)
         EM.exportCSV(filename)

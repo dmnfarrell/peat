@@ -37,33 +37,34 @@ import Utilities
 class Tester(object):
     """This class does all the pipeline tests"""
 
-    basictests = {'test1':({'format':'databyrow','model1':'Linear'},'databyrow1.txt'),
-                  'test2':({'format':'databycolumn'},'databycol1.txt'),
+    basictests = {1:({'format':'databyrow','model1':'Linear'},'databyrow1.txt'),
+                  2:({'format':'databycolumn'},'databycol1.txt'),
                   #rows, multiple groups
-                  'test3':({'format':'databyrow','colrepeat':6},'databyrow2.txt'),
+                  3:({'format':'databyrow','colrepeat':6},'databyrow2.txt'),
                   #cols, multiple groups
-                  'test4':({'format':'databycolumn','rowrepeat':6}, 'databycol2.txt'),
+                  4:({'format':'databycolumn','rowrepeat':6}, 'databycol2.txt'),
                   #paired x-y data in rows
-                  'test5':({'format':'paireddatabyrow'},'databyrow_paired.txt'),
-                  #paired x-y data in cols
-                  'test6':({'format':'paireddatabycolumn','colstart':1,'colheaderstart':2},
+                  5:({'format':'paireddatabyrow'},'databyrow_paired.txt'),
+                  #paired x-y data in cols with colheader offset
+                  6:({'format':'paireddatabycolumn','colstart':1,'colheaderstart':2},
                              'databycol_paired.txt'),
-                  #paired x-y data in rows
-                  #'test7':({'format':'paireddatabydoublerow'},'databyrow_paired_double.txt'),                  
+                  #paired x-y data in double rows
+                  7:({'format':'paireddatabydoublerow','rowstart':0,'rowheader':0},
+                            'databyrow_paired_double.txt'),                  
                   #paired x-y data in double cols
-                  'test8':({'format':'paireddatabydoublecolumn','rowstart':2,'colheader':0},
+                  8:({'format':'paireddatabydoublecolumn','rowstart':2,'colheader':0},
                       'databycol_paired_double.txt'),                  
                   #various non-default formatting
-                  'test9':({'format':'databyrow','delimeter':'tab','decimalsymbol':',',
+                  9:({'format':'databyrow','delimeter':'tab','decimalsymbol':',',
                             'colrepeat':6}, 'databyrow_errors.txt'),
                   #fitting models included
-                  'test10':({'format':'groupeddatabyrow','rowrepeat':4,'rowheader':0,'rowstart':1,
+                  10:({'format':'groupeddatabyrow','rowrepeat':4,'rowheader':0,'rowstart':1,
                              'model1':'Linear'}, 'databyrow_grouped.txt'),
-                  #'test11':({'format':'groupeddatabycolumn','colrepeat':4,'colheader':0,'colstart':1,
+                  #11:({'format':'groupeddatabycolumn','colrepeat':4,'colheader':0,'colstart':1,
                   #          'model1':'Linear','model2':'sigmoid','variable1':'a','variable2':'tm',
                   #          'xerror':0.2,'yerror':0.3},
                   #          'databycol_grouped.txt'),
-                  #'test12':({'format':'databyrow','rowheader':"aaa,bbb,ccc,ddd"},
+                  #12:({'format':'databyrow','rowheader':"aaa,bbb,ccc,ddd"},
                   #          'databyrow_noheader.txt')
                   }
 
@@ -71,7 +72,7 @@ class Tester(object):
                            'filename':'databyrow1.xls'}}
 
     def doTest(self, info, name='test', path='testfiles'):
-        print 'running %s' %name
+        print 'running test %s' %name
         p = Pipeline()
         conf = info[0]
         filename = info[1]
@@ -81,15 +82,17 @@ class Tester(object):
         if p.model1 != '':
             p.run()        
         if len(data) == 0:
-            print '%s failed' %name
+            print 'test %s failed' %name
         else:            
-            print '%s completed' %name
+            print 'test %s completed' %name
         print '-------------------'
         return
 
-    def formatTests(self, testinfo):
-        """Test basic standard format handling"""
-        for t in sorted(testinfo.keys()):
+    def formatTests(self, testinfo, names=None):
+        """Test basic standard format handling and fitting"""
+        if names == None:
+            names = testinfo.keys()
+        for t in sorted(names):
             self.doTest(testinfo[t], t)
 
     def multiFileTest(self):
@@ -225,7 +228,7 @@ class Tester(object):
 
 def main():
     t=Tester()
-    t.formatTests(t.basictests)
+    t.formatTests(t.basictests, names=[9])
     #t.multiFileTest()
     #t.groupedFileTest()
     #t.multiFolderTest()

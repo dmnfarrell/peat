@@ -137,7 +137,7 @@ class PipeApp(Frame, GUI_help):
         return
 
     def updateinfoPane(self):
-        if hasattr(self.p, 'conffile'):
+        if hasattr(self.p, 'configurationfile'):
             self.conffilevar.set(self.p.configurationfile)
         self.queuefilesvar.set(len(self.p.queue))
         self.currfilevar.set(self.p.filename)
@@ -452,6 +452,12 @@ class PlotPreviewer(Frame):
         if hasattr(self.app,'p'):
             self.p = self.app.p     #reference to pipeline object
         fr = Frame(self)
+        self.totalvar = IntVar()
+        lfr=Frame(fr)
+        lfr.pack()
+        Label(lfr,text='Datasets:').pack(side=LEFT,fill=BOTH)
+        l=Label(lfr,text='',textvariable=self.totalvar)
+        l.pack(side=LEFT,fill=BOTH)
         b=Button(fr,text='update',command=self.update)
         b.pack(side=TOP,fill=BOTH)
         self.previmg = Images.prev()
@@ -467,7 +473,7 @@ class PlotPreviewer(Frame):
                 entry_width=3,
                 datatype = 'integer',
                 entryfield_command=self.replot,
-                entryfield_validate={'validator':'numeric', 'min':1,'max':8})
+                entryfield_validate={'validator':'numeric', 'min':1,'max':12})
         self.numplotscounter.pack()
         self.overlayvar = BooleanVar(); self.overlayvar.set(False)
         Checkbutton(fr, text='overlay plots', variable=self.overlayvar, command=self.replot).pack(side=TOP,fill=BOTH)
@@ -483,9 +489,14 @@ class PlotPreviewer(Frame):
     def replot(self):
         """Replot"""
         p = int(self.numplotscounter.getvalue())
+        if p > self.E.length: p = self.E.length
         if p>1:
-            dsets = self.E.datasets[self.dsindex:self.dsindex+p]
-            c=p/2            
+            if self.dsindex+p>self.E.length:
+                start = self.E.length - p
+            else:
+                start = self.dsindex
+            dsets = self.E.datasets[start:self.dsindex+p]
+            c=math.ceil(math.sqrt(p))
         else:
             dsets = self.E.datasets[self.dsindex]
             c=1
@@ -505,6 +516,7 @@ class PlotPreviewer(Frame):
         """Load dict into datasets"""
         E = self.E = Pipeline.getEkinProject(data)
         self.plotframe.setProject(E)
+        self.totalvar.set(self.E.length)
         return
 
     def update(self, evt=None):
