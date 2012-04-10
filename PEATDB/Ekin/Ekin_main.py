@@ -2045,6 +2045,7 @@ class FitterPanel(Frame):
 
     def showExpUncertaintyDialog(self):
         """Show dialog for doing Exp Uncertainty"""
+        if self.fitdata == {}: return
         data = self.data; fitdata = self.fitdata
         model = fitdata['model']
         X = Fitting.getFitter(model)

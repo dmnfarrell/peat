@@ -371,7 +371,7 @@ class FitPreviewer(Frame):
     def updateFit(self, selfdiff, vrs, fitvals, c, X):
         self.plotframe.updateFit(X, showfitvars=True)
         return
-
+        
     def prev(self):
         if self.dsindex <= 0:
             self.dsindex = 0
