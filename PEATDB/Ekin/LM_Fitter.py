@@ -52,6 +52,14 @@ class LM_Fitter:
         self.singular_matrix = 0
         return
 
+    def setVars(self, fdata):
+        """Set variable values from fitdata"""
+        self.variables=[]      
+        for i in self.varnames:
+            if i in fdata:
+                self.variables.append(fdata[i])         
+        return        
+                    
     def setChangeVars(self, changevars=None):
         """Change vars is a mask array of 1's and 0's that specifies which
             variables should be fitted if change_vars[varnum] is None,
@@ -114,9 +122,10 @@ class LM_Fitter:
         fitdict={}
         names = self.varnames; vrs = self.variables
         i=0
-        for i in range(len(names)):
+        for i in range(len(names)):            
             fitdict[names[i]] = vrs[i]
-            i+=1       
+            i+=1
+        #print 'getfitdict',fitdict    
         return fitdict
         
     def getFitLine(self, xdata):

@@ -35,6 +35,7 @@ import Pmw
 from PEATDB.Ekin.Plotting import PlotPanel
 from PEATDB.Ekin.Base import EkinProject, EkinDataset
 import PEATDB.Ekin.Fitting as Fitting
+import Ekin_images
 
 class ModelDesignApp(Frame):
     """Simple GUI for designing new models for use in ekin fitting"""
@@ -281,10 +282,10 @@ class ModelDesignApp(Frame):
         """Parse model entry and create a new fitter"""
         model = {}
         for f in self.entrywidgets:
-            model[f] = self.entrywidgets[f].get().rstrip()
+            model[f] = str(self.entrywidgets[f].get().rstrip())
         model['guess']={}
         for v in self.guessentrywidgets:
-            val = self.guessentrywidgets[v].get().rstrip()
+            val = str(self.guessentrywidgets[v].get().rstrip())
             if val != '':
                 model['guess'][v] = val
         return model
@@ -302,8 +303,10 @@ class FitPreviewer(Frame):
         Frame.__init__(self, master)
         self.main=self.master
         self.app = app
+        self.E = None
         self.gui()
         self.sampleData()
+        self.stop = False
         return
 
     def gui(self):
@@ -312,13 +315,18 @@ class FitPreviewer(Frame):
         b.pack(side=LEFT,fill=BOTH)
         b=Button(fr,text='load ekin prj',command=self.loadProject)
         b.pack(side=LEFT,fill=BOTH)
-        b=Button(fr,text='update',command=self.replot)
+        self.stopbtn=Button(fr,text='stop',command=self.stopFit)#,state=DISABLED)
+        self.stopbtn.pack(side=LEFT,fill=BOTH)
+        self.previmg = Ekin_images.prev()
+        b=Button(fr,text='prev',image=self.previmg,command=self.prev)
         b.pack(side=LEFT,fill=BOTH)
-        b=Button(fr,text='prev',command=self.prev)
-        b.pack(side=LEFT,fill=BOTH)
-        b=Button(fr,text='next',command=self.next)
+        self.nextimg = Ekin_images.next()
+        b=Button(fr,text='next',image=self.nextimg,command=self.next)
         b.pack(side=LEFT,fill=BOTH)
         fr.pack(side=TOP)
+        self.dsetselector = Pmw.ComboBox(fr,
+                        selectioncommand = self.selectDataset)
+        self.dsetselector.pack(side=LEFT,fill=BOTH)
         self.plotframe = PlotPanel(parent=self, side=BOTTOM, height=200)
         self.dsindex = 0
         self.opts = {'markersize':18,'fontsize':10,'showfitvars':True}
@@ -326,58 +334,60 @@ class FitPreviewer(Frame):
 
     def sampleData(self):
         E=self.E = EkinProject()
-        #linear
-        x=range(30)
-        y=[i+np.random.normal(0,.6) for i in x]
-        ek = EkinDataset(xy=[x,y])
-        self.E.insertDataset(ek,'testdata1')
-        #power law
-        x=np.arange(0,5,0.1)
-        y=[math.pow(i,3)+np.random.normal(5) for i in x]
-        ek = EkinDataset(xy=[x,y])
-        self.E.insertDataset(ek,'testdata2')
-        #gaussian
-        x=np.arange(0,5,0.1)
-        y=[1*math.exp(-(pow((i-2),2)/(pow(.5,2)))) for i in x]
-        ek = EkinDataset(xy=[x,y])
-        self.E.insertDataset(ek,'testdata3')
-        #MM
-        x=np.arange(0.1,5,0.2)
-        y=[(2 * i)/(i + .6)+np.random.normal(0,.04) for i in x]
-        ek = EkinDataset(xy=[x,y])
-        self.E.insertDataset(ek,'testdata4')
+        E.createSampleData()
         self.plotframe.setProject(E)
+        self.datasets = sorted(self.E.datasets)
         self.replot()
+        self.updateSelector()
         return
 
-    def replot(self):
-        dset = self.E.datasets[self.dsindex]
+    def updateSelector(self):
+        self.dsindex=0
+        lst = self.datasets
+        self.dsetselector.setlist(lst)
+        self.dsetselector.selectitem(lst[self.dsindex])
+        return
+
+    def replot(self, dset=None):
+        if dset==None:
+            dset = self.datasets[self.dsindex]
         self.plotframe.plotCurrent(dset,options=self.opts)
         return
 
     def finishFit(self, X):
         """Call when fitting done"""
-        d = self.E.datasets[self.dsindex]
-        fitresult = X.getResult()
-        self.E.setFitData(d, fitresult)
+        d = self.datasets[self.dsindex]
+        model = X.getResult()['model']
+        fitdata = Fitting.makeFitData(model, X.variables, X.getError())
+        self.E.setFitData(d, fitdata)
         self.replot()
+        self.stop = False
+        return
+
+    def stopFit(self):
+        self.stop = True
         return
 
     def getCurrentData(self):
-        dset = self.E.datasets[self.dsindex]
+        dset = self.datasets[self.dsindex]
         ek = self.E.getDataset(dset)
         return ek.getxy()
 
     def updateFit(self, selfdiff, vrs, fitvals, c, X):
         self.plotframe.updateFit(X, showfitvars=True)
+        self.update_idletasks()
+        self.update()
+        if self.stop == True:
+            X.stop_fit = 1
         return
-        
+
     def prev(self):
         if self.dsindex <= 0:
             self.dsindex = 0
         else:
             self.dsindex -= 1
         self.replot()
+        self.dsetselector.selectitem(self.datasets[self.dsindex])
         return
 
     def next(self):
@@ -386,6 +396,12 @@ class FitPreviewer(Frame):
         else:
             self.dsindex += 1
         self.replot()
+        self.dsetselector.selectitem(self.datasets[self.dsindex])
+        return
+
+    def selectDataset(self, name):
+        self.dsindex = self.datasets.index(name)
+        self.replot(name)
         return
 
     def importCSV(self):
@@ -396,8 +412,10 @@ class FitPreviewer(Frame):
         newdata = importer.import_multiple()
         for name in newdata.keys():
             self.E.insertDataset(newdata[name], newname=name)
-        self.dsindex = self.E.datasets.index(name)
+        self.datasets = sorted(self.E.datasets)
+        self.dsindex = self.datasets.index(name)
         self.replot()
+        self.updateSelector()
         return
 
     def loadProject(self):
@@ -408,7 +426,9 @@ class FitPreviewer(Frame):
                                               parent=self.main)
         if not filename: return
         self.E.openProject(filename)
+        self.datasets = sorted(self.E.datasets)
         self.replot()
+        self.updateSelector()
         return
 
 def main():

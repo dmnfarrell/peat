@@ -862,7 +862,7 @@ class EkinProject(object):
 
     def updateFit(self, X, ax=None, xdata=None, clr=None,
                         normalise=None, plotoption=1, showfitvars=False):
-        """Get the fit data line for given fitter object and redraw"""
+        """Get the fit data line for given fitter object and redraw"""        
         if xdata == None:
             xdata = self.currxdata
         if ax == None:
@@ -992,21 +992,26 @@ class EkinProject(object):
         y=[i+numpy.random.normal(0,.6) for i in x]
         ek = EkinDataset(xy=[x,y])
         self.insertDataset(ek,'testdata1')
+        #sigmoid
+        x=numpy.arange(0.1,10,0.1)
+        y=[1/(1+math.exp((5-i)/0.8))+numpy.random.normal(0,.02) for i in x]
+        ek = EkinDataset(xy=[x,y])
+        self.insertDataset(ek,'testdata2')
         #power law
         x=numpy.arange(0,5,0.1)
         y=[math.pow(i,3)+numpy.random.normal(5) for i in x]
         ek = EkinDataset(xy=[x,y])
-        self.insertDataset(ek,'testdata2')
+        self.insertDataset(ek,'testdata3')
         #gaussian
         x=numpy.arange(0,5,0.1)
-        y=[1*math.exp(-(pow((i-2),2)/(pow(.5,2)))) for i in x]
+        y=[1*math.exp(-(pow((i-2),2)/(pow(.5,2))))+numpy.random.normal(0,.02) for i in x]
         ek = EkinDataset(xy=[x,y])
-        self.insertDataset(ek,'testdata3')
+        self.insertDataset(ek,'testdata4')
         #MM
         x=numpy.arange(0.1,5,0.2)
         y=[(2 * i)/(i + .6)+numpy.random.normal(0,.04) for i in x]
         ek = EkinDataset(xy=[x,y])
-        self.insertDataset(ek,'testdata4')
+        self.insertDataset(ek,'testdata5')        
         return
 
 #
