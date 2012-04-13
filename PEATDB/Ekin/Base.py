@@ -862,7 +862,7 @@ class EkinProject(object):
 
     def updateFit(self, X, ax=None, xdata=None, clr=None,
                         normalise=None, plotoption=1, showfitvars=False):
-        """Get the fit data line for given fitter object and redraw"""        
+        """Get the fit data line for given fitter object and redraw"""
         if xdata == None:
             xdata = self.currxdata
         if ax == None:
@@ -1011,9 +1011,24 @@ class EkinProject(object):
         x=numpy.arange(0.1,5,0.2)
         y=[(2 * i)/(i + .6)+numpy.random.normal(0,.04) for i in x]
         ek = EkinDataset(xy=[x,y])
-        self.insertDataset(ek,'testdata5')        
+        self.insertDataset(ek,'testdata5')
         return
 
+    def exportDatasets(self, filename=None, format=None):
+       """Export all datasets as csv
+       formatted as ..   """
+       if filename == None:
+           return
+       f=open(filename,'wb')
+       import csv
+       cw=csv.writer(f)
+       for d in self.datasets:
+           ek = self.getDataset(d)
+           x,y = ek.getxy()
+           cw.writerow([d])
+           cw.writerows(zip(x,y))
+           cw.writerow('')
+       return
 #
 # These methods are dataset based and could be handled by the ekindataset class
 #

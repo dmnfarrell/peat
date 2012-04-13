@@ -250,14 +250,13 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
         self.menu.add_cascade(label='Data',menu=self.data_menu['var'])
 
         self.IE_menu={  '01Import from CSV file':{'cmd':self.import_csv},
-                        '02Export as CSV file':{'cmd':self.export_csv},
-                        '03Import Sparky peak files':{'cmd':self.import_chem_shift},
-                        #'04Import from chem. shift file':{'cmd':self.import_chem_shift},
-                        '05Import CcpNmr file':{'cmd':self.import_ccpnmr},
-                        #'06Transfer peaks to pKaSystem':{'cmd':self.open_pKaSystem_dialog},
-                        '07sep':{None:None},
-                        '08Import CD temperature scan':{'cmd':self.import_CD_tempscan},
-                        '09Analyse temp dependence of CD data':{'cmd':self.insert_CD_temp_datatab}
+                        '02Export Dataset':{'cmd':self.exportDataset},
+                        '03Export All':{'cmd':self.exportAll},
+                        '04Import Sparky peak files':{'cmd':self.import_chem_shift},                  
+                        '05Import CcpNmr file':{'cmd':self.import_ccpnmr},                      
+                        '06sep':{None:None},
+                        '07Import CD temperature scan':{'cmd':self.import_CD_tempscan},
+                        '08Analyse temp dependence of CD data':{'cmd':self.insert_CD_temp_datatab}
                         }
 
         self.IE_menu=self.create_pulldown(self.menu,self.IE_menu)
@@ -334,7 +333,7 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
         #self.ekin_win.bind("<1>", lambda:self.disableSelected(0))
         self.ekin_win.bind("<Control-q>", self.quit)
         self.ekin_win.bind("<Control-i>", self.import_csv)
-        self.ekin_win.bind("<Control-e>", self.export_csv)
+        self.ekin_win.bind("<Control-e>", self.exportDataset)
         self.ekin_win.bind_all("<F1>", self.about)
         self.ekin_win.bind_all("<Control-r>", self.redrawGraph)
         #self.ekin_win.focus_set()
@@ -1284,15 +1283,25 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
     # Import and export functions, most should use the Importer class to do the actual
     # importing stuff and get the returned dataset that we simply insert
     #
+    
+    def exportAll(self):
+        filename = tkFileDialog.asksaveasfilename(parent=self.ekin_win,
+                                                defaultextension='.csv',
+                                                initialdir=self.defaultsavedir,
+                                                filetypes=[("csv","*.csv"),
+                                                           ("All files","*.*")])
+        if filename:
+            self.E.exportDatasets(filename)
+        return
+        
     def import_csv(self, event=None):
         """Will allow import of multiple or single text files"""
         self.importer.path = self.path
         newdatasets = self.importer.import_multiple()
         self.insertMultipleDatasets(newdatasets)
-
         return
 
-    def export_csv(self, event=None):
+    def exportDataset(self, event=None):
         """Will allow export of multiple or single csv files"""
         name = self.currentdataset.get()
         self.exporter.export_csv(self.data[name], self.E.__datatabs_fits__[name])
