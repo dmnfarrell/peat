@@ -310,7 +310,8 @@ class Pipeline(object):
                  #if no fitting we just put the data in ekin
                 Em = self.getEkinProject(data)
             Em.saveProject(fname)
-            if self.model1 != '':
+            Em.exportDatasets(fname)
+            if self.model1 != '':                
                 self.saveFitstoCSV(Em, fname)
 
             if self.saveplots == 1:
@@ -326,8 +327,8 @@ class Pipeline(object):
             Em = EkinProject()
             E,fits = self.processFits(rawdata=results, Em=Em)
             fname = os.path.join(self.workingdir, 'final')
-
             Em.saveProject(os.path.join(self.workingdir, fname))
+            Em.exportDatasets(os.path.join(self.workingdir, fname))
             if self.model1 != '':
                 self.saveFitstoCSV(Em, fname)
             #if self.saveplots == 1:
