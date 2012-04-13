@@ -1019,6 +1019,8 @@ class EkinProject(object):
        formatted as ..   """
        if filename == None:
            return
+       if os.path.splitext(filename) != '.csv':
+           filename = os.path.splitext(filename)[0]+'.csv'
        f=open(filename,'wb')
        import csv
        cw=csv.writer(f)
@@ -1026,7 +1028,7 @@ class EkinProject(object):
            ek = self.getDataset(d)
            x,y = ek.getxy()
            cw.writerow([d])
-           cw.writerows(zip(x,y))
+           cw.writerows(sorted(zip(x,y)))
            cw.writerow('')
        return
 #
