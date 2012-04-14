@@ -48,27 +48,34 @@ def loadModelsFile(modelsfile=None):
     currentmodels = pickle.load(open(modelsfile,'r'))
     return currentmodels, modelsfile
 
+def updateModels(data):
+    """Reload the models from a dict"""    
+    currentmodels = data
+    return
+    
 def createModels():
     """Create default models file"""
     modelsdict = {
-        'Linear': {'Name': 'Linear',
+        'Linear': { 'name': 'Linear',
          'description': 'straight line',
          'equation': 'a*x+b',
-         'guess': {'a': 'min(y)', 'b': 'max(y)-min(y)/max(x)-min(x)'},
-         'name': 'Linear',
+         'guess': {'a': 'min(y)', 'b': 'max(y)-min(y)/max(x)-min(x)'},         
          'varnames': 'a,b'},
-        'Sigmoid': {'Name': 'Sigmoid',
+        'Sigmoid': { 'name': 'Sigmoid',
          'description': 'simple sigmoid',
          'equation': 'bottom+(top-bottom)/(1+exp((tm-x)/slope))',
          'guess': {'slope': '1', 'top': 'max(y)', 'tm': '(max(x)-min(x))/2+min(x)', 'bottom': 'min(y)'},
-         'name': 'Sigmoid',
          'varnames': 'tm,bottom,top,slope'},
-        'Gaussian': {'Name': 'Gaussian',
+        'Gaussian': { 'name': 'Gaussian',
          'description': 'gaussian function, a bell-shaped curve',
          'equation': 'a*exp(-(pow((x-b),2)/(pow(2*c,2))))',
-         'guess': {'a':'max(y)'},
-         'name': 'Gaussian',
-         'varnames': 'a,b,c'}
+         'guess': {'a':'max(y)'},         
+         'varnames': 'a,b,c'},
+        'Michaelis-Menten': { 'name': 'Michaelis-Menten',
+         'description': 'gaussian function, a bell-shaped curve',
+         'equation': '(Vmax * x)/(x + Km)',
+         'guess': {'Km':'max(x)/100','Vmax':'max(y)'},         
+         'varnames': 'Km,Vmax'},         
     }
     return modelsdict
      

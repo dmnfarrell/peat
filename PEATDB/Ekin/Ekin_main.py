@@ -148,6 +148,8 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
         return
 
     def createFitFrame(self):
+        if hasattr(self,'fitframe'):
+            self.fitframe.destroy()
         self.fitframe = FitterPanel(parent=self.sidepane)
         self.fitframe.setParentApp(self)
         self.fitframe.setPlotter(self.plotframe)
@@ -304,8 +306,9 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
         # Fit menu
         self.fit_menu=Menu(self.menu,tearoff=0)
         self.fit_menu={ '01Find best model':{'cmd':self.fitframe.showBestModelDialog},
-                        '02Fit all datasets':{'cmd':self.fitAll},
-                        '03Model Designer':{'cmd':self.modelDesigner}}
+                         '02Fit all datasets':{'cmd':self.fitAll},
+                         '03Model Designer':{'cmd':self.modelDesigner},
+                         '04Load models file':{'cmd':self.loadModelsFile}}
         self.fit_menu=self.create_pulldown(self.menu,self.fit_menu)
         self.menu.add_cascade(label='Fitting',menu=self.fit_menu['var'])
 
@@ -1275,8 +1278,17 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
         self.modelapp.loadModelsFile(Fitting.modelsfile)
         return
 
-    def reloadModels(self):
-        """load a new models file"""
+    def loadModelsFile(self, filename=None):
+        """load a new models file"""        
+        if filename==None:
+            filename = tkFileDialog.askopenfilename(defaultextension='.dict',
+                                                  initialdir=self.path,
+                                                  filetypes=[("dict","*.dict"),
+                                                             ("All files","*.*")],
+                                                  parent=self.ekin_win)
+        if filename:    
+            Fitting.loadModelsFile(filename)
+        self.createFitFrame()
         return
 
     #
@@ -1678,16 +1690,18 @@ class FitterPanel(Frame):
             f[2].set(0.0)
         return
 
-    def doModelButton(self):
+    def doModelButton(self, models=None):
         """Mode drop down menu"""
         if hasattr(self, 'model_button'):
             self.model_button.destroy()
-        self.model_button = Menubutton(self,textvariable=self.model_type,relief=RAISED,width=self.model_button_width)
+        self.model_button = Menubutton(self,textvariable=self.model_type,relief=RAISED,
+                                         width=self.model_button_width)
         self.model_menu = Menu(self.model_button,tearoff=0)
         self.model_button['menu'] = self.model_menu
 
-        modelts = EkinProject.mode_definition[self.mode]
-        for text in modelts:
+        if models == None:
+            models = EkinProject.mode_definition[self.mode]
+        for text in models:
             self.model_menu.add_radiobutton(label=text,
                             variable=self.model_type,
                             value=text,

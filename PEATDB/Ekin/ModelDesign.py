@@ -26,7 +26,7 @@
 #
 
 import os, sys, math, random, numpy, string, types
-import csv
+import csv, copy
 import pickle
 import numpy as np
 from Tkinter import *
@@ -98,8 +98,6 @@ class ModelDesignApp(Frame):
 
         f2=Frame(m1)
         m1.add(f2)
-        b=Button(f2,text='New Model',command=self.newModel)
-        b.pack(side=TOP,fill=BOTH,pady=2)
         b=Button(f2,text='Load Models File',command=self.loadModelsFile)
         b.pack(side=TOP,fill=BOTH,pady=2)
         b=Button(f2,text='Save Current Models',command=self.save)
@@ -108,19 +106,28 @@ class ModelDesignApp(Frame):
         w=Label(f2, text='', textvariable=self.filenamevar, fg='blue')
         w.pack(side=TOP,fill=BOTH,pady=2)
         self.updateFileLabel()
-
-        self.modelselector = Pmw.ScrolledListBox(f2,
+        f3 = Frame(f2)
+        f3.pack(fill=BOTH)
+        self.modelselector = Pmw.ScrolledListBox(f3,
                 items=self.modelsdict.keys(),
                 labelpos='nw',
                 label_text='Current Models:',
                 listbox_height = 3,
-                selectioncommand=self.loadModel,
-                #dblclickcommand=self.loadModel,
+                dblclickcommand=self.loadModel,
                 usehullsize = 1,
                 hull_width = 300,
                 hull_height = 100,
         )
         self.modelselector.pack()
+        b=Button(f3,text='New',command=self.newModel)
+        b.pack(side=LEFT,fill=BOTH,pady=2)
+        b=Button(f3,text='Delete',command=self.deleteModel)
+        b.pack(side=LEFT,fill=BOTH,pady=2)
+        b=Button(f3,text='Rename',command=self.renameModel)
+        b.pack(side=LEFT,fill=BOTH,pady=2)
+        self.currmodelvar = StringVar()
+        Label(f3,text='Current Model:').pack(side=LEFT,fill=BOTH,pady=2)
+        Label(f3,textvariable=self.currmodelvar,anchor=W,fg='blue').pack(side=LEFT,fill=BOTH,pady=2)
         b=Button(f2,text='Test Model',command=self.testFitter,bg='#FFFF99')
         b.pack(side=TOP,fill=BOTH,pady=2)
         m1.add(f1)
@@ -147,31 +154,52 @@ class ModelDesignApp(Frame):
         self.guessentry = fr
         return fr
 
-    def newModel(self):
+    def newModel(self, name=None):
         """Create new model"""
         name = tkSimpleDialog.askstring('New model','Enter a name',
-                                          initialvalue='',
+                                          initialvalue='modelname',
                                           parent=self.main)
-        if not name: return
+        if not name or name == '' or name in self.modelsdict.keys():
+            print 'model exists or empty'
+            return
         model = { 'description': '',
-             'equation': 'a*x+b',
-             'guess': "",
-             'name': name,
-             'varnames': 'a,b'}
+                 'equation': 'a*x+b',
+                 'guess': {},
+                 'name': name,
+                 'varnames': 'a,b'}
         self.modelsdict[name] = model
         self.updateModelSelector()
         self.modelselector.setvalue(name)
         self.loadModel()
         return
 
+    def renameModel(self):
+        currentname = self.modelselector.getcurselection()[0]
+        name = tkSimpleDialog.askstring('Rename model','Enter a new name',
+                                          initialvalue=currentname,
+                                          parent=self.main)
+        if not name or name == '' or name in self.modelsdict.keys():
+            print 'model exists or empty'
+            return
+        self.modelsdict[name] = copy.deepcopy(self.modelsdict[currentname])
+        del self.modelsdict[currentname]
+        self.updateModelSelector()
+        self.modelselector.setvalue(name)
+        self.loadModel()
+        return
+
+    def deleteModel(self):
+        currentname = self.modelselector.getcurselection()[0]
+        del self.modelsdict[currentname]
+        self.updateModelSelector()
+        self.modelselector.setvalue(self.modelsdict.keys()[0])
+        self.loadModel()
+        return
+
     def updateModelsDict(self):
         """Send the current model to the dict"""
-        try:
-            name = self.modelselector.getcurselection()[0]
-        except:
-            #if we lose the listbox selection
-            name = self.currentname
-            self.modelselector.setvalue(name)
+        name = self.currentname
+        self.modelselector.setvalue(name)
         self.modelsdict[name] = self.currentmodel
         return
 
@@ -257,6 +285,7 @@ class ModelDesignApp(Frame):
                 self.entrywidgets[f].settext(model[f])
         self.updateGuessEntryWidgets(model)
         self.previewer.replot()
+        self.currmodelvar.set(self.currentname)
         return
 
     def createFitter(self, model, name):
@@ -275,6 +304,7 @@ class ModelDesignApp(Frame):
         X.guess_start()
         X.fit(rounds=60)
         self.updateModelsDict()
+        Fitting.currentmodels = self.modelsdict
         self.previewer.finishFit(X)
         return
 
