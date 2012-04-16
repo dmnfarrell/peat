@@ -114,6 +114,7 @@ class ModelDesignApp(Frame):
                 label_text='Current Models:',
                 listbox_height = 3,
                 dblclickcommand=self.loadModel,
+                listbox_selectmode = EXTENDED,
                 usehullsize = 1,
                 hull_width = 300,
                 hull_height = 100,
@@ -129,6 +130,8 @@ class ModelDesignApp(Frame):
         Label(f3,text='Current Model:').pack(side=LEFT,fill=BOTH,pady=2)
         Label(f3,textvariable=self.currmodelvar,anchor=W,fg='blue').pack(side=LEFT,fill=BOTH,pady=2)
         b=Button(f2,text='Test Model',command=self.testFitter,bg='#FFFF99')
+        b.pack(side=TOP,fill=BOTH,pady=2)
+        b=Button(f2,text='Compare Models',command=self.findBestModel)
         b.pack(side=TOP,fill=BOTH,pady=2)
         m1.add(f1)
         self.previewer = FitPreviewer(m,app=self)
@@ -304,8 +307,24 @@ class ModelDesignApp(Frame):
         X.guess_start()
         X.fit(rounds=60)
         self.updateModelsDict()
-        Fitting.currentmodels = self.modelsdict
+        #update the global fitting models since the plotter uses them
+        Fitting.updateModels(self.modelsdict)
         self.previewer.finishFit(X)
+        return
+
+    def findBestModel(self):
+        """Determine best fit model using SS F-test"""
+        models = self.modelselector.getcurselection()
+        if len(models)<2:
+            print 'select 2 or more models'
+            return
+        fitters= []
+        for m in models:
+            model = self.modelsdict[m]
+            X = self.createFitter(model, m)
+            fitters.append(X)
+        Fitting.updateModels(self.modelsdict)
+        self.previewer.findBestModel(models)
         return
 
     def parseValues(self):
@@ -343,7 +362,7 @@ class FitPreviewer(Frame):
         fr = Frame(self)
         b=Button(fr,text='load csv',command=self.importCSV)
         b.pack(side=LEFT,fill=BOTH)
-        b=Button(fr,text='load ekin prj',command=self.loadProject)
+        b=Button(fr,text='load ekin',command=self.loadProject)
         b.pack(side=LEFT,fill=BOTH)
         self.stopbtn=Button(fr,text='stop',command=self.stopFit)#,state=DISABLED)
         self.stopbtn.pack(side=LEFT,fill=BOTH)
@@ -354,16 +373,17 @@ class FitPreviewer(Frame):
         b=Button(fr,text='next',image=self.nextimg,command=self.next)
         b.pack(side=LEFT,fill=BOTH)
         fr.pack(side=TOP)
-        self.dsetselector = Pmw.ComboBox(fr,
+        self.dsetselector = Pmw.ComboBox(fr, entry_width=15,
                         selectioncommand = self.selectDataset)
         self.dsetselector.pack(side=LEFT,fill=BOTH)
+
         self.plotframe = PlotPanel(parent=self, side=BOTTOM, height=200)
         self.dsindex = 0
         self.opts = {'markersize':18,'fontsize':10,'showfitvars':True}
         return
 
     def sampleData(self):
-        E=self.E = EkinProject()
+        E =self.E = EkinProject()
         E.createSampleData()
         self.plotframe.setProject(E)
         self.datasets = sorted(self.E.datasets)
@@ -459,6 +479,16 @@ class FitPreviewer(Frame):
         self.datasets = sorted(self.E.datasets)
         self.replot()
         self.updateSelector()
+        return
+
+    def findBestModel(self, models, callback=None):
+        """determine best fit model using SS F-test"""
+        dset = self.datasets[self.dsindex]
+        ek = self.E.getDataset(dset)
+        fitdata,p = Fitting.findBestModel(ek, models=models, silent=True)
+        best = fitdata['model']
+        text = 'Best model is %s with p-value=%2.2e' %(best,p)
+        tkMessageBox.showinfo('Best fit model result',text)
         return
 
 def main():

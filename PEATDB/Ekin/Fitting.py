@@ -49,8 +49,10 @@ def loadModelsFile(modelsfile=None):
     return currentmodels, modelsfile
 
 def updateModels(data):
-    """Reload the models from a dict"""    
+    """Reload the current global set of models from a dict"""    
+    global currentmodels
     currentmodels = data
+    createFitters()
     return
     
 def createModels():
@@ -121,6 +123,7 @@ def createClass(equation, varnames,
             for i in range(len(self.varnames)):
                 #print i, self.varnames[i],variables[i] 
                 globals()[self.varnames[i]] = variables[i]
+            
             try:   
                 value = eval(eq)
             except Exception, e:
@@ -160,7 +163,7 @@ def getFitter(model, vrs=None, expdata=None, callback=None):
     if model not in fitterClasses:
         createFitters()
     try:    
-        fitclass =  fitterClasses[model]
+        fitclass = fitterClasses[model]
     except:
         print 'model not found, please check name'
         print 'current available models are: %s' %fitterClasses.keys()
@@ -170,6 +173,7 @@ def getFitter(model, vrs=None, expdata=None, callback=None):
 
 def makeFitter(fitdata, expdata=None, callback=None):
     """Return a fit object created from the provided ekin fit data"""
+    
     if fitdata.has_key('model'):
         model = fitdata['model']
         vrs = getFitVars(fitdata)
@@ -352,7 +356,7 @@ def estimateExpUncertainty(ekindata, fitdata, xuncert=0, yuncert=0,
 
     return fitstats
 
-def findBestModel(ek, models, checkfunc=None,
+def findBestModel(ek, models, fitters=None, checkfunc=None,
                     conv=None, grad=None, alpha=0.05, silent=False):
     """Finds the best fit model using f-testing.
        We do an f-test here between each successive model
@@ -396,8 +400,8 @@ def findBestModel(ek, models, checkfunc=None,
         error2 = float(modelfits[n]['error'])
         if silent == False: print 'error1',error1, 'error2',error2
 
-        numparams1 = len(Fitting.getFitter(model=best).getVariables())
-        numparams2 = len(Fitting.getFitter(model=n).getVariables())
+        numparams1 = len(getFitter(model=best).getVariables())
+        numparams2 = len(getFitter(model=n).getVariables())
         if silent == False: print 'numparams1 ',numparams1;print 'numparams2 ',numparams2
         result, p = Utils.doFtest(modelfits[best],modelfits[n],numparams1,numparams2,numdps,alpha=alpha)
 
