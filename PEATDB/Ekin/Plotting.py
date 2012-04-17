@@ -562,7 +562,6 @@ class PlotPanel(Frame):
 
         #Note: TkAgg backend causes memory leak with repeated calls to plot
         self.fig.clear()
-
         if type(datasets) is types.ListType and len(datasets) > 1:
             self.ax = self.E.plotDatasets(datasets, figure=self.fig, plotoption=plotoption, cols=cols,
                                              **options)
@@ -584,6 +583,12 @@ class PlotPanel(Frame):
         self.canvas.draw()
         return
 
+    def clearData(self):
+        """Clear current data series"""
+        if len(self.ax.collections)>0:
+            del self.ax.collections[0]
+        return
+    
     def updateFit(self, X, showfitvars=False):
         """Just update fit line"""
         self.E.updateFit(X, showfitvars=showfitvars)

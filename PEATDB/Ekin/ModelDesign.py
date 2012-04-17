@@ -305,11 +305,15 @@ class ModelDesignApp(Frame):
         self.currentmodel = self.parseValues()
         X = self.createFitter(self.currentmodel, self.currentname)
         X.guess_start()
-        X.fit(rounds=60)
-        self.updateModelsDict()
-        #update the global fitting models since the plotter uses them
-        Fitting.updateModels(self.modelsdict)
-        self.previewer.finishFit(X)
+        if self.previewer.plotfunctionvar.get() == 1:
+            self.previewer.plotframe.clearData()
+            self.previewer.plotframe.updateFit(X, showfitvars=True)
+        else:
+            X.fit(rounds=60)
+            self.updateModelsDict()
+            #update the global fitting models since the plotter uses them
+            Fitting.updateModels(self.modelsdict)
+            self.previewer.finishFit(X)
         return
 
     def findBestModel(self):
@@ -361,11 +365,11 @@ class FitPreviewer(Frame):
     def gui(self):
         fr = Frame(self)
         b=Button(fr,text='load csv',command=self.importCSV)
-        b.pack(side=LEFT,fill=BOTH)
+        b.pack(side=LEFT,fill=BOTH,padx=1)
         b=Button(fr,text='load ekin',command=self.loadProject)
-        b.pack(side=LEFT,fill=BOTH)
+        b.pack(side=LEFT,fill=BOTH,padx=1)
         self.stopbtn=Button(fr,text='stop',command=self.stopFit)#,state=DISABLED)
-        self.stopbtn.pack(side=LEFT,fill=BOTH)
+        self.stopbtn.pack(side=LEFT,fill=BOTH,padx=1)
         self.previmg = Ekin_images.prev()
         b=Button(fr,text='prev',image=self.previmg,command=self.prev)
         b.pack(side=LEFT,fill=BOTH)
@@ -375,8 +379,12 @@ class FitPreviewer(Frame):
         fr.pack(side=TOP)
         self.dsetselector = Pmw.ComboBox(fr, entry_width=15,
                         selectioncommand = self.selectDataset)
-        self.dsetselector.pack(side=LEFT,fill=BOTH)
-
+        self.dsetselector.pack(side=LEFT,fill=BOTH,padx=1)
+        fr2 = Frame(self)
+        fr2.pack(side=TOP)
+        self.plotfunctionvar = IntVar()
+        cb=Checkbutton(fr2, text='plot function only',variable=self.plotfunctionvar)
+        cb.pack(side=TOP)
         self.plotframe = PlotPanel(parent=self, side=BOTTOM, height=200)
         self.dsindex = 0
         self.opts = {'markersize':18,'fontsize':10,'showfitvars':True}
@@ -399,6 +407,8 @@ class FitPreviewer(Frame):
         return
 
     def replot(self, dset=None):
+        """Replot"""
+
         if dset==None:
             dset = self.datasets[self.dsindex]
         self.plotframe.plotCurrent(dset,options=self.opts)
@@ -482,12 +492,12 @@ class FitPreviewer(Frame):
         return
 
     def findBestModel(self, models, callback=None):
-        """determine best fit model using SS F-test"""
+        """Determine best fit model using SS F-test"""
         dset = self.datasets[self.dsindex]
         ek = self.E.getDataset(dset)
         fitdata,p = Fitting.findBestModel(ek, models=models, silent=True)
         best = fitdata['model']
-        text = 'Best model is %s with p-value=%2.2e' %(best,p)
+        text = 'Best model is %s with p value=%2.2e' %(best,p)
         tkMessageBox.showinfo('Best fit model result',text)
         return
 

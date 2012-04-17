@@ -673,7 +673,7 @@ class EkinProject(object):
         prms = Params(**kwargs)
         self.current = datasets
         shapes = Options.shapes
-
+        
         plt.rc('font', family=prms.font)
         plt.rc('font', size=prms.fontsize)
         plt.rc('text', usetex=prms.usetex)
