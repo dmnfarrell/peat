@@ -314,7 +314,7 @@ class fit_stability(Double_mutant.double_mutant):
             txt='%-15s' %group
             vals=[]
             for state in ['F','U']:
-                value=str(pKa_values[group][state])
+                value=str(pKa_values[group][state]).strip()
                 if value.lower()=='model' or value.lower=='model pka' or value=='m':
                     group_type=group.split(':')[-1]
                     model_pKa=pKaTool.pKadata.modelpKas[group_type]
@@ -556,7 +556,6 @@ class fit_stability(Double_mutant.double_mutant):
             diff=calc_stab[self.mutant][pH]-calc_stab['wt'][pH]
             calc_diff[pH]=diff
         #
-
         exp_diff={}
         for pH,ddG_wt,ddG_mut in zip(self.tmp_stab_data['ph'],self.tmp_stab_data['wt'],self.tmp_stab_data[self.mutant]):
             exp_diff[pH]=ddG_mut-ddG_wt
@@ -578,7 +577,7 @@ class fit_stability(Double_mutant.double_mutant):
         """Add noise to the experimental data"""
         import random
         self.tmp_stab_data={}
-        dS=random.gauss(1.37,self.options.dSscaling) # Effect of using different dS
+        dS=random.gauss(1.00,self.options.dSscaling) # Effect of using different dS
         for prop in self.stab_data.keys():
             self.tmp_stab_data[prop]=[]
             #
@@ -754,7 +753,7 @@ class fit_stability(Double_mutant.double_mutant):
             ys.append(float(exp_mut_diff))
         pylab.plot(xs,ys,'bo-',label='Experimental')
         pylab.xlabel('pH')
-        pylab.ylabel('ddGfold (kJ/mol)')
+        pylab.ylabel(r'$\Delta\Delta{G}_{fold}$ (kJ/mol)')
         pylab.title(self.mutant.upper())
         if not os.path.isdir('fits'):
             os.mkdir('fits')
@@ -792,7 +791,8 @@ class fit_stability(Double_mutant.double_mutant):
         for group in sorted(self.TGs):
             for state in ['F','U']:
                 pka=pKa_values[group][state]
-                if pka=='fit':
+                #print pka,group,state,len(str(pka))
+                if str(pka).strip()=='fit':
                     import pKaTool.pKadata
                     group_type=group.split(':')[-1]
                     pka=pKaTool.pKadata.modelpKas[group_type]
@@ -822,7 +822,7 @@ class fit_stability(Double_mutant.double_mutant):
             # Do the fit
             #
             import scipy.optimize
-            solution,score,numits,func_calls,warnflag=scipy.optimize.fmin(self.get_difference_all,fit_variables,full_output=True,maxiter=990000000,ftol=1.49012e-12, xtol=1.49012e-12)
+            solution,score,numits,func_calls,warnflag=scipy.optimize.fmin(self.get_difference_all,fit_variables,full_output=True,maxiter=9990000000,ftol=1.49012e-12, xtol=1.49012e-12)
             print 'Solution for fit #%3d:' %(numfit)
             print 'Groups and fitted variables'
             print '%15s %5s %5s' %('Group','start','fitted pKa')
@@ -892,10 +892,13 @@ class fit_stability(Double_mutant.double_mutant):
             xs=[]
             ys=[]
             for pH in sorted(stabprof.keys()):
-                xs.append(pH)
-                ys.append(stabprof[pH])
+                #print type(pH),self.options.maxpH,type(self.options.maxpH)
+                #stop
+                if float(pH)<=self.options.maxpH and float(pH)>=self.options.minpH:
+                    xs.append(pH)
+                    ys.append(stabprof[pH])
             RMSD=self.get_RMSD(stabprof,'wt')
-            #pylab.plot(xs,ys,format,label='%s. RMSD: %5.1f' %(txt,RMSD))
+            pylab.plot(xs,ys,format,label='%s. RMSD: %5.1f' %(txt,RMSD))
         #
         # Plot the profile assuming model pKa values for the unfolded state
         #
@@ -914,25 +917,27 @@ class fit_stability(Double_mutant.double_mutant):
         xs=[]
         ys=[]
         for pH in sorted(stabprof.keys()):
-            xs.append(pH)
-            ys.append(stabprof[pH])
+            if float(pH)<=self.options.maxpH and float(pH)>=self.options.minpH:
+                xs.append(pH)
+                ys.append(stabprof[pH])
         #import pylab
         #pylab.clf()
         RMSD=self.get_RMSD(stabprof,'wt')
-        pylab.plot(xs,ys,'g-',label='Model pKa values. ')
+        #pylab.plot(xs,ys,'g-',label='Model pKa values. ')
         #
         # Plot the exerimental pH-stability profile
         #
         xs=[]
         ys=[]
         for pH,ddG in zip(stabdata['ph'],stabdata['wt']):
-            xs.append(pH)
-            ys.append(ddG)
+            if float(pH)<=self.options.maxpH and float(pH)>=self.options.minpH:
+                xs.append(pH)
+                ys.append(ddG)
         pylab.plot(xs,ys,'bo-',label='wt exp')
         pylab.legend(loc=9)
         pylab.title('HEWL pH-stability profile')
         pylab.xlabel('pH')
-        pylab.ylabel('dGfold (kJ/mol)')
+        pylab.ylabel(r'$\Delta{G}_{fold}$ (kJ/mol)')
         pylab.xlim((1.5,11.0))
         pylab.savefig('global_fit.png',dpi=300)
         if self.options.showplot:
@@ -972,7 +977,7 @@ class fit_stability(Double_mutant.double_mutant):
         
         pylab.legend()
         pylab.xlabel('pH')
-        pylab.ylabel('ddG (kJ/mol)')
+        pylab.ylabel(r'$\Delta\Delta{G}_{fold}$ (kJ/mol)')
         pylab.title('Differential pH-stability profiles')
         pylab.savefig('diffcurves.png',dpi=300)
         #pylab.show()
@@ -1002,7 +1007,7 @@ class fit_stability(Double_mutant.double_mutant):
         
         pylab.legend(loc=9)
         pylab.xlabel('pH')
-        pylab.ylabel('dGfold (kJ/mol)')
+        pylab.ylabel(r'$\Delta{G}_{fold}$ (kJ/mol)')
         pylab.title('pH-stability profiles')
         pylab.savefig('rawcurves.png',dpi=300)
         pylab.show()
