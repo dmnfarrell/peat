@@ -30,7 +30,11 @@ class map_struct(EM_effect.EM_effect):
         val=dCS*4*math.pi*e0*(dist*1E-10)**2*-charge
         val=val/(NSP[atom]*e*ppm_au*cos_angle*1E6*-1)
         return 1.0/val
-
+        
+    def _calc_Efield(self,dCS,dist,angle,atom,charge):
+        """Given a change in chemical shift and an angle, calculate the electric field change"""
+        cos_angle=math.cos(math.radians(angle))
+        val=dCS/(NSP[atom]*e*ppm_au*cos_angle*1E6*-1)
     #
     # -----
     #

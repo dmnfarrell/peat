@@ -89,7 +89,6 @@ class ghost_analyzer:
         import os
         if not os.path.isdir(options.plotdir):
             os.mkdir(options.plotdir)
-        
         #
         # Load all data
         #
@@ -189,6 +188,13 @@ class ghost_analyzer:
         #
         if options.restraints:
             self.restraint_plot(big_satisfied)
+        #
+        # Maybe we want to do the sexy comparison with changes in activities?
+        #
+         def _calc_Efield(self,dCS,dist,angle,atom,charge):
+        """Given a change in chemical shift and an angle, calculate the electric field change"""
+        cos_angle=math.cos(math.radians(angle))
+        val=dCS/(NSP[atom]*e*ppm_au*cos_angle*1E6*-1)
         return
         
 	#
