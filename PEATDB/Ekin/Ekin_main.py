@@ -158,28 +158,44 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
 
     def showDatasetsTable(self):
         """Show a list of all datasets in a table"""
+        if hasattr(self, 'datasetsframe'):
+            self.m.forget(self.datasetsframe)
         if self.showdatasetstable.get() == 1:
             from PEATDB.Ekin.Tables import EkinProjModel, EkinProjTable
 
             def plotselected():
                 datasets = self.datasetstable.get_selectedRecordNames()
                 self.plotframe.plotCurrent(datasets=datasets, plotoption=self.overlayPlots.get())
+                
+            def deleteselected():
+                datasets = self.datasetstable.get_selectedRecordNames()
+                for d in datasets:
+                    print d
+                    self.E.deleteDataset(d)
+                self.updateDatasetSelector()    
+                self.updateAll()    
+               
             def createTable():
                 self.currentmodel = EkinProjModel(self.E)
                 self.datasetsframe = Frame(self.m)
                 self.m.add(self.datasetsframe,minsize=250)
                 self.datasetstable = EkinProjTable(self.datasetsframe, self.currentmodel)
                 self.datasetstable.createTableFrame()
+                
             def refresh():
                 self.currentmodel = EkinProjModel(self.E)
                 self.datasetstable.redrawTable()
+                
             createTable()
             b=Frame(self.datasetsframe)
             b.grid(row=3,column=1)
             Button(b, text='plot selected', command=plotselected).pack(side=LEFT,fill=BOTH)
+            self.delb = Ekin_images.delb()
+            Button(b, text='delete', image=self.delb,command=deleteselected).pack(side=LEFT,fill=BOTH)
             Button(b, text='refresh', command=refresh).pack(side=LEFT,fill=BOTH)
         else:
-            self.m.forget(self.datasetsframe)
+            if hasattr(self, 'datasetsframe'):
+                self.m.forget(self.datasetsframe)
         return
 
     def setupVars(self):
@@ -491,7 +507,7 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
         if hasattr(self, 'M') and self.M != None:
             self.M.applyCurrent()
             self.M.updateFields(dataset=self.currentdataset.get())
-        #self.showDatasetsTable()
+        self.showDatasetsTable()
         return
 
     def update_dataset(self):
