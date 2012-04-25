@@ -31,6 +31,8 @@ import os, random, string
 import re, glob
 import csv
 import ConfigParser
+from math import *
+import numpy as np
 
 def setAttributesfromConfigParser(obj, cp):
     """A helper method that makes the options in a ConfigParser object

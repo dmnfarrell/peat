@@ -200,6 +200,9 @@ class Pipeline(object):
                 for v in vals:
                     txt=txt+str(v)+sep
                 lines.append(txt)
+
+        #override some settings for excel
+        self.importer.delimeter = ' '
         return lines
 
     def doImport(self, lines=None):
@@ -311,7 +314,7 @@ class Pipeline(object):
                 Em = self.getEkinProject(data)
             Em.saveProject(fname)
             Em.exportDatasets(fname)
-            if self.model1 != '':                
+            if self.model1 != '':
                 self.saveFitstoCSV(Em, fname)
 
             if self.saveplots == 1:
@@ -322,7 +325,7 @@ class Pipeline(object):
 
         #if grouped by file names then we process that here from results
         if self.groupbyname == 1:
-            print results.keys()
+            #print results.keys()
             results = self.extractSecondaryKeysFromDict(results)
             Em = EkinProject()
             E,fits = self.processFits(rawdata=results, Em=Em)
@@ -440,7 +443,7 @@ class Pipeline(object):
         xerrors = []
         yerrors = []
         E.fitDatasets('ALL', models=[model], noiter=self.iterations,
-                      conv=1e-6, grad=1e-8, silent=True)
+                      conv=1e-9, grad=1e-8, silent=True)
         labels = E.datasets
         if self.xerror != 0 or self.yerror != 0:
             print 'getting exp uncert'

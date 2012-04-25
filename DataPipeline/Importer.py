@@ -233,19 +233,19 @@ class DatabyRowImporter(BaseImporter):
         return
 
     def doImport(self, lines):
-
-        data = {}
+        
+        data = {}        
         self.guessRowStart(lines)
         xdata = self.getColumnHeader(lines,grouped=True)
         if xdata == None:
             return
         if self.rowend == 0:
             self.rowend=len(lines)
-
+            
         for row in range(self.rowstart+1, self.rowend):
             if row>=len(lines):
                 break
-            rowdata = self.getRow(lines,row,grouped=True)
+            rowdata = self.getRow(lines,row,grouped=True)            
             #print xdata, rowdata
             if rowdata == None: continue
             for xd,yd in zip(xdata,rowdata):

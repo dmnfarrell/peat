@@ -68,8 +68,8 @@ class Tester(object):
                   #          'databyrow_noheader.txt')
                   }
 
-    exceltests = {'test1':{'conf':{'format':'databyrow'},
-                           'filename':'databyrow1.xls'}}
+    exceltests = {1:({'format':'databyrow','colheaderstart':0,'sheet':1},
+                      'databyrow1.xls')}
 
     def doTest(self, info, name='test', path='testfiles'):
         print 'running test %s' %name
@@ -77,8 +77,8 @@ class Tester(object):
         conf = info[0]
         filename = info[1]
         p.createConfig('temp.conf',**conf)
-        p.openRaw(os.path.join(path,filename))
-        data = p.doImport()
+        lines = p.openRaw(os.path.join(path,filename))
+        data = p.doImport(lines)
         if p.model1 != '':
             p.run()        
         if len(data) == 0:
@@ -198,8 +198,8 @@ class Tester(object):
                 'colheader':colheaderlabels, 'rowheader':rowheaderlabels,
                 'decimalsymbol':',','xformat':'%M:%S',
                 'groupbyname':1, 'parsenamesindex':2,
-                'model1':'linear','model2':'Michaelis-Menten','model3':'sigmoid',
-                'variable1':'a','variable2':'Km','variable3':'tm','xerror':.1,'yerror':0.05,
+                'model1':'linear','model2':'Michaelis-Menten','model3':'1 pKa 2 Chemical shifts',
+                'variable1':'a','variable2':'Km','variable3':'pKa',#'xerror':.1,'yerror':0.05,
                 }
         p = Pipeline()
         p.createConfig('temp.conf',**conf)
@@ -228,13 +228,14 @@ class Tester(object):
 
 def main():
     t=Tester()
-    t.formatTests(t.basictests, names=[9])
+    #t.formatTests(t.basictests, names=[9])
+    #t.formatTests(t.exceltests)
     #t.multiFileTest()
     #t.groupedFileTest()
     #t.multiFolderTest()
     #t.replicatesTest()
     #t.fitPropagationTest()
-    #t.customTest()
+    t.customTest()
     #t.renameFilesTest()
 
 if __name__ == '__main__':
