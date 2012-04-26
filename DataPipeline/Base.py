@@ -45,7 +45,8 @@ class Pipeline(object):
     def __init__(self, conffile=None):
 
         if conffile==None:
-            self.createConfig('default.conf')
+            confpath = os.path.join(os.path.expanduser('~'),'default.conf')
+            self.createConfig(confpath)
         self.savedir = os.getcwd()
         self.filename = ''
         self.lines = None
@@ -58,7 +59,8 @@ class Pipeline(object):
         """Create a basic config file with default options and/or custom values"""
 
         c = ConfigParser.ConfigParser()
-        wdir = os.path.join(os.getcwd(),'workingdir')
+        wdir = os.path.join(os.path.expanduser('~'),'workingdir')
+
         defaults = {'base': [('format', 'databyrow'), ('rowstart', 0), ('colstart', 0), ('rowend', 0),
                         ('colend', 0), ('colheaderstart', 0),('rowheaderstart', 0),
                         ('rowheader', ''), ('colheader', ''),
@@ -77,8 +79,6 @@ class Pipeline(object):
                     }
 
         cp = Utilities.createConfigParserfromDict(defaults, self.configsections ,**kwargs)
-        #print cp.sections()
-
         cp.write(open(conffile,'w'))
         self.parseConfig(conffile)
         return cp
