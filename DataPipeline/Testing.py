@@ -76,7 +76,8 @@ class Tester(object):
         p = Pipeline()
         conf = info[0]
         filename = info[1]
-        p.createConfig('temp.conf',**conf)
+        confpath = os.path.join(os.path.expanduser('~'),'temp.conf')
+        p.createConfig(confpath,**conf)
         lines = p.openRaw(os.path.join(path,filename))
         data = p.doImport(lines)
         if p.model1 != '':
