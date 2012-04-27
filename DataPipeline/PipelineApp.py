@@ -206,6 +206,10 @@ class PipeApp(Frame, GUI_help):
         self.updateinfoPane()
         return
 
+    def reloadConfig(self):
+        self.loadConfig(self.p.configurationfile)
+        return
+        
     def editConfig(self):
         self.editFile(self.p.configurationfile)
         return
@@ -219,6 +223,7 @@ class PipeApp(Frame, GUI_help):
 
         tf = TextEditor(parent=self,title=filename)
         tf.openFile(filename)
+        tf.addFunction('Reload Config', self.reloadConfig)
         return
 
     def showRawFile(self, lines):
@@ -391,7 +396,7 @@ class PipeApp(Frame, GUI_help):
         return
 
     def startTextEditor(self):
-        t = TextEditor(parent=self)
+        t = TextEditor(parent=self)        
         return
 
     def batchFileRename(self):

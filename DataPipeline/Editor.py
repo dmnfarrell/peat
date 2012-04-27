@@ -63,9 +63,9 @@ class TextEditor(Frame):
         self.text.grid(row=0,column=0,columnspan=2,sticky='NEWS',padx=2,pady=2)
         self.main.columnconfigure(0,weight=1)
         self.main.rowconfigure(0,weight=1)
-        buttonpanel = Frame(self.main)
-        buttonpanel.grid(row=1,column=0,columnspan=2,sticky='NEWS',padx=2,pady=2)
-        self.doButtons(buttonpanel)
+        self.buttonpanel = Frame(self.main)
+        self.buttonpanel.grid(row=1,column=0,columnspan=2,sticky='NEWS',padx=2,pady=2)
+        self.doButtons(self.buttonpanel)
         return
 
     def doButtons(self, frame):
@@ -80,6 +80,13 @@ class TextEditor(Frame):
             x.pack(side=LEFT,fill=BOTH,padx=2,pady=2)
         return
 
+    def addFunction(self, name, func):
+        """Add an external function to the buttons bar"""
+        print name, func
+        x=Button(self.buttonpanel,text=name,command=func)
+        x.pack(side=LEFT,fill=BOTH,padx=2,pady=2)
+        return
+        
     def openFile(self, filename=None):
         """Displays text from a simple text file"""
         if filename == None:
