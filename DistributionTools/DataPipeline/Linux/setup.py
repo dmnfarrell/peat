@@ -10,9 +10,11 @@ setup(name='DataPipeline', version='1.0',
 	url='http://code.google.com/p/peat/wiki/DataPipeline',
 	license='GPL v3',
 	packages=['DataPipeline'],	
+    	include_package_data = True,
 	package_data={'DataPipeline':['app.ico','testfiles/*.txt']},
-    install_requires=['numpy>=1.1',
-                      'matplotlib>=0.98.5.2'],
+	install_requires=['numpy>=1.1',
+                      'matplotlib>=0.98.5.2',
+                      'PEATDB','xlrd'],
     dependency_links = [
           "http://download.sourceforge.net/pmw/Pmw.1.3.tar.gz"],
     entry_points = { 'gui_scripts': [
