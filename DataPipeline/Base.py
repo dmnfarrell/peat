@@ -34,6 +34,7 @@ from itertools import izip, chain, repeat
 import Importer, Custom
 import Utilities
 from PEATDB.Ekin.Base import EkinProject, EkinDataset
+import PEATDB.Ekin.Fitting as Fitting
 
 class Pipeline(object):
     """This class does all the pipeline processing and configuration"""
@@ -154,6 +155,16 @@ class Pipeline(object):
         print 'preset conf file written, you can also rename and edit this'
         return
 
+    def loadModels(self):
+        print self.modelsfile
+        if self.modelsfile != '':
+            try:
+                Fitting.loadModelsFile(self.modelsfile)
+            except:
+                pass
+        print Fitting.currentmodels.keys()
+        return
+
     def openRaw(self, filename=None, callback=None):
         """Open raw file, display preview and get some info about them"""
 
@@ -254,6 +265,7 @@ class Pipeline(object):
         """Do initial import/fitting run with the current config"""
 
         self.stop=False
+        self.loadModels()
         self.preProcess()
         print 'processing files in queue..'
 
@@ -463,7 +475,6 @@ class Pipeline(object):
            used so we don't cause an error when doing processFits when no
            variable is given in the conf file"""
 
-        import PEATDB.Ekin.Fitting as Fitting
         X = Fitting.getFitter(model)
         if X==None:
             print 'no fitter found for this model name'

@@ -81,8 +81,7 @@ class TextEditor(Frame):
         return
 
     def addFunction(self, name, func):
-        """Add an external function to the buttons bar"""
-        print name, func
+        """Add an external function to the buttons bar"""       
         x=Button(self.buttonpanel,text=name,command=func)
         x.pack(side=LEFT,fill=BOTH,padx=2,pady=2)
         return
