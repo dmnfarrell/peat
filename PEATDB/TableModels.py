@@ -814,7 +814,7 @@ class TableModel(object):
         import csv
         if filename==None: return
         #take column labels as field names 
-        writer = csv.writer(file(filename, "w"), delimiter=sep)
+        writer = csv.writer(open(filename, "w"), delimiter=sep)
         colnames = self.columnNames
         collabels = self.columnlabels
         recs = self.getAllCells()

@@ -35,23 +35,22 @@ import platform
 
 # Append the path to PEAT_DB
 DNAtooldir=os.path.split(__file__)[0]
-EAT_DIR=os.path.split(DNAtooldir)[0]
-sys.path.append(EAT_DIR)
 
-split1=os.path.split(sys.path[0])[0]
-sys.path.append(split1)
-sys.path.append(os.path.split(split1)[0])
+#split1=os.path.split(sys.path[0])[0]
+#sys.path.append(split1)
+#sys.path.append(os.path.split(split1)[0])
 #the above leads to opaque imports later in the code...bi
 
 from Tkinter import *
+import Pmw
 from DNAtool_IO import *
 from DNA_Edit import *
 from evaluate_primer import *
 from Restriction_Digest_driver import *
 from primer_design_GUI import *
-from GUI_helper import *
-from tooltip import *
-import Pmw
+from PEATDB.GUI_helper import GUI_help
+from PEATDB.tooltip import *
+from PEATDB.Prefs import Preferences
 
 class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
                     primer_design_GUI, GUI_help, evaluate_primer):
@@ -1115,7 +1114,7 @@ class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
 
     def save_preferences(self):
         """Saves the sequence display settings to prefs file"""
-        from Prefs import Preferences
+
         print 'Saving DNAtool preferences'
         self.preferences.set('seqfont',self.seqfont_input.get())
         self.preferences.set('seqfontsize',self.seqfontsize_input.get())
@@ -1128,7 +1127,7 @@ class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
 
     def load_preferences(self):
         """Loads the sequence display settings from prefs file, if present"""
-        from Prefs import Preferences
+
         print 'Loading current DNAtool preferences'
         self.preferences=Preferences('DNAtool',{'canvas_height':600})
 
