@@ -20,6 +20,9 @@ version = '1.0'
 
 f = Freezer('datapipeline', excludes=('wx'))
 f.addScript(os.path.join(pipepath, "PipelineApp.py"))
+f.addScript(os.path.join(pipepath, "PipelineCommand.py"))
+f.addScript(os.path.join(peatpath, "Ekin/ModelDesign.py"))
+f.addScript(os.path.join(peatpath, "Ekin/Ekin_main.py"))
 
 #these lines allow the plugins to work
 f.addModule('PEATDB.PEATApp')
@@ -36,9 +39,13 @@ shutil.copytree(mpldir, datadir)
 
 #add resource files
 resources = ['DataPipeline/app.ico',
+             'DataPipeline/modeldesign.ico',
+             'PEATDB/Ekin/Ekin.ico',
              'PEATDB/Ekin/models.dict']
 for r in resources:
     shutil.copy(os.path.join(path, r), 'datapipeline')
+tst = 'DataPipeline/testfiles'
+shutil.copytree(os.path.join(path, tst), 'datapipeline/testfiles')
 
 #make zip archive
 import zipfile

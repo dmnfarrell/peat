@@ -4,12 +4,13 @@
     <ROW Property="ALLUSERS" Value="2"/>
     <ROW Property="ARPCONTACT" Value="damien.farrell[at]ucd.ie"/>
     <ROW Property="ARPHELPLINK" Value="http://enzyme.ucd.ie/main/index.php/PEAT_DB"/>
+    <ROW Property="ARPPRODUCTICON" Value="PEATApp.exe" Type="8"/>
     <ROW Property="ARPURLINFOABOUT" Value="http://enzyme.ucd.ie/main/index.php/PEAT_DB"/>
     <ROW Property="Manufacturer" Value="Nielsen Group, UCD" ValueLocId="*"/>
     <ROW Property="ProductCode" Value="1033:{5C858A92-20E3-47A0-B859-4B1503822F28} " Type="16"/>
     <ROW Property="ProductLanguage" Value="1033"/>
     <ROW Property="ProductName" Value="PEATDB" ValueLocId="*"/>
-    <ROW Property="ProductVersion" Value="1.0.0"/>
+    <ROW Property="ProductVersion" Value="2.2.0"/>
     <ROW Property="SecureCustomProperties" Value="OLDPRODUCTS;AI_NEWERPRODUCTFOUND"/>
     <ROW Property="UpgradeCode" Value="{78DF7111-C058-47F8-9FE6-D9A16F6B0DF6}"/>
     <ROW Property="WindowsType9X" MultiBuildValue="DefaultBuild:Windows 9x/ME" ValueLocId="-"/>
@@ -48,6 +49,7 @@
     <ROW Directory="North_Dakota_Dir" Directory_Parent="America_Dir" DefaultDir="North_~1|North_Dakota"/>
     <ROW Directory="Pacific_Dir" Directory_Parent="tzdata_Dir" DefaultDir="Pacific"/>
     <ROW Directory="ProgramFilesFolder" Directory_Parent="TARGETDIR" DefaultDir="Progra~1|ProgramFilesFolder" IsPseudoRoot="1"/>
+    <ROW Directory="SHORTCUTDIR" Directory_Parent="TARGETDIR" DefaultDir="SHORTC~1|SHORTCUTDIR" IsPseudoRoot="1"/>
     <ROW Directory="SystemV_Dir" Directory_Parent="tzdata_Dir" DefaultDir="SystemV"/>
     <ROW Directory="TARGETDIR" DefaultDir="SourceDir"/>
     <ROW Directory="US_Dir" Directory_Parent="tzdata_Dir" DefaultDir="US"/>
@@ -164,6 +166,7 @@
     <ROW Component="ProductInformation" ComponentId="{B800D5A6-B495-4A2E-B84D-E596D2E8CC0F}" Directory_="APPDIR" Attributes="4" KeyPath="Version"/>
     <ROW Component="README.txt" ComponentId="{B12B01BB-AD8B-49AA-8A6F-4B5AEA14B6C9}" Directory_="library_Dir" Attributes="0" KeyPath="README.txt_3" Type="0"/>
     <ROW Component="README.txt_1" ComponentId="{794F9FE8-5354-4FA6-8F29-DF3743BE54F2}" Directory_="zipsource_Dir" Attributes="0" KeyPath="README.txt_4" Type="0"/>
+    <ROW Component="SHORTCUTDIR" ComponentId="{0DAF0FB8-6F42-4D13-ABFC-3AE5EAAC95C4}" Directory_="SHORTCUTDIR" Attributes="0"/>
     <ROW Component="__init__.pyc" ComponentId="{D5EC01EF-5B0A-4E7A-B0E4-C449B81ED193}" Directory_="zc_Dir" Attributes="0" KeyPath="__init__.pyc_8" Type="0"/>
     <ROW Component="__init__.pyc_1" ComponentId="{FFD648C6-7FA7-419A-92E9-C678BE494B82}" Directory_="components_Dir" Attributes="0" KeyPath="__init__.pyc_13" Type="0"/>
     <ROW Component="__init__.pyc_2" ComponentId="{ECB197CE-2625-4195-B7D3-EBCFF65E628F}" Directory_="foo_Dir" Attributes="0" KeyPath="__init__.pyc_18" Type="0"/>
@@ -192,7 +195,7 @@
     <ROW Component="cache_simul.pyc" ComponentId="{160E25A1-70B5-44FA-A4AD-EC759B464FB1}" Directory_="scripts_1_Dir" Attributes="0" KeyPath="cache_simul.pyc" Type="0"/>
     <ROW Component="cfgparser.pyc" ComponentId="{56646C70-AC0A-49B1-8CD9-580C23A0AE7E}" Directory_="ZConfig_Dir" Attributes="0" KeyPath="cfgparser.pyc" Type="0"/>
     <ROW Component="client.pyc" ComponentId="{9099594A-B1C1-4F7F-9914-0623B1D2CEE3}" Directory_="zrpc_Dir" Attributes="0" KeyPath="client.pyc" Type="0"/>
-    <ROW Component="cmb10.ttf" ComponentId="{90980B15-E07D-45B3-B1F3-E7065D8A7C04}" Directory_="ttf_Dir" Attributes="0" Type="0"/>
+    <ROW Component="cmb10.ttf" ComponentId="{90980B15-E07D-45B3-B1F3-E7065D8A7C04}" Directory_="ttf_Dir" Attributes="0" KeyPath="COPYRIGHT.TXT" Type="0"/>
     <ROW Component="cmex10.afm" ComponentId="{A70F92BE-7909-469F-BCF6-FB3C3461517A}" Directory_="afm_Dir" Attributes="0" KeyPath="cmex10.afm" Type="0"/>
     <ROW Component="compat.pyc" ComponentId="{37852D7C-8FEB-438A-B96D-4788F7074709}" Directory_="transaction_Dir" Attributes="0" KeyPath="compat.pyc" Type="0"/>
     <ROW Component="component.xml" ComponentId="{43BE4542-3813-4A2F-9E5B-5184CB6AC16E}" Directory_="basic_Dir" Attributes="0" KeyPath="component.xml_1" Type="0"/>
@@ -236,7 +239,7 @@
     <ROW Component="zconfig" ComponentId="{95FF25FD-D540-4A7A-83E1-BB65E7B48C25}" Directory_="scripts_Dir" Attributes="0" KeyPath="zconfig" Type="0"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiFeatsComponent">
-    <ROW Feature="MainFeature" Title="MainFeature" Description="Description" Display="1" Level="1" Directory_="APPDIR" Attributes="0" Components="AA.DAT ACT AST4 Abidjan Acre ActivityMonitor.pyc Adak Aden Alaska Amsterdam Antananarivo Apia Atlantic Azores BTreeItemsTemplate.c BajaNorte BasicStorage.pyc Buenos_Aires CET CHANGES.txt Casey Center Continental CourierBold.afm DNAtool.exe Ekin_main.exe FileStorage.pyc GMT Indianapolis Longyearbyen Louisville ModelDesign.exe PEATApp.exe ProductInformation README.txt README.txt_1 __init__.pyc __init__.pyc_1 __init__.pyc_2 __init__.pyc_3 __init__.pyc_4 abstract.xml adapter.pyc af.msg alltests.pyc altTheme.tcl analyze.pyc anilabel.tcl ascii.enc auth_digest.pyc auth_plaintext.pyc auto.tcl autotemp.pyc back.png basedatatype1.xml basemapping.pyc batch.pyc bgerror.tcl biodatabaseplugin.py cPersistence.c cache.pyc cache_simul.pyc cfgparser.pyc client.pyc cmb10.ttf cmex10.afm compat.pyc component.xml component.xml_1 component.xml_2 component.xml_3 component.xml_4 convenience.txt cs.msg dependency_links.txt dependency_links.txt_1 dependency_links.txt_2 dependency_links.txt_3 dependency_links.txt_4 dependency_links.txt_5 dependency_links.txt_6 dependency_links.txt_7 dummy.pyc earth.gif extras.xml foosample.zip fstail.txt http.tcl idatetime.pyc lineprops.glade logo.eps nokill.pyc optparse.tcl persistent.txt py.exe python26.dll tcl85.dll testBTrees.pyc test_batch.pyc test_logger.pyc test_mapping.pyc testblob.pyc testchecker.fs tests.pyc tk85.dll zconfig"/>
+    <ROW Feature="MainFeature" Title="MainFeature" Description="Description" Display="1" Level="1" Directory_="APPDIR" Attributes="0" Components="AA.DAT ACT AST4 Abidjan Acre ActivityMonitor.pyc Adak Aden Alaska Amsterdam Antananarivo Apia Atlantic Azores BTreeItemsTemplate.c BajaNorte BasicStorage.pyc Buenos_Aires CET CHANGES.txt Casey Center Continental CourierBold.afm DNAtool.exe Ekin_main.exe FileStorage.pyc GMT Indianapolis Longyearbyen Louisville ModelDesign.exe PEATApp.exe ProductInformation README.txt README.txt_1 SHORTCUTDIR __init__.pyc __init__.pyc_1 __init__.pyc_2 __init__.pyc_3 __init__.pyc_4 abstract.xml adapter.pyc af.msg alltests.pyc altTheme.tcl analyze.pyc anilabel.tcl ascii.enc auth_digest.pyc auth_plaintext.pyc auto.tcl autotemp.pyc back.png basedatatype1.xml basemapping.pyc batch.pyc bgerror.tcl biodatabaseplugin.py cPersistence.c cache.pyc cache_simul.pyc cfgparser.pyc client.pyc cmb10.ttf cmex10.afm compat.pyc component.xml component.xml_1 component.xml_2 component.xml_3 component.xml_4 convenience.txt cs.msg dependency_links.txt dependency_links.txt_1 dependency_links.txt_2 dependency_links.txt_3 dependency_links.txt_4 dependency_links.txt_5 dependency_links.txt_6 dependency_links.txt_7 dummy.pyc earth.gif extras.xml foosample.zip fstail.txt http.tcl idatetime.pyc lineprops.glade logo.eps nokill.pyc optparse.tcl persistent.txt py.exe python26.dll tcl85.dll testBTrees.pyc test_batch.pyc test_logger.pyc test_mapping.pyc testblob.pyc testchecker.fs tests.pyc tk85.dll zconfig"/>
     <ATTRIBUTE name="CurrentFeature" value="MainFeature"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiFilesComponent">
@@ -432,6 +435,7 @@
     <ROW File="Egypt" Component_="CET" FileName="Egypt" Attributes="0" SourcePath="peatdb\lib-tcl\tzdata\Egypt" SelfReg="false" NextFile="Eire"/>
     <ROW File="Eire" Component_="CET" FileName="Eire" Attributes="0" SourcePath="peatdb\lib-tcl\tzdata\Eire" SelfReg="false" NextFile="EST"/>
     <ROW File="Eirunepe" Component_="Adak" FileName="Eirunepe" Attributes="0" SourcePath="peatdb\lib-tcl\tzdata\America\Eirunepe" SelfReg="false" NextFile="El_Salvador"/>
+    <ROW File="Ekin.ico" Component_="AA.DAT" FileName="Ekin.ico" Attributes="0" SourcePath="peatdb\Ekin.ico" SelfReg="false"/>
     <ROW File="Ekin_main.exe" Component_="Ekin_main.exe" FileName="Ekin_m~1.exe|Ekin_main.exe" Attributes="0" SourcePath="peatdb\Ekin_main.exe" SelfReg="false" NextFile="auto.tcl"/>
     <ROW File="El_Aaiun" Component_="Abidjan" FileName="El_Aaiun" Attributes="0" SourcePath="peatdb\lib-tcl\tzdata\Africa\El_Aaiun" SelfReg="false" NextFile="Freetown"/>
     <ROW File="El_Salvador" Component_="Adak" FileName="El_Sal~1|El_Salvador" Attributes="0" SourcePath="peatdb\lib-tcl\tzdata\America\El_Salvador" SelfReg="false" NextFile="Ensenada"/>
@@ -1046,7 +1050,7 @@
     <ROW File="_mysql.pyd" Component_="AA.DAT" FileName="_mysql.pyd" Attributes="0" SourcePath="peatdb\_mysql.pyd" SelfReg="false" NextFile="_socket.pyd"/>
     <ROW File="_socket.pyd" Component_="AA.DAT" FileName="_socket.pyd" Attributes="0" SourcePath="peatdb\_socket.pyd" SelfReg="false" NextFile="_ssl.pyd"/>
     <ROW File="_ssl.pyd" Component_="AA.DAT" FileName="_ssl.pyd" Attributes="0" SourcePath="peatdb\_ssl.pyd" SelfReg="false" NextFile="_tkinter.pyd"/>
-    <ROW File="_tkinter.pyd" Component_="AA.DAT" FileName="_tkinter.pyd" Attributes="0" SourcePath="peatdb\_tkinter.pyd" SelfReg="false"/>
+    <ROW File="_tkinter.pyd" Component_="AA.DAT" FileName="_tkinter.pyd" Attributes="0" SourcePath="peatdb\_tkinter.pyd" SelfReg="false" NextFile="Ekin.ico"/>
     <ROW File="_transaction.pyc" Component_="compat.pyc" FileName="_trans~1.pyc|_transaction.pyc" Attributes="0" SourcePath="peatdb\transaction-1.2.0-py2.6.egg\transaction\_transaction.pyc" SelfReg="false" NextFile="__init__.pyc_6"/>
     <ROW File="_zope_interface_coptimizations.c" Component_="adapter.pyc" FileName="_zope_~1.c|_zope_interface_coptimizations.c" Attributes="0" SourcePath="peatdb\zope.interface-3.8.0-py2.6-win32.egg\zope\interface\_zope_interface_coptimizations.c" SelfReg="false" NextFile="_zope_interface_coptimizations.pyc"/>
     <ROW File="_zope_interface_coptimizations.pyc" Component_="adapter.pyc" FileName="_zope_~1.pyc|_zope_interface_coptimizations.pyc" Attributes="0" SourcePath="peatdb\zope.interface-3.8.0-py2.6-win32.egg\zope\interface\_zope_interface_coptimizations.pyc" SelfReg="false" NextFile="_zope_interface_coptimizations.pyd"/>
@@ -2038,6 +2042,9 @@
     <ROW Dialog_="VerifyReadyDlg" Control_="Install" Event="EndDialog" Argument="Return" Condition="AI_PATCH" Ordering="199"/>
     <ROW Dialog_="ResumeDlg" Control_="Install" Event="EndDialog" Argument="Return" Condition="AI_RESUME" Ordering="299"/>
   </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiCreateFolderComponent">
+    <ROW Directory_="SHORTCUTDIR" Component_="SHORTCUTDIR"/>
+  </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiCustActComponent">
     <ROW Action="AI_DOWNGRADE" Type="19" Target="4010"/>
     <ROW Action="AI_InstallModeCheck" Type="1" Source="aicustact.dll" Target="UpdateInstallMode" WithoutSeq="true"/>
@@ -2051,14 +2058,16 @@
     <ROW Action="SET_TARGETDIR_TO_APPDIR" Type="51" Source="TARGETDIR" Target="[APPDIR]"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiIconsComponent">
+    <ROW Name="DNAtool.exe" SourcePath="peatdb\DNAtool.ico" Index="0"/>
+    <ROW Name="Ekin_main.exe" SourcePath="peatdb\Ekin.ico" Index="0"/>
     <ROW Name="PEATApp.exe" SourcePath="peatdb\App.ico" Index="0"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiInstExSeqComponent">
-    <ROW Action="AI_DOWNGRADE" Condition="AI_NEWERPRODUCTFOUND AND (UILevel &lt;&gt; 5)" Sequence="210"/>
     <ROW Action="AI_RESTORE_LOCATION" Condition="APPDIR=&quot;&quot;" Sequence="749"/>
     <ROW Action="AI_STORE_LOCATION" Condition="(Not Installed) OR REINSTALL" Sequence="1501"/>
     <ROW Action="AI_PREPARE_UPGRADE" Condition="AI_UPGRADE=&quot;No&quot; AND (Not Installed)" Sequence="1399"/>
     <ROW Action="AI_ResolveKnownFolders" Sequence="51"/>
+    <ROW Action="AI_DOWNGRADE" Condition="AI_NEWERPRODUCTFOUND AND (UILevel &lt;&gt; 5)" Sequence="201"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiInstallUISequenceComponent">
     <ROW Action="AI_RESTORE_LOCATION" Condition="APPDIR=&quot;&quot;" Sequence="749"/>
@@ -2072,7 +2081,10 @@
     <ROW Registry="Version" Root="-1" Key="Software\[Manufacturer]\[ProductName]" Name="Version" Value="[ProductVersion]" Component_="ProductInformation"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiShortsComponent">
+    <ROW Shortcut="DNAtool" Directory_="SHORTCUTDIR" Name="DNAtool" Component_="DNAtool.exe" Target="[#DNAtool.exe]" Description="DNA Sequence Tool" Hotkey="0" Icon_="DNAtool.exe" IconIndex="0" ShowCmd="1" WkDir="peatdb_Dir"/>
+    <ROW Shortcut="Ekin" Directory_="SHORTCUTDIR" Name="Ekin" Component_="Ekin_main.exe" Target="[#Ekin_main.exe]" Description="Data Fitting Application" Hotkey="0" Icon_="Ekin_main.exe" IconIndex="0" ShowCmd="1" WkDir="peatdb_Dir"/>
     <ROW Shortcut="PEATDB" Directory_="DesktopFolder" Name="PEATDB" Component_="PEATApp.exe" Target="[#PEATApp.exe]" Description="PEAT main application" Hotkey="0" Icon_="PEATApp.exe" IconIndex="0" ShowCmd="1" WkDir="peatdb_Dir"/>
+    <ROW Shortcut="PEATDB_1" Directory_="SHORTCUTDIR" Name="PEATDB" Component_="PEATApp.exe" Target="[#PEATApp.exe]" Hotkey="0" Icon_="PEATApp.exe" IconIndex="0" ShowCmd="1" WkDir="peatdb_Dir"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiThemeComponent">
     <ATTRIBUTE name="UsedTheme" value="classic"/>
