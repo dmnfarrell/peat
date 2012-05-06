@@ -764,6 +764,11 @@ class EM_effect(Frame,pKaTool.pKa_base.pKa_base):
             atoms=[residue+':N',prev_res+':C']
         elif atom_type=='H':
             atoms=[residue+':H',residue+':N']
+        elif atom_type=='HA':
+            if self.PI.resname(residue)=='GLY':
+                atoms=['%s:CA' %residue,'%s:2HA' %residue]
+            else:
+                atoms=['%s:CA' %residue,'%s:HA' %residue]
         else:
             print 'Atom type %s unknown' %str(atom_type)
             raise Exception
@@ -771,7 +776,7 @@ class EM_effect(Frame,pKaTool.pKa_base.pKa_base):
         # Check that both atoms are present
         #
         if not self.PI.atoms.has_key(atoms[0]) or not self.PI.atoms.has_key(atoms[1]):
-            return None,None
+            raise Exception('One or more atoms not found for %s' %(str(atoms)))
         #
         # Get the bond vector
         #

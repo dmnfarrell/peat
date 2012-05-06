@@ -3,10 +3,14 @@
 # Constants
 #
 ppm_au=1.9447E-18
-NSP={'N':977,'H':90}
+NSP={'N':977,'H':188,'HA':60} #
+# NSP value for HA from Cybulski S, Bishop D. Calculation of magnetic properties VII. Electron-correlated magnetizability polarizabilities and nuclear shielding polarizabilities for nine small molecules. Molecular Physics, 93(5), 739-750 (1998)
+# NSP value for H and N from Hass et al.
+#
 e=1.602E-19 # electron charge
 e0=8.85E-12 # vacuum permittivity
 kB=1.3806503E-23 #Boltzmann's constant
+NA=6.02E23 # Avogadro's number
 
 import EM_effect, numpy
 
@@ -25,16 +29,40 @@ class map_struct(EM_effect.EM_effect):
     
     def _calc_eff_eps(self,dCS,dist,angle,atom,charge):
         import math
-        #E=1.0/(4*math.pi*e0*deff)*e/(r*1E-10)**2*ppm_au*NSP[atom_type]*1E6*cos_angle*charge
         cos_angle=math.cos(math.radians(angle))
         val=dCS*4*math.pi*e0*(dist*1E-10)**2*-charge
         val=val/(NSP[atom]*e*ppm_au*cos_angle*1E6*-1)
         return 1.0/val
+
+    #
+    # -----------
+    #
         
     def _calc_Efield(self,dCS,dist,angle,atom,charge):
         """Given a change in chemical shift and an angle, calculate the electric field change"""
         cos_angle=math.cos(math.radians(angle))
         val=dCS/(NSP[atom]*e*ppm_au*cos_angle*1E6*-1)
+        return val
+
+    #
+    # ----
+    #
+
+    def get_energy(self,dCS,atom,titgroup):
+        """Given a chemical shift change, and angle, the atom and a titgroup, return the energy change"""
+        titpos=self.get_charge_center(titgroup)
+        atom_type=atom.split(':')[-1]
+        resid=self.PI.resnum(atom)
+        cos_angle,distance=self.get_angle(residue=resid,titpos=titpos,atom_type=atom_type)
+        #
+        # Angle is in radians
+        #
+        energy=float(dCS)/(NSP[atom_type]*e*ppm_au*cos_angle*1E6*NA*1000.0)
+        if abs(energy)>15.0:
+            print atom,dCS,energy
+        return energy
+        
+        
     #
     # -----
     #
@@ -123,7 +151,7 @@ class map_struct(EM_effect.EM_effect):
 def main():
     """Calculate effective dielectric constants"""
     X=map_struct('2lzt.pka.pdb')
-    eff_eps=X.get_eff_eps(0.45,titgroup=':0052:ASP',atom=':0035:GLU:N')
+    eff_eps=X.get_eff_eps(0.45,titgroup=':0052:ASP',atom=':0035:GLU:N',charge=-1.0)
     print 'Effective eps',eff_eps
     # Do the reverse calc
     span,angle=X.get_dEF(residue=':0035',
@@ -131,9 +159,9 @@ def main():
                          charge=-1,deff=eff_eps,atom_type='N')
     print 'Backcalc, span: %5.3f, angle: %5.3f' %(span,angle)
     print
-    eff_eps=X.get_eff_eps(0.2,titgroup=':0035:GLU',atom=':0052:ASP:N')
-    print 'ghost in D52',eff_eps
-    print 'Eint',X.get_Eint(21,7.3)
+    eff_eps=X.get_eff_eps(0.2,titgroup=':0035:GLU',atom=':0052:ASP:N',charge=-1.0)
+    print 'ghost in D52 has effective dielectric constant of: %5.2f '  %eff_eps
+    print 'Eint: %5.2f kT/e' %(X.get_Eint(21,7.3))
 
 
 if __name__=='__main__':

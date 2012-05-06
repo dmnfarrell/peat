@@ -93,7 +93,7 @@ class ghost_analyzer:
         # Load all data
         #
         exp_ghosts=self.get_expdata(options.expfile)
-        del exp_ghosts[':0015:HIS'] # We trust none of the His15 data
+        del exp_ghosts[':0015:HIS'] # We trust none of the His15 data # This needs to be fixed
         #
         # filter my conformational change
         #
@@ -103,7 +103,7 @@ class ghost_analyzer:
             self.read_confchange(exp_ghosts.keys())
             for tg in exp_ghosts.keys():
                 if tg in self.conf_change.keys():
-					#
+                    #
                     # Remove the ghosts of the residues that are moving
                     #
                     atom=options.atom
@@ -160,42 +160,171 @@ class ghost_analyzer:
                             if cpmgval>abs(0.5*float(Nghost)):
                                 del exp_ghosts[tg][residue]
                             
-            stop
-            
-            
         #
         # Display stats on experimental data
         #
         if options.stats:
             self.stats_forpaper(exp_ghosts)
             return
+
+        if options.anatype=='eps':
+            #
+            # Get the calculated ghosts
+            #
+            if options.dofull:
+                self.load_all_calculated(exp_ghosts)
+                return
+            #
+            # Just load normally - i.e. just make correlation for a single epstype
+            #
+            calc_ghosts=self.load_calcghosts(options)
+            #
+            # Find optimal eps?
+            #
+            big_satisfied=self.find_opteps(exp_ghosts,calc_ghosts)
+            #
+            # Then do the plots/analyses that were requested
+            #
+            if options.restraints:
+                self.restraint_plot(big_satisfied)
+        elif options.anatype=='energies':
+            self.energy_analysis(exp_ghosts)
+ 
+        else:
+            raise Exception('Unknown analysis type')
+
+
+    def interpret_ranges(self,exp_value,atom):
+        """Given a number of a range, get the true value + and error"""
+        exp_error=errors[atom]
+        if type(exp_value) is type('jkfjd'):
+            if len(exp_value.split(';'))==2:
+                s=[]
+                for val in str(exp_value).split(';'):
+                    if val[0] in ['<','>']:
+                        val=val[1:]
+                    s.append(float(val))
+                exp_error=abs(s[0]-s[1])
+                exp_value=float(sum(s))/len(s)
+        return exp_value,exp_error
+
+    #
+    # ----------------
+    #
+
+    def energy_analysis(self,exp_ghosts):
+        """
+        # Calculate energies from ghost titrations
+        """
         #
-        # Get the calculated ghosts
+        # First instantiate the class for converting between chemical shift and energies
         #
-        if options.dofull:
-            self.load_all_calculated(exp_ghosts)
-            return
+        import get_dEF
+        EF=get_dEF.map_struct(self.options.pdbfile)
+        #EF.build_Hs()
         #
-        # Just load normally
+        # Now load all ghosts and calculate energies
         #
-        calc_ghosts=self.load_calcghosts(options)
+        excludes=self.find_excludes()
+        Edict={}
+        for titgroup in [':0035:GLU']: #sorted(exp_ghosts.keys()):
+            Edict[titgroup]={}
+            for residue in sorted(exp_ghosts[titgroup].keys()):
+                if excludes.has_key(titgroup):
+                    if residue in excludes[titgroup]:
+                        continue
+                vals=[]
+                D=exp_ghosts[titgroup][residue]
+                for nucleus in D.keys():
+                    if nucleus=='HA':
+                        continue
+                    thisval=None
+                    if D[nucleus]!='absent':
+                        if D[nucleus][0]=='q':
+                            thisval=D[nucleus][1:]
+                        else:
+                            thisval=D[nucleus]
+                    else:
+                        thisval=0.0
+                    #
+                    # Deal with range
+                    #
+                    exp_value,exp_error=self.interpret_ranges(thisval,nucleus)
+                    # convert to kJ/mol
+                    exp_value=EF.get_energy(exp_value,'%s:%s' %(residue,nucleus),titgroup)
+                    vals.append([exp_value,exp_error,nucleus])
+                Edict[titgroup][residue]=vals[:]
         #
-        # Find optimal eps?
+        # Load PDB file and calculate distance from E35
         #
-        big_satisfied=self.find_opteps(exp_ghosts,calc_ghosts)
+        import Protool
+        X=Protool.structureIO()
+        X.readpdb(self.options.pdbfile)
         #
-        # Then do the plots/analyses that were requested
+        # Plot everything
         #
-        if options.restraints:
-            self.restraint_plot(big_satisfied)
+        tg=':0035:GLU'
+        xs=[]
+        ys=[]
+        for residue in sorted(Edict[tg].keys()):
+            if not X.residues.has_key(residue):
+                continue
+            dist=X.dist(':0035:CG','%s:N' %residue)
+            for exp_value,exp_error,atom in Edict[tg][residue]:
+                xs.append(dist)
+                val=float(exp_value)
+                ys.append(abs(val))
+        import pylab
+        pylab.plot(xs,ys,'ro',label='Ghosts')
+        print 'Average Ghost energy: %5.2f kJ/mol' %(sum(ys)/len(ys))
+        #
+        # Read ddGcat values
+        #
+        fd=open('ddGcat.csv')
+        lines=fd.readlines()
+        fd.close()
+        cat=[]
+        for line in lines[1:]:
+            sp=line.split(',')
+            resnum=int(sp[0])
+            mutation=sp[1]
+            try:
+                ddG=float(sp[2])
+            except:
+                continue
+            cat.append([resnum,mutation,ddG])
+        #
+        # Plot it
+        #
+        xs=[]
+        ys=[]
+        for resnum,mutation,ddG in cat:
+            import string
+            residue=':%s' %(string.zfill(resnum,4))
+            md=9999.9
+            for atom in X.residues[residue]:
+                md=min(md,X.dist(':0035:CG',atom))
+            xs.append(md)
+            ys.append(abs(ddG))
+        pylab.plot(xs,ys,'bo',label='ddGcat')
+        print 'Average ddGcat: %5.1f kJ/mol' %(sum(ys)/len(ys))
+        pylab.xlabel('Distance from E35CG')
+        pylab.ylabel('Energy change (kJ/mol)')
+        pylab.legend()
+        pylab.title('Correlation between ghosts and change in activity')
+        pylab.show()
+        return
+                
+            
+ 
+    def _calc_Efield(self,dCS,angle,atom,charge):
         #
         # Maybe we want to do the sexy comparison with changes in activities?
         #
-         def _calc_Efield(self,dCS,dist,angle,atom,charge):
         """Given a change in chemical shift and an angle, calculate the electric field change"""
         cos_angle=math.cos(math.radians(angle))
         val=dCS/(NSP[atom]*e*ppm_au*cos_angle*1E6*-1)
-        return
+        return val
         
 	#
 	# ------
@@ -295,7 +424,7 @@ class ghost_analyzer:
     # --------
     #
 
-    def find_excludes(self,options,exp_ghosts):
+    def find_excludes(self,options=None,exp_ghosts=None):
         """find residues to exclude based on an analysis of the structure"""
         excludes={':0007:GLU':[':0004:',':0005',':0006:'],
         ':0015:HIS':[':0011',':0012',':0013',':0014',':0016',':0088',':0090',':0089',':0092'],
@@ -955,7 +1084,13 @@ if __name__=='__main__':
     parser.add_option('--filter_CPMG',dest='CPMG_filter',default=False,action='store_true',help='Filter residues where the CPMG signal is at least 50% of the ghost. Default: %default')
     
     parser.add_option('--no_calcerror',dest='no_calcerror',action='store_true',default=True,help='Disable the use of errors on calculated values. Default: %default')
-    
+
+    #
+    # --------------
+    #
+    # Execution mode
+    #
+    parser.add_option('--anatype',dest='anatype',default='eps',help='Analysis mode. choices are: eps (compare calculated and experimental ghosts and find optimal eps), energies (convert experimental ghosts to energies). Default: %default')
     
     (options, args,) = parser.parse_args()
     #
