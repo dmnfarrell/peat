@@ -93,7 +93,7 @@ class ghost_analyzer:
         # Load all data
         #
         exp_ghosts=self.get_expdata(options.expfile)
-        del exp_ghosts[':0015:HIS'] # We trust none of the His15 data # This needs to be fixed
+        #del exp_ghosts[':0015:HIS'] # We trust none of the His15 data # This needs to be fixed
         #
         # filter my conformational change
         #
@@ -193,6 +193,9 @@ class ghost_analyzer:
         else:
             raise Exception('Unknown analysis type')
 
+    #
+    # ------------
+    #
 
     def interpret_ranges(self,exp_value,atom):
         """Given a number of a range, get the true value + and error"""
@@ -213,9 +216,7 @@ class ghost_analyzer:
     #
 
     def energy_analysis(self,exp_ghosts):
-        """
-        # Calculate energies from ghost titrations
-        """
+        """Calculate energies from ghost titrations"""
         #
         # First instantiate the class for converting between chemical shift and energies
         #
@@ -227,7 +228,7 @@ class ghost_analyzer:
         #
         excludes=self.find_excludes()
         Edict={}
-        for titgroup in [':0035:GLU']: #sorted(exp_ghosts.keys()):
+        for titgroup in sorted(exp_ghosts.keys()):
             Edict[titgroup]={}
             for residue in sorted(exp_ghosts[titgroup].keys()):
                 if excludes.has_key(titgroup):
@@ -255,28 +256,11 @@ class ghost_analyzer:
                     vals.append([exp_value,exp_error,nucleus])
                 Edict[titgroup][residue]=vals[:]
         #
-        # Load PDB file and calculate distance from E35
+        # Load PDB file 
         #
         import Protool
-        X=Protool.structureIO()
-        X.readpdb(self.options.pdbfile)
-        #
-        # Plot everything
-        #
-        tg=':0035:GLU'
-        xs=[]
-        ys=[]
-        for residue in sorted(Edict[tg].keys()):
-            if not X.residues.has_key(residue):
-                continue
-            dist=X.dist(':0035:CG','%s:N' %residue)
-            for exp_value,exp_error,atom in Edict[tg][residue]:
-                xs.append(dist)
-                val=float(exp_value)
-                ys.append(abs(val))
-        import pylab
-        pylab.plot(xs,ys,'ro',label='Ghosts')
-        print 'Average Ghost energy: %5.2f kJ/mol' %(sum(ys)/len(ys))
+        PI=Protool.structureIO()
+        PI.readpdb(self.options.pdbfile)
         #
         # Read ddGcat values
         #
@@ -294,25 +278,103 @@ class ghost_analyzer:
                 continue
             cat.append([resnum,mutation,ddG])
         #
-        # Plot it
+        # First hypothesis - We can use the propagation of the electric field from E35 to say something about
+        # the effect of the distant mutations - this is a longshot
+        if self.options.longshot:
+            #
+            # Plot everything
+            #
+            tg=':0035:GLU'
+            xs=[]
+            ys=[]
+            for residue in sorted(Edict[tg].keys()):
+                if not PI.residues.has_key(residue):
+                    continue
+                dist=PI.dist(':0035:CG','%s:N' %residue)
+                for exp_value,exp_error,atom in Edict[tg][residue]:
+                    xs.append(dist)
+                    val=float(exp_value)
+                    ys.append(abs(val))
+            import pylab
+            pylab.plot(xs,ys,'ro',label='Ghosts')
+            print 'Average Ghost energy: %5.2f kJ/mol' %(sum(ys)/len(ys))
+
+            #
+            # Plot it
+            #
+            xs=[]
+            ys=[]
+            for resnum,mutation,ddG in cat:
+                import string
+                residue=':%s' %(string.zfill(resnum,4))
+                md=9999.9
+                for atom in PI.residues[residue]:
+                    md=min(md,PI.dist(':0035:CG',atom))
+                xs.append(md)
+                ys.append(abs(ddG))
+            pylab.plot(xs,ys,'bo',label='ddGcat')
+            print 'Average ddGcat: %5.1f kJ/mol' %(sum(ys)/len(ys))
+            pylab.xlabel('Distance from E35CG')
+            pylab.ylabel('Energy change (kJ/mol)')
+            pylab.legend()
+            pylab.title('Correlation between ghosts and change in activity')
+            pylab.show()
         #
-        xs=[]
-        ys=[]
-        for resnum,mutation,ddG in cat:
-            import string
-            residue=':%s' %(string.zfill(resnum,4))
-            md=9999.9
-            for atom in X.residues[residue]:
-                md=min(md,X.dist(':0035:CG',atom))
-            xs.append(md)
-            ys.append(abs(ddG))
-        pylab.plot(xs,ys,'bo',label='ddGcat')
-        print 'Average ddGcat: %5.1f kJ/mol' %(sum(ys)/len(ys))
-        pylab.xlabel('Distance from E35CG')
-        pylab.ylabel('Energy change (kJ/mol)')
-        pylab.legend()
-        pylab.title('Correlation between ghosts and change in activity')
-        pylab.show()
+        # Now for the more reasonable stuff
+        #
+        if self.options.remotecharge:
+            #
+            # Load the complex
+            #
+            import Protool
+            CPI=Protool.structureIO()
+            CPI.readpdb('lysmgm2.pdb')
+            TSatom='J:0130:C1'
+            TSdists={}
+            for residue in CPI.residues.keys():
+                if residue[0]=='J':
+                    continue
+                dist1=CPI.dist('%s:N' %residue,TSatom)
+                dist2=CPI.dist('%s:N' %residue,':0035:OE1')
+                if min(dist1,dist2)<15.0:
+                    TSdists[residue]=min(dist1,dist2)
+            xs=[]
+            ys=[]
+            print 'Mutation,Ghost,ddGcat'
+            for resnum,mutation,ddG in cat:
+                if int(resnum)==35:
+                    continue
+                import string
+                residue=':%s' %(string.zfill(resnum,4))
+                thisTG='%s:%s' %(residue,PI.resname(residue))
+                if Edict.has_key(thisTG):
+                    thismut=[]
+                    for actres in TSdists.keys(): #[':0035',':0109',':0057',':0058']:
+                        if Edict[thisTG].has_key(actres):
+                            for exp_value,exp_error,atom in Edict[thisTG][actres]:
+                                print thisTG,actres,exp_value
+                                thismut.append(TSdists[actres]/sum(TSdists.values())*exp_value)
+                    #
+                    # Calculate weighted average
+                    #
+                    if len(thismut)>0:
+                        exp_value=sum(thismut)
+                        xs.append(abs(exp_value))
+                        ys.append(abs(ddG))
+                        print '%7s, %5.2f %5.2f' %(mutation,abs(exp_value),abs(ddG))
+                                
+                    #print 'Mut: %7s, ddGcat: %5.1f, Ghost: %5.1f, actres: %s' %(mutation,ddG,exp_value,actres)
+
+            import pylab
+            pylab.plot(xs,ys,'bo')
+            pylab.xlabel('Ghost energy (kJ/mol)')
+            pylab.ylabel('ddGcat (kJ/mol)')
+            #pylab.legend()
+            
+            pylab.title('Correlation between ghosts and change in activity')
+            pylab.plot([0,2],[0,2],'r-')
+            #pylab.xlim([-1,7])
+            pylab.show()   
         return
                 
             
@@ -1084,7 +1146,11 @@ if __name__=='__main__':
     parser.add_option('--filter_CPMG',dest='CPMG_filter',default=False,action='store_true',help='Filter residues where the CPMG signal is at least 50% of the ghost. Default: %default')
     
     parser.add_option('--no_calcerror',dest='no_calcerror',action='store_true',default=True,help='Disable the use of errors on calculated values. Default: %default')
-
+    #
+    # Energy analysis options
+    #
+    parser.add_option('--longshot',dest='longshot',action='store_true',help='Try the long-shot analysis')
+    parser.add_option('--remotecharge',dest='remotecharge',action='store_true',help='See if the effect of the remote charges in terms of chemical shift correlates with changes in activity')
     #
     # --------------
     #
