@@ -26,7 +26,7 @@
 from Tkinter import *
 import tkFileDialog
 import Pmw
-import os,zipfile
+import os, zipfile, types
 import evaluate_primer
 import primer_alignment
 import PEATDB.ProgressBar as ProgressBar
@@ -35,12 +35,8 @@ class sequencing_window(primer_alignment.align_primer):
 
     def __init__(self,main_self):
 
-        #
-        # -
-        #
-        self.main_self=main_self
-        self.parent=main_self
-        #print self.parent, 'in DNA_sequencing'
+        self.main_self = main_self
+        self.parent = main_self        
         self.choose_seq_win=None
         self.main_self.maxseqlevel=0
         return
@@ -97,12 +93,11 @@ class sequencing_window(primer_alignment.align_primer):
             self.draw_primer(self.current_seq,colour='#800080',thetag='comparison_seq',seqname=x[1],lvl=level)
         return
 
-    #
-    # This function provides a dialog to view and select the multiple loaded sequences
-    #
 
     def show_multiple_DNAseq_dialog(self):
-        """load and display many sequences in a set of files or zip file"""
+        """
+        This function provides a dialog to view and select the multiple loaded sequences
+        """
         self.choose_seq_win=Toplevel()
         self.choose_seq_win.title("Load Multiple DNA Sequences")
         #self.choose_seq_win.geometry("%dx%d%+d%+d" % (40, 20, 0, 0))
@@ -159,12 +154,9 @@ class sequencing_window(primer_alignment.align_primer):
         for btn,txt in help:
             self.balloon.bind(btn,txt)
 
-        #do bindings
         #self.details.bind("<Button-1>",self.display_current)
         self.details.bind("<ButtonRelease-1>",self.display_current)
         self.details.bind("<Double-Button-1>",self.change_seq_direction)
-        #self.choose_seq_win.bind("<Destroy>", self.main_self.clear_comp_seqs )
-
         return
 
 
@@ -183,9 +175,8 @@ class sequencing_window(primer_alignment.align_primer):
         self.seq_list_direction={}
         self.clear_list()
         # populate file list here
-        self.seq_list=self.open_filelist()
-        for name in self.seq_list:
-            #print 'file:', name
+        self.seq_list = self.open_filelist()
+        for name in self.seq_list:           
             x = os.path.split(name)
             self.details.insert(END,x[1])
             self.seq_list_direction[name]='f'
@@ -270,13 +261,11 @@ class sequencing_window(primer_alignment.align_primer):
                 self.details.insert(END,x[1])
         return
 
-
     # Clears the current sequences from the listbox
     def clear_list(self,event=None):
         """Clear listbox"""
         self.details.delete(0, END)
         return
-
 
     #
     # Draw a grey shaded boxes to highlight all displayed sequences
@@ -331,6 +320,8 @@ class sequencing_window(primer_alignment.align_primer):
                                                            ("BSML file",".xml"),
                                                            ("All files","*.*")],
                                                 parent=self.parent.master)
+        if type(filelist) == types.UnicodeType:
+            filelist = self.parent.tk.splitlist(filelist)            
         return filelist
 
     # Open zip files dialog
