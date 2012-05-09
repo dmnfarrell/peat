@@ -17,29 +17,31 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Contact information:
-# Email: Jens.Nielsen_at_gmail.com 
+# Email: Jens.Nielsen_at_gmail.com
 # Normal mail:
 # Jens Nielsen
 # SBBS, Conway Institute
 # University College Dublin
 # Dublin 4, Ireland
-# 
+#
 
+import tkFileDialog, os
+import tkMessageBox
+import pickle
+import PEATDB.DNA_sequence as DNA_sequence
+import mutation
 
 class DNA_IO:
 
     def project_open(self):
-
         """Open a project"""
 
-        import tkFileDialog, os
         filename=tkFileDialog.askopenfilename(defaultextension='.DTP',
                                               initialdir=self.data['datadir'],
                                               parent=self.master,
                                               filetypes=[("DNATool project file","*.DTP"),
                                                          ("All files","*.*")])
         if filename:
-            import os
             if os.path.isfile(filename):
 
                 # Load the file
@@ -55,7 +57,8 @@ class DNA_IO:
                 except:
                     import tkMessageBox
                     tkMessageBox.showwarning('Error reading file',
-                                             'Please ensure that this is a valid DTP file',parent=self.master)
+                                             'Please ensure that this is a valid DTP file',
+                                             parent=self.master)
                     return
 
                 self.assess_status()
@@ -63,15 +66,14 @@ class DNA_IO:
 
             else:
                 # File not found
-                import tkMessageBox
-                tkMessageBox.showwarning('File not found','Please select a valid file',parent=self.master)
+                tkMessageBox.showwarning('File not found','Please select a valid file',
+                                    parent=self.master)
         return
 
     def project_close(self):
 
         """Close the project"""
         if not self.data['Project saved']:
-            import tkMessageBox
             if not tkMessageBox.askyesno("Project not saved", "Discard changes?",parent=self.master):
                 return
 
@@ -84,25 +86,16 @@ class DNA_IO:
 
     def project_saveas(self):
         # Get the filename
-        import tkFileDialog, os
+
         filename=tkFileDialog.asksaveasfilename(defaultextension='.DTP',
                                                 initialdir=self.data['datadir'],
                                                 parent=self.master,
                                                 filetypes=[("DNATool project file","*.DTP"),
                                                            ("All files","*.*")])
         if filename:
-            #
-            # Save it
-            #
             self.data['Project filename']=filename
             self._save_project()
-            #
-            # Enable "Save" button
-            #
             self.assess_status()
-        #
-        # Done
-        #
         return
 
     def project_save(self):
@@ -110,7 +103,6 @@ class DNA_IO:
         if self.data['Project filename']:
             self._save_project()
         else:
-            import tkMessageBox
             tkMessageBox.showwarning('No project filename',
                                      'Please choose a project filename using Save As..',
                                      parent=self.master)
@@ -122,9 +114,6 @@ class DNA_IO:
 
         filename=self.data['Project filename']
         self.data['Project saved']=1
-
-        #try:
-        import pickle
         print "Save data ", dir(self.data)
         #print self.data['primer_dict']
         fd=open(filename,'w')
@@ -145,7 +134,7 @@ class DNA_IO:
 
     def open_file(self):
         """Open file dialog"""
-        import tkFileDialog, os
+
         dnaseqfile=tkFileDialog.askopenfilename(defaultextension='.EAT',
                                                 initialdir=self.data['datadir'],
                                                 filetypes=[("PIR file","*.pir"),
@@ -164,23 +153,18 @@ class DNA_IO:
         if fileinput == None:
             dnaseqfile = self.open_file()
         else:
-            #print 'fileinput:', fileinput
             dnaseqfile = fileinput
         self.data[var2]=dnaseqfile
 
         # Load the DNA sequence data
         #  - only simple file format supported at the moment
-        #
-        if self.data[var2]:
-            import DNA_sequence
-            S=DNA_sequence.sequence()
 
-            # Read the file
+        if self.data[var2]:
+            S=DNA_sequence.sequence()
             seqfile=self.data[var2]
             DNAseq=S.read_DNA_sequence(seqfile)
 
             # Check the DNA sequence
-            import mutation
             ok,DNAseq=mutation.check_DNA(DNAseq)
             if not ok:
                 # Give a warning
@@ -191,9 +175,7 @@ class DNA_IO:
                 return
             self.data[variable]=DNAseq
             self.update_sequence_window()
-            #
             # Activate/Deactivate buttons
-            #
             self.assess_status()
         return dnaseqfile
 

@@ -24,9 +24,12 @@
 # 
 
 from Tkinter import *
+import tkFileDialog
 import Pmw
+import os,zipfile
 import evaluate_primer
 import primer_alignment
+import PEATDB.ProgressBar as ProgressBar
 
 class sequencing_window(primer_alignment.align_primer):
 
@@ -89,8 +92,7 @@ class sequencing_window(primer_alignment.align_primer):
             this_seq['sequence']=self.main_self.data['seq_comp']
             self.current_seq=this_seq
 
-        if self.main_self.show_comp_sequence.get()==1:
-            import os.path
+        if self.main_self.show_comp_sequence.get()==1:            
             x = os.path.split(seqfile)
             self.draw_primer(self.current_seq,colour='#800080',thetag='comparison_seq',seqname=x[1],lvl=level)
         return
@@ -136,7 +138,6 @@ class sequencing_window(primer_alignment.align_primer):
         Clearbtn=Button(self.choose_seq_win,text='Clear Display',command=self.main_self.clear_comp_seqs)
         Clearbtn.grid(row=3,column=1,columnspan=2,sticky='news',padx=4,pady=3)
 
-        import ProgressBar
         self.seq_progressbar = ProgressBar.ProgressBar(self.choose_seq_win)
         self.seq_progressbar.frame.grid(row=4,column=1,columnspan=2,padx=2,pady=4)
         progrlbl = Label(self.choose_seq_win,text='Progress:')
@@ -183,7 +184,6 @@ class sequencing_window(primer_alignment.align_primer):
         self.clear_list()
         # populate file list here
         self.seq_list=self.open_filelist()
-        import os.path
         for name in self.seq_list:
             #print 'file:', name
             x = os.path.split(name)
@@ -195,7 +195,7 @@ class sequencing_window(primer_alignment.align_primer):
     # Display the current sequence(s) selected in the listbox
     def display_current(self,event=None):
         """Display the current sequences selected in the listbox"""
-        import ProgressBar
+       
         # Reset this if main window has been cleared while listbox open
         self.main_self.show_comp_sequence.set(1)
         self.main_self.maxseqlevel=0
@@ -251,8 +251,7 @@ class sequencing_window(primer_alignment.align_primer):
 
     def load_Zip(self,event=None):
         """Loads sequences from a zip file and show items in the details widget"""
-        import zipfile
-        import os.path
+
         zfilename = None
         zfilename = self.open_zipfile()
         if zfilename == None:
@@ -322,7 +321,7 @@ class sequencing_window(primer_alignment.align_primer):
     # Open multiple files dialog
     def open_filelist(self):
         """Open multiple filenames list dialog"""
-        import tkFileDialog, os
+        
         filelist=tkFileDialog.askopenfilenames(defaultextension='.seq.clipped',
                                                 initialdir=self.main_self.data['datadir'],
                                                 filetypes=[("Clipped Seq","*.seq.clipped"),
@@ -336,7 +335,7 @@ class sequencing_window(primer_alignment.align_primer):
 
     # Open zip files dialog
     def open_zipfile(self):
-        import tkFileDialog, os
+    
         filename=tkFileDialog.askopenfilename(defaultextension='.zip',
                                                 initialdir=self.main_self.data['datadir'],
                                                 filetypes=[("Zip file","*.zip"),

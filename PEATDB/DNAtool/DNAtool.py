@@ -34,7 +34,7 @@ import tkFont
 import platform
 
 # Append the path to PEAT_DB
-DNAtooldir=os.path.split(__file__)[0]
+DNAtooldir = os.path.split(__file__)[0]
 
 #split1=os.path.split(sys.path[0])[0]
 #sys.path.append(split1)
