@@ -321,7 +321,9 @@ class sequencing_window(primer_alignment.align_primer):
                                                            ("All files","*.*")],
                                                 parent=self.parent.master)
         if type(filelist) == types.UnicodeType:
-            filelist = self.parent.tk.splitlist(filelist)            
+            #master_win is reference to parent root
+            filelist = self.parent.master_win.tk.splitlist(filelist)
+            
         return filelist
 
     # Open zip files dialog

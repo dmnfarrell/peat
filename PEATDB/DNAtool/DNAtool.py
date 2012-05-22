@@ -162,11 +162,12 @@ class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
         """Create the main window """
         if not self.parent:
             Frame.__init__(self)
-            self.master_win=self.master
+            self.master_win = self.master
         else:
-            self.master=Toplevel()
-            self.master_win=self.parent.master
-
+            self.master = Toplevel()
+            self.master_win = self.parent.master
+        print self.master, self.master_win
+        
         self.master.title("DNA sequence manipulation")
         self.master.geometry("%dx%d+%d+%d" %(self.x_size,self.y_size,100,100))
 
