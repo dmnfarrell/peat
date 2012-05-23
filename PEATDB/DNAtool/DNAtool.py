@@ -192,8 +192,7 @@ class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
             self.filename.insert(INSERT,self.data['dnaseqfile'])
         self.filename.grid(row=0,column=1,sticky='we')
 
-
-        # Button for selecting the pdb file
+        # Button for selecting the file
         self.loadbutton=Button(self.master,text='Browse',command=self.dnaseq_read,
                                font=self.font,fg=self.fg_colour,bg=self.bg_colour)
         self.loadbutton.grid(row=0,column=2,sticky='W')
@@ -511,6 +510,11 @@ class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
 
             start=self.data['ORF_selected']['start']
             stop=self.data['ORF_selected']['stop']
+        return
+
+    def projectChanged():
+        self.data['Project saved']=None
+        self.assess_status()
         return
 
     def init_bindings(self):

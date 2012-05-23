@@ -175,8 +175,9 @@ class DNA_IO:
                 return
             self.data[variable]=DNAseq
             self.update_sequence_window()
+            
             # Activate/Deactivate buttons
-            self.assess_status()
+            self.projectChanged()
         return dnaseqfile
 
 

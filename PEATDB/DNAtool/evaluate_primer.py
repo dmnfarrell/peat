@@ -37,10 +37,6 @@ class evaluate_primer:
         self.pDB=primer_database.primer_database(self,1)
         return
 
-    #
-    # -----
-    #
-
     def do_evaluate_primer(self,parent=None,i_parent=None,edit_primer_seq=None,
             edit_primer_descr=None, edit_primer_name=None):
         #
@@ -155,9 +151,6 @@ class evaluate_primer:
         Ebox.focus_set()
         self.update_eval()
         return self.eval_win
-    #
-    # -----------
-    #
 
     def get_characteristics(self,primer,Tm_method):
         """Get the characteristics (hairpin prop, selfcomplementarity) of a primer"""
@@ -192,10 +185,6 @@ class evaluate_primer:
             Tm,mismatches,Tm_method_used=mutation.get_primer_Tm(DNAseq=primer['template_DNA'],primer=primer_seq,primer_start=primer['startpos'],method=Tm_method)
             return text_hairpin,text_selfcompl,Tm,Tm_method_used,mismatches
         return 'DNA sequenece not ok','DNA sequence not ok','DNA sequenece not ok','DNA sequence not ok'
-
-    #
-    # -----------
-    #
 
     def update_eval(self,event=None):
         #
@@ -281,26 +270,16 @@ class evaluate_primer:
             self.eval_Tm.set('Invalid DNA sequence')
         return
 
-    #
-    # -------
-    #
-
     def close_eval(self,event=None):
         """Close the primer evaluation window"""
-        #
-        # Clear all graphics
-        #
+        
+        # Clear all graphics        
         if getattr(self,'pDB',None):
             self.pDB.clear_pDB_objects()
-        #
-        # Close the window
-        #
+        
+        # Close the window        
         self.eval_win.destroy()
         return
-
-    #
-    # Saving primer to db involves a few basic validation steps
-    #
 
     def save_primer_from_edit(self, parent_window=None):
         """Save the primer in the DB when doing a primer Edit"""
@@ -413,9 +392,8 @@ class evaluate_primer:
                 
         print 'Setting name to',primer_name
         print 'Setting description to',description    
-        #
-        # Store the primer
-        #
+        
+        # Store the primer        
         if not this_primer:
             DNA=self.eval_var.get()
             if not DNA:
@@ -441,15 +419,13 @@ class evaluate_primer:
                 tkMessageBox.showwarning('Invalid primer','Cannot store an invalid primer',parent=parent_window)
                 return
         else:
-            #
-            #  If we already have all the data then save it
-            #
+            
+            #  If we already have all the data then save it            
             this_primer['description']=description
             self.data['primer_dict'][primer_name]=this_primer.copy()
             self.primer_save_ok(primer_name,parent_window)
-        #
-        # Clear all the graphics
-        #
+        
+        # Clear all the graphics        
         if getattr(self,'pDB',None):
             self.pDB.clear_pDB_objects()
             
@@ -458,24 +434,16 @@ class evaluate_primer:
             openpdbWin.show_pDB_contents()
             openpdbWin.highlight_primer(primer_name)
             openpdbWin.display_details()
-        #
-        # Done
-        #
+
         return 
 
-    #
-    # -----
-    #
- 
     def primer_save_ok(self,primer_name,parent_window):
-        #
-        # Show info
-        #
+        
+        # Show info        
         import tkMessageBox
         tkMessageBox.showinfo('Primer saved','Primer %s saved to the Primer Database' %primer_name,parent=parent_window)
-        #
-        # Mark that we need to save the project
-        #
+        
+        # Mark that we need to save the project        
         self.data['Project saved']=None
         self.assess_status()
         return

@@ -17,13 +17,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Contact information:
-# Email: Jens.Nielsen_at_gmail.com 
+# Email: Jens.Nielsen_at_gmail.com
 # Normal mail:
 # Jens Nielsen
 # SBBS, Conway Institute
 # University College Dublin
 # Dublin 4, Ireland
-# 
+#
 
 """Functions for dealing with the primer database in DNAtool"""
 
@@ -239,16 +239,16 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
                 import tkMessageBox
                 tkMessageBox.showwarning('not implemented yet','I never thought anyone would use this, so send me an email with a good reason why you need this, and I will fix it.\nJens.Nielsen@ucd.ie')
                 return
-        #
+
         if not self.find_solution is None:
             self.find_solution=self.find_solution+1
             if self.find_solution>=len(solutions):
                 self.find_solution=0
         else:
             self.find_solution=0
-        #
+
         # Highlight the solution and scroll the listbox
-        #
+
         self.primers.selection_clear(first=0,last=len(self.primer_order)-1)
         if len(solutions)>0 and searchtext!='':
             pname=solutions[self.find_solution]
@@ -261,9 +261,9 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
                 index=index+1
         return
 
-    #
+
     # Highlight a specified single primer
-    #
+
     def highlight_primer(self,pname):
         """Highlight and update details for the given primer after addition/editing"""
         self.primers.selection_clear(first=0,last=1)
@@ -277,10 +277,6 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
                 else:
                     index=index+1
 
-    #
-    # -----
-    #
-
     def primer_sort(self,primer1,primer2):
         """This function is for sorting primers"""
         p1=primer1.lower()
@@ -291,14 +287,9 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
             return 1
         return 0
 
-    #
-    # -----
-    #
-
     def show_pDB_contents(self):
-        #
+
         # Show the database, sort by name
-        #
         self.primers.delete(0, END)
         if self.parent.data.has_key('primer_dict'):
             self.primer_names=self.parent.data['primer_dict'].keys()
@@ -311,41 +302,33 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
             self.primer_order.append(primer)
         return
 
-    #
-    # -------
-    #
-
     def display_details(self,event=None):
         """Show all details on a selected primer. If we have a parent DNA sequence then
         show the alignment to that one"""
-        #
+
         # Figure out the selected primer and display in textbox
-        #
         tmp_selection=self.primers.curselection()
         selection=[]
         for num in tmp_selection:
             selection.append(int(num))
-        #
+
         # Display all of the primers
-        #
         primer_sites=[]
         first=1
         for primer_num in selection:
             site=self.display_single_primer(primer_num,focus=first,delete=first)
             first=None
             primer_sites.append(site)
-        #
+
         # Select the maximum length DNA sequence spanned by the primers
-        #
         if primer_sites!=[] and primer_sites != None:
             minstart=999
             maxend=-9999
             for start,end in primer_sites:
                 minstart=min(start,minstart)
                 maxend=max(end,maxend)
-            #
+
             # Highlight the sequence
-            #
             self.parent.clear_selection()
             self.parent.data['DNA_selection']={}
             self.parent.data['sel_objs']={}
@@ -356,10 +339,6 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
             if getattr(self.parent,'routine_call_DNAselection',None):
                 (self.parent.routine_call_DNAselection)()
         return
-
-    #
-    # -----
-    #
 
     def display_single_primer(self,selection,focus,delete):
         """Display a single primer - focus on it if focus is true, and delete
@@ -372,56 +351,46 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
         self.details.config(state=NORMAL)
         if delete:
             self.details.delete(1.0,END)
-        #
+
         # Align the primer
-        #
         # If we do not have a DNA sequence then we cannot do it
-        #
+
         this_primer['startpos']=None
         if self.parent.data.has_key('DNAseq'):
             if self.parent.data['DNAseq']:
-                #
+
                 # Find all possible binding sites for the primer
-                #
                 sites=self.find_primer_binding_sites(this_primer['sequence'],self.parent.data['DNAseq'])
-                #
+
                 # Print the number of binding sites
-                #
                 best_score=0
                 best_position=None
                 scores=[]
                 first_neg=1
                 for position,score in sites:
                     scores.append(score)
-                    #
+
                     # Find the best position
-                    #
                     if score>best_score:
                         best_score=score
                         best_position=position
-                #
+
                 # Set the primer start for the primer characteristics
-                #
                 this_primer['startpos']=best_position
                 this_primer['template_DNA']=self.parent.data['DNAseq']
-        #
-        # -------------------------------------
-        #
+
         # Show all the info on the primer
-        #
         self.details.tag_config('n', foreground='blue')
         self.details.insert(END,'Primer: %s \n' %name_selected, 'n')
         self.details.insert(END,'Description: %s \n' %(this_primer['description']))
         self.details.insert(END,'Length: %3d bases\n' %(len(this_primer['sequence'])))
         self.details.insert(END,"Forward 5' %s 3'\n\n" %this_primer['sequence'])
-        #
+
         # Show the reverse complementary sequence
-        #
         import mutation
         self.details.insert(END,"Reverse complementary: 5' %s 3'\n" %mutation.get_reverse_complementary(this_primer['sequence']))
-        #
+
         # Make sure that we have the updated the characteristics of the primer
-        #
         if not this_primer.has_key('template_DNA'):
             return
         import evaluate_primer
@@ -430,9 +399,8 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
         this_primer['hairpin_prop']=hairpin
         this_primer['self-compl']=selfcompl
         this_primer['introduced_sites']='Unknown'
-        #
+
         # Show the characteristics of the primer
-        #
         text='-----------------------\nCharacteristics\nTm (in aligned position): %5.2f (%s)\n' %(Tm_inpos,Tm_method_used)
         self.details.insert(END,text)
         text='Hairpin: %s, \nself-sim: %s, \nrestr. site differences: ' %(this_primer['hairpin_prop'],
@@ -449,7 +417,7 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
             if enz_specs.has_key(enz):
                 self.details.insert(END,enz+'(+)*, ')
                 inserted=1
-        #
+
         for enz in unique_removed.keys():
             if enz_specs.has_key(enz):
                 self.details.insert(END,enz+'(-)*, ')
@@ -458,19 +426,17 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
             if enz_specs.has_key(enz):
                 self.details.insert(END,enz+'(+), ')
                 inserted=1
-        #
+
         for enz in non_unique_removed.keys():
             if enz_specs.has_key(enz):
                 self.details.insert(END,enz+'(-), ')
                 inserted=1
-        #
+
         # If there were no differences in the restriction map, then write that
-        #
         if inserted==None:
             self.details.insert(END,'None')
-        #
+
         # Delete all graphic objects from last round
-        #
         if delete:
             if not getattr(self.parent,'detailed_objs',None):
                 self.parent.detailed_objs={}
@@ -488,22 +454,21 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
             self.details.insert(END,'WARNING: Primer is not unique!\n')
         if scores[-1]!=len(this_primer['sequence']):
             self.details.insert(END,'\nWARNING: No perfectly matching binding site.\n')
-        # =======================================================================
-        #
+
         # Print the number of mismatches as a control
-        #
+
         if this_primer['startpos']>0:
             self.details.insert(END,'\nDisplaying position: %4d on forward strand\n' %this_primer['startpos'])
         else:
             self.details.insert(END,'\nDisplaying position: %4d on reverse strand\n' %(-this_primer['startpos']))
         self.details.insert(END,'Number of mismatches: %d\n\n' %mismatches)
-        #
+
         # Display the primer
-        #
+
         match=self.display_primer(this_primer,focus)
-        #
+
         # Show the binding site
-        #
+
         self.details.insert(END,'\n==================================\n')
         site=sites[0][0]
         if site<0:
@@ -564,9 +529,9 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
 
     def display_primer(self,this_primer,delete=1,only_delete=None,focus=1):
         """Display the primer in the sequence window"""
-        
+
         font = self.parent.getCurrentFont()
-        # Keep track of the objects        
+        # Keep track of the objects
         if not getattr(self,'primer_objs',None):
             self.primer_objs={}
         if delete or only_delete:
@@ -575,41 +540,41 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
             self.primer_objs={}
             if only_delete:
                 return
-        
-        # Do we have a primer?        
+
+        # Do we have a primer?
         if this_primer['sequence']=='' or not this_primer['sequence']:
             return
-        
-        # Draw the new primer        
+
+        # Draw the new primer
         mismatches,match,objs=self.draw_primer(this_primer,lvl=self.parent.maxseqlevel)
         for obj in objs.keys():
             self.primer_objs[obj]=1
-        
-        # Get the restriction map differences        
+
+        # Get the restriction map differences
         unique_added,unique_removed,non_unique_added,non_unique_removed=self.get_primer_restriction_differences(this_primer)
-        
+
         # Plot the thing
         self.parent.plot_restriction_sites(unique_added,colour='darkgreen',direction='down',
-                                           add_text='(+)',temporary=1,delete_temporary=1)        
+                                           add_text='(+)',temporary=1,delete_temporary=1)
         self.parent.plot_restriction_sites(unique_removed,colour='red',direction='down',
-                                           add_text='(-)',temporary=1,delete_temporary=None)         
+                                           add_text='(-)',temporary=1,delete_temporary=None)
         self.parent.plot_restriction_sites(non_unique_added,colour='darkgreen',direction='down',
-                                           add_text='(+)',temporary=1,delete_temporary=None,underline_unique=None)        
+                                           add_text='(+)',temporary=1,delete_temporary=None,underline_unique=None)
         self.parent.plot_restriction_sites(non_unique_removed,colour='darkred',direction='down',
-                                           add_text='(-)',temporary=1,delete_temporary=None,underline_unique=None)        
-        
+                                           add_text='(-)',temporary=1,delete_temporary=None,underline_unique=None)
+
         # See if there are any AA changes and show (only if we have an ORF)
-        
+
         self.mutations=[]
-        if self.parent.data.has_key('ORF_selected'):            
-            # Find any differences in the sequence            
+        if self.parent.data.has_key('ORF_selected'):
+            # Find any differences in the sequence
             frame=self.parent.data['ORF_selected']['frame']-1
             wtseq=self.parent.data['ORF_selected']['aaseq3']
             new_DNA=self.apply_primer_to_DNA(this_primer,self.parent.data['DNAseq'],this_primer['startpos'])
             import mutation
             AA_seqs3,AA_seqs1=mutation.translate(new_DNA)
-            
-            # Get only the part of sequence that's defined in the ORF            
+
+            # Get only the part of sequence that's defined in the ORF
             ORF_start=self.parent.data['ORF_selected']['start']
             AA_seqs3[frame]=AA_seqs3[frame][ORF_start-1:]
             for count in range(min(len(AA_seqs1[frame]),len(wtseq))):
@@ -627,17 +592,17 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
                                                          anchor='w',fill=colour)
                     self.primer_objs[obj]=1
                     self.mutations.append(':'+wtseq[count]+':'+str(count+self.parent.data['ORF_selected']['aastart_number'])+':'+AA_seqs3[frame][count])
-        
-        # Update the view of the sequence window        
+
+        # Update the view of the sequence window
         if focus:
             position=this_primer['startpos']
             if this_primer['startpos']<0:
                 position=len(self.parent.data['DNAseq'])-(abs(position)+len(this_primer['sequence']))
             x,y=self.parent.get_base_pos_on_screen(position+len(this_primer['sequence'])/2)
-            
-            # We need to center on the aa preferably            
-            center=max(0.0,x-(self.parent.x_size-self.parent.canvas_border_x)/2.0)            
-            # Moveto works in fractions of the screen, so get the fraction   
+
+            # We need to center on the aa preferably
+            center=max(0.0,x-(self.parent.x_size-self.parent.canvas_border_x)/2.0)
+            # Moveto works in fractions of the screen, so get the fraction
             frac=center/self.parent.canvas_x
             self.parent.seqframe.xview('moveto', frac)
             self.parent.seqframe.yview('moveto', 0.2)  #middle of scrollregion
@@ -646,49 +611,49 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
 
     def get_primer_restriction_differences(self,this_primer):
         """Find the impact of this primer of the restriction map of the parent DNA"""
-        
-        # Do a restriction digest with the new DNA sequence and display any added/removed sites        
+
+        # Do a restriction digest with the new DNA sequence and display any added/removed sites
         new_DNA=self.apply_primer_to_DNA(this_primer,self.parent.data['DNAseq'],this_primer['startpos'])
         #
         self.parent.select_enzymes()
         new_cut=self.parent.RS.get_restriction_sites(new_DNA,self.parent.data['used_enzymes'])
-        
-        # Wild type restriction digest        
+
+        # Wild type restriction digest
         self.parent.select_enzymes()
         wt_cut=self.parent.RS.get_restriction_sites(self.parent.data['DNAseq'],
                                                     self.parent.data['used_enzymes'])
-        
-        # Find the difference between the two sets of digests        
+
+        # Find the difference between the two sets of digests
         enzymes=new_cut.keys()
         #to_be_plotted={}
         unique_added={}
         non_unique_added={}
         non_unique_removed={}
-        
+
         for enz in enzymes:
             if wt_cut.has_key(enz):
-                if wt_cut[enz]!=new_cut[enz]:                    
-                    # Check if we removed non-unique cuts                    
+                if wt_cut[enz]!=new_cut[enz]:
+                    # Check if we removed non-unique cuts
                     for cut in wt_cut[enz]:
-                        if not cut in new_cut[enz]:                            
-                            # There's a cut missing for this enzyme when the primer is applied                            
+                        if not cut in new_cut[enz]:
+                            # There's a cut missing for this enzyme when the primer is applied
                             if not non_unique_removed.has_key(enz):
                                 non_unique_removed[enz]=[]
                             non_unique_removed[enz].append(cut)
-                    
-                    # Check if we added non-unique cuts                    
+
+                    # Check if we added non-unique cuts
                     for cut in new_cut[enz]:
-                        if not cut in wt_cut[enz]:                            
-                            # We added this one                            
+                        if not cut in wt_cut[enz]:
+                            # We added this one
                             if not non_unique_added.has_key(enz):
                                 non_unique_added[enz]=[]
                             non_unique_added[enz].append(cut)
 
-            else:                
-                # Added completely new site                
+            else:
+                # Added completely new site
                 unique_added[enz]=new_cut[enz][:]
-        
-        # Check the other way        
+
+        # Check the other way
         unique_removed={}
         for enz in wt_cut.keys():
             if not enz in enzymes:
@@ -698,53 +663,40 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
 
     def delete_primer(self):
         """Delete a primer from the database"""
-  
+
         self.clear_pDB_objects()
-        #
+
         # Delete a primer
-        #
         selection=int(str(self.primers.curselection()[0]))
         name_selected=self.primer_order[selection]
         print 'in primer_dict, deleting',name_selected
         del self.parent.data['primer_dict'][name_selected]
-        #
+
         # Update the view
-        #
         self.details.delete(1.0,END)
         self.show_pDB_contents()
+        self.parent.projectChanged()
         return
-
-    #
-    # -------
-    #
 
     def add_primer(self):
         """Open the evaluate primer window to add a primer manually"""
-        #
-        # Delete all the objects we displayed
-        #
+
         self.clear_pDB_objects()
-        #
         # Add a primer
-        #
-        win=self.parent.do_evaluate_primer(self.pDB_win,self)
+        win = self.parent.do_evaluate_primer(self.pDB_win,self)
         self.pDB_win.wait_window(win)
-        #
+
         # Update view
-        #
         self.show_pDB_contents()
-        print 'PRIMER_NAME=',self.new_name
+        #print 'PRIMER_NAME=',self.new_name
         self.highlight_primer(self.new_name)
         self.display_details()
         return
-    #
-    # -----
-    #
 
     def edit_primer(self):
-        #
-        # Edit a primer, using the current selection to locate the primer name
-        #
+
+        """Edit a primer, using the current selection to locate the primer name"""
+
         try:
             selection=int(str(self.primers.curselection()[0]))
         except:
@@ -756,17 +708,17 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
 
         selection=int(str(self.primers.curselection()[0]))
         name_selected=self.primer_order[selection]
-        #
+
         # Undisplay the original primer since do_evaluate_primer will show the primer while editing
-        #
+
         if not getattr(self,'primer_objs',None):
             self.primer_objs={}
         for obj in self.primer_objs.keys():
             self.parent.seqframe.delete(obj)
             del self.primer_objs[obj]
-        #
+
         # Call do_evaluate primer
-        #
+
         this_primer=self.parent.data['primer_dict'][name_selected]
         win=self.parent.do_evaluate_primer(self.pDB_win,self,
                                            edit_primer_seq=this_primer['sequence'],
@@ -782,9 +734,6 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
         self.display_details()
         return
 
-    #
-    # -------
-    #
 
     def rename_primer(self):
         #
@@ -990,15 +939,15 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
                                                          ("All files","*.*")])
         if not filename:
             return
-        
+
         # Load a simple pickled file (for now)
-        
+
         import pickle
         fd=open(filename,'rb')
         pdict=pickle.load(fd)
         fd.close()
-        
-        # Should we overwrite the existing primers?        
+
+        # Should we overwrite the existing primers?
         if overwrite:
             import tkMessageBox
             '''ans = tkMessageBox.askyesno("Overwrite primer database?",
