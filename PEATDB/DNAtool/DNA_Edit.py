@@ -301,10 +301,10 @@ class DNA_Edit:
             self.data['sel_objs'][obj]=1
 
         # Mark the bases that are selected
-
+        font = self.getCurrentFont()
         for position in range(bstart,bend):
             markx,marky=self.get_base_pos_on_screen(position+1)
-            obj=self.seqframe.create_text(markx,marky,text=self.data['DNAseq'][position],fill='red',font=self.seqfont,anchor='w')
+            obj=self.seqframe.create_text(markx,marky,text=self.data['DNAseq'][position],fill='red',font=font,anchor='w')
             self.data['sel_objs'][obj]=1
         return
 

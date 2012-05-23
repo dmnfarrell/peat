@@ -17,17 +17,19 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Contact information:
-# Email: Jens.Nielsen_at_gmail.com 
+# Email: Jens.Nielsen_at_gmail.com
 # Normal mail:
 # Jens Nielsen
 # SBBS, Conway Institute
 # University College Dublin
 # Dublin 4, Ireland
-# 
+#
 
 """Functions for dealing with the primer database in DNAtool"""
 
 from Tkinter import *
+import string
+import mutation
 
 class align_primer:
 
@@ -53,14 +55,14 @@ class align_primer:
         return position
 
     #
-    # This draws a primer OR any comparison sequence above the main sequence 
+    # This draws a primer OR any comparison sequence above the main sequence
     # Use tags to distinguish primers and other kinds of sequences
 
     def draw_primer(self,this_primer,colour='blue',thetag='primer',seqname=None,lvl=0):
         """This draws a primer OR any comparison sequence above the main sequence"""
-        #
+
         # Draw the primer
-        #        
+        font = self.parent.getCurrentFont()
         objs={}
         mismatches=0
         rev_compl=None
@@ -71,9 +73,8 @@ class align_primer:
         if position<0:
             rev_compl=1
             position=len(self.parent.data['DNAseq'])-(abs(position)+len(primer_sequence))
-            #
+
             # Reverse
-            #
             primer_sequence=''
             for letter in this_primer['sequence']:
                 primer_sequence=letter+primer_sequence
@@ -81,11 +82,9 @@ class align_primer:
         DNA_stretch=''
         match=''
 
-        #
-        # Write the 5' or 3' to start with
-        #
+        # Write the 5' or 3'
         x,y=self.parent.get_base_pos_on_screen(position-2)
- 
+
         # First find the y value, corrected for scale and no. of sequences etc.
         # This needs to be only done once, so use the dummy ytmp value when doing
         # get_base_pos_on_screen after this
@@ -98,9 +97,9 @@ class align_primer:
             if lvl>0:
                 lvl=lvl-1
                 y=y-(lvl*15)/self.parent.y_scale
-        #raise mutliple levels when many comparison sequences displayed  
+        #raise mutliple levels when many comparison sequences displayed
         if thetag != 'primer':
-            y=y-(lvl*15)/self.parent.y_scale         
+            y=y-(lvl*15)/self.parent.y_scale
 
         if this_primer['startpos']<0:
             start_symbol="3'"
@@ -108,28 +107,23 @@ class align_primer:
         else:
             start_symbol="5'"
             end_symbol="3'"
-        objs[self.parent.seqframe.create_text(x,y,text=start_symbol,font=self.parent.seqfont,
+
+        objs[self.parent.seqframe.create_text(x,y,text=start_symbol,font=font,
                                             fill='blue',anchor='w',tag=thetag)]=1
-        #
+
         # Now draw the primer/seq
-        #
         for letter in primer_sequence:
             x,ytmp=self.parent.get_base_pos_on_screen(position)
-
-            #
             # If we are still within the parent sequence then detect differences
-            #
+
             if position-1<len(self.parent.data['DNAseq']):
                 org_base=self.parent.data['DNAseq'][position-1]
             else:
                 org_base=letter
-            #
-            # ---
-            #
-            import string
+
             identical=None
             if rev_compl:
-                import mutation
+
                 if mutation.match(org_base,letter):
                     identical=1
             else:
@@ -140,64 +134,54 @@ class align_primer:
             #
             if identical:
                 if seqname==None:
-                    obj=objs[self.parent.seqframe.create_text(x,y,text=letter,font=self.parent.seqfont,
+                    obj=objs[self.parent.seqframe.create_text(x,y,text=letter,font=font,
                                                         fill=colour,anchor='w',
                                                         tags=thetag)]=1
                 else:
                     name=seqname.rstrip('seq.clipped')
-                    obj=objs[self.parent.seqframe.create_text(x,y,text=letter,font=self.parent.seqfont,
+                    obj=objs[self.parent.seqframe.create_text(x,y,text=letter,font=font,
                                                         fill=colour,anchor='w',
-                                                        tags=(thetag,name))]=1                    
+                                                        tags=(thetag,name))]=1
                 match=match+'|'
             else:
                 if seqname==None:
-                    obj=objs[self.parent.seqframe.create_text(x,y,text=letter,font=self.parent.seqfont,
+                    obj=objs[self.parent.seqframe.create_text(x,y,text=letter,font=font,
                                                         fill='red',anchor='w',
                                                         tags=thetag)]=1
                 else:
                     name=seqname.rstrip('seq.clipped')
-                    obj=objs[self.parent.seqframe.create_text(x,y,text=letter,font=self.parent.seqfont,
+                    obj=objs[self.parent.seqframe.create_text(x,y,text=letter,font=font,
                                                         fill='red',anchor='w',
-                                                        tags=(thetag,name))]=1                 
-                                              
+                                                        tags=(thetag,name))]=1
+
                 match=match+' '
                 mismatches=mismatches+1
             DNA_stretch=DNA_stretch+org_base
             position=position+1
-        #
+
         # Write the end symbol
-        #
         x,ytmp=self.parent.get_base_pos_on_screen(position)
-        objs[self.parent.seqframe.create_text(x,y,text=end_symbol,font=self.parent.seqfont,
+        objs[self.parent.seqframe.create_text(x,y,text=end_symbol,font=font,
                                                 fill='blue',anchor='w',tags=thetag)]=1
         return mismatches,match,objs
-    #
-    # ----
-    #
 
     def find_primer_binding_sites(self,primer_seq,DNA_seq):
-        #
-        # Find all possible binding sites for the primer in the DNA_seq
-        # - also probe the reverse strand
-        #
+
+        '''Find all possible binding sites for the primer in the DNA_seq
+         - also probe the reverse strand'''
+
         binding_sites=self.find_primer_binding_sites_1(primer_seq,DNA_seq)
-        #
         # Reverse complement strand
-        #
-        import mutation
-        rev_compl=mutation.get_reverse_complementary(DNA_seq)
-        rev_binding_sites=self.find_primer_binding_sites_1(primer_seq,rev_compl,1)
+        rev_compl = mutation.get_reverse_complementary(DNA_seq)
+        rev_binding_sites = self.find_primer_binding_sites_1(primer_seq,rev_compl,1)
         return binding_sites+rev_binding_sites
 
-    #
-    # --------
-    #
 
     def find_primer_binding_sites_1(self,primer_seq,DNA_seq,rev=None):
         """Find all possible binding sites for the primer in the DNA_seq.
         This function should be changed so we use the scan_primer class in mutation.py"""
         #
-        import mutation
+
         scores=[]
         primer_len=len(primer_seq)
         for pos in range(0,len(DNA_seq)):
@@ -229,4 +213,4 @@ class dummy_align_primer(align_primer):
     def __init__(self,parent):
         self.parent=parent
         return
-    
+

@@ -17,19 +17,20 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Contact information:
-# Email: Jens.Nielsen_at_gmail.com 
+# Email: Jens.Nielsen_at_gmail.com
 # Normal mail:
 # Jens Nielsen
 # SBBS, Conway Institute
 # University College Dublin
 # Dublin 4, Ireland
-# 
+#
 
 
 """DNAtool application
 Authors: Jens Nielsen & Damien Farrell"""
 
 import sys, os
+import types
 import tkFont
 import platform
 
@@ -39,10 +40,11 @@ DNAtooldir = os.path.split(__file__)[0]
 #split1=os.path.split(sys.path[0])[0]
 #sys.path.append(split1)
 #sys.path.append(os.path.split(split1)[0])
-#the above leads to opaque imports later in the code...bi
+#the above led to opaque imports later in the code
 
 from Tkinter import *
 import Pmw
+import mutation
 from DNAtool_IO import *
 from DNA_Edit import *
 from evaluate_primer import *
@@ -78,16 +80,17 @@ class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
         # Positioning bases and aas on the screen
         self.seq_xstart=70
         #scale for spacing between bases
-        self.base_scale=10
+        #self.base_scale=10
         #offset value of ORF for vertical spacing
         self.orf_offset=8
         #vertical scale value, to adjust for font sizes
         self.y_scale=1
 
-        self.seqfont='Courier 10'
-        self.labelfont='Courier 10'
-        self.restr_font='Arial 10'
-        self.backgrcolor='#f6f9f6'
+        self.defaultprefs = {'seqfont':'Courier', 'seqfontsize':10, 'fontstyle':1,
+                              'base_scale':10, 'restr_font':'Arial',
+                              'backgrcolor':'#f6f9f6'}
+
+        self.labelfont='Courier 10' #independent of prefs
 
         # Graphics objects
         self.seq_win_objs={}
@@ -109,7 +112,6 @@ class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
         self.data['ORFS']=None
 
         # Dir for Data
-        import os
         self.data['datadir']=os.getcwd()
 
         # Other variables
@@ -130,15 +132,15 @@ class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
             for key in data_passed.keys():
                 self.data[key]=copy.deepcopy(data_passed[key])
 
-        self.check_primers()        
-        
+        self.check_primers()
+
         if openwin:
-            self.do_window()            
+            self.do_window()
             #load display preferences if they are there
-            self.load_preferences()             
             self.main_pulldown()
             self.init_tkvars()
             self.init_bindings()
+            self.load_preferences()
 
         # Open the window
         if openwin:
@@ -146,7 +148,7 @@ class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
             self.update_sequence_window()
             self.open_pDB()
             self.assess_status()
-       
+
         return
 
     def check_primers(self):
@@ -167,7 +169,7 @@ class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
             self.master = Toplevel()
             self.master_win = self.parent.master
         print self.master, self.master_win
-        
+
         self.master.title("DNA sequence manipulation")
         self.master.geometry("%dx%d+%d+%d" %(self.x_size,self.y_size,100,100))
 
@@ -282,26 +284,35 @@ class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
     def init_tkvars(self):
         """Initialise the Tk variables"""
 
-        self.base_scale_input=IntVar()
+        for key in self.defaultprefs:
+            print key
+            value = self.defaultprefs[key]
+            if type(value) is types.IntType:
+                var = self.__dict__[key] = IntVar()
+            elif type(value) is types.StringType:
+                var = self.__dict__[key] = StringVar()
+            var.set(value)
+
+        '''self.base_scale_input = IntVar()
         self.base_scale_input.set(10)
-        self.seqfont_input=StringVar()
+        self.seqfont_input = StringVar()
         self.seqfont_input.set('Courier')
-        self.seqfontsize_input=IntVar()
-        if 'Darwin' in self.currplatform:
-            self.seqfontsize_input.set(16)
-        else:
-            self.seqfontsize_input.set(14)
-        self.fontstyle_input=IntVar()
+        self.seqfontsize_input = IntVar()
+        self.fontstyle_input = IntVar()
         self.fontstyle_input.set(1)
-        self.restr_site_font_input=StringVar()
-        self.restr_site_font_input.set('Arial')
-        self.resnum=IntVar()
+        self.restr_site_font_input = StringVar()
+        self.restr_site_font_input.set('Arial')'''
+
+        self.resnum = IntVar()
         self.resnum.set(1)
         # Method for calculating Tm of primers
-        self.Tm_method=StringVar()
+        self.Tm_method = StringVar()
         self.Tm_method.set('Stratagene')
+        if 'Darwin' in self.currplatform:
+            self.seqfontsize.set(16)
+        else:
+            self.seqfontsize.set(14)
         return
-
 
     def resize(self,event):
         """
@@ -435,8 +446,6 @@ class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
         self.assess_status()
         return
 
-
-
     def assess_status(self):
         """Figures out which buttons to activate/deactivate"""
 
@@ -509,7 +518,7 @@ class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
         self.seqframe.bind("<ButtonRelease-1>",self.handle_left_release)
         self.seqframe.bind("<Button-3>",self.handle_right_click)
         self.seqframe.bind("<ButtonRelease-3>",self.handle_right_release)
- 
+
         self.seqframe.bind("<Shift-Button-1>", self.handle_left_shift_click)
         self.seqframe.bind("<B3-Motion>", self.handle_right_motion)
 
@@ -552,28 +561,28 @@ class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
         """mainly for restr label movement"""
         c=self.seqframe
         if 'textlabel' in c.gettags(CURRENT):
-            self.currobjs = c.find_withtag(CURRENT)            
+            self.currobjs = c.find_withtag(CURRENT)
         return
-    
+
     def handle_right_release(self, event):
         """mainly for restr label movement"""
         if not hasattr(self,'currobjs') or len(self.currobjs)==0:
             return
-        c=self.seqframe       
+        c=self.seqframe
         y=self.seqframe.canvasy(event.y)
-        for item in self.currobjs:            
+        for item in self.currobjs:
             self.move_restriction_label(item, y)
-        self.currobjs=[]    
+        self.currobjs=[]
         return
-    
+
     def handle_right_motion(self, event):
         if len(self.currobjs)==0:
             return
         x=self.seqframe.canvasy(event.x)
         y=self.seqframe.canvasy(event.y)
-        
+
         return
-        
+
     def show_sequence_label(self, event):
         """how sequence name if it's a seq label, called from DNAtool main"""
         c=self.seqframe
@@ -608,6 +617,27 @@ class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
 		c.delete('seqlabel')
 		return
 
+    def getCurrentFont(self):
+        fontsize = self.seqfontsize.get()
+        fontstyle = 'normal'
+        if self.fontstyle.get() == 0:
+            fontstyle = 'normal'
+        elif self.fontstyle.get() == 1:
+            fontstyle = 'bold'
+        elif self.fontstyle.get() == 2:
+            fontstyle = 'italic'
+
+        restrfont = self.restr_font.get()+" 10"
+
+        #create a font object this time - more convenient
+        if fontstyle != 'italic':
+            seqfont = tkFont.Font (family=self.seqfont.get(), size=fontsize,
+                                    weight=fontstyle)
+        else:
+            seqfont = tkFont.Font (family=self.seqfont.get(), size=fontsize,
+                                    slant="italic")
+        return seqfont
+
     def update_sequence_window(self,junk=None):
         """Delete everything from last time if needed"""
         for obj in self.seq_win_objs.keys():
@@ -617,32 +647,17 @@ class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
         # Do we have a DNA sequence?
         if not self.data['DNAseq']:
             return
-          
-        # Set base scaling and font        
-        self.base_scale = self.base_scale_input.get()
-        fontsize = self.seqfontsize_input.get()
-        fontstyle = 'normal'
-        if self.fontstyle_input.get() == 0:
-            fontstyle = 'normal'
-        elif self.fontstyle_input.get() == 1:
-            fontstyle = 'bold'
-        elif self.fontstyle_input.get() == 2:
-            fontstyle = 'italic'
 
-        self.restrfont = self.restr_site_font_input.get()+" 10"
-        #create a font object this time - more convenient
-        if fontstyle != 'italic':
-            self.seqfont = tkFont.Font (family=self.seqfont_input.get(), size=fontsize,
-                                    weight=fontstyle)
-        else:
-            self.seqfont = tkFont.Font (family=self.seqfont_input.get(), size=fontsize,
-                                    slant="italic")
+        # Set base scaling and font
+        base_scale = self.base_scale.get()
+        fontsize = self.seqfontsize.get()
+        seqfont = self.getCurrentFont()
 
         # Change y scale to prevent crowding for large font sizes
         # this is done by getting the font size and applying a scale factor
         self.y_scale=1  #reset
         if fontsize>10:
-            self.y_scale = self.seqfontsize_input.get()/10.0
+            self.y_scale = self.seqfontsize.get()/10.0
             if self.y_scale>1:
                  self.y_scale=pow(self.y_scale,0.05)
 
@@ -655,9 +670,8 @@ class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
             self.canvas_x=max_x
             self.canvas_y=self.canvas_height
             self.seqframe.configure(scrollregion=(0,0,self.canvas_x,self.canvas_y))
-        #
+
         # Print the sequence in the window
-        #
         self.seq_win_objs[self.seqframe.create_text(0,self.seq_row,font=self.labelfont,text='DNA seq',
             fill='darkgreen',anchor='w')]=1
         count=0
@@ -678,7 +692,7 @@ class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
                 colour='#66CC00'
             count=count+1
             x,y=self.get_base_pos_on_screen(count)
-            self.seq_win_objs[self.seqframe.create_text(x,y,text=letter,font=self.seqfont,fill=colour,
+            self.seq_win_objs[self.seqframe.create_text(x,y,text=letter,font=seqfont,fill=colour,
                 anchor='w')]=1
 
         # Print base sequence numbers
@@ -713,18 +727,16 @@ class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
                 self.seq_win_objs[self.seqframe.create_text(x+6,y-20,text='%d' %(position),font=self.labelfont,anchor='w')]=1
 
         # Translate in three forward frames
-        import mutation
         AA_seqs3,AA_seqs1=mutation.translate(self.data['DNAseq'])
         self.data['AA_seqs1']=AA_seqs1
         self.data['AA_seqs3']=AA_seqs3
-        #
+
         # Print the sequence
-        #
         if self.data.has_key('ORF_selected'):
             self.orf_offset=8
-            
+
             # Update the sequence in the ORF_selected array
-            
+
             frame_sel=self.data['ORF_selected']['frame']
             start=self.data['ORF_selected']['start']
             stop=self.data['ORF_selected']['stop']
@@ -753,7 +765,7 @@ class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
             ORF_data=self.data['ORF_selected']
             self.print_aa3_seq(seq,y,
                                ORF_data['start']-1,ORF_data['frame'],
-                               highlight_aa=highlight_aa)
+                               highlight_aa=highlight_aa, font=seqfont)
 
             # Print the numbers
             self.print_aa_numbers(seq,15)
@@ -765,7 +777,7 @@ class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
                 y=y*self.y_scale
                 self.seq_win_objs[self.seqframe.create_text(0,y,text='Frame %d' %(frame+1),
                 font=self.labelfont,anchor='w')]=1
-                self.print_aa_seq(AA_seq,y,0,frame)
+                self.print_aa_seq(AA_seq,y,0,frame,seqfont)
                 frame=frame+1
             self.print_aa_numbers(AA_seqs3[0])
 
@@ -778,25 +790,24 @@ class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
         self.update_overview_win()
         #move view to middle of scrollregion
         self.seqframe.yview("moveto", 0.2)
-        self.seqframe.configure(bg=self.backgrcolor)
-     
+        self.seqframe.configure(bg=self.backgrcolor.get())
         return
 
 
 
-    def print_aa_seq(self,sequence,y,position=0,frame=0):
+    def print_aa_seq(self,sequence,y,position=0,frame=0,font=None):
         """
         Write a single aa sequence in the sequence window
         """
         for letter in sequence:
             position=position+1
             x,y_junk=self.get_aa_pos_on_screen(position,frame)
-            self.seq_win_objs[self.seqframe.create_text(x,y,text=letter,font=self.seqfont,anchor='w')]=1
+            self.seq_win_objs[self.seqframe.create_text(x,y,text=letter,font=font,anchor='w')]=1
         return
 
 
 
-    def print_aa3_seq(self,sequence,y,position=0,frame=0,highlight_aa=None):
+    def print_aa3_seq(self,sequence,y,position=0,frame=0,highlight_aa=None,font=None):
         """
         Write a single aa sequence in the sequence window
         """
@@ -807,7 +818,7 @@ class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
                 colour='red'
             else:
                 colour='black'
-            self.seq_win_objs[self.seqframe.create_text(x+2,y,text=aa_name,font=self.seqfont,anchor='w',fill=colour)]=1
+            self.seq_win_objs[self.seqframe.create_text(x+2,y,text=aa_name,font=font,anchor='w',fill=colour)]=1
         return
 
 
@@ -852,8 +863,7 @@ class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
     def get_base_pos_on_screen(self,position):
         """return the x and y position of the base on the screen"""
 
-        #return self.seq_xstart+float(position-1)*8,self.seq_row
-        return self.seq_xstart+float(position-1)*self.base_scale,self.seq_row
+        return self.seq_xstart+float(position-1)*self.base_scale.get(),self.seq_row
 
     def get_DNApos_fromcoords(self,x,y):
         """From X and Y coordinate, return the DNA base number"""
@@ -863,7 +873,7 @@ class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
             return None
 
         # ok, DNA it is
-        pos=int(float(x-self.seq_xstart+4.0)/self.base_scale)
+        pos=int(float(x-self.seq_xstart+4.0)/self.base_scale.get())
         return pos
 
 
@@ -1020,14 +1030,14 @@ class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
         lblspace=Label(self.seq_display_setupwin,text='Bases Spacing:')
         lblspace.grid(row=row,column=0,padx=3,pady=2)
         bscaleentry=Scale(self.seq_display_setupwin,from_=8,to=20,resolution=1,orient='horizontal',
-                            relief='ridge',variable=self.base_scale_input,label='scale factor')
+                            relief='ridge',variable=self.base_scale,label='scale factor')
         bscaleentry.grid(row=row,column=1, sticky='wens', padx=3,pady=2)
         row=2
         lblfont=Label(self.seq_display_setupwin,text='Seq Font:')
         lblfont.grid(row=row,column=0,padx=3,pady=2)
-        fontentry_button=Menubutton(self.seq_display_setupwin,textvariable=self.seqfont_input,
+        fontentry_button=Menubutton(self.seq_display_setupwin,textvariable=self.seqfont,
 					relief=RAISED,width=16)
-        restr_fontentry_button=Menubutton(self.seq_display_setupwin,textvariable=self.restr_site_font_input,
+        restr_fontentry_button=Menubutton(self.seq_display_setupwin,textvariable=self.restr_font,
 					relief=RAISED,width=16)
         fontentry_menu=Menu(fontentry_button,tearoff=0)
         restr_fontentry_menu=Menu(restr_fontentry_button,tearoff=0)
@@ -1039,11 +1049,11 @@ class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
         for text in fts:
             #text='Font '+text
             fontentry_menu.add_radiobutton(label=text,
-                                            variable=self.seqfont_input,
+                                            variable=self.seqfont,
                                             value=text,
                                             indicatoron=1)
             restr_fontentry_menu.add_radiobutton(label=text,
-                                            variable=self.restr_site_font_input,
+                                            variable=self.restr_font,
                                             value=text,
                                             indicatoron=1)
         fontentry_button.grid(row=row,column=1, sticky='nes', padx=3,pady=2)
@@ -1052,53 +1062,53 @@ class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
         lblfontsize=Label(self.seq_display_setupwin,text='Sequence Font Size:')
         lblfontsize.grid(row=row,column=0,padx=3,pady=2)
         fontsizeentry=Scale(self.seq_display_setupwin,from_=8,to=20,resolution=1,orient='horizontal',
-                            relief='ridge',variable=self.seqfontsize_input)
+                            relief='ridge',variable=self.seqfontsize)
 
         fontsizeentry.grid(row=row,column=1, sticky='wens',padx=3,pady=2)
         row=4
         frame = Frame(self.seq_display_setupwin)
         fontstyle_label = Label(frame, text='Font Style:')
         fontstyle_label.grid(row=0,column=0)
-        fontstyle = Radiobutton(frame, text="plain", variable=self.fontstyle_input, value=0)
-        fontstyle1 = Radiobutton(frame, text="bold", variable=self.fontstyle_input, value=1)
-        fontstyle2 = Radiobutton(frame, text="italic", variable=self.fontstyle_input, value=2)
+        fontstyle = Radiobutton(frame, text="plain", variable=self.fontstyle, value=0)
+        fontstyle1 = Radiobutton(frame, text="bold", variable=self.fontstyle, value=1)
+        fontstyle2 = Radiobutton(frame, text="italic", variable=self.fontstyle, value=2)
         fontstyle.grid(row=0,column=1)
         fontstyle1.grid(row=0,column=2)
         fontstyle2.grid(row=0,column=3)
         frame.grid(row=row,column=0,columnspan=2,sticky='news', padx=3,pady=2)
 
         row=5
-        self.backgrcolorbutton = Button(self.seq_display_setupwin, text='background color', bg=self.backgrcolor,
+        self.backgrcolorbutton = Button(self.seq_display_setupwin, text='background color',
+                                    bg=self.backgrcolor.get(),
                                     command=self.setbackgrcolor)
         self.backgrcolorbutton.grid(row=row,column=1, sticky='nes', padx=3,pady=2)
         row=6
         restrfont=Label(self.seq_display_setupwin,text='Restr. Site Font:')
         restrfont.grid(row=row,column=0,padx=3,pady=2)
         restr_fontentry_button.grid(row=row,column=1, sticky='nes', padx=3,pady=2)
-
         row=7
-        
-        # Apply Button        
+
+        # Apply Button
         b = Button(self.seq_display_setupwin, text="Apply Settings", command=self.update_window_formatting)
         b.grid(row=row,column=1,sticky='wens',padx=4,pady=4)
-        
-        # Close button    
+
+        # Close button
         c=Button(self.seq_display_setupwin,text='Close',command=self.close_seq_display_setupwin)
         c.grid(row=row,column=0,sticky='wens',padx=4,pady=4)
-        
-        # Save Settings button        
+
+        # Save Settings button
         row=8
         c=Button(self.seq_display_setupwin,text='Save as Default',command=self.save_preferences)
         c.grid(row=row,column=0,columnspan=2,sticky='wens',padx=4,pady=4)
         return
 
     def setbackgrcolor(self):
-        clr = self.getaColor(self.backgrcolor)
+        clr = self.getaColor(self.backgrcolor.get())
         if clr != None:
-            self.backgrcolor = clr
+            self.backgrcolor.set(clr)
             self.backgrcolorbutton.configure(bg=clr)
         return
-    
+
     def getaColor(self, oldcolor):
         import tkColorChooser
         ctuple, newcolor = tkColorChooser.askcolor(title='pick a color', initialcolor=oldcolor,
@@ -1117,53 +1127,31 @@ class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
         """Saves the sequence display settings to prefs file"""
 
         print 'Saving DNAtool preferences'
-        self.preferences.set('seqfont',self.seqfont_input.get())
-        self.preferences.set('seqfontsize',self.seqfontsize_input.get())
-        self.preferences.set('fontstyle',self.fontstyle_input.get())
-        self.preferences.set('base_scale',self.base_scale_input.get())
-        self.preferences.set('restr_font',self.restr_site_font_input.get())
-        self.preferences.set('backgrcolor',self.backgrcolor)
-        print self.preferences.get('restr_font')
+        self.preferences.set('seqfont',self.seqfont.get())
+        self.preferences.set('seqfontsize',self.seqfontsize.get())
+        self.preferences.set('fontstyle',self.fontstyle.get())
+        self.preferences.set('base_scale',self.base_scale.get())
+        self.preferences.set('restr_font',self.restr_font.get())
+        self.preferences.set('backgrcolor',self.backgrcolor.get())
+        #print self.preferences.get('restr_font')
         return
 
     def load_preferences(self):
         """Loads the sequence display settings from prefs file, if present"""
 
         print 'Loading current DNAtool preferences'
-        self.preferences=Preferences('DNAtool',{'canvas_height':600})
+        self.preferences = Preferences('DNAtool',{'canvas_height':600})
 
-        try:
-            f=self.preferences.get('seqfont')
-            self.seqfont_input.set(f)
-        except:
-            self.preferences.set('seqfont','Courier')
-        try:
-            f=self.preferences.get('seqfontsize')
-            self.seqfontsize_input.set(f)
-        except:
-            self.preferences.set('seqfontsize',12)
-        try:
-            f=self.preferences.get('fontstyle')
-            self.fontstyle_input.set(f)
-        except:
-            self.preferences.set('fontstyle',1)
-        try:
-            f=self.preferences.get('base_scale')
-            self.base_scale_input.set(f)
-        except:
-            self.preferences.set('base_scale',10)
-        try:
-            f=self.preferences.get('restr_font')
-            self.restr_site_font_input.set(f)
-        except:
-            self.preferences.set('restr_font','Arial')
-        try:
-            self.backgrcolor = self.preferences.get('backgrcolor')
-        except:
-            pass                
+        for key in self.defaultprefs:
+            if key in self.preferences.prefs:
+                self.__dict__[key].set(self.preferences.get(key))
+            else:
+                self.preferences.set(key, defaultprefs[key])
+
+        self.update_window_formatting()
         return
 
-            
+
     def update_window_formatting(self):
         """Do this only when display setup changes are applied. Ensures all objects, including
            applied primers are updated with the new formatting."""
@@ -1175,9 +1163,9 @@ class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
         return
 
 
-    def overview_on_off(self):        
+    def overview_on_off(self):
         """Turn the over view window on and off"""
-        
+
         if self.overview_win:
             self.overview_button.deselect()
             self.overview_win.destroy()
@@ -1243,7 +1231,7 @@ class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
             position=0
             x=60
             y=frame*25+25
-            self.overview_win_objs[self.overview_frame.create_text(0,y,text='Frame %d' %(frame+1),font=self.seqfont,anchor='w')]=1
+            self.overview_win_objs[self.overview_frame.create_text(0,y,text='Frame %d' %(frame+1),font=self.seqfont.get(),anchor='w')]=1
             self.overview_win_objs[self.overview_frame.create_line(x,y,x+200,y,fill='green',width=2)]=1
             for letter in AA_seq:
                 position=position+1

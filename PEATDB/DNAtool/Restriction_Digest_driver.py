@@ -28,6 +28,7 @@
 """Driver for the Restriction digest class in mutation.py"""
 
 from Tkinter import *
+import tkFont
 
 def alphabetical(text1,text2):
 	import string
@@ -95,7 +96,7 @@ class Restriction_Digest:
 		Plot all restriction sites in enzymes
 		"""
 		enzymes=cut_pos.keys()  #enzyme names, for string label of each site
-		#print enzymes
+
 		#
 		# Control vars
 		#
@@ -205,16 +206,15 @@ class Restriction_Digest:
 							step=0
 
 						# Underline unique sites
-						font=self.restrfont
+						font = self.restr_font.get() + " 10"
 						uniquetag='nu'
 						if underline_unique:
 							if len(positions)==1:
 								uniquetag='u'
 								font=font+' underline'
-
-						#
+						
 						# Draw site/enzyme label here
-						#
+						
 						obj=self.seqframe.create_text(x,(y-45)/self.y_scale,text=enzyme+add_text,
 										activefill='red',font=font,anchor='sw',fill=col,
 										tags=('textlabel',uniquetag,level,enzyme+add_text,subsite))
@@ -223,9 +223,8 @@ class Restriction_Digest:
 							self.temp_objs[obj]=1
 						else:
 							self.new_seq_win_objs[obj]=1
-						#
-						# Keep track of where we've plotted everything
-						#
+						
+						# Keep track of where we've plotted everything						
 						if not self.donepos.has_key(subsite):
 							self.donepos[subsite]=0
 						self.donepos[subsite]=self.donepos[subsite]+1
@@ -276,8 +275,7 @@ class Restriction_Digest:
                 c.move(obj, 0, y-oldy)
                 c.move(rect, 0, y-oldy)
                 c.tag_raise(rect)
-                c.tag_raise(obj)
-                
+                c.tag_raise(obj)                
                 return
         
 	def tidy_restriction_labels(self,direction='up',temporary=None,underline_unique=None):
@@ -382,7 +380,7 @@ class Restriction_Digest:
 		items=c.find_enclosed(x1-1,y1-1,x2+1,y2+1)
 		#get this for recog sequence
 		enzymes=self.RS.enzymes_regexs
-		import tkFont
+		
 		sfont = tkFont.Font (family='Arial', size=12,weight='bold')
 		for obj in items:
 			c.tag_raise(obj)

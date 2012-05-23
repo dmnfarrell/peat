@@ -564,9 +564,9 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
 
     def display_primer(self,this_primer,delete=1,only_delete=None,focus=1):
         """Display the primer in the sequence window"""
-        #
-        # Keep track of the objects
-        #
+        
+        font = self.parent.getCurrentFont()
+        # Keep track of the objects        
         if not getattr(self,'primer_objs',None):
             self.primer_objs={}
         if delete or only_delete:
@@ -588,7 +588,7 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
         # Get the restriction map differences        
         unique_added,unique_removed,non_unique_added,non_unique_removed=self.get_primer_restriction_differences(this_primer)
         
-        # Plot the thing        
+        # Plot the thing
         self.parent.plot_restriction_sites(unique_added,colour='darkgreen',direction='down',
                                            add_text='(+)',temporary=1,delete_temporary=1)        
         self.parent.plot_restriction_sites(unique_removed,colour='red',direction='down',
@@ -623,7 +623,7 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
 
                     obj=self.parent.seqframe.create_text(x+2,y,
                                                          text=newres,
-                                                         font=self.parent.seqfont,
+                                                         font=font,
                                                          anchor='w',fill=colour)
                     self.primer_objs[obj]=1
                     self.mutations.append(':'+wtseq[count]+':'+str(count+self.parent.data['ORF_selected']['aastart_number'])+':'+AA_seqs3[frame][count])
