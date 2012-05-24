@@ -27,11 +27,15 @@
 
 """Functions for dealing with the primer database in DNAtool"""
 
-import sys,os,copy
-import primer_alignment
+import sys, os, copy
 from Tkinter import *
-from PDBDumper import *
+import tkFileDialog, tkMessageBox, tkSimpleDialog
 import Pmw
+import pickle
+import csv
+import primer_alignment
+from PDBDumper import *
+
 
 class primer_database(primer_alignment.align_primer,PDBDumper):
 
@@ -101,7 +105,7 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
         yscrollbar=Scrollbar(self.pDB_win,orient='vertical',width=14)
         yscrollbar.grid(row=row,column=2,sticky='nws')
         #
-        self.primers=Listbox(self.pDB_win,bg='white',
+        self.primers = Listbox(self.pDB_win,bg='white',
                              fg='black',
                              height=height,width=30,yscrollcommand=yscrollbar.set,
                              selectmode=EXTENDED)
@@ -203,7 +207,6 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
 
         return
 
-
     def set_balloon_help(self):
         """Set help text for the popup balloons"""
         try:
@@ -218,7 +221,6 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
         for btn,txt in help:
             self.balloon.bind(btn,txt)
         return
-
 
     def find_primer_inpDB(self,event=None):
         """Find the primers in pDB that fulfills the criteria"""
@@ -261,11 +263,9 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
                 index=index+1
         return
 
-
-    # Highlight a specified single primer
-
     def highlight_primer(self,pname):
         """Highlight and update details for the given primer after addition/editing"""
+        
         self.primers.selection_clear(first=0,last=1)
         if pname!='':
             index=0
@@ -279,6 +279,7 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
 
     def primer_sort(self,primer1,primer2):
         """This function is for sorting primers"""
+        
         p1=primer1.lower()
         p2=primer2.lower()
         if p1<p2:
@@ -288,8 +289,8 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
         return 0
 
     def show_pDB_contents(self):
-
-        # Show the database, sort by name
+        """ Show the database, sort by name"""
+        
         self.primers.delete(0, END)
         if self.parent.data.has_key('primer_dict'):
             self.primer_names=self.parent.data['primer_dict'].keys()
@@ -307,7 +308,7 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
         show the alignment to that one"""
 
         # Figure out the selected primer and display in textbox
-        tmp_selection=self.primers.curselection()
+        tmp_selection = self.primers.curselection()
         selection=[]
         for num in tmp_selection:
             selection.append(int(num))
@@ -316,7 +317,7 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
         primer_sites=[]
         first=1
         for primer_num in selection:
-            site=self.display_single_primer(primer_num,focus=first,delete=first)
+            site = self.display_single_primer(primer_num,focus=first,delete=first)
             first=None
             primer_sites.append(site)
 
@@ -342,10 +343,11 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
 
     def display_single_primer(self,selection,focus,delete):
         """Display a single primer - focus on it if focus is true, and delete
-        previous graphics and text objects if delete is true"""
+            previous graphics and text objects if delete is true"""
+            
         name_selected=self.primer_order[selection]
         #print 'SELECTION=',selection
-        this_primer=self.parent.data['primer_dict'][name_selected]
+        this_primer = self.parent.data['primer_dict'][name_selected]
         self.current_primers_shown.append(this_primer)
         self.parent.primer_displayed=1  #tells DNAtool that a primer is currently shown
         self.details.config(state=NORMAL)
@@ -406,9 +408,8 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
         text='Hairpin: %s, \nself-sim: %s, \nrestr. site differences: ' %(this_primer['hairpin_prop'],
                                                                         this_primer['self-compl'])
         self.details.insert(END,text)
-        #
-        # Show the recognition sequence for the enzyme(s)
-        #
+        
+        # Show the recognition sequence for the enzyme(s)        
         self.details.insert(END,'Unique sites are marked with a "*"\n')
         unique_added,unique_removed,non_unique_added,non_unique_removed=self.get_primer_restriction_differences(this_primer)
         enz_specs=self.parent.RS.enzymes_regexs
@@ -439,14 +440,14 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
         # Delete all graphic objects from last round
         if delete:
             if not getattr(self.parent,'detailed_objs',None):
-                self.parent.detailed_objs={}
+                self.parent.detailed_objs = {}
             for obj in self.parent.detailed_objs.keys():
                 self.parent.seqframe.delete(obj)
                 if getattr(self.parent,'tempsites',None):
                     self.parent.tempsites.remove(obj)
-        #
+
         # Print guidelines for this primer
-        #
+
         scores.sort()
         diff=scores[-1]-scores[-2]
         self.details.insert(END,'\nDifference in # of matches between two best sites: %2d\n' %diff)
@@ -476,9 +477,9 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
         #
         DNA_stretch=self.parent.data['DNAseq'][site:site+len(this_primer['sequence'])]
         self.details.insert(END,'Primer %s\n       %s\nDNASeq %s\n' %(this_primer['sequence'],match,DNA_stretch))
-        #
+
         # Print summary of all binding sites
-        #
+
         self.details.insert(END,'\n---------------------\nSummary of best binding sites\n')
         self.details.insert(END,'Forward strand:\n')
         first_neg=1
@@ -489,43 +490,14 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
                     first_neg=None
                     self.details.insert(END,'Reverse compl. strand:\n')
             self.details.insert(END,'Position: %4d, matches: %2d\n' %(site,score))
-        #
-        # All done
-        #
+
+
         self.details.insert(END,'\n')
         self.details.config(state=DISABLED)
-        #
+
         # Return the sites for use in highlighting
-        #
         start_position=self.get_real_primer_position(this_primer)
         return [start_position,start_position+len(this_primer['sequence'])]
-
-    #
-    # Refresh display of the primer in the sequence window. Done when formatting
-    # is changed in sequence window
-
-    def refresh_primer(self):
-        """Refresh display of the primer in the sequence window"""
-
-        #get current selection and just refresh it with new font/size
-        #selection=self.primers.curselection()
-        #find if there are any primers shown in sequence window
-        #c=self.parent.seqframe
-        #currprimers = c.find_withtag('primer')
-        #print 'CURRENT PRIMERS',currprimers
-        #c.delete(currprimers)
-
-        #redisplay the stored list of currently displayed primers
-        for currprimer in self.current_primers_shown:
-            self.display_primer(currprimer)
-            #also refresh current base selection
-            if self.parent.data.has_key('DNA_selection'):
-                self.parent.mark_base_selection(self.parent.data['DNA_selection']['start'],
-                                                self.parent.data['DNA_selection']['stop'])
-        return
-    #
-    # -----------
-    #
 
     def display_primer(self,this_primer,delete=1,only_delete=None,focus=1):
         """Display the primer in the sequence window"""
@@ -608,7 +580,18 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
             self.parent.seqframe.yview('moveto', 0.2)  #middle of scrollregion
         return match
 
+    def refresh_primer(self):
+        """Refresh display of the primer in the sequence window"""
 
+        #redisplay the stored list of currently displayed primers
+        for currprimer in self.current_primers_shown:
+            self.display_primer(currprimer)
+            #also refresh current base selection
+            if self.parent.data.has_key('DNA_selection'):
+                self.parent.mark_base_selection(self.parent.data['DNA_selection']['start'],
+                                                self.parent.data['DNA_selection']['stop'])
+        return
+        
     def get_primer_restriction_differences(self,this_primer):
         """Find the impact of this primer of the restriction map of the parent DNA"""
 
@@ -665,7 +648,6 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
         """Delete a primer from the database"""
 
         self.clear_pDB_objects()
-
         # Delete a primer
         selection=int(str(self.primers.curselection()[0]))
         name_selected=self.primer_order[selection]
@@ -696,11 +678,9 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
     def edit_primer(self):
 
         """Edit a primer, using the current selection to locate the primer name"""
-
         try:
             selection=int(str(self.primers.curselection()[0]))
         except:
-           import tkMessageBox
            tkMessageBox.showwarning('No primer selected',
                                      'Please select a primer in the listbox',
                                      parent=self.pDB_win)
@@ -710,7 +690,6 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
         name_selected=self.primer_order[selection]
 
         # Undisplay the original primer since do_evaluate_primer will show the primer while editing
-
         if not getattr(self,'primer_objs',None):
             self.primer_objs={}
         for obj in self.primer_objs.keys():
@@ -718,41 +697,34 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
             del self.primer_objs[obj]
 
         # Call do_evaluate primer
-
         this_primer=self.parent.data['primer_dict'][name_selected]
         win=self.parent.do_evaluate_primer(self.pDB_win,self,
                                            edit_primer_seq=this_primer['sequence'],
                                            edit_primer_descr=this_primer['description'],
                                            edit_primer_name=name_selected)
         self.pDB_win.wait_window(win)
-        #
+
         # Update view
-        #
         self.show_pDB_contents()
         print 'PRIMER_NAME=',self.new_name
         self.highlight_primer(self.new_name)
         self.display_details()
         return
 
-
     def rename_primer(self):
-        #
-        # Rename a primer
-        #
+        """Rename a primer"""
+
         try:
            selection=int(str(self.primers.curselection()[0]))
         except:
-           import tkMessageBox
            tkMessageBox.showwarning('No primer selected',
                                      'Please select a primer in the listbox',
                                      parent=self.pDB_win)
            return
 
         name_selected=self.primer_order[selection]
-        #
+
         # Get the new name
-        #
-        import tkSimpleDialog
         new_name=tkSimpleDialog.askstring('Rename primer','Enter new name',
                                           initialvalue=name_selected,
                                           parent=self.pDB_win)
@@ -760,103 +732,78 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
             if not self.parent.data['primer_dict'].has_key(new_name):
                 self.parent.data['primer_dict'][new_name]=self.parent.data['primer_dict'][name_selected].copy()
                 del self.parent.data['primer_dict'][name_selected]
-        #
+
         # Update view
-        #
         self.show_pDB_contents()
         self.highlight_primer(new_name)
         self.display_details()
         return
 
-    #
-    # --------------
-    #
-
     def align_primer(self,this_primer):
         """Align the primer to the template DNA"""
-        #
+
         # Find out where the primer is aligned
-        #
         sites=self.find_primer_binding_sites(this_primer['sequence'],self.parent.data['DNAseq'])
-        #
+
         # Print the number of binding sites
-        #
         best_score=0
         best_position=None
         scores=[]
         first_neg=1
         for position,score in sites:
             scores.append(score)
-            #
             # Find the best position
-            #
+
             if score>best_score:
                 best_score=score
                 best_position=position
         return best_position
 
-    #
-    # -------
-    #
-
     def apply_primer(self):
         """Apply a primer to the DNA sequence"""
         selection=None
-        #
+
         # We only accept a single primer
-        #
-        if len(self.primers.curselection())>1:
-            import tkMessageBox
+        if len(self.primers.curselection())>1:            
             tkMessageBox.showinfo('Apply primer',
                                   'You can only apply a single primer at the time',
                                   parent=self.pDB_win)
             return
-        #
+
         # First a warning
-        #
-        import tkMessageBox
+
         if not tkMessageBox.askyesno('Apply primer',
                                      'I will apply the primer to the main DNA sequence\n\nDo you want to continue?.',
                                      parent=self.pDB_win):
             print 'I am not applying the primer!'
             return
-        #
-        # Apply the primer
-        #
-        #
+
         # First find the best binding site
-        #
+
         selection=int(str(self.primers.curselection()[0]))
         name_selected=self.primer_order[selection]
         this_primer=self.parent.data['primer_dict'][name_selected]
         this_primer['startpos']=self.align_primer(this_primer)
-        #
+
         # Apply the primer
-        #
         new_DNA=self.apply_primer_to_DNA(this_primer,self.parent.data['DNAseq'],this_primer['startpos'])
-        #
-        # Clear all EAT_DB specific records
-        #
+
+        # Clear all PEAT specific records
+
         self.parent.data['DNAseq_status']='ALTERED'
         self.parent.data['DNAseq_mutations']=self.mutations[:]
         self.parent.data['DNAseq']=new_DNA
-        #
+
         # Update the view
-        #
         self.parent.update_sequence_window()
         self.display_details()
         return
 
-    #
-    # -----------
-    #
-
     def apply_primer_to_DNA(self,this_primer,DNA_seq,position):
-        #
-        # Construct new DNA sequence
-        #
-        # If we have a negative position, then it's a reverse strand primer
-        #
+
+        """Construct new DNA sequence. If we have a negative position,
+           then it's a reverse strand primer"""
+
         if position<0:
             import mutation
             position=abs(int(position))
@@ -864,37 +811,28 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
             position=len(DNA_seq)-(position+len(repl_seq))
         else:
             repl_seq=this_primer['sequence']
-        #
+
         # Construct the new DNA
-        #
         new_DNA=DNA_seq[:position]+repl_seq+DNA_seq[position+len(repl_seq):]
         return new_DNA
-
-    #
-    # ----------
-    #
 
     def clear_pDB_objects(self):
         """Clear all objects that were displayed temporarily by primer_database functions
         Also clear the self.mutations variable"""
-        #
+
         # Delete all graphics that we constructed
-        #
         if not getattr(self.parent,'detailed_objs',None):
             self.parent.detailed_objs={}
         for obj in self.parent.detailed_objs.keys():
             self.parent.seqframe.delete(obj)
         self.parent.details_objs={}
-        #
+
         # Remove all the temporary restriction sites
-        #
         if getattr(self.parent,'temp_objs',None):
             for obj in self.parent.temp_objs.keys():
                 self.parent.seqframe.delete(obj)
             self.parent.temp_objs={}
-        #
-        # Another dict
-        #
+
         if getattr(self,'primer_objs',None):
             for obj in self.primer_objs.keys():
                 self.parent.seqframe.delete(obj)
@@ -902,15 +840,8 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
         #also remove rects and lines for temp sites
         self.parent.seqframe.delete('templabelrect')
         self.parent.seqframe.delete('templine')
-        #
-        # Clear the mutations variable
-        #
         self.mutations=[]
         return
-
-    #
-    # ----------
-    #
 
     def close_pDB(self,event=None):
         """Close the primer database and clean up the display"""
@@ -918,20 +849,16 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
         print 'closing pdb window'
         self.clear_pDB_objects()
         self.parent.primer_displayed==0
-        #
+
         # Close window
-        #
         self.pDB_win.destroy()
-        #
+
         # Reset the variable in the parent
-        #
         self.parent.pDB_open=None
         return
 
-
     def load_primerDB(self,overwrite=1):
         """Load a new primer database"""
-        import tkFileDialog, os
         initialdir=os.getcwd()
         filename=tkFileDialog.askopenfilename(defaultextension='primerDB',
                                               initialdir=initialdir,
@@ -940,16 +867,14 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
         if not filename:
             return
 
-        # Load a simple pickled file (for now)
+        # Load a simple pickled file
 
-        import pickle
         fd=open(filename,'rb')
         pdict=pickle.load(fd)
         fd.close()
 
         # Should we overwrite the existing primers?
         if overwrite:
-            import tkMessageBox
             '''ans = tkMessageBox.askyesno("Overwrite primer database?",
                      "This will overwrite all primers you have in the primer datbase.\nAre you sure you want to continue?")'''
             from PEATDB.Dialogs import askyesnocancel
@@ -966,7 +891,7 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
 
     def load_from_text(self,overwrite=1):
         """Load a new primer database from a csv text file"""
-        import tkFileDialog, os
+
         initialdir=os.getcwd()
         filename=tkFileDialog.askopenfilename(defaultextension='pdb.csv',
                                               initialdir=initialdir,
@@ -975,7 +900,6 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
         if not filename:
             return
         pdict={}
-        import csv
         reader = csv.reader(open(filename, "rb"))
         for row in reader:
             try:
@@ -983,11 +907,8 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
                 pdict[primer]={'description':row[1],'sequence':row[2]}
             except:
                 print 'failed to load'
-        #print pdict
 
-        #
         # Should we overwrite the existing primers?
-        #
         if overwrite:
             import tkMessageBox
             if tkMessageBox.askyesno("Overwrite primer database?",
@@ -996,33 +917,24 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
                 self.show_pDB_contents()
         return pdict
 
-    #
-    # ----
-    #
 
     def save_primerDB(self):
         """Save the primers to a file"""
-        import tkFileDialog, os
+
         savedir=os.getcwd()
         filename=tkFileDialog.asksaveasfilename(defaultextension='.primerDB',
                                                 initialdir=savedir,
                                                 filetypes=[("Primer database files","*.primerDB"),("All files","*.*")])
         if not filename:
             return
-        #
+
         # Write the file
-        #
         primers=self.parent.data['primer_dict'].copy()
         fd=open(filename,'wb')
         import pickle
         pickle.dump(primers,fd)
         fd.close()
         return
-
-
-    #
-    # ----
-    #
 
     def save_to_text(self,filename=None,separator=',',nodesc=None):
         """Save the primers to a csv text file. Same format as dump file"""
@@ -1035,9 +947,8 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
 
         if not filename:
             return
-        #
+
         # Write the file
-        #
         primers=self.parent.data['primer_dict'].copy()
         fd=open(filename,'wb')
 
@@ -1073,10 +984,6 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
         fd.close()
         return
 
-    #
-    # ----
-    #
-
     def add_primers_to_DB(self):
         """Add primers from a file"""
         pdict=self.load_primerDB(overwrite=None)
@@ -1094,10 +1001,6 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
         self.show_pDB_contents()
         return
 
-
-    #
-    # Add primers from a csv file
-    #
     def add_primers_from_text(self):
         """Add primers from a csv file"""
         pdict=self.load_from_text(overwrite=None)
@@ -1115,13 +1018,10 @@ class primer_database(primer_alignment.align_primer,PDBDumper):
         self.show_pDB_contents()
         return
 
-    #
-    # Write currently selected primers to a space-delimited file
-    #
+
     def write_current_primers(self,filename='current_order.txt'):
         """Write currently selected primers to a space-delimited file
            This is formatted to be uploaded to the MGW website for ordering"""
-        #self.save_to_text(filename='current_order.csv',separator=' ',nodesc=1)
 
         if not filename:
             print 'no filename given'

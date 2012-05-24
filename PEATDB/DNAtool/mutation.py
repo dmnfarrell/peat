@@ -27,11 +27,11 @@
 
 from Tkinter import *
 from seq_utils import *
-#
-# Data
-#
+import PEATDB.DNA_sequence as DNA_sequence
+import re, sys, os, string
+
 # conversion from three to one-letter code
-#
+
 three_to_one={'ALA':'A','CYS':'C','ASP':'D','GLU':'E','PHE':'F','GLY':'G','HIS':'H','ILE':'I',
               'LYS':'K','LEU':'L','MET':'M','ASN':'N','PRO':'P','GLN':'Q','ARG':'R','SER':'S',
               'THR':'T','VAL':'V','TRP':'W','TYR':'Y','***':'*'}
@@ -58,7 +58,7 @@ genetic_code={'TTT':'PHE', 'TTC':'PHE','TTA':'LEU','TTG':'LEU','TCT':'SER','TCC'
 
 def get_codons(AA):
     """Get all the codons that code for amino acid AA"""
-    import string
+    
     posskey = []
     for codon in genetic_code.keys():   
         if genetic_code[codon].upper()==AA.upper():
@@ -81,15 +81,11 @@ for key in three_to_one.keys():
 complementary={'A':'T','T':'A','C':'G','G':'C'}
 
 
-import re, sys, os, string
 try:
     from Numeric import *
 except:
     from numpy import *
 
-#
-# -----
-#
 
 class restriction_digest:
     """Class for performing restriction digests
@@ -1029,8 +1025,8 @@ def main():
     seq_file=params['seq']
     new_AA=params['mutation'][-1]
     AA_number=int(params['mutation'][1:-1])
-    sys.path.append('../EAT_DB/')
-    import DNA_sequence
+    
+    
     S=DNA_sequence.sequence()
     DNA_seq=S.readpir(seq_file)
     Tm_desired=params['Tm']

@@ -17,17 +17,20 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Contact information:
-# Email: Jens.Nielsen_at_gmail.com 
+# Email: Jens.Nielsen_at_gmail.com
 # Normal mail:
 # Jens Nielsen
 # SBBS, Conway Institute
 # University College Dublin
 # Dublin 4, Ireland
-# 
+#
 
 """Routines for evaluating and entering primers"""
 
 from Tkinter import *
+import tkMessageBox
+import mutation
+import primer_database
 
 class evaluate_primer:
 
@@ -39,14 +42,12 @@ class evaluate_primer:
 
     def do_evaluate_primer(self,parent=None,i_parent=None,edit_primer_seq=None,
             edit_primer_descr=None, edit_primer_name=None):
-        #
+
         # Import functions from primer_database
-        #
-        import primer_database
+
         self.pDB=primer_database.primer_database(i_parent=self,no_window=1)
-        #
+
         # Who is the parent?
-        #
         if not parent:
             parent=self.master
             self.i_parent=None
@@ -60,31 +61,31 @@ class evaluate_primer:
             self.eval_win.title('Edit primer')
         else:
             self.eval_win.title('Add primer')
-            
+
         self.eval_win.geometry('+%d+%d' %(parent.winfo_rootx()+50,
                                           parent.winfo_rooty()+50))
-                                          
-        
+
+
         # Create the string variables and attach them to entry widgets
-        
+
         self.primername_var=StringVar()
         lab=Label(self.eval_win,text='Primer Name:')
         lab.grid(row=0,column=0,sticky='news')
         Ebox=Entry(self.eval_win,textvariable=self.primername_var,width=50)
         Ebox.grid(row=0,column=1,columnspan=2,sticky='news')
-        
+
         self.eval_var=StringVar()
         lab=Label(self.eval_win,text='Sequence:')
         lab.grid(row=1,column=0,sticky='news')
         Ebox=Entry(self.eval_win,textvariable=self.eval_var,width=50)
         Ebox.grid(row=1,column=1,columnspan=2,sticky='news')
-        
+
         self.descr_var=StringVar()
         desclab=Label(self.eval_win,text='Description:')
         desclab.grid(row=2,column=0,sticky='news')
         Ebox=Entry(self.eval_win,textvariable=self.descr_var,width=50)
         Ebox.grid(row=2,column=1,columnspan=2,sticky='news')
-        
+
         #
         # Do recalculate and close buttons
         #
@@ -106,7 +107,7 @@ class evaluate_primer:
         else:
             addp=Button(self.eval_win,text='Save primer',command=self.save_primer)
         addp.grid(row=row,column=2,sticky='news')
-        
+
         #
         # Hairpin propensity
         row=row+1
@@ -272,23 +273,22 @@ class evaluate_primer:
 
     def close_eval(self,event=None):
         """Close the primer evaluation window"""
-        
-        # Clear all graphics        
+
+        # Clear all graphics
         if getattr(self,'pDB',None):
             self.pDB.clear_pDB_objects()
-        
-        # Close the window        
+
         self.eval_win.destroy()
         return
 
     def save_primer_from_edit(self, parent_window=None):
         """Save the primer in the DB when doing a primer Edit"""
         if not parent_window:
-            parent_window=self.eval_win
-        #
+            parent_window = self.eval_win
+
         # Check if the primer name has been changed first, and ask for confirmation of rename
-        #        
-        if self.primername_var.get() != self.edit_primer_name or not self.edit_primer_name:  
+
+        if self.primername_var.get() != self.edit_primer_name or not self.edit_primer_name:
             import tkMessageBox
             ok = tkMessageBox.askyesno('Primer Name altered',
                                        'Rename primer and save?\n',
@@ -296,7 +296,7 @@ class evaluate_primer:
             if not ok:
                 self.primername_var.set(self.edit_primer_name)
                 return
-            #rename primer based on value in entry widget    
+            #rename primer based on value in entry widget
             else:
                 new_name=self.primername_var.get()
                 if new_name:
@@ -304,105 +304,92 @@ class evaluate_primer:
                     if not self.data['primer_dict'].has_key(new_name):
                         self.data['primer_dict'][new_name]=self.data['primer_dict'][self.edit_primer_name].copy()
                         del self.data['primer_dict'][self.edit_primer_name]
-                        self.edit_primer_name = new_name 
+                        self.edit_primer_name = new_name
                         self.i_parent.new_name = new_name
                     #otherwise don't allow rename
                     else:
                         tkMessageBox.showwarning('Primer name already present',
                                      'Primer name already present.\nPlease choose another name',
                                      parent=parent_window)
-                        return          
+                        return
 
-        #
+
         # Update the sequence and description fields for the primer
-        #
         DNA=self.eval_var.get()
         # Validation check if primer is changed (maybe by mistake)
-        if not DNA:            
+        if not DNA:
             ok = tkMessageBox.askyesno('No sequence entered',
                                         'No sequence entered.\nDo you wish to save anyway?',
                                         parent=parent_window)
             if not ok:
                 return
-                
+
         import mutation
         ok,DNA_sequence=mutation.check_DNA(DNA)
-        self.data['primer_dict'][self.edit_primer_name]['sequence']=DNA_sequence        
+        self.data['primer_dict'][self.edit_primer_name]['sequence']=DNA_sequence
         self.data['primer_dict'][self.edit_primer_name]['description']=self.descr_var.get()
-        # debug line
+
         #print 'Primer Info:',self.edit_primer_name,self.data['primer_dict'][self.edit_primer_name]
-        #
+
         # Clear all graphics
-        #
         if getattr(self,'pDB',None):
             self.pDB.clear_pDB_objects()
-        #
+
         # Close the window
-        #
         self.eval_win.destroy()
         return
 
-    #
-    # Saves primers to database
-    #
+    def save_primer(self,parent_window=None,openpdbWin=None, this_primer=None,
+                        calledby=None ):
+        """Saves primers to database"""
 
-    def save_primer(self,parent_window=None,openpdbWin=None,this_primer=None,calledby=None ):
-        #
         # Get the parent window right
-        #
         if not parent_window:
             parent_window=self.eval_win
-        #
+
         # Save the primer to the primer library
-        #
         if not self.data.has_key('primer_dict'):
             self.data['primer_dict']={}
-        #
+
         # Find the next unique name
-        #
         for x in range(1000):
             nextname='primer_%3d' %x
             if not self.data['primer_dict'].has_key(nextname):
                 break
-        #
+
         # Get a name for the primer
         # If calling from primer design just use little dialog, otherwise use
-        #
+
         if calledby=='from design':
             print 'Saving primer from design window'
             done=None
-            result=self.get_text_input(parent_window,[['name',20],['description',30]])
+            result = self.get_text_input(parent_window,[['name',20],['description',30]])
             if not result:
-                #
-                # User pressed Cancel
-                #
                 return None
             primer_name=result[0]
             description=result[1]
         else:
             primer_name=self.primername_var.get()
             description=self.descr_var.get()
-            
+
         if not primer_name:
-            import tkMessageBox
             tkMessageBox.showwarning('Invalid primer name',
                                      'I need a real primer name to store this primer',
                                      parent=parent_window)
             return
-                
+
         print 'Setting name to',primer_name
-        print 'Setting description to',description    
-        
-        # Store the primer        
+        print 'Setting description to',description
+
+        # Store the primer
         if not this_primer:
             DNA=self.eval_var.get()
-            if not DNA:
-                import tkMessageBox
+            if not DNA:                
                 ok = tkMessageBox.askyesno('No sequence entered',
                                             'No sequence entered.\nDo you wish to save anyway?')
                 if not ok:
                     return
-            import mutation
+
             ok,sequence=mutation.check_DNA(DNA)
             if ok:
                 self.data['primer_dict'][primer_name]={'description':description,'sequence':sequence,'startpos':None,
@@ -415,36 +402,33 @@ class evaluate_primer:
                 parent_window.destroy()
                 print 'Primer Info:',self.data['primer_dict'][primer_name]
             else:
-                import tkMessageBox
                 tkMessageBox.showwarning('Invalid primer','Cannot store an invalid primer',parent=parent_window)
                 return
         else:
-            
-            #  If we already have all the data then save it            
+            # If we already have all the data then save it
             this_primer['description']=description
             self.data['primer_dict'][primer_name]=this_primer.copy()
             self.primer_save_ok(primer_name,parent_window)
-        
-        # Clear all the graphics        
+
+        # Clear all the graphics
         if getattr(self,'pDB',None):
             self.pDB.clear_pDB_objects()
-            
-        # If calling from mutagenic design, handle refresh of pdb here    
-        if calledby=='from design' and openpdbWin!=None:
+
+        # If calling from mutagenic design, handle refresh of pdb here
+        if calledby == 'from design' and openpdbWin != None:
             openpdbWin.show_pDB_contents()
             openpdbWin.highlight_primer(primer_name)
             openpdbWin.display_details()
-
-        return 
+        return
 
     def primer_save_ok(self,primer_name,parent_window):
-        
-        # Show info        
-        import tkMessageBox
-        tkMessageBox.showinfo('Primer saved','Primer %s saved to the Primer Database' %primer_name,parent=parent_window)
-        
-        # Mark that we need to save the project        
+
+        # Show info
+        tkMessageBox.showinfo('Primer saved',
+                    'Primer %s saved to the Primer Database' %primer_name,parent=parent_window)
+
+        # Mark that we need to save the project
         self.data['Project saved']=None
         self.assess_status()
         return
-        
+

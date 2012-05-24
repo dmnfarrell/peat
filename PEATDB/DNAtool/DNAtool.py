@@ -512,7 +512,7 @@ class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
             stop=self.data['ORF_selected']['stop']
         return
 
-    def projectChanged():
+    def projectChanged(self):
         self.data['Project saved']=None
         self.assess_status()
         return
@@ -928,21 +928,17 @@ class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
         for base in self.data['DNAseq']:
             comDNA=comDNA+compl[base]
         self.data['DNAseq']=comDNA
-        #
+
         # Update
-        #
         self.update_sequence_window()
         return
 
 
     def warning(self,text1,text2):
-        """
-        Show a warning
-        """
+        """Show a warning"""
         import tkMessageBox
         tkMessageBox.showwarning(text1,text2)
         return
-
 
     def quit(self,event=None):
         """
@@ -1180,9 +1176,8 @@ class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
                 self.warning('No DNA sequence loaded','Load a DNA sequence first')
                 self.overview_button.deselect()
                 return
-            #
+
             # Open Canvas and draw lines
-            #
             self.overview_win=Toplevel()
             self.overview_win.geometry('300x100+400+350')
             self.overview_win.title('Open reading frames')
