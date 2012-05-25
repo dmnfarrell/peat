@@ -26,6 +26,7 @@
 # 
 
 from Tkinter import *
+import tkMessageBox
 
 class DNA_Edit:
 
@@ -170,13 +171,13 @@ class DNA_Edit:
 
     def start_selection(self,event=None):
         """Start selecting a sequence"""
-
+       
         if not self.data['DNAseq']:
             return
         self.clear_selection()
         # find the base clicked
-        x=self.seqframe.canvasx(event.x)
-        y=self.seqframe.canvasy(event.y)
+        x = self.seqframe.canvasx(event.x)
+        y = self.seqframe.canvasy(event.y)
         position=self.get_DNApos_fromcoords(x,y)
         if position==None or position<0 or position>len(self.data['DNAseq']):
             return
@@ -250,7 +251,7 @@ class DNA_Edit:
                     self.seqframe.xview('scroll',1,'units')
                 elif event.x<5:
                     self.seqframe.xview('scroll',-11,'units')
-
+        
         # Does anyone else want to know about this?
         if getattr(self,'routine_call_DNAselection',None):
             (self.routine_call_DNAselection)()
@@ -339,10 +340,9 @@ class DNA_Edit:
         self.cut_DNA(delete=1)
         return
 
-    def copy_DNA(self,event=None):
-        #
-        # Cut the selected DNA stretch
-        #
+    def copy_DNA(self,event=None):        
+        """Copy the selected DNA stretch"""
+        
         if self.data.has_key('DNA_selection'):
             if not self.data['DNA_selection']['active']:
                 start=self.data['DNA_selection']['start']
@@ -350,16 +350,15 @@ class DNA_Edit:
                 c_start=min(start,stop)
                 c_end=max(start,stop)
                 self.data['DNAclipboard']=self.data['DNAseq'][c_start:c_end]
-                #
-                # Mark it
-                #
+                
+                # Mark it                
                 self.mark_base_selection(self.data['DNA_selection']['start'],
                                          self.data['DNA_selection']['stop'],freeze=1)
-                #
-                # Add to clipboard
-                #
+                
+                # Add to clipboard                
                 self.master.clipboard_clear()
                 self.master.clipboard_append(self.data['DNAclipboard'])
+        
         return
 
 
@@ -377,7 +376,7 @@ class DNA_Edit:
         DNA=['A','C','G','T','a','c','g','t']
         for letter in text:
             if not letter in DNA:
-                import tkMessageBox
+                
                 tkMessageBox.showwarning('Invalid DNA sequence',
                                          '"%s" is not a valid DNA sequence. \n"%s" is first illegal base.' %(text,letter),
                                          parent=self.master)

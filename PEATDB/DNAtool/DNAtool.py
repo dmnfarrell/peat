@@ -284,23 +284,12 @@ class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
         """Initialise the Tk variables"""
 
         for key in self.defaultprefs:
-            print key
             value = self.defaultprefs[key]
             if type(value) is types.IntType:
                 var = self.__dict__[key] = IntVar()
             elif type(value) is types.StringType:
                 var = self.__dict__[key] = StringVar()
             var.set(value)
-
-        '''self.base_scale_input = IntVar()
-        self.base_scale_input.set(10)
-        self.seqfont_input = StringVar()
-        self.seqfont_input.set('Courier')
-        self.seqfontsize_input = IntVar()
-        self.fontstyle_input = IntVar()
-        self.fontstyle_input.set(1)
-        self.restr_site_font_input = StringVar()
-        self.restr_site_font_input.set('Arial')'''
 
         self.resnum = IntVar()
         self.resnum.set(1)
@@ -314,10 +303,8 @@ class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
         return
 
     def resize(self,event):
-        """
-        Make sure the visible portion of the canvas is resized with the
-        window
-        """
+        """  Make sure the visible portion of the canvas is resized with the
+        window    """
         if event.widget==self.master:
             Y=event.height
             X=event.width
@@ -342,9 +329,8 @@ class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
         self.file_menu.add_command(label='Save Project As',command=self.project_saveas)
         self.file_menu.add_command(label='Exit',command=self.quit)
         self.menu.add_cascade(label='File',menu=self.file_menu)
-        # -----------------------------------------------
+
         # Sequence menu
-        #
         self.seqmenu={'01Open':{'cmd':self.dnaseq_read},
                       '02Save':{'cmd':self.save_dnaseq},
                       '03Save As':{'cmd':self.save_dnaseq},
@@ -355,27 +341,25 @@ class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
                       '08Paste':{'cmd':self.paste_DNA,'sc':'Ctrl+V'},
                       '09Delete':{'cmd':self.delete_DNA,'sc':'Del'}}
         self.seqmenu=self.create_pulldown(self.menu,self.seqmenu)
-        #
+
         # Invert sequence
-        #
         self.invert_seq_var=IntVar()
         self.invert_seq_var.set(0)
         self.seqmenu['var'].add_checkbutton(label='Invert',
                                             command=self.invert_seq,
                                             variable=self.invert_seq_var,onvalue=1,offvalue=0)
-        #
+
         # Complementary seq
-        #
         self.complement_seq_var=IntVar()
         self.complement_seq_var.set(0)
         self.seqmenu['var'].add_checkbutton(label='Complementary',
                                             command=self.complementary_seq,
                                             variable=self.complement_seq_var,onvalue=1,offvalue=0)
-        #
+
         # Set restriction digest parameters
-        #
         self.seqmenu['var'].add_command(label="Configure restriction digest",command=self.win_select_enzymes)
         self.seqmenu['var'].add_separator()
+
         # Option to set spacing of bases, if needed
         self.seqmenu['var'].add_command(label="Sequence Display Setup",command=self.seq_display_settings)
         self.seqmenu['var'].add_separator()
@@ -395,13 +379,11 @@ class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
         self.seqmenu['var'].add_radiobutton(label="Colour in threes", command=self.update_sequence_window,
                                             variable=self.colour_seq_var, value=2)
 
-        #
+
         # Add the self.sequence_menu to the main menu
-        #
         self.menu.add_cascade(label='DNA Sequence',menu=self.seqmenu['var'])
-        # -----------------------------------------------
+
         # Primer menu
-        #
         self.primer_menu=Menu(self.menu,tearoff=0)
         self.primer_menu.add_command(label='PCR primers',command=self.design_PCR_primer)
         self.primer_menu.add_command(label='Mutagenic primer',command=self.design_mutagenic_primer)
@@ -518,24 +500,27 @@ class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
         return
 
     def init_bindings(self):
+        """Bindings"""
         self.seqframe.bind("<Button-1>",self.handle_left_click)
         self.seqframe.bind("<ButtonRelease-1>",self.handle_left_release)
         self.seqframe.bind("<Button-3>",self.handle_right_click)
         self.seqframe.bind("<ButtonRelease-3>",self.handle_right_release)
 
         self.seqframe.bind("<Shift-Button-1>", self.handle_left_shift_click)
+        self.seqframe.bind("<Shift-ButtonRelease-1>", self.handle_left_shift_release)
         self.seqframe.bind("<B3-Motion>", self.handle_right_motion)
 
         #self.seqframe.bind("<Button-3>", self.show_item)
         #self.seqframe.bind("<ButtonRelease-3>",self.remove_label)
         #self.seqframe.bind_all("<Control-KeyPress-x>",self.cut_DNA)  # Cut
-        #self.seqframe.bind_all("<Control-KeyPress-c>",self.copy_DNA) # Copy
-        #self.seqframe.bind_all("<Control-KeyPress-v>",self.paste_DNA) # Paste
+        self.seqframe.bind_all("<Control-KeyPress-c>", self.copy_DNA) # Copy
+        self.seqframe.bind_all("<Control-KeyPress-v>",self.paste_DNA) # Paste
         #self.seqframe.bind_all("<Delete>",self.delete_DNA) # Delete
         return
 
     def handle_left_click(self,event):
         """handle left mouse press on canvas"""
+
         c = self.seqframe
         if 'textlabel' in c.gettags(CURRENT):
             self.show_item(event)
@@ -543,6 +528,7 @@ class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
             self.show_sequence_label(event)
         else:
             self.start_selection(event)
+        return
 
     def handle_left_release(self,event):
         """handle left mouse release on canvas"""
@@ -551,14 +537,19 @@ class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
             self.remove_recog_label(event)
         elif 'comparison_seq' in c.gettags(CURRENT):
             self.remove_seq_label(event)
-        #else:
-        #    self.end_selection(event)
+        elif 'DNA_selection' in self.data.keys():
+            if self.data['DNA_selection']['start'] != self.data['DNA_selection']['stop']:
+                self.end_selection(event)
         return
 
     def handle_left_shift_click(self, event):
         """handle shift left click for seq selection"""
+        #placeholder to prevent handle_left_click being called
+        return
+
+    def handle_left_shift_release(self, event):
         self.extend_selection(event)
-        #self.end_selection(event)
+        self.end_selection(event)
         return
 
     def handle_right_click(self, event):
