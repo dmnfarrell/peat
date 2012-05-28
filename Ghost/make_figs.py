@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-import numpy 
+import numpy
+import numpy.linalg
 import matplotlib.pyplot as plt
     
 #
@@ -251,9 +252,12 @@ class ghost_analyzer:
                     # Deal with range
                     #
                     exp_value,exp_error=self.interpret_ranges(thisval,nucleus)
+                    #
                     # convert to kJ/mol
-                    exp_value=EF.get_energy(exp_value,'%s:%s' %(residue,nucleus),titgroup)
-                    vals.append([exp_value,exp_error,nucleus])
+                    #
+                    exp_value,angle_degrees=EF.get_energy(exp_value,'%s:%s' %(residue,nucleus),titgroup)
+                    if abs(90.0-angle_degrees)>10.0 and abs(270-angle_degrees)>10.0:
+                        vals.append([exp_value,exp_error,nucleus])
                 Edict[titgroup][residue]=vals[:]
         #
         # Load PDB file 
@@ -323,57 +327,125 @@ class ghost_analyzer:
         # Now for the more reasonable stuff
         #
         if self.options.remotecharge:
+            bigx=[]
+            bigy=[]
             #
             # Load the complex
+            # Find the atoms that are close enough to use for phi sampling
             #
             import Protool
             CPI=Protool.structureIO()
             CPI.readpdb('lysmgm2.pdb')
-            TSatom='J:0130:C1'
+            TSatoms=[['J:0130:C1',+1.0],[':0035:OE2',-1.0]]
             TSdists={}
-            for residue in CPI.residues.keys():
-                if residue[0]=='J':
-                    continue
-                dist1=CPI.dist('%s:N' %residue,TSatom)
-                dist2=CPI.dist('%s:N' %residue,':0035:OE1')
-                if min(dist1,dist2)<15.0:
-                    TSdists[residue]=min(dist1,dist2)
-            xs=[]
-            ys=[]
-            print 'Mutation,Ghost,ddGcat'
-            for resnum,mutation,ddG in cat:
-                if int(resnum)==35:
-                    continue
-                import string
-                residue=':%s' %(string.zfill(resnum,4))
-                thisTG='%s:%s' %(residue,PI.resname(residue))
-                if Edict.has_key(thisTG):
-                    thismut=[]
-                    for actres in TSdists.keys(): #[':0035',':0109',':0057',':0058']:
-                        if Edict[thisTG].has_key(actres):
-                            for exp_value,exp_error,atom in Edict[thisTG][actres]:
-                                print thisTG,actres,exp_value
-                                thismut.append(TSdists[actres]/sum(TSdists.values())*exp_value)
-                    #
-                    # Calculate weighted average
-                    #
-                    if len(thismut)>0:
-                        exp_value=sum(thismut)
-                        xs.append(abs(exp_value))
-                        ys.append(abs(ddG))
-                        print '%7s, %5.2f %5.2f' %(mutation,abs(exp_value),abs(ddG))
-                                
-                    #print 'Mut: %7s, ddGcat: %5.1f, Ghost: %5.1f, actres: %s' %(mutation,ddG,exp_value,actres)
-
+            for TSatom,charge in TSatoms:
+                TSdists[TSatom]={}
+                for residue in CPI.residues.keys():
+                    if residue[0]=='J':
+                        continue
+                    dist=CPI.dist('%s:N' %residue,TSatom)
+                    if dist<15.0:
+                        TSdists[TSatom][residue]=[dist,charge]
+            #
+            # Calculate and plot
+            #
             import pylab
-            pylab.plot(xs,ys,'bo')
-            pylab.xlabel('Ghost energy (kJ/mol)')
-            pylab.ylabel('ddGcat (kJ/mol)')
-            #pylab.legend()
+            print 'Mutation,Ghost,ddGcat'
+            muts=[]
+            minx=0.0
+            maxx=0.0
+            count=0
+            symbol='o'
+            import pylab
             
+            for TG in sorted(Edict.keys()):
+                count=count+1
+                if count>7:
+                    symbol='+'
+                xs=[]
+                ys=[]
+                for resnum,mutation,ddG in cat:
+                    if int(resnum)==35:
+                        continue
+                    import string
+                    residue=':%s' %(string.zfill(resnum,4))
+                    thisTG='%s:%s' %(residue,PI.resname(residue))
+                    if thisTG!=TG:
+                        continue
+                    if Edict.has_key(thisTG):
+                        thismut=[]
+                        #
+                        # Calculate the total energy for this mutant
+                        #
+                        for TSatom in TSdists.keys():
+                            thisTSatom=[]
+                            
+                            #
+                            # Get the sum of distances so we can scale
+                            #
+                            sumdist=0.0
+                            for res in TSdists[TSatom].keys():
+                                distance=TSdists[TSatom][res][0]
+                                sumdist=sumdist+distance
+                            #
+                            # Now calculate the field for each observed ghost
+                            #
+                            for actres in TSdists[TSatom].keys():
+                                distance=TSdists[TSatom][actres][0]
+                                charge=TSdists[TSatom][actres][1]
+                                #print actres,distance,charge
+                                if Edict[thisTG].has_key(actres):
+                                    for exp_value,exp_error,atom in Edict[thisTG][actres]:
+                                        charge=TSdists[TSatom][actres][1]
+                                        distance=TSdists[TSatom][actres][0]
+                                        thisTSatom.append(charge*distance/sumdist*exp_value)
+                            #
+                            # Calculate weighted average
+                            #
+                            exp_value=0.0
+                            if len(thisTSatom)>0:
+                                exp_value=sum(thisTSatom)
+                            #print thisTSatom
+                            thismut.append(exp_value)
+                    #
+                    # Add up the contributions of all the TSatoms
+                    #
+                    total=0.0
+                    for val in thismut:
+                        total=total+val
+                    xs.append(total)
+                    ys.append(ddG)
+                    #print '%7s, %5.2f %5.2f' %(mutation,abs(exp_value),abs(ddG))
+                                
+                    
+
+                minx=min([minx]+xs)
+                maxx=max([maxx]+xs)
+                if len(xs)>0:
+                    bigx=bigx+xs
+                    bigy=bigy+ys
+                    pylab.plot(xs,ys,symbol,label=TG,linewidth=2,markersize=10,mew=2)
+            pylab.xlabel('TS Electrostatic energy (kJ/mol)')
+            pylab.ylabel(r'$\Delta\Delta{G}_{cat}$ (kJ/mol)')
+            print 'maxx,minx',maxx,minx
+            pylab.legend(title='Mutated group',loc=5)
+            pylab.plot([minx,maxx],[minx,maxx],'g-',linewidth=2)
+            pylab.plot([minx,maxx],[0,0],'b-',linewidth=2)
             pylab.title('Correlation between ghosts and change in activity')
-            pylab.plot([0,2],[0,2],'r-')
-            #pylab.xlim([-1,7])
+            #
+            # do linear least squares fit
+            #
+            x=numpy.array(bigx)
+            A=numpy.vstack([x,numpy.ones(len(x))]).T
+            y=numpy.array(bigy)
+            solution=numpy.linalg.lstsq(A,y)
+            m,c=solution[0]
+            print solution[1]
+            pylab.plot(x,m*x+c,'r-.',linewidth=1)
+            
+            #pylab.xlim([-1,4])
+            #pylab.ylim([-2,4])
+            pylab.savefig('ddGcat.png',dpi=300)
             pylab.show()   
         return
                 

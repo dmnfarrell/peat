@@ -57,10 +57,17 @@ class map_struct(EM_effect.EM_effect):
         #
         # Angle is in radians
         #
-        energy=float(dCS)/(NSP[atom_type]*e*ppm_au*cos_angle*1E6*NA*1000.0)
-        if abs(energy)>15.0:
-            print atom,dCS,energy
-        return energy
+        charge=False
+        ttype=titgroup.split(':')[-1]
+        if ttype.upper() in ['ASP','GLU','TYR','SER','C-TERM']:
+            charge=-1
+        else:
+            charge=1
+        energy=float(dCS)/(NSP[atom_type]*charge*e*ppm_au*cos_angle*NA)*(distance/1E10)
+        #if abs(energy)>15.0:
+        #    print atom,dCS,energy
+        import math
+        return energy,math.degrees(math.acos(cos_angle))
         
         
     #
