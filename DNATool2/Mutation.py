@@ -26,7 +26,6 @@
 # 
 
 from Tkinter import *
-from seq_utils import *
 import PEATDB.DNA_sequence as DNA_sequence
 import re, sys, os, string
 
