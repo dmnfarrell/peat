@@ -22,4 +22,31 @@
 """Test functions for DNATool"""
 
 import os, sys, types
+from Bio.Seq import Seq
+from Bio.SeqRecord import SeqRecord
+from Bio.Alphabet import generic_protein
+from Bio import SeqIO, AlignIO
+from Bio.SeqRecord import SeqRecord
+
+def writeFastaFile(sequences):
+    recs=[]
+    for s in sequences:
+        recs.append(SeqRecord(Seq(s)))
+    SeqIO.write(recs, "test.faa", "fasta")
+    return
+
+def clustalAlignment(filename):
+    from Bio.Align.Applications import ClustalwCommandline
+    cline = ClustalwCommandline("clustalw", infile=filename)
+    print 'performing alignment..'    
+    stdout, stderr = cline()
+    align = AlignIO.read("test.aln", "clustal")
+    '''print align
+    from Bio import Phylo
+    tree = Phylo.read("test.dnd", "newick")
+    Phylo.draw_ascii(tree)'''
+    return align
+
+clustalAlignment('test.faa')
+
 

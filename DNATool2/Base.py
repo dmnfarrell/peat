@@ -29,7 +29,7 @@ import platform
 import random
 import Utilities
 import Mutation
-from PEATDB.Prefs import Preferences
+from Prefs import Preferences
 import Dialogs
 
 class Project(object):
@@ -309,7 +309,7 @@ class SequenceCanvas(Pmw.ScrolledCanvas):
                                     slant="italic")
         return seqfont
 
-    def showSequence(self, sequence=None, row=None):
+    def showSequence(self, sequence=None, row=None, tag=None):
         """Show sequence"""
         if sequence == None:
             return
@@ -326,6 +326,8 @@ class SequenceCanvas(Pmw.ScrolledCanvas):
             item = c.create_text(pos,row,
                             font=seqfont,text=seq[i],
                             fill='black',anchor='w',tag=('seqtext','sequence'))
+            if tag != None:
+                c.itemconfig(i, tag=tag)
         self.seqend = self.getBasePosition(len(seq))-self.seqstart
         self.colorSequence()
         self.drawSeqBackground()
@@ -335,14 +337,26 @@ class SequenceCanvas(Pmw.ScrolledCanvas):
 
     def showMultiple(self):
         """Show multiple sequences aligned to the base one"""
-        print self.alignedsequences
+        #print self.alignedsequences
+        self.clearMultiple()
+        #move restr sites up 
+        self.clearRestrictionSites()
         if len(self.alignedsequences) == 0:
             return
-        row = self.baserow - 30
+        row = self.baserow - 25
         for s in self.alignedsequences:
-            self.showSequence(s, row)
+            self.showSequence(s, row, tag='aligned')
+            row-=15
+
         return
-            
+      
+    def clearMultiple(self):
+        """Clear multiple sequences"""
+        c = self.canvas
+        c.delete('aligned')
+        self.update()
+        return
+      
     def showAASeq(self):
 
         return
@@ -434,12 +448,12 @@ class SequenceCanvas(Pmw.ScrolledCanvas):
             done.append(pos[0])
             x = self.getBasePosition(pos[0])
             y = self.baserow-self.siterowstart
-            text = self.create_text(x,y,text=name,tags=(uid,'sitelabel'),
+            text = self.create_text(x,y,text=name,tags=(uid,'sitelabel','restrsite'),
                                         font=font,anchor='nw')
 
             x1,y1,x2,y2 = box = c.bbox(text)
             rect = c.create_rectangle(box,fill=fill,outline='gray',
-                                        tags=(uid,'rect'))
+                                        tags=(uid,'rect','restrsite'))
             items = c.find_withtag(uid)
             overlapping = c.find_overlapping(x1,y1,x2,y2)[:-2]
             #print pos, items, overlapping
@@ -467,11 +481,11 @@ class SequenceCanvas(Pmw.ScrolledCanvas):
                 c.delete(i)
         line = c.create_line(x1,y1,x1,y2, fill='blue',
                               width=2,stipple='gray25',
-                              tag=(uid,'line'))
+                              tag=(uid,'line','restrsite'))
         c.tag_lower(line)
         line = c.create_line(x1,y2,x2,y2, fill='blue',
                               width=2,stipple='gray25',
-                              tag=(uid,'line'))
+                              tag=(uid,'line','restrsite'))
         c.tag_lower(line)
         return
 
@@ -480,7 +494,6 @@ class SequenceCanvas(Pmw.ScrolledCanvas):
         items = c.find_withtag(name)
         for i in items:
             c.move(i, 0, y)
-
         return
 
     def showRestrictionSites(self, enzymes=None, cutpos=None):
@@ -493,7 +506,14 @@ class SequenceCanvas(Pmw.ScrolledCanvas):
             if cutpos.has_key(e):
                 positions = cutpos[e]
                 r = self.drawRestrictionSite(e, positions)
-        print self.restrictionsites
+        
+        return
+
+    def clearRestrictionSites(self):
+        """Clear all restriction sites"""
+        c = self.canvas
+        #print c.find_withtag('restrsite')        
+        c.delete('restrsite')        
         return
 
     def getBasePosition(self, pos):
@@ -555,7 +575,7 @@ class SequenceCanvas(Pmw.ScrolledCanvas):
         curr = {}
         for key in self.defaultprefs:
             curr[key] = self.__dict__[key]
-        dlg = self.prefsdialog = PrefsDialog(fr, self, options=self.defaultopts,
+        dlg = self.prefsdialog = Dialogs.PrefsDialog(fr, self, options=self.defaultopts,
                                     defaults=curr, callback=func)
         dlg.pack(fill=BOTH,expand=1)
         fr.geometry(dlg.geometry)
@@ -629,12 +649,4 @@ class ORFOverview(Frame):
     def getBasePosition(self, pos):
         return self.xstart + float(pos) * self.scale
 
-class PrefsDialog(Dialogs.GenericDialog):
-    def __init__(self, parent, parentapp=None, options=[], defaults=None, callback=None):
-        self.geometry = '300x300+500+250'
-        self.parentapp = parentapp
-        Dialogs.GenericDialog.__init__(self, parent, options, defaults, callback)
-        b=Button(self.buttonframe, text='Save', command=self.parentapp.savePrefs)
-        b.pack(side=LEFT,fill=X,expand=1,padx=1,pady=1)
-        return
 

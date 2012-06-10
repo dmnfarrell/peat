@@ -156,6 +156,15 @@ class GenericDialog(Frame):
         self.parent.destroy()
         return
 
+class PrefsDialog(GenericDialog):
+    def __init__(self, parent, parentapp=None, options=[], defaults=None, callback=None):
+        self.geometry = '300x300+500+250'
+        self.parentapp = parentapp
+        GenericDialog.__init__(self, parent, options, defaults, callback)
+        b=Button(self.buttonframe, text='Save', command=self.parentapp.savePrefs)
+        b.pack(side=LEFT,fill=X,expand=1,padx=1,pady=1)
+        return
+
 def openFilename(parent, ext=['txt'], savedir=None):
     if not type(ext) is types.ListType:
         ext=[ext]

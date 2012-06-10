@@ -33,6 +33,7 @@ from Primer import PrimerDatabase, PrimerDBGUI, PrimerDesignGUI
 from SeqIO import SequenceLoader
 import RestrictionDigest
 import Images
+from Prefs import Preferences
 from Editor import TextEditor
 
 class App(Frame, GUI_help):
@@ -51,19 +52,45 @@ class App(Frame, GUI_help):
             self.main=Toplevel()
             self.master=self.main
         self.main.title('DNATool Desktop')
+        self.main.protocol('WM_DELETE_WINDOW',self.quit)
+
+        self.defaultprefs = {'rememberwindowsize':0,'orientation':'horizontal',}
+        self.defaultopts = [('rememberwindowsize','checkbutton',1,'Remember window size'),
+                            ('orientation','menu',('horizontal','vertical'),
+                            'Default sideframe orientation')]
+        self.loadPrefs()
+        self.setGeometry()
+        self.P = Project()
+        self.primerdb = PrimerDatabase()
+        self.setupApps()
+        self.setupGUI()
+        self.sidepane.selectpage('PrimerDB')        
+        return
+
+    def setGeometry(self):
+        if self.rememberwindowsize == 1 and self.preferences.has_key('lastwindowsize'):            
+            lastwindowsize = self.preferences.get('lastwindowsize')
+            self.winsize = lastwindowsize
+            #self.w = int(lastwindowsize.split('x')[0]) 
+        else:
+            self.winsize = self.getBestGeometry()        
+        self.main.geometry(self.winsize)       
+       
+        return
+
+    def getBestGeometry(self):
+        """Calculate optimal geometry from screen size"""
         ws = self.main.winfo_screenwidth()
         hs = self.main.winfo_screenheight()
         self.w=w=ws/1.3; h=500
         x = (ws/2)-(w/2); y = (hs/2)-(h/2)
-        self.main.geometry('%dx%d+%d+%d' % (w,h,x,y))
-        self.main.protocol('WM_DELETE_WINDOW',self.quit)
-        self.orientation = 'horizontal'
-        self.P = Project()
-        self.primerdb = PrimerDatabase()
-        self.setupApps()
-        self.setupVars()
-        self.setupGUI()
-        self.sidepane.selectpage('PrimerDB')
+        g = '%dx%d+%d+%d' % (w,h,x,y)
+        return g
+
+    def saveGeometry(self): 
+        """Save current geometry before quitting"""       
+        g = self.main.geometry()
+        self.preferences.set('lastwindowsize', g)   
         return
 
     def setupApps(self):
@@ -73,13 +100,33 @@ class App(Frame, GUI_help):
                      'ORF Overview': ORFOverview,
                      'Sequence Loader':SequenceLoader,
                      'Restriction Digest Summary': RestrictionDigestSummary,
-                     'NotePad': TextEditor,
-                     'Preferences': PrefsDialog}
+                     'NotePad': TextEditor}
         return
 
-    def setupVars(self):
-        """tk vars"""
+    def loadPrefs(self):
+        """Load prefs from a preferences instance"""
+        self.preferences = Preferences('DNATool2',{})
+        temp = {}
+        for key in self.defaultprefs:
+            if not key in self.preferences.prefs:
+                self.preferences.set(key, self.defaultprefs[key])
+            temp[key] = self.preferences.get(key)
+        self.applyPrefs(temp)
+        return
 
+    def savePrefs(self):
+        """Save prefs to a preferences instance"""
+        self.applyPrefs(self.prefsdialog.getValues())
+        self.preferences = Preferences('DNATool2',{})  
+        for key in self.defaultprefs:            
+            self.preferences.set(key, self.__dict__[key])        
+        return
+
+    def applyPrefs(self, prefs=None):
+        """Apply prefs from a given dict"""
+        if prefs == None: prefs=self.defaultprefs
+        for key in prefs:            
+            self.__dict__[key] = prefs[key]           
         return
 
     def setupGUI(self):
@@ -99,13 +146,17 @@ class App(Frame, GUI_help):
                            sashwidth=2,
                            showhandle=True)
         self.m.pack(side=TOP,fill=BOTH,pady=2,expand=1)
+
         sc = self.sc = SequenceCanvas(self.m,parentapp=self,
-                                      width=self.w-400,height=800)
+                                      width=900,height=800)
         sc.pack(side=TOP,fill=BOTH,pady=2)
         self.m.add(sc)
-        self.m.paneconfigure(sc,sticky='news',min=200)
+        self.m.paneconfigure(sc,sticky='news',min=200)        
         self.createToolBar()
         self.createSidePane()
+        if self.orientation == 'vertical':
+            self.m.paneconfigure(self.sidepane,
+                                      min=200)
         self.createPrimerDBGUI()
         self.createChildFrame(name='NotePad')
         return
@@ -153,7 +204,7 @@ class App(Frame, GUI_help):
         self.main.config(menu=self.menu)
         return
 
-    def createSidePane(self, width=20):
+    def createSidePane(self, width=200):
         """Side panel for various dialogs is tabbed notebook that can hold multiple
             dialogs at once """
         self.closeSidePane()
@@ -174,13 +225,6 @@ class App(Frame, GUI_help):
         if hasattr(self, 'sidepane'):
             self.m.forget(self.sidepane)
             self.sidepane.destroy()
-        return
-
-    def resetSidePane(self, width=20):
-        """Create a new sidepane"""
-        self.createSidePane(width=width)
-        if hasattr(self,'tableframe'):
-            self.m.paneconfigure(self.sidepane, before=self.tableframe)
         return
 
     def createChildFrame(self, sidepane=True, width=400, name=None):
@@ -262,17 +306,19 @@ class App(Frame, GUI_help):
         img = Images.undo()
         hlptxt="Undo"
         self.toolbar.addButton('Save Project', self.openProject, img, hlptxt)
-
         img = Images.zoomout()
         hlptxt="Zoom Out"
         self.toolbar.addButton('Save Project', self.sc.zoomOut, img, hlptxt)
         img = Images.zoomin()
         hlptxt="Zoom In"
         self.toolbar.addButton('Save Project', self.sc.zoomIn, img, hlptxt)
-
+        img = Images.windowprefs()
+        hlptxt="Seqeuence display preferences"
+        self.toolbar.addButton('Seqeuence display preferences', self.sc.showPrefs,
+                         img, hlptxt)
         img = Images.prefs()
         hlptxt="Preferences"
-        self.toolbar.addButton('Preferences', self.sc.showPrefs, img, hlptxt)
+        self.toolbar.addButton('Preferences', self.globalPrefsDialog, img, hlptxt)
         return
 
     def addWindowToolBar(self, parent):
@@ -337,7 +383,7 @@ class App(Frame, GUI_help):
         self.P.load(filename)
         #open sequence
         seq = self.P.DNAseq
-        print self.P.used_enzymes, self.P.cut_pos
+        #print self.P.used_enzymes, self.P.cut_pos
 
         self.sc.update()
 
@@ -352,36 +398,6 @@ class App(Frame, GUI_help):
         return
 
     def undo(self):
-        return
-
-    def help(self):
-        import webbrowser
-        link='http://code.google.com/p/peat/wiki/DNAtool'
-        webbrowser.open(link,autoraise=1)
-        return
-
-    def about(self):
-        win=Toplevel()
-        win.geometry('+500+350')
-        win.title('About DNATool')
-        win.maxsize(width=400,height=400)
-        logo = Images.logo()
-        label = Label(win,image=logo)
-        label.image = logo
-        label.pack(fill=BOTH,padx=4,pady=4)
-        text="""DNATool App, Version 2
-             is a python desktop application for DNA sequence manipulation.
-             Released under GPL v3
-             (C) Copyright 2012- Damien Farrell """
-        text=text.replace('\t','')
-        text= ' '.join(text.split())
-        Label(win,text=text,wraplength=400).pack(fill=Y,side=TOP,pady=4)
-        return
-
-    def quit(self):
-        self.main.destroy()
-        if not self.parent:
-            sys.exit()
         return
 
     def createPrimerDBGUI(self, sidepane=True):
@@ -416,17 +432,59 @@ class App(Frame, GUI_help):
                    ('excludepromiscuous','checkbutton',1,'Exclude promiscuous enzymes')]
         geometry = '400x250+500+250'
         fr = self.createChildFrame(name='Configure Restriction Enzymes',sidepane=sidepane)
-        self.restrsitedialog = Dialogs.GenericDialog(fr, options, defaults,
-                                                     self.applyRestrSiteSettings)
+        self.restrsitedialog = Dialogs.GenericDialog(fr, options, defaults)
+        defaults = {'uniquesitesonly':1,'showonlyenzymescutmax':50,
+                    'ignorecutpos':1,'minlengthrecseq':5,'excludepromiscuous':1}                                              
         self.restrsitedialog.pack(fill=BOTH,expand=1)
         return
 
-class PrefsDialog(Dialogs.GenericDialog):
-    def __init__(self, parent, parentapp=None):
-        options = []
-        self.geometry = '400x400+500+250'
-        self.parentapp = parentapp
-        Dialogs.GenericDialog.__init__(self, parent, options)
+    def applySettings(self):        
+        self.applyPrefs(self.prefsdialog.getValues())
+        #self.removeAll()
+        #self.setupGUI()
+        #self.globalPrefsDialog()
+        return
+
+    def globalPrefsDialog(self, sidepane=True):
+        curr = {}
+        for key in self.defaultprefs:
+            curr[key] = self.__dict__[key]
+        fr = self.createChildFrame(name='Global settings', sidepane=sidepane)
+        self.prefsdialog = Dialogs.PrefsDialog(fr, self, self.defaultopts, 
+                                                curr, self.applySettings)
+        self.prefsdialog.pack(fill=BOTH,expand=1)
+        return
+
+    def help(self):
+        import webbrowser
+        link='http://code.google.com/p/peat/wiki/DNAtool'
+        webbrowser.open(link,autoraise=1)
+        return
+
+    def about(self):
+        win=Toplevel()
+        win.geometry('+500+350')
+        win.title('About DNATool')
+        win.maxsize(width=400,height=400)
+        logo = Images.logo()
+        label = Label(win,image=logo)
+        label.image = logo
+        label.pack(fill=BOTH,padx=4,pady=4)
+        text="""DNATool App, Version 2
+             is a python desktop application for DNA sequence manipulation.
+             Released under GPL v3
+             (C) Copyright 2012- Damien Farrell """
+        text=text.replace('\t','')
+        text= ' '.join(text.split())
+        Label(win,text=text,wraplength=400).pack(fill=Y,side=TOP,pady=4)
+        return
+
+    def quit(self):
+        if self.rememberwindowsize == 1:
+            self.saveGeometry()
+        self.main.destroy()
+        if not self.parent:
+            sys.exit()
         return
 
 class RestrictionDigestSummary(Frame):
@@ -460,7 +518,6 @@ class ToolBar(Frame):
         Frame.__init__(self, parent, width=600, height=30)
         self.parentframe = parent
         self.parentapp = parentapp
-
         return
 
     def addButton(self, name, callback, img=None, helptxt=None):
@@ -481,26 +538,6 @@ class ToolBar(Frame):
     def addSeperator(self):
         Label(self, text=' ').pack(side=LEFT, padx=2, pady=2)
         return
-
-def main():
-    from optparse import OptionParser
-    parser = OptionParser()
-    parser.add_option("-c", "--conf", dest="conf",
-                            help="Provide a conf file", metavar="FILE")
-    parser.add_option("-f", "--file", dest="file",
-                        help="Raw file", metavar="FILE")
-    parser.add_option("-p", "--project", dest="project",
-                        help="Project file", metavar="FILE")
-
-    opts, remainder = parser.parse_args()
-    app = App()
-    '''if opts.conf != None:
-        app.loadConfig(opts.conf)
-    if opts.file != None:
-        app.openRaw(opts.file)
-    if opts.project != None:
-        app.loadProject(opts.project)'''
-    app.mainloop()
 
 def main():
     from optparse import OptionParser
