@@ -51,28 +51,22 @@ class TopLevelModalDialog(Toplevel):
         self.destroy()
         return
 
-'''class ProgressDialog(TopLevelModalDialog):
-    def __init__(self, parent, message='Working', cancel=None):
+class WaitDialog(TopLevelModalDialog):
+    def __init__(self, parent, message='Wait', cancel=None):
         TopLevelModalDialog.__init__(self, parent)
         self.parent=parent
-        self.title(message)
-        progrlbl = Label(self.body,text='Progress:')
+        self.title('Working')
+        progrlbl = Label(self.body,text=message)
         progrlbl.pack(fill=BOTH,padx=2,pady=4)
-        self.bar = ProgressBar.ProgressBar(self.body)
-        self.bar.frame.pack(fill=Y,padx=2,pady=4)
         if cancel != None:
             self.cancel = Button(self.body,text='cancel',command=cancel)
             self.cancel.pack()
-
         return
 
     def updateValue(self, value=None):
-        #print 'update'
-        #self.after(100, self.updateValue)
         self.update()
-        if value!=None:
-            self.bar.update(value)
-        return'''
+        return
+
 
 class GenericDialog(Frame):
     """Generic dialog"""

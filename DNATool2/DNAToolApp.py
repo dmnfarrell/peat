@@ -30,7 +30,7 @@ import Dialogs
 from PEATDB.GUI_helper import *
 from Base import Project, Sequence, SequenceCanvas, ORFOverview
 from Primer import PrimerDatabase, PrimerDBGUI, PrimerDesignGUI
-from SeqIO import SequenceLoader
+from SeqIO import SequenceAnalysis, SequenceAlignmentTool, BlastInterface
 import RestrictionDigest
 import Images
 from Prefs import Preferences
@@ -54,28 +54,32 @@ class App(Frame, GUI_help):
         self.main.title('DNATool Desktop')
         self.main.protocol('WM_DELETE_WINDOW',self.quit)
 
-        self.defaultprefs = {'rememberwindowsize':0,'orientation':'horizontal',}
+        self.defaultprefs = {'rememberwindowsize':0,'orientation':'horizontal',
+                             'alignmenttool':'clustal','clustalpath':'clustalw'}
         self.defaultopts = [('rememberwindowsize','checkbutton',1,'Remember window size'),
                             ('orientation','menu',('horizontal','vertical'),
-                            'Default sideframe orientation')]
+                            'Default sideframe orientation'),
+                            ('alignmenttool','menu',('clustal','muscle','needle'),
+                            'External alignment tool'),
+                            ('clustalpath','entry','','Path to Clustal')]
         self.loadPrefs()
         self.setGeometry()
         self.P = Project()
         self.primerdb = PrimerDatabase()
         self.setupApps()
         self.setupGUI()
-        self.sidepane.selectpage('PrimerDB')        
+        self.sidepane.selectpage('PrimerDB')
         return
 
     def setGeometry(self):
-        if self.rememberwindowsize == 1 and self.preferences.has_key('lastwindowsize'):            
+        if self.rememberwindowsize == 1 and self.preferences.has_key('lastwindowsize'):
             lastwindowsize = self.preferences.get('lastwindowsize')
             self.winsize = lastwindowsize
-            #self.w = int(lastwindowsize.split('x')[0]) 
+            #self.w = int(lastwindowsize.split('x')[0])
         else:
-            self.winsize = self.getBestGeometry()        
-        self.main.geometry(self.winsize)       
-       
+            self.winsize = self.getBestGeometry()
+        self.main.geometry(self.winsize)
+
         return
 
     def getBestGeometry(self):
@@ -87,10 +91,10 @@ class App(Frame, GUI_help):
         g = '%dx%d+%d+%d' % (w,h,x,y)
         return g
 
-    def saveGeometry(self): 
-        """Save current geometry before quitting"""       
+    def saveGeometry(self):
+        """Save current geometry before quitting"""
         g = self.main.geometry()
-        self.preferences.set('lastwindowsize', g)   
+        self.preferences.set('lastwindowsize', g)
         return
 
     def setupApps(self):
@@ -98,8 +102,10 @@ class App(Frame, GUI_help):
            can be dynamically added without explicit methods for each"""
         self.apps = {'Primer Design': PrimerDesignGUI,
                      'ORF Overview': ORFOverview,
-                     'Sequence Loader':SequenceLoader,
+                     'Sequence Analysis': SequenceAnalysis,
+                     'Sequence Alignment Tool': SequenceAlignmentTool,
                      'Restriction Digest Summary': RestrictionDigestSummary,
+                     'Blast Interface':BlastInterface,
                      'NotePad': TextEditor}
         return
 
@@ -117,22 +123,21 @@ class App(Frame, GUI_help):
     def savePrefs(self):
         """Save prefs to a preferences instance"""
         self.applyPrefs(self.prefsdialog.getValues())
-        self.preferences = Preferences('DNATool2',{})  
-        for key in self.defaultprefs:            
-            self.preferences.set(key, self.__dict__[key])        
+        self.preferences = Preferences('DNATool2',{})
+        for key in self.defaultprefs:
+            self.preferences.set(key, self.__dict__[key])
         return
 
     def applyPrefs(self, prefs=None):
         """Apply prefs from a given dict"""
         if prefs == None: prefs=self.defaultprefs
-        for key in prefs:            
-            self.__dict__[key] = prefs[key]           
+        for key in prefs:
+            self.__dict__[key] = prefs[key]
         return
 
     def setupGUI(self):
         """Do GUI elements"""
         self.visibleapps = {}
-        self.createMenuBar()
         #bottom panel
         bottom = Frame(self.main,height=50)
         bottom.pack(side=BOTTOM,fill=BOTH,pady=1)
@@ -151,7 +156,9 @@ class App(Frame, GUI_help):
                                       width=900,height=800)
         sc.pack(side=TOP,fill=BOTH,pady=2)
         self.m.add(sc)
-        self.m.paneconfigure(sc,sticky='news',min=200)        
+        self.m.paneconfigure(sc,sticky='news',min=200)
+
+        self.createMenuBar()
         self.createToolBar()
         self.createSidePane()
         if self.orientation == 'vertical':
@@ -166,12 +173,13 @@ class App(Frame, GUI_help):
         self.menu=Menu(self.main)
         self.file_menu={'01Open Project':{'cmd':self.openProject},
                         '02Open Sequence':{'cmd':self.openSequence},
-                         '05Quit':{'cmd':self.quit}}
+                        '05Quit':{'cmd':self.quit}}
         self.file_menu=self.create_pulldown(self.menu,self.file_menu)
         self.menu.add_cascade(label='File',menu=self.file_menu['var'])
         self.edit_menu={'01Undo':{'cmd':self.undo},
                         '02Copy':{'cmd':self.copy},
-                        '03Configure Restriction Enzymes':{'cmd':self.restrictionEnzymesDialog}}
+                        '03Select All':{'cmd':self.sc.selectAll},
+                        '04Configure Restriction Enzymes':{'cmd':self.restrictionEnzymesDialog}}
         self.edit_menu=self.create_pulldown(self.menu,self.edit_menu)
         self.menu.add_cascade(label='Edit',menu=self.edit_menu['var'])
 
@@ -384,7 +392,7 @@ class App(Frame, GUI_help):
         #open sequence
         seq = self.P.DNAseq
         #print self.P.used_enzymes, self.P.cut_pos
-
+        self.sc.project = self.P
         self.sc.update()
 
         #update primer db
@@ -434,11 +442,11 @@ class App(Frame, GUI_help):
         fr = self.createChildFrame(name='Configure Restriction Enzymes',sidepane=sidepane)
         self.restrsitedialog = Dialogs.GenericDialog(fr, options, defaults)
         defaults = {'uniquesitesonly':1,'showonlyenzymescutmax':50,
-                    'ignorecutpos':1,'minlengthrecseq':5,'excludepromiscuous':1}                                              
+                    'ignorecutpos':1,'minlengthrecseq':5,'excludepromiscuous':1}
         self.restrsitedialog.pack(fill=BOTH,expand=1)
         return
 
-    def applySettings(self):        
+    def applySettings(self):
         self.applyPrefs(self.prefsdialog.getValues())
         #self.removeAll()
         #self.setupGUI()
@@ -450,7 +458,7 @@ class App(Frame, GUI_help):
         for key in self.defaultprefs:
             curr[key] = self.__dict__[key]
         fr = self.createChildFrame(name='Global settings', sidepane=sidepane)
-        self.prefsdialog = Dialogs.PrefsDialog(fr, self, self.defaultopts, 
+        self.prefsdialog = Dialogs.PrefsDialog(fr, self, self.defaultopts,
                                                 curr, self.applySettings)
         self.prefsdialog.pack(fill=BOTH,expand=1)
         return
@@ -510,7 +518,6 @@ class RestrictionDigestSummary(Frame):
         self.details = Pmw.ScrolledText(self.main)
         self.details.pack(side=TOP,fill=BOTH,expand=1)
         return
-
 
 class ToolBar(Frame):
     """Uses the parent instance to provide the functions"""

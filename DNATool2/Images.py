@@ -178,36 +178,36 @@ def saveproject():
 
 def zoomin():
      img = tk.PhotoImage(format='gif',data=
-             'R0lGODlhEAAQAMZTAIdIKCprJi5vKTBxKzJ0LDN2LjV5MKVcMz6DN6tkN6tk'
-            +'PatnN0SLPU2WRVqbU1OeS7mASLyDT7yES7yEUbyFSryGTL2GTL2JTL6JTb6K'
-            +'Tb6KT1yoUmWnXsGOT16rVMGOWMGPT8KPUF+tVsORUMORU8ORVmGwV2usY8SV'
-            +'VWOyWcaWVceXV8aZVme2XMeaV8icV8mbYcmfW3a3bcyhXc2kW82lXs2lYc2m'
-            +'Xs6mXs6mYM6mYs6nXs6nYc+nYs+oYc+oZILCfYbFfYvGg4vHhda1f9e1fZDK'
-            +'iNq7gJrPkp7RlZ/Sl97Ejd/Fj6bVneDHk+PMmefToOjVo+nXpf//////////'
-            +'////////////////////////////////////////////////////////////'
-            +'////////////////////////////////////////////////////////////'
-            +'/////////////////////////////////////////////////yH+EUNyZWF0'
-            +'ZWQgd2l0aCBHSU1QACH5BAEKAH8ALAAAAAAQABAAAAeDgH+Cg4SFhDs8Pzoz'
-            +'L4aDPjiELiuOPjSGIySFNzWOfx0XhDmeghiEPYYtJht/GoQ2hiJND38WhDGE'
-            +'KR4ySScMCIQsKoMbSkhBRkIGhSgggg8NHEMOBQKGIRmDCEAET0sRhhQVFhIG'
-            +'AwFRUkcKpIIfTFBOMADtfxNFRCUL9X8HEAmCAgEAOw==')
+             'R0lGODlhEAAQAPYAADpuKi9wKjFzLDN1LjV4Lzd7MT5/PZNbEZdfGJpiG51l'
+            +'H51nIqVtK6hwMLF5PECGOUaOP1OTRFCaSFaiTl+tVmKgUWmnWHCpVGGwWGOz'
+            +'WWW1W3uwXmKoYW67aX6yYHi1ZHC9abyNVYS2ZYy6bJS/c8WXZMeZZsyidc6k'
+            +'dprDeJzEeXaczXug0H+l04qTot21iafKguTBnejLq4Wp1oqu2Zy635a44Z/A'
+            +'56LD6K7J6KjI7KvL7rfQ7a7O8K/P8bTT9LvW873V8LjW9rnX973Y87vZ+b3b'
+            +'+r7b+r/c+sDa9MHa9MLb9MPc9MTc9MXd9cbd9cfe9cjd88je9cjf9cnf9crg'
+            +'9cvh9s3h9czh9s7i9szi+M3i+dDj9tHl99Lk99Pl99bn99fn99no+Nrp+N3q'
+            +'+d7r+d/s+d7s+uHt+eLt+eLu+ePu+gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+            +'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEAAGwA'
+            +'LAAAAAAQABAAAAeOgGyCg4SFhEhDQkI9OoaDR1tra2pjRDeOkGthWJxkIBoU'
+            +'hUNkYVZWU09YGTAThT9rWKhLHRgfKRYQD4M9ZrJLFCokIyIbBYM6m0tLRBwS'
+            +'FR4RBAGDODxiU0RES14PFwOGNjlYXl5RNQYCAI40My0sKy4nMigNjoUOJTEm'
+            +'CvaEDCEvEPQjlGDBgYEIE7IJBAA7')
      return img
 
 def zoomout():
      img = tk.PhotoImage(format='gif',data=
-             'R0lGODlhEAAQAMZJAOoRHOwaI+4mLodIKPE1OqVcM/RFSKtkN6tkPatnN/dU'
-            +'VvpjYrd+R7mASLuBTLyDT7yES7yEUbyFSvxvbbyGTL2GTL2JTL6JTb6KTb6K'
-            +'T8GMUv54dMGOT8GOWMGPT8KPUMORUMORU8ORVsSVVcaWVceXV8aZVseaV8ic'
-            +'V8mbYcmfW8yhXc2kW82lXs2lYc2mXs6mXs6mYM6mYs6nXs6nYc+nYs+oYc+o'
-            +'ZPOgm9a0eda1f9e1ffSrpNq7gNu/h/a2rt7Ejd/Fj+DHk/fAt+PMmfjIv+fT'
-            +'oOjVo+nXpf//////////////////////////////////////////////////'
-            +'////////////////////////////////////////////////////////////'
-            +'////////////////////////////////////////////////////////////'
-            +'/////////////////////////////////////////////////yH+EUNyZWF0'
-            +'ZWQgd2l0aCBHSU1QACH5BAEKAH8ALAAAAAAQABAAAAd3gH+Cg4SFhDM0NzIr'
-            +'KIaDNjCEJyWONiyGICGFLy2OfxwWhDGegheENaR/GYQuqRWEKoQbEwsKBgQC'
-            +'hCYkgxNFQz88OAGFIx6CtbcCAQCGHxiEGjlEQA+GEhQVEAwOPkdIPQipfx1B'
-            +'RkIpA+MROzoiCeN/BQ0HgoEAOw==')
+             'R0lGODlhEAAQAPYAAOoRHOwaI+4mLvE1OpNbEZdfGJpiG51lH51nIqVtK6hw'
+            +'MLF5PLV9QfRFSPdUVvpjYvxvbfNxc7yNVcWXZMeZZvmAfsyidc6kdnaczXug'
+            +'0H+l05KUnYqTouiMguuTh+2bjdWuht21ifChkfKnleTBnejLq5Gox4Wp1oqu'
+            +'2Yyw25O235y6352735a44Z/A56LD6K7J6KjI7KvL7rXP7LfQ7a7O8K/P8bTT'
+            +'9LvW873V8LjW9rnX973Y87vZ+b3b+r7b+r/c+sDa9MHa9MLb9MPc9MTc9MXd'
+            +'9cbd9cfe9cjd88je9cjf9cnf9crg9cvh9s3h9czh9s7i9szi+M3i+dDi9dDj'
+            +'9tHl99Lk99Pl99bn99fn99no+Nrp+N3q+d7r+d/s+d7s+uHt+eLt+eLu+ePu'
+            +'+gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+            +'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEAAGUA'
+            +'LAAAAAAQABAAAAeMgGWCg4SFhEA9Ojc2MoaDP1NfY2FcPC6OkGRZUlJWXTMq'
+            +'hjtdWk5OUkZOVCmGN2RQS0dLERAPDg0DAoM1X7FDQxAjIh8eHQGDMVpQvzwR'
+            +'t7kBAIMvNFtLPDhDVywbji0wUFdXSSsmIAyOKCcnGRgcFiUXCo6FCxMkEwf0'
+            +'hAkSIQb7CBlAQCCgwYNlAgEAOw==')
      return img
 
 def undo():

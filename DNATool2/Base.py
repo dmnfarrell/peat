@@ -74,6 +74,7 @@ class SequenceCanvas(Pmw.ScrolledCanvas):
         Pmw.ScrolledCanvas.__init__(self, parent, canvasmargin=2)
         self.parent = parent
         self.parentapp = parentapp
+        self.project = None
         self.platform = platform.system()
         self.width=width
         self.height=height
@@ -108,9 +109,9 @@ class SequenceCanvas(Pmw.ScrolledCanvas):
     def createBindings(self):
         """Bindings"""
         c = self.canvas
-        c.bind("<Button-1>",self.handleLeftClick)
+        c.bind("<Button-1>", self.handleLeftClick)
         c.bind("<B1-Motion>", self.handleLeftMotion)
-        c.bind("<Button-3>",self.handleRightClick)
+        c.bind("<Button-3>", self.handleRightClick)
         c.bind_all("<Control-KeyPress-c>", self.copySequence)
         #c.bind("<ButtonRelease-3>",self.handleRightRelease)
 
@@ -171,11 +172,22 @@ class SequenceCanvas(Pmw.ScrolledCanvas):
         if 'sitelabel' in current:
             self.dragMove(evt, items)
         elif 'sequence' in current:
-            self.selectSequence(evt)
+            self.setSequenceSelection(evt)
         return
 
-    def selectSequence(self, evt):
-        """Select sequence"""
+    def selectSequence(self, seq):
+        """Select sequence just from seq values"""
+        self.highlightSequence(seq)
+        self.selectedrange = seq
+        return
+
+    def selectAll(self):
+        sel = range(0,len(self.sequence))
+        self.selectSequence(sel)
+        return
+
+    def setSequenceSelection(self, evt):
+        """Select sequence from mouse action"""
         c = self.canvas
         x = self.oldx
         x2 = c.canvasx(evt.x)
@@ -187,24 +199,24 @@ class SequenceCanvas(Pmw.ScrolledCanvas):
         x1,y1,x2,y2 = c.bbox(rect)
         items = c.find_overlapping(x1+2, y1, x2-2, y2)
         seq = range(self.getSeqPositionFromCoords(x),self.getSeqPositionFromCoords(x2))
-        self.colorSequence() #reset colors first
-        for i in items:
-            if 'seqtext' in c.gettags(i):
-                c.itemconfig(i,fill='red')
-                c.lift(i)
-        self.selectedrange = seq
+        self.selectSequence(seq)
         return
 
     def highlightSequence(self, sequence):
         """Highlight section of sequence in different color"""
+        self.colorSequence()
         c = self.canvas
         height = self.basescale/1.1
         y = self.baserow+height/2
+        ignore = set(['seqbackground','seqselection'])
         for s in sequence:
             x = self.getBasePosition(s)
-            items =c.find_overlapping(x-2, y-2, x+2, y+2)
+            items = c.find_overlapping(x-2, y-2, x, y+2)
             for i in items:
+                if len(set(c.gettags(i)) & ignore) > 0:
+                    continue
                 c.itemconfig(i,fill='red')
+                c.lift(i)
         return
 
     def getSeqPositionFromCoords(self,x):
@@ -246,6 +258,8 @@ class SequenceCanvas(Pmw.ScrolledCanvas):
         def popupFocusOut(evt):
             popupmenu.unpost()
         popupmenu.add_command(label="Show Prefs", command= self.showPrefs)
+        popupmenu.add_command(label="Zoom in", command= self.zoomIn)
+        popupmenu.add_command(label="Zoom out", command= self.zoomOut)
         popupmenu.bind("<FocusOut>", popupFocusOut)
         popupmenu.focus_set()
         popupmenu.post(evt.x_root, evt.y_root)
@@ -255,34 +269,45 @@ class SequenceCanvas(Pmw.ScrolledCanvas):
         self.alignedsequences = sequences
         return
 
-    def update(self, sequence=None, restrictionsites=None, primers=None):
+    def update(self, sequence=None, enzymes=None, cutpos=None):
         """Update display of the current sequence(s)"""
 
-        #if sequence == None:
-        #    return
-
-        if self.parentapp != None:
-            P = self.parentapp.P
-            if P.DNAseq == '':
+        if sequence == None:
+            X = self.getDatafromProject()
+            if X == None:
                 return
-        sequence = P.DNAseq
-        enzymes = P.used_enzymes
-        cutpos = P.cut_pos
-
+            else:
+                sequence, enzymes, cutpos = X
         #remove previous
         self.clear()
         self.calculateScaling()
         self.drawDefaultLabels()
         #update sequence
         self.showSequence(sequence)
+        self.colorSequence()
+        self.drawSeqBackground()
         #if self.ORFselected == True:
         self.showAA3Seq(sequence)
         #draw restr sites
-        self.showRestrictionSites(enzymes, cutpos)
+        if enzymes != None:
+            self.showRestrictionSites(enzymes, cutpos)
         #update primers if selected
-        self.showPrimers()
+        #self.showPrimers()
         self.canvas.configure(bg=self.backgrcolor)
         return
+
+    def getDatafromProject(self):
+
+        if self.project != None:
+            P = self.project
+            if P.DNAseq == '':
+                return
+        else:
+            return
+        sequence = P.DNAseq
+        enzymes = P.used_enzymes
+        cutpos = P.cut_pos
+        return sequence, enzymes, cutpos
 
     def clear(self):
         """Clear all"""
@@ -319,44 +344,50 @@ class SequenceCanvas(Pmw.ScrolledCanvas):
         seqfont = self.getCurrentFont()
 
         #dna sequence
-        seq = sequence
-        print sequence
-        for i in range(len(seq)):
+        self.sequence = sequence
+        #print sequence
+        for i in range(len(sequence)):
             pos = self.getBasePosition(i)
             item = c.create_text(pos,row,
-                            font=seqfont,text=seq[i],
+                            font=seqfont,text=sequence[i],
                             fill='black',anchor='w',tag=('seqtext','sequence'))
             if tag != None:
                 c.itemconfig(i, tag=tag)
-        self.seqend = self.getBasePosition(len(seq))-self.seqstart
-        self.colorSequence()
-        self.drawSeqBackground()
+        self.seqend = self.getBasePosition(len(sequence))-self.seqstart
         self.canvas.configure(scrollregion=(0,0,self.seqend+100,self.height))
         self.centerPage()
         return
 
-    def showMultiple(self):
+    def showMultiple(self, aligned=None, direction='up'):
         """Show multiple sequences aligned to the base one"""
-        #print self.alignedsequences
-        self.clearMultiple()
-        #move restr sites up 
-        self.clearRestrictionSites()
-        if len(self.alignedsequences) == 0:
-            return
-        row = self.baserow - 25
-        for s in self.alignedsequences:
-            self.showSequence(s, row, tag='aligned')
-            row-=15
 
+        #print self.alignedsequences
+        if aligned == None:
+            aligned = self.alignedsequences
+        self.clearMultiple()
+        if len(aligned) == 0:
+            return
+        #move restr sites up
+        self.clearRestrictionSites()
+        if direction == 'up':
+            inc = -15
+        else:
+            inc = 15
+        row = self.baserow + inc
+        print len(aligned)
+        for s in aligned[:55]:
+            self.showSequence(s, row, tag='aligned')
+            row+=inc
+            self.height+=20
         return
-      
+
     def clearMultiple(self):
         """Clear multiple sequences"""
         c = self.canvas
         c.delete('aligned')
         self.update()
         return
-      
+
     def showAASeq(self):
 
         return
@@ -506,14 +537,14 @@ class SequenceCanvas(Pmw.ScrolledCanvas):
             if cutpos.has_key(e):
                 positions = cutpos[e]
                 r = self.drawRestrictionSite(e, positions)
-        
+
         return
 
     def clearRestrictionSites(self):
         """Clear all restriction sites"""
         c = self.canvas
-        #print c.find_withtag('restrsite')        
-        c.delete('restrsite')        
+        #print c.find_withtag('restrsite')
+        c.delete('restrsite')
         return
 
     def getBasePosition(self, pos):
