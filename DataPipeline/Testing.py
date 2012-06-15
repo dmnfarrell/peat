@@ -188,7 +188,7 @@ class Tester(object):
         print '-------------------'
         return
 
-    def customTest(self):
+    def kineticsTest(self):
         """Tests kinetics data for paper"""
 
         p = Pipeline()
@@ -210,6 +210,24 @@ class Tester(object):
         #data = p.doImport()
         #E=p.getEkinProject(data)
         #E.saveProject('customtest')
+        p.run()
+        return
+
+    def processingStepTest(self):
+        """Test processing steps like differentation of the data"""
+        path = "testfiles"
+        Utilities.createDirectory(path)
+        names = Utilities.createRandomStrings(8,6)
+        fname = os.path.join(path,'preprocessingtest.txt')
+        Utilities.createCDData(fname, names, 300)
+        conf = {'format':'databycolumn','model1':'gaussian',
+                'function1':'differentiate','function2':'gaussiansmooth',
+                'iterations':100,
+                'variable1':'a','saveplots':1}
+        p = Pipeline()
+        p.createConfig('temp.conf',**conf)
+        p.openRaw(fname)
+        #data = p.doImport()
         p.run()
         return
 
@@ -236,7 +254,8 @@ def main():
     #t.multiFolderTest()
     #t.replicatesTest()
     #t.fitPropagationTest()
-    t.customTest()
+    #t.kineticsTest()
+    t.processingStepTest()    
     #t.renameFilesTest()
 
 if __name__ == '__main__':

@@ -40,21 +40,21 @@ def setAttributesfromConfigParser(obj, cp):
 
     for s in cp.sections():
         obj.__dict__[s] = cp.items(s)
-        for f in cp.items(s):            
+        for f in cp.items(s):
             try: val=int(f[1])
             except: val=f[1]
             obj.__dict__[f[0]] = val
 
 def createConfigParserfromDict(data, sections, **kwargs):
     """Helper method to create a ConfigParser from a dict and/or keywords"""
-    
+
     cp = ConfigParser.ConfigParser()
     for s in sections:
         cp.add_section(s)
         for i in data[s]:
             name,val = i
             cp.set(s, name, val)
-    
+
     #use kwargs to create specific settings in the appropriate section
     for s in cp.sections():
         opts = cp.options(s)
@@ -63,13 +63,15 @@ def createConfigParserfromDict(data, sections, **kwargs):
                 cp.set(s, k, kwargs[k])
     #handle model and variable sections which can have zero or multiple
     #options
-    for k in sorted(kwargs):       
+    for k in sorted(kwargs):
         if k.startswith('model'):
             cp.set('models', k, kwargs[k])
         elif k.startswith('variable'):
-            cp.set('variables', k, kwargs[k])                
+            cp.set('variables', k, kwargs[k])
+        elif k.startswith('function'):
+            cp.set('functions', k, kwargs[k])
     return cp
-        
+
 def getListFromConfigItems(items):
     """Get a list from a set of ConfigParser key-value pairs"""
     lst = [i[1] for i in sorted(items) if i[1] != '']
@@ -129,6 +131,20 @@ def createTempData(fname, names, slope, noise=0.2):
         cw.writerow(vals)
     return
 
+def createCDData(fname, names, tm, noise=0.2):
+    """Create some simulated cd data with noise as a function of temp"""
+
+    cw = csv.writer(open(fname,'w'))
+    cw.writerow(['temp']+names)
+    for x in range(250,350,1):
+        val = 10/(1+exp((tm-x)/2))
+        #print x, val
+        vals = [round(val+random.normalvariate(0,noise),2) for j in range(len(names))]
+        vals.insert(0,x)
+        cw.writerow(vals)
+        
+    return
+
 def createSingleFileData(path='testfiles', clear=False):
     """Create sets of individual data files all in one folder,
        one per xy datasew with multiple copies for each label representing ph values"""
@@ -180,4 +196,8 @@ def createNestedData():
                 data[n][p][s] = (x,y)
     return data
 
-        
+def differentiate(self, x,y):
+    dy = numpy.diff(y,1)
+    dx = x[:len(dy)]
+    return dx,dy
+

@@ -25,7 +25,7 @@
 # Dublin 4, Ireland
 #
 
-import os, sys
+import os, sys, copy
 import math, random, numpy, string, types
 import re
 from datetime import datetime
@@ -40,7 +40,7 @@ class Pipeline(object):
     """This class does all the pipeline processing and configuration"""
 
     __version__ = '1.0.0'
-    configsections = ['base','files','fitting','models','variables',
+    configsections = ['base','files','fitting','models','variables','functions',
                       'excel','plotting','custom']
 
     def __init__(self, conffile=None):
@@ -67,11 +67,12 @@ class Pipeline(object):
                         ('rowheader', ''), ('colheader', ''),
                         ('rowrepeat', 0), ('colrepeat', 0), ('delimeter', ','),
                         ('workingdir', wdir),  ('ignorecomments', 1),
-                        ('decimalsymbol', '.'), #('checkunicode', 0),
-                        ('xformat',''),('yformat','')],
+                        ('decimalsymbol', '.'), ('preprocess',''),
+                        ('xformat',''),('yformat','')],                    
                     'files': [('groupbyname', 0), ('parsenamesindex', 0),
                                 ('replicates',0)],
                     'models': [('model1', '')], 'variables': [('variable1', '')],
+                    'functions':[('function1','')],
                     'excel': [('sheet', 0), ('numsheets', 1)],
                     'plotting': [('saveplots', 0), ('normaliseplots', 0), ('grayscale', 0),
                         ('dpi', 100)],
@@ -105,6 +106,7 @@ class Pipeline(object):
         #both the Importer and Pipeline object get copies of the config options
         #as attributes, convenient but probably bad..
         Utilities.setAttributesfromConfigParser(self, cp)
+
         self.models = sorted(self.models)
         self.variables = sorted(self.variables)
         print 'parsed config file ok, format is %s' %format
@@ -250,7 +252,7 @@ class Pipeline(object):
         print 'importer returned %s datasets' %l
         return
 
-    def preProcess(self):
+    def prepareData(self):
         """Prepare for data import and processing"""
         if self.workingdir == '':
             self.workingdir = os.path.join(os.getcwd(), 'workingdir')
@@ -261,12 +263,24 @@ class Pipeline(object):
             Utilities.clearDirectory(self.workingdir)
         return
 
+    def doProcessingStep(self, data):
+        """Apply a pre-defined processing step to the data"""
+        X = Processor()
+        
+        print self.functions
+        names = [i[1] for i in self.functions]
+        for n in names:  
+            if n not in X.predefined:
+                return data
+        data = X.doFunction(names, data)
+        return data
+
     def run(self, callback=None):
         """Do initial import/fitting run with the current config"""
 
         self.stop=False
         self.loadModels()
-        self.preProcess()
+        self.prepareData()
         print 'processing files in queue..'
 
         if self.groupbyname == 1:
@@ -302,6 +316,10 @@ class Pipeline(object):
             fname = os.path.basename(key)
             fname = os.path.join(self.workingdir, fname)
             data = imported[key]
+
+            if self.function1 != '':
+                data = self.doProcessingStep(data)
+
             if labels.has_key(key):
                 label = labels[key]
             else:
@@ -646,4 +664,50 @@ class FolderStructure(object):
         folders = len(self.info)
         print '%s files found in %s folders' %(self.p)
         return
+
+class Processor(object):
+    """Class that defining processing steps applied to data"""
+
+    def __init__(self):
+        self.predefined = ['differentiate','gaussiansmooth']
+        return
+
+    def doFunction(self, names, data):
+        newdata = copy.deepcopy(data)
+        for name in names:
+            func = getattr(self, name)            
+            for d in data:
+               #print data[d]
+               x,y = newdata[d]
+               newdata[d] = func(x,y)
+               print newdata[d]
+        return newdata
+
+    def differentiate(self, x, y):
+        dy = list(numpy.diff(y,1))
+        dx = list(x[:len(dy)])
+        return dx,dy
+
+    def gaussiansmooth(self, x, y, degree=4):  
+        window=degree*2-1  
+        weight=numpy.array([1.0]*window)
+        weightGauss=[]  
+        for i in range(window):  
+            i=i-degree+1  
+            frac=i/float(window)  
+            gauss=1/(numpy.exp((4*(frac))**2))  
+            weightGauss.append(gauss)  
+        weight=numpy.array(weightGauss)*weight  
+        smoothed=[0.0]*(len(y)-window)  
+        for i in range(len(smoothed)):  
+            smoothed[i]=sum(numpy.array(y[i:i+window])*weight)/sum(weight)
+        #cut x vals so they match y - may introduce some error
+        d=len(x)-len(smoothed)
+        if d>0:
+            end=start=int(d/2)
+            if start%2!=0: end=end+1 
+            sx = x[start:-end]
+        print d,len(sx), len(smoothed)
+        return sx, smoothed 
+
 
