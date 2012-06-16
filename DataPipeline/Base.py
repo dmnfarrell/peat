@@ -68,14 +68,14 @@ class Pipeline(object):
                         ('rowrepeat', 0), ('colrepeat', 0), ('delimeter', ','),
                         ('workingdir', wdir),  ('ignorecomments', 1),
                         ('decimalsymbol', '.'), ('preprocess',''),
-                        ('xformat',''),('yformat','')],                    
+                        ('xformat',''),('yformat','')],
                     'files': [('groupbyname', 0), ('parsenamesindex', 0),
                                 ('replicates',0)],
                     'models': [('model1', '')], 'variables': [('variable1', '')],
                     'functions':[('function1','')],
                     'excel': [('sheet', 0), ('numsheets', 1)],
                     'plotting': [('saveplots', 0), ('normaliseplots', 0), ('grayscale', 0),
-                        ('dpi', 100)],
+                           ('showerrorbars',0), ('dpi', 100), ('marker','o')],
                     'custom': [],
                     'fitting': [('xerror', 0), ('yerror', 0), ('iterations', 50), ('modelsfile','')],
                     }
@@ -265,14 +265,14 @@ class Pipeline(object):
 
     def doProcessingStep(self, data):
         """Apply a pre-defined processing step to the data"""
+
         X = Processor()
-        
-        print self.functions
         names = [i[1] for i in self.functions]
-        for n in names:  
+        for n in names:
             if n not in X.predefined:
+                print 'function %s not found' %n
                 return data
-        data = X.doFunction(names, data)
+        data = X.doFunctions(names, data)
         return data
 
     def run(self, callback=None):
@@ -574,9 +574,9 @@ class Pipeline(object):
         d = E.datasets
         if len(d) > 25: d = E.datasets[:25]
         E.plotDatasets(d, filename=filename, plotoption=2,
-                       dpi=self.dpi, size=(10,8), showerrorbars=True,
+                       dpi=self.dpi, size=(10,8), showerrorbars=self.showerrorbars,
                        title=title, normalise=self.normaliseplots,
-                       grayscale=self.grayscale)
+                       grayscale=self.grayscale, marker=self.marker)
         return
 
     def saveFitstoCSV(self, E, filename):
@@ -666,48 +666,108 @@ class FolderStructure(object):
         return
 
 class Processor(object):
-    """Class that defining processing steps applied to data"""
+    """Class that defining pre-processing steps applied to data"""
 
     def __init__(self):
-        self.predefined = ['differentiate','gaussiansmooth']
+        self.predefined = ['differentiate','gaussiansmooth','smooth', 'filternoise',
+                           'removebaseline','removeoutliers']
         return
 
-    def doFunction(self, names, data):
+    def doFunctions(self, names, data):
+        """Apply one or more functions to the data, need to account
+           for nesting of data here
+           names: names of functions, should be in class.predefined
+           data: dictionary with paired x,y tuples """
+
         newdata = copy.deepcopy(data)
         for name in names:
-            func = getattr(self, name)            
+            func = getattr(self, name)
             for d in data:
                #print data[d]
                x,y = newdata[d]
                newdata[d] = func(x,y)
-               print newdata[d]
+               #print newdata[d]
         return newdata
 
+    def detectpeaks(self, x, y, threshold=None):
+        """Extract a peak from the y data"""
+        if threshold == None:
+            threshold = max(y) * 0.1
+        return sx, sy
+
+    def removebaseline(self, x, y):
+        """Detect and remove baseline"""
+        mean = numpy.mean(y)
+        by = [i-mean for i in y]
+        return x, by
+
     def differentiate(self, x, y):
+        """Get numerical derivative of y vales"""
         dy = list(numpy.diff(y,1))
         dx = list(x[:len(dy)])
         return dx,dy
 
-    def gaussiansmooth(self, x, y, degree=4):  
-        window=degree*2-1  
+    def gaussiansmooth(self, x, y, degree=6):
+        """Smooth noisy data with gaussian filter"""
+
+        window=degree*2-1
         weight=numpy.array([1.0]*window)
-        weightGauss=[]  
-        for i in range(window):  
-            i=i-degree+1  
-            frac=i/float(window)  
-            gauss=1/(numpy.exp((4*(frac))**2))  
-            weightGauss.append(gauss)  
-        weight=numpy.array(weightGauss)*weight  
-        smoothed=[0.0]*(len(y)-window)  
-        for i in range(len(smoothed)):  
+        weightGauss=[]
+        for i in range(window):
+            i=i-degree+1
+            frac=i/float(window)
+            gauss=1/(numpy.exp((4*(frac))**2))
+            weightGauss.append(gauss)
+        weight=numpy.array(weightGauss)*weight
+        smoothed=[0.0]*(len(y)-window)
+        for i in range(len(smoothed)):
             smoothed[i]=sum(numpy.array(y[i:i+window])*weight)/sum(weight)
         #cut x vals so they match y - may introduce some error
-        d=len(x)-len(smoothed)
+        sx = self.getMatchingList(smoothed, x)
+        #print d,len(sx), len(smoothed)
+        return sx, smoothed
+
+    def getMatchingList(self, a, b):
+        d=len(b)-len(a)
         if d>0:
             end=start=int(d/2)
-            if start%2!=0: end=end+1 
-            sx = x[start:-end]
-        print d,len(sx), len(smoothed)
-        return sx, smoothed 
+            if start%2!=0: end=end+1
+            x = b[start:-end]
+        return x
+
+    def smooth(self,x,y,window_len=20,window='blackman'):
+        
+        if len(x) < window_len:
+            raise ValueError, "Input list needs to be bigger than window size."
+        if window_len<3:
+            return y
+        if not window in ['hanning', 'hamming', 'bartlett', 'blackman']:
+            raise ValueError, 'wrong filter name'
+        s=numpy.r_[y[window_len-1:0:-1],y,y[-1:-window_len:-1]]
+        print s
+        w=eval('numpy.'+window+'(window_len)')
+        sy = numpy.convolve(w/w.sum(),s,mode='same')
+        sy = list(sy)
+        #sx = self.getMatchingList(sy, x)
+        print len(x), len(sy)
+        return x,sy[window_len:-window_len+1]
+
+    def filternoise(self, x, y):
+        fft=numpy.fft.fft(y)
+        bp=fft[:]
+        for i in range(len(bp)):
+            if i>=100:bp[i]=0  
+        ibp=numpy.fft.ifft(bp)
+        return x, ibp
+
+    def fouriertransform(self, x, y):
+        """Find discrete fourier transform of data"""
+        return numpy.fft2(x,y)
+
+    def removeoutliers(self, x, y, sigma=3):
+        """Remove outliers based on y values distance from mean"""
+
+        return
+
 
 

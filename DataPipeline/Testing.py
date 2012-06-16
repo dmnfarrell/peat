@@ -213,13 +213,12 @@ class Tester(object):
         p.run()
         return
 
-    def processingStepTest(self):
+    def preProcessingTest(self):
         """Test processing steps like differentation of the data"""
-        path = "testfiles"
-        Utilities.createDirectory(path)
+        path = "testfiles"        
         names = Utilities.createRandomStrings(8,6)
         fname = os.path.join(path,'preprocessingtest.txt')
-        Utilities.createCDData(fname, names, 300)
+        Utilities.createCDData(fname, names, 300, .5)
         conf = {'format':'databycolumn','model1':'gaussian',
                 'function1':'differentiate','function2':'gaussiansmooth',
                 'iterations':100,
@@ -229,6 +228,21 @@ class Tester(object):
         p.openRaw(fname)
         #data = p.doImport()
         p.run()
+        return
+
+    def peakDetectionTest(self):
+        """Use pre-processing funcs to detect peaks"""
+        path = "testfiles"        
+        names = Utilities.createRandomStrings(8,6)
+        fname = os.path.join(path,'spectraldatatest.txt')
+        Utilities.createSimulatedSpectralData(fname, names)
+        conf = {'format':'databycolumn', 'saveplots':1, 'marker':'-',
+                'function2':'removebaseline','function1':'smooth',
+                }
+        p = Pipeline()
+        p.createConfig('temp.conf',**conf)
+        p.openRaw(fname)
+        p.run()    
         return
 
     def renameFilesTest(self):
@@ -255,7 +269,8 @@ def main():
     #t.replicatesTest()
     #t.fitPropagationTest()
     #t.kineticsTest()
-    t.processingStepTest()    
+    #t.preProcessingTest() 
+    t.peakDetectionTest()   
     #t.renameFilesTest()
 
 if __name__ == '__main__':
