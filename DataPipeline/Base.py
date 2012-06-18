@@ -26,8 +26,9 @@
 #
 
 import os, sys, copy
-import math, random, numpy, string, types
+import math, random, string, types
 import re
+import numpy as np
 from datetime import datetime
 import ConfigParser, csv
 from itertools import izip, chain, repeat
@@ -74,8 +75,9 @@ class Pipeline(object):
                     'models': [('model1', '')], 'variables': [('variable1', '')],
                     'functions':[('function1','')],
                     'excel': [('sheet', 0), ('numsheets', 1)],
-                    'plotting': [('saveplots', 0), ('normaliseplots', 0), ('grayscale', 0),
-                           ('showerrorbars',0), ('dpi', 100), ('marker','o')],
+                    'plotting': [('saveplots', 0), ('includerawplots',0),
+                            ('normaliseplots', 0), ('grayscale', 0),
+                            ('showerrorbars',0), ('dpi', 100), ('marker','o')],
                     'custom': [],
                     'fitting': [('xerror', 0), ('yerror', 0), ('iterations', 50), ('modelsfile','')],
                     }
@@ -254,6 +256,7 @@ class Pipeline(object):
 
     def prepareData(self):
         """Prepare for data import and processing"""
+
         if self.workingdir == '':
             self.workingdir = os.path.join(os.getcwd(), 'workingdir')
         if not os.path.exists(self.workingdir):
@@ -263,7 +266,7 @@ class Pipeline(object):
             Utilities.clearDirectory(self.workingdir)
         return
 
-    def doProcessingStep(self, data):
+    def doProcessingStep(self, data, fname):
         """Apply a pre-defined processing step to the data"""
 
         X = Processor()
@@ -272,7 +275,15 @@ class Pipeline(object):
             if n not in X.predefined:
                 print 'function %s not found' %n
                 return data
+        #user may want to see raw data before processing, so we plot here
+        if self.saveplots == 1:
+            Er = self.getEkinProject(data)            
         data = X.doFunctions(names, data)
+        if self.saveplots == 1:
+            Em = self.getEkinProject(data)      
+            Er.addProject(Em,label='proc')
+            Er.saveProject(fname+'_processed')
+            self.saveEkinPlotstoImages(Er, fname+'_processed',groupbylabel=True)
         return data
 
     def run(self, callback=None):
@@ -318,7 +329,7 @@ class Pipeline(object):
             data = imported[key]
 
             if self.function1 != '':
-                data = self.doProcessingStep(data)
+                data = self.doProcessingStep(data, fname)
 
             if labels.has_key(key):
                 label = labels[key]
@@ -460,7 +471,7 @@ class Pipeline(object):
         for n in names:
             arrs = []
             for D in dictslist:
-                arrs.append(numpy.array(D[n]))
+                arrs.append(np.array(D[n]))
             newdata[n] = list(sum(arrs)/len(arrs))
         return newdata
 
@@ -565,18 +576,44 @@ class Pipeline(object):
                 self.queue[f] = f
         return
 
-    def saveEkinPlotstoImages(self, E, filename):
-        """Save the ekin plots to png images"""
+    def saveEkinPlotstoImages(self, E, filename, groupbylabel=False):
+        """Save the ekin plots to png images
+           groupbylabel allows commonly labelled datasets 
+           to be overlayed - useful for viewing processing results"""
         title = os.path.basename(filename)
         filename = os.path.join(self.workingdir, filename)
         filename = filename + '.png'
-        #limit to 25 plots per image
-        d = E.datasets
-        if len(d) > 25: d = E.datasets[:25]
-        E.plotDatasets(d, filename=filename, plotoption=2,
-                       dpi=self.dpi, size=(10,8), showerrorbars=self.showerrorbars,
-                       title=title, normalise=self.normaliseplots,
-                       grayscale=self.grayscale, marker=self.marker)
+        #limit to 30 plots per image
+        dsets = E.datasets
+        if len(dsets) > 30: 
+            dsets = E.datasets[:30]
+        #the following functionality should be integrated into ekin plotter
+        if groupbylabel == True:
+            import itertools
+            import pylab as plt
+            from mpl_toolkits.axes_grid1 import AxesGrid
+            groups = []
+            #use iterator to get groups
+            iterator = itertools.groupby(sorted(dsets), key=lambda x: x.split('_')[0])
+            for i,j in iterator:
+                groups.append(list(j))
+            #print groups
+            fig = plt.figure(dpi=80)
+            cols, dim = E.getGeometry(groups, 0)
+            c=1      
+            for g in groups:
+                ax=fig.add_subplot(cols,dim,c)                   
+                E.plotDatasets(g,figure=fig,axis=ax,plotoption=3,marker=self.marker,
+                                    markers=['-','o'],fontsize=8,
+                                    normalise=1,varyshapes=1)                
+                c+=1        
+            fig.tight_layout(pad=0.8, w_pad=0.5, h_pad=1.0)
+            fig.savefig(filename)
+        else:
+            E.plotDatasets(dsets, filename=filename, plotoption=2,
+                           dpi=self.dpi, size=(10,8), showerrorbars=self.showerrorbars,
+                           title=title, normalise=self.normaliseplots,
+                           grayscale=self.grayscale, marker=self.marker)
         return
 
     def saveFitstoCSV(self, E, filename):
@@ -669,8 +706,9 @@ class Processor(object):
     """Class that defining pre-processing steps applied to data"""
 
     def __init__(self):
-        self.predefined = ['differentiate','gaussiansmooth','smooth', 'filternoise',
-                           'removebaseline','removeoutliers']
+        self.predefined = ['differentiate','detectpeaks','gaussiansmooth','smooth',
+                           'fouriernoisefilter','savitzkygolayfilter',
+                           'baselinecorrection','removeoutliers']
         return
 
     def doFunctions(self, names, data):
@@ -682,28 +720,125 @@ class Processor(object):
         newdata = copy.deepcopy(data)
         for name in names:
             func = getattr(self, name)
-            for d in data:
-               #print data[d]
+            for d in data:               
                x,y = newdata[d]
                newdata[d] = func(x,y)
-               #print newdata[d]
+               print d, newdata[d][0]           
         return newdata
 
-    def detectpeaks(self, x, y, threshold=None):
-        """Extract a peak from the y data"""
-        if threshold == None:
-            threshold = max(y) * 0.1
-        return sx, sy
+    def detectpeaks(self, x_axis, y_axis, lookahead=5, delta=20):
+        """
+        Converted from/based on a MATLAB script at http://billauer.co.il/peakdet.html
+        
+        Algorithm for detecting local maximas and minmias in a signal.
+        Discovers peaks by searching for values which are surrounded by lower
+        or larger values for maximas and minimas respectively
+        
+        keyword arguments:
+        y_axis -- A list containg the signal over which to find peaks
+        x_axis -- A x-axis whose values correspond to the 'y_axis' list and is used
+            in the return to specify the postion of the peaks. If omitted the index
+            of the y_axis is used. (default: None)
+        lookahead -- (optional) distance to look ahead from a peak candidate to
+            determine if it is the actual peak (default: 500) 
+            '(sample / period) / f' where '4 >= f >= 1.25' might be a good value
+        delta -- (optional) this specifies a minimum difference between a peak and
+            the following points, before a peak may be considered a peak. Useful
+            to hinder the algorithm from picking up false peaks towards to end of
+            the signal. To work well delta should be set to 'delta >= RMSnoise * 5'.
+            (default: 0)
+                Delta function causes a 20% decrease in speed, when omitted
+                Correctly used it can double the speed of the algorithm
+        
+        return -- two lists [maxtab, mintab] containing the positive and negative
+            peaks respectively. Each cell of the lists contains a tupple of:
+            (position, peak_value) 
+            to get the average peak value do 'np.mean(maxtab, 0)[1]' on the results
+        """
+        maxtab = []
+        mintab = []
+        dump = []   #Used to pop the first hit which always if false
+           
+        length = len(y_axis)
+        if x_axis is None:
+            x_axis = range(length)
+        
+        #perform some checks
+        if length != len(x_axis):
+            raise ValueError, "Input vectors y_axis and x_axis must have same length"
+        if lookahead < 1:
+            raise ValueError, "Lookahead must be above '1' in value"
+        if not (np.isscalar(delta) and delta >= 0):
+            raise ValueError, "delta must be a positive number"
+        
+        #needs to be a numpy array
+        y_axis = np.asarray(y_axis)
+        
+        #maxima and minima candidates are temporarily stored in
+        #mx and mn respectively
+        mn, mx = np.Inf, -np.Inf
+        
+        #Only detect peak if there is 'lookahead' amount of points after it
+        for index, (x, y) in enumerate(zip(x_axis[:-lookahead], y_axis[:-lookahead])):
+            if y > mx:
+                mx = y
+                mxpos = x
+            if y < mn:
+                mn = y
+                mnpos = x
+            
+            ####look for max####
+            if y < mx-delta and mx != np.Inf:
+                #Maxima peak candidate found
+                #look ahead in signal to ensure that this is a peak and not jitter
+                if y_axis[index:index+lookahead].max() < mx:
+                    maxtab.append((mxpos, mx))
+                    dump.append(True)
+                    #set algorithm to only find minima now
+                    mx = np.Inf
+                    mn = np.Inf
+            
+            ####look for min####
+            if y > mn+delta and mn != -np.Inf:
+                #Minima peak candidate found 
+                #look ahead in signal to ensure that this is a peak and not jitter
+                if y_axis[index:index+lookahead].min() > mn:
+                    mintab.append((mnpos, mn))
+                    dump.append(False)
+                    #set algorithm to only find maxima now
+                    mn = -np.Inf
+                    mx = -np.Inf
+            
+        #Remove the false hit on the first value of the y_axis
+        try:
+            if dump[0]:
+                maxtab.pop(0)               
+            else:
+                mintab.pop(0)            
+            del dump
+        except IndexError:
+            #no peaks were found, should the function return empty lists?
+            return [], []
+       
+        x,y = zip(*maxtab)              
+        return x, y       
 
-    def removebaseline(self, x, y):
-        """Detect and remove baseline"""
-        mean = numpy.mean(y)
-        by = [i-mean for i in y]
-        return x, by
+    def baselinecorrection(self, x, y):
+        """Detect and remove baseline by dividing list into segments and
+           then interpolating the result over all x values"""        
+        seg=len(x)/30
+        bx=[];by=[]
+        for i in range(0,len(x),seg):
+            mean = np.min(y[i:i+seg])
+            bx.append(i)
+            by.append(mean)
+        by = np.interp(x, bx, by)
+        y=y-by
+        return x, y
 
     def differentiate(self, x, y):
         """Get numerical derivative of y vales"""
-        dy = list(numpy.diff(y,1))
+        dy = list(np.diff(y,1))
         dx = list(x[:len(dy)])
         return dx,dy
 
@@ -711,17 +846,17 @@ class Processor(object):
         """Smooth noisy data with gaussian filter"""
 
         window=degree*2-1
-        weight=numpy.array([1.0]*window)
+        weight=np.array([1.0]*window)
         weightGauss=[]
         for i in range(window):
             i=i-degree+1
             frac=i/float(window)
-            gauss=1/(numpy.exp((4*(frac))**2))
+            gauss=1/(np.exp((4*(frac))**2))
             weightGauss.append(gauss)
-        weight=numpy.array(weightGauss)*weight
+        weight=np.array(weightGauss)*weight
         smoothed=[0.0]*(len(y)-window)
         for i in range(len(smoothed)):
-            smoothed[i]=sum(numpy.array(y[i:i+window])*weight)/sum(weight)
+            smoothed[i]=sum(np.array(y[i:i+window])*weight)/sum(weight)
         #cut x vals so they match y - may introduce some error
         sx = self.getMatchingList(smoothed, x)
         #print d,len(sx), len(smoothed)
@@ -735,39 +870,76 @@ class Processor(object):
             x = b[start:-end]
         return x
 
-    def smooth(self,x,y,window_len=20,window='blackman'):
-        
+    def smooth(self,x,y,window_len=7,window='hanning'):
+        """smooth the data using a window with requested size.    
+        This method is based on the convolution of a scaled window with the signal.
+        The signal is prepared by introducing reflected copies of the signal 
+        (with the window size) in both ends so that transient parts are minimized
+        in the begining and end part of the output signal.
+        """
         if len(x) < window_len:
             raise ValueError, "Input list needs to be bigger than window size."
         if window_len<3:
             return y
         if not window in ['hanning', 'hamming', 'bartlett', 'blackman']:
             raise ValueError, 'wrong filter name'
-        s=numpy.r_[y[window_len-1:0:-1],y,y[-1:-window_len:-1]]
-        print s
-        w=eval('numpy.'+window+'(window_len)')
-        sy = numpy.convolve(w/w.sum(),s,mode='same')
+        s=np.r_[y[window_len-1:0:-1],y,y[-1:-window_len:-1]]        
+        w=eval('np.'+window+'(window_len)')
+        sy = np.convolve(w/w.sum(),s,mode='same')
         sy = list(sy)
-        #sx = self.getMatchingList(sy, x)
-        print len(x), len(sy)
-        return x,sy[window_len:-window_len+1]
+        sx = np.r_[x[window_len-1:0:-1],x,x[-1:-window_len:-1]]
+        print len(sx), len(sy)
+        return sx[window_len:-window_len+1],sy[window_len:-window_len+1]
 
-    def filternoise(self, x, y):
-        fft=numpy.fft.fft(y)
+    def fouriernoisefilter(self, x, y):
+        fft=np.fft.fft(y)
         bp=fft[:]
         for i in range(len(bp)):
-            if i>=100:bp[i]=0  
-        ibp=numpy.fft.ifft(bp)
+            if i<=20:bp[i]=0  
+        ibp=np.fft.ifft(bp)
         return x, ibp
 
+    def savitzkygolayfilter(self, x, y, window_size=11, order=3, deriv=0):
+        """Smooth (and optionally differentiate) data with a Savitzky-Golay filter.
+        The Savitzky-Golay filter removes high frequency noise from data.
+        It has the advantage of preserving the original shape and
+        features of the signal better than other types of filtering
+        approaches, such as moving averages techhniques.
+        The main idea behind this
+        approach is to make for each point a least-square fit with a
+        polynomial of high order over a odd-sized window centered at
+        the point.
+        """
+
+        try:
+            window_size = np.abs(np.int(window_size))
+            order = np.abs(np.int(order))
+        except ValueError, msg:
+            raise ValueError("window_size and order have to be of type int")
+        if window_size % 2 != 1 or window_size < 1:
+            raise TypeError("window_size size must be a positive odd number")
+        if window_size < order + 2:
+            raise TypeError("window_size is too small for the polynomials order")
+        order_range = range(order+1)
+        half_window = (window_size -1) // 2
+        # precompute coefficients
+        b = np.mat([[k**i for i in order_range] for k in range(-half_window, half_window+1)])
+        m = np.linalg.pinv(b).A[deriv]
+        # pad the signal at the extremes with
+        # values taken from the signal itself
+        y=np.array(y)
+        firstvals = y[0] - np.abs( y[1:half_window+1][::-1] - y[0] )
+        lastvals = y[-1] + np.abs(y[-half_window-1:-1][::-1] - y[-1])
+        y = np.concatenate((firstvals, y, lastvals))
+        return x, np.convolve( m, y, mode='valid')
+
     def fouriertransform(self, x, y):
-        """Find discrete fourier transform of data"""
-        return numpy.fft2(x,y)
+        """Find discrete fourier transform of y data"""
+        return np.fft(x,y)
 
     def removeoutliers(self, x, y, sigma=3):
         """Remove outliers based on y values distance from mean"""
 
         return
-
 
 

@@ -143,30 +143,44 @@ def createCDData(fname, names, tm, noise=0.2):
         cw.writerow(vals)        
     return
 
-def createSimulatedSpectralData(fname, names, peaks=10, noise=0.1):
+def createSimulatedSpectralData(fname, names, peaks=10, noise=0.05):
     """Create spectral type data with noise and peaks that you might find
        commonly in experimental data"""
 
     cw = csv.writer(open(fname,'w'))
     cw.writerow(['temp']+names)
-    baseline=100
+    offset=100
     n=500
-    pheight = baseline*5
-    percnoise = baseline*noise
-    peakvals = {}
-
-    for j in range(len(names)):        
-        peakvals[j] = [int(random.normalvariate(n/4,n/4)) for p in range(peaks)]
+    pheight = offset*2
+    percnoise = offset*noise
+    #peakvals = {}  
+    baselinefunc = lambda x: offset + pheight*pow(.98/x,0.08)
     
-    for x in range(1,n,1):
-        vals = []
-        for j in range(len(names)):
-            if x in peakvals[j]:
-                vals.append(random.normalvariate(pheight,pheight/20))
-            else:
-                vals.append(float(baseline)+random.normalvariate(0,percnoise))
-        vals.insert(0,x)
-        cw.writerow(vals) 
+    def gaussianpeaks(x, peaks):
+        #add random gaussian-shaped peaks as signals
+        res=0
+        for i in peaks:
+           height = random.normalvariate(pheight,pheight/5)
+           res+= height*exp(-(i-x)**2/1.3)
+        return res
+
+    data={}
+    for name in names:
+        peakvals = [abs(int(random.normalvariate(n/3,n/4))) for p in range(peaks)]    
+        print name, sorted(peakvals )
+        vals=[]
+        for i in range(1,n,1):
+            val = gaussianpeaks(i, peakvals)
+            val += baselinefunc(i)+random.normalvariate(0,percnoise)
+            vals.append(val)
+        data[name] = vals
+
+    for x in range(0,n-1):
+        row=[]
+        for name in names:
+            row.append(data[name][x])
+        row.insert(0,x)
+        cw.writerow(row)
     return
 
 def createSingleFileData(path='testfiles', clear=False):

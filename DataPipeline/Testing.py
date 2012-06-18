@@ -232,17 +232,18 @@ class Tester(object):
 
     def peakDetectionTest(self):
         """Use pre-processing funcs to detect peaks"""
-        path = "testfiles"        
+        path = "testfiles"
         names = Utilities.createRandomStrings(8,6)
-        fname = os.path.join(path,'spectraldatatest.txt')
+        fname = os.path.join(path,'spectraldata.txt')
         Utilities.createSimulatedSpectralData(fname, names)
         conf = {'format':'databycolumn', 'saveplots':1, 'marker':'-',
-                'function2':'removebaseline','function1':'smooth',
+                'function1':'smooth', 'function2':'baselinecorrection',
+                #'function3':'detectpeaks' 
                 }
         p = Pipeline()
         p.createConfig('temp.conf',**conf)
         p.openRaw(fname)
-        p.run()    
+        p.run()
         return
 
     def renameFilesTest(self):
