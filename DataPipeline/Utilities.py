@@ -51,6 +51,8 @@ def createConfigParserfromDict(data, sections, **kwargs):
     cp = ConfigParser.ConfigParser()
     for s in sections:
         cp.add_section(s)
+        if not data.has_key(s):
+            continue
         for i in data[s]:
             name,val = i
             cp.set(s, name, val)
@@ -143,7 +145,7 @@ def createCDData(fname, names, tm, noise=0.2):
         cw.writerow(vals)        
     return
 
-def createSimulatedSpectralData(fname, names, peaks=10, noise=0.05):
+def createSimulatedSpectralData(fname, names, peaks=10, noise=0.08):
     """Create spectral type data with noise and peaks that you might find
        commonly in experimental data"""
 

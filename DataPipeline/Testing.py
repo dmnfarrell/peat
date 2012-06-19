@@ -236,9 +236,9 @@ class Tester(object):
         names = Utilities.createRandomStrings(8,6)
         fname = os.path.join(path,'spectraldata.txt')
         Utilities.createSimulatedSpectralData(fname, names)
-        conf = {'format':'databycolumn', 'saveplots':1, 'marker':'-',
+        conf = {'format':'databycolumn', 'saveplots':1, 'marker':'-','normalise':1,
                 'function1':'smooth', 'function2':'baselinecorrection',
-                #'function3':'detectpeaks' 
+                'function3':'detectpeaks',                
                 }
         p = Pipeline()
         p.createConfig('temp.conf',**conf)
