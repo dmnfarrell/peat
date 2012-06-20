@@ -81,11 +81,15 @@ class zDatabase(object):
             self.storagetype = 'local'
         else:
             return None
+
         self.db = DB(self.storage)
-        self.db.setCacheSize(50)
+        self.db.setCacheSize(100)
         self.connection = self.db.open()
         self.dbroot = self.connection.root()
         self.open = True
+        self.changessincelastcommit = 0
+        self.defaultinfo={'project': '','users':'', 
+                          'cachesize':100}
 
         #define data
         if self.dbroot.has_key('data'):
@@ -95,24 +99,22 @@ class zDatabase(object):
 
             #temp for old dbs - convert meta.info to persistent if it isn't
             if not self.meta.has_key('info'):
-                self.meta.info = PersistentMapping({'project': '', 'users':'', 'cachesize':100})
+                self.meta.info = PersistentMapping(self.defaultinfo)
                 self.commit()
             if type(self.meta.info) != PersistentMapping:
                 x = PersistentMapping(self.meta.info)
                 self.meta.info = x
                 self.commit(note='convert db info')
             if not self.meta.info.has_key('cachesize'):
-                self.setCacheSize(200)
-                self.commit(note='cachesize set')
-            #self.cellcache = self.dbroot['cellcache']
+                self.setCacheSize(200)            
+                self.commit(note='memory settings applied')            
             try:
                 self.blobs = self.dbroot['blobs']
             except:
                 self.blobs = self.dbroot['blobs'] = OOBTree()
                 self.commit(note='blob dir')
         else:
-            self.createData()
-
+            self.createData()        
         return
 
     def createStorage(self, server, username, password,
@@ -174,13 +176,9 @@ class zDatabase(object):
         self.meta = self.dbroot['meta'] = Meta('PEAT-DB database')
         self.meta.staticfields = { 'name': 'text', 'Mutations':'text',
                                      'Structure':'PDB'}
-        #self.cellcache = self.dbroot['cellcache'] = OOBTree()
-        self.blobs = self.dbroot['blobs'] = OOBTree()
-        #self.meta.usedisplaycache = False
+        self.blobs = self.dbroot['blobs'] = OOBTree()       
         #use meta.info for any misc settings specific to the DB
-        self.meta.info = PersistentMapping({'project': '', 'users':'', 'cachesize':100})
-        #try to limit no of objects to store in RAM
-        self.meta.cachesize = 100
+        self.meta.info = PersistentMapping(self.defaultinfo)
         self.commit()
         return
 
@@ -194,14 +192,18 @@ class zDatabase(object):
             transaction.get().abort()
 
         #self.dbroot.clear()       
-        self.connection.close()        
+        self.connection.close()
         self.db.close()
         self.storage.close()
         self.open = False
         return
 
+    def getCacheLimit(self):
+        return self.meta.info['cachesize']
+
     def setCacheSize(self, s):
         self.meta.info['cachesize'] = s
+        self.db.setCacheSize(s)
         return
 
     def clean(self):
@@ -219,7 +221,6 @@ class zDatabase(object):
         from ZODB import POSException
         try:
             t.commit()            
-            #self._checkMemCache()
         except POSException.ConflictError:
             print 'there is a conflict'
             print 'following objects changed: ', self.getChanged().keys()            
@@ -260,15 +261,21 @@ class zDatabase(object):
 
     def add(self, key, record=None, overwrite=True):
         """Add a record"""
-        if key in self.data.keys() and overwrite==False:
+        #if key in self.data.keys() and overwrite==False:
             #print 'key %s is already present' %key
-            return False
+        #    return False
         if record == None:
             record = Record(name=key)
         self._checkMemCache()
+        self._checkTransactionSize()
         self.data[key] = record
-        print record, self.data[key]
         self.data._p_changed = 1
+        return
+
+    def addDict(self, key, data=None):
+        rec = self.add(key)        
+        for d in data: 
+            self.data[key][d] = data[d]
         return
 
     def delete(self, key):
@@ -296,17 +303,12 @@ class zDatabase(object):
         if not fname in self.meta.userfields:
             print 'field name not in userfields..'
         i=0    
-        for k in self.data.keys():
-            #we cannot minimize cache between transactions, so 
-            #may need to manually commit in batches to prevent filling memory
-            '''if self.db.cacheSize() > self.meta.info['cachesize']:
-                self.commit('field deletion')
-                self.db.cacheMinimize()'''
-            #print self.db.cacheSize() 
+        for k in self.data.keys():            
             if fname in self.data[k].keys() and type(self.data[k]) is PEATRecord:                
                 #del self.data[k][fname]
                 self.data[k].delete(fname)
-            i+=1    
+            i+=1
+            self._checkTransactionSize()
             if callback != None:               
                 callback(float(i)/self.length()*100)
         del self.meta.userfields[fname]
@@ -444,6 +446,13 @@ class zDatabase(object):
         self.importDict(data, namefield)
         return
 
+    def getTextFields(self):
+        flds = ['name']
+        for f in self.getFields():
+            if self.meta.userfields[f]['field_type'] == 'text':
+                flds.append(f)
+        return flds
+
     def addFile(self, blob):
         self.connection.add(blob)
         return
@@ -494,6 +503,21 @@ class zDatabase(object):
                         files[name] = f.name
         return files
 
+    def _checkTransactionSize(self):
+        """To prevent current changes swamping memory we should commit
+           in batches when the cache limit is exceeded. This method should be
+           called from functions likely to be involved in large commits.
+           Each subtransaction commit writes the current changes out to disk
+           and frees memory to make room for more changes"""
+        self.changessincelastcommit += 1
+        if self.changessincelastcommit > self.meta.info['cachesize']:
+            self.commit(note='transaction limit reached commit')
+            self.db.cacheMinimize()
+            #self.db.savepoint()
+            self.changessincelastcommit = 0
+            print 'cache limit reached, commit'
+        return
+
     def _checkMemCache(self):
         """Need to check the memory isn't being overloaded
            Call this when addressing lots of recs serially, eg. inside getitem
@@ -519,12 +543,13 @@ class PDatabase(zDatabase):
 
     def add(self, key, record=None, overwrite=True):
         """Add a record"""
-        if key in self.data.keys() and overwrite==False:
+        #if key in self.data.keys() and overwrite==False:
             #print 'key %s is already present' %key
-            return False
+            #return False
         if record == None:
             record = PEATRecord(name=key)
-        self._checkMemCache()    
+        self._checkMemCache()
+        self._checkTransactionSize()
         self.data[key] = record
         self.data._p_changed = 1
         return
@@ -549,13 +574,6 @@ class PDatabase(zDatabase):
             if mutationstring == prot.Mutations:
                 return p
         return None
-    
-    def getTextFields(self):
-        flds = ['name']
-        for f in self.getFields():
-            if self.meta.userfields[f]['field_type'] == 'text':
-                flds.append(f)
-        return flds
     
     def getDictFields(self):
         flds = []

@@ -44,15 +44,16 @@ def loadModelsFile(modelsfile=None):
     if not os.path.exists(modelsfile):
         #write a default file if none available
         modelsdict = createModels()
-        writeModelsFile(modelsfile, modelsdict)
+        writeModelsFile(modelsfile, modelsdict)    
     currentmodels = pickle.load(open(modelsfile,'r'))
+    updateModels(currentmodels)
     return currentmodels, modelsfile
 
 def updateModels(data):
     """Reload the current global set of models from a dict"""    
     global currentmodels
     currentmodels = data
-    createFitters()
+    createFitters()    
     return
     
 def createModels():

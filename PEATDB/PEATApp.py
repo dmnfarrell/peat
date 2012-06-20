@@ -71,7 +71,7 @@ class App(Frame, GUI_help):
         self.MAIN_width=900; self.MAIN_height=600
         self.main.geometry('900x600+200+100')
 
-        self.preferences=Preferences('PEAT',{})
+        self.preferences = Preferences('PEAT',{})
         self.server = 'localhost'
         self.port = 8080
         self.username = self.getUserID()
@@ -409,11 +409,12 @@ class App(Frame, GUI_help):
 
         self.settings_menu={ '01General':{'cmd':self.showSettings},
                              '02Project Info':{'cmd':self.editDBInfo},
-                             '03Table Prefs':{'cmd':self.showtablePrefs},
-                             '04sep':'',
-                             '05Inspect DB Meta':{'cmd':self.inspectDBMeta},
-                             '06Pack Database':{'cmd':self.packDB},
-                             '07Testing':{'cmd':self.testsDialog}, }
+                             '03Check Available Projects':{'cmd':self.checkServerPriviledges},
+                             '04Table Prefs':{'cmd':self.showtablePrefs},
+                             '05sep':'',
+                             '06Inspect DB Meta':{'cmd':self.inspectDBMeta},
+                             '07Pack Database':{'cmd':self.packDB},
+                             '08Testing':{'cmd':self.testsDialog}, }
         self.settings_menu=self.create_pulldown(self.menu,self.settings_menu)
         self.menu.add_cascade(label='Settings',menu=self.settings_menu['var'])
 
@@ -2481,6 +2482,35 @@ class App(Frame, GUI_help):
                               'Project %s successfully created on %s. '
                               'With access for users %s. '
                               'You may connect to this project now.' %(dbname,server,access))
+        return
+
+    def checkServerPriviledges(self):
+        """Find which projects a user has access to"""
+        import MySQLdb as mysql
+        mpDlg = MultipleValDialog(title='Check Available Databases',
+                                    initialvalues=(self.server, self.port,
+                                                   self.username,''),
+                                    labels=('server','port',
+                                            'user','password'),
+                                    types=('string','int',
+                                           'string','password'),
+                                    parent=self.main)
+        if not mpDlg.result:
+            return
+        server = mpDlg.results[0]
+        port = mpDlg.results[1]
+        user = mpDlg.results[2]
+        passwd = mpDlg.results[3]
+        db = mysql.connect(user=user, host=server,
+                               passwd=passwd, port=port)
+        c = db.cursor()
+        cmd = "SHOW DATABASES;"
+        c.execute(cmd)
+        projects = c.fetchall()
+        text = ''
+        for p in projects:
+            text+=p[0]+'\n'
+        tkMessageBox.showinfo("Available databases", text)
         return
 
     def plot(self, event=None):

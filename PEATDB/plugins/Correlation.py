@@ -227,7 +227,7 @@ class CorrelationAnalyser(Plugin):
         #draw expected correlation line with slope x
         slope=1
         #set range of axes
-        ax.plot((a,b),(a,b),'g')            
+        ax.plot((a,b),(a,b),'g')
         ax.axhline(y=0, color='grey'); ax.axvline(x=0,color='grey')
         ax.set_xlim(a,b); ax.set_ylim(a,b)
         ax.set_title(title)

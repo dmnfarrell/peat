@@ -788,8 +788,6 @@ class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
         self.seqframe.configure(bg=self.backgrcolor.get())
         return
 
-
-
     def print_aa_seq(self,sequence,y,position=0,frame=0,font=None):
         """
         Write a single aa sequence in the sequence window
@@ -799,8 +797,6 @@ class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
             x,y_junk=self.get_aa_pos_on_screen(position,frame)
             self.seq_win_objs[self.seqframe.create_text(x,y,text=letter,font=font,anchor='w')]=1
         return
-
-
 
     def print_aa3_seq(self,sequence,y,position=0,frame=0,highlight_aa=None,font=None):
         """

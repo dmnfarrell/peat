@@ -659,9 +659,18 @@ class EkinProject(object):
         xx, fity = self.updateFit(X, ax, x, clr=fitclr, plotoption=plotoption)
         return
 
+    def getGeometry(self, datasets, cols):
+        if cols==0 or cols=='':
+            cols=int(math.ceil(math.sqrt(len(datasets))))
+        if len(datasets) == 2:
+            cols=1; dim=2
+        else:
+            dim = int(math.ceil(len(datasets)/float(cols)))
+        return cols, dim
+
     def plotDatasets(self, datasets='ALL', data=None, fitdata=None,
                            filename=None, plotoption=1, cols=0,
-                           size=(6,4), linecolor=None, figure=None,
+                           size=(6,4), linecolor=None, figure=None, axis=None,
                            showfitvars=False, dpi=80, **kwargs):
         """Plot a dataset or list of datasets, if none given all are  plotted.
            plotoptions:
@@ -669,9 +678,10 @@ class EkinProject(object):
            2 - each dataset in different axes but same figure - one image
            3 - all datasets in one plot, single figure
            Note: errorbars are drawn +/- value supplied"""
+
         status = self.setPylab(size)
-        prms = Params(**kwargs)
-        self.current = datasets
+        prms = Params(**kwargs)       
+        self.current = datasets        
         shapes = Options.shapes
         
         plt.rc('font', family=prms.font)
@@ -684,27 +694,23 @@ class EkinProject(object):
             print 'sorry, install pylab..'
             return
         if figure != None:
-            fig = figure
+            fig = figure           
         else:
-            #from matplotlib import figure
-            #fig = figure.Figure(figsize=size, dpi=80)
             fig = plt.figure(figsize=size, dpi=80)
-        fig.clf()
+        #fig.clf()
         datasets = self.checkDatasetParam(datasets)
         if plotoption == 2:
-            if cols==0 or cols=='':
-                cols=math.ceil(math.sqrt(len(datasets)))
+            cols, dim = self.getGeometry(datasets, cols)
+            n=1
             plt.rc('font', size=9.0)
             if prms.title != None:
                 fig.suptitle(prms.title, fontsize=prms.fontsize)
-            if len(datasets) == 2:
-                   cols=1; dim=2
+        else:           
+            if axis != None:
+                ax = axis
             else:
-                dim = math.ceil(len(datasets)/float(cols))
-            n=1
-        else:
-            ax = fig.add_subplot(111)
-            ax.cla()
+                ax = fig.add_subplot(111)
+            ax.cla()      
             self.ax = ax
 
         legendlines = []
@@ -735,16 +741,17 @@ class EkinProject(object):
             else:
                 ylabel = ek.labels[1]
 
-        #e=[]
-        #for i in xdata: e.append(i[0])
         i=0
         cc=0
-        for name in datasets:
+        for name in datasets:            
             if cc >= len(prms.colors):
                 cc=0
             if prms.varyshapes == True:
-                prms.marker = shapes[cc]
-            if plotoption == 2:
+                if prms.markers != None and len(prms.markers)>cc:
+                    prms.marker = prms.markers[cc]
+                else:
+                    prms.marker = shapes[cc]            
+            if plotoption == 2:                
                 ax = fig.add_subplot(int(dim),int(cols),n)
                 ax.set_title(name, fontsize=prms.fontsize, fontweight='bold')
                 if cols<4:
@@ -764,7 +771,7 @@ class EkinProject(object):
             self.currydata = y
             if len(x) == 0:
                 continue
-            if prms.normalise == True:
+            if prms.normalise == True:             
                 self.mindata=min(y); self.maxdata=max(y)
                 y = normList(y, inputmin=self.mindata, inputmax=self.maxdata)
             if prms.graphtype == 'XY':
@@ -791,7 +798,7 @@ class EkinProject(object):
 
                     line = ax.scatter(x, y, marker=prms.marker, c=ptcolors,
                                       s=prms.markersize, lw=prms.linewidth, alpha=prms.alpha)
-                    cc+=1
+                cc+=1
 
                 lineclr = self._getlineColor(line)
                 if prms.showerrorbars == True and (yerr != None or xerr != None):
@@ -1054,6 +1061,7 @@ class Params(object):
     def __init__(self, **kwargs):
         self.colors = Options.colors
         self.marker = 'o'
+        self.markers = ['-','o','>']
         self.linewidth = 1
         self.legend = False
         self.legendloc = 'best'
