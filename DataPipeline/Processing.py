@@ -37,7 +37,8 @@ class Processor(object):
     def __init__(self, conffile=None):
         self.predefined = ['differentiate','detectpeaks','gaussiansmooth','smooth',
                            'fouriernoisefilter','savitzkygolayfilter',
-                           'baselinecorrection','removeoutliers']
+                           'baselinecorrection','removeoutliers','normalise',
+                           'omitrange']
         if conffile==None:
             conffile = os.path.join(os.path.expanduser('~'),'functions.conf')
         if not os.path.exists(conffile):
@@ -50,9 +51,13 @@ class Processor(object):
 
         c = ConfigParser.ConfigParser()        
         defaults = {'smooth': [('window', 'hanning'),('windowlen', 11)],
+                    'gaussiansmooth':[('degree',6)],
                     'baselinecorrection':[('segmentsize',0.3)],
                     'detectpeaks':[('lookahead',5),('delta',20)],
-                    'savitzkygolayfilter':[('windowsize',11), ('order',3), ('deriv',0)]}
+                    'savitzkygolayfilter':[('windowsize',11), ('order',3), ('deriv',0)],
+                    'normalise':[('value',1)],
+                    'removeoutliers':[('percentile',0.95)],
+                    'omitrange':[('xmin',''),('xmax',''),('ymin',''),('ymax','')]}
         cp = Utilities.createConfigParserfromDict(defaults, self.predefined ,**kwargs)
         cp.write(open(conffile,'w'))
         print conffile
@@ -244,12 +249,13 @@ class Processor(object):
         return x
 
     def smooth(self,x,y,windowlen=11,window='hanning'):
-        """smooth the data using a window with requested size.    
+        """smooth the data using a window with requested size. 
         This method is based on the convolution of a scaled window with the signal.
         The signal is prepared by introducing reflected copies of the signal 
         (with the window size) in both ends so that transient parts are minimized
         in the begining and end part of the output signal.
         """
+
         if len(x) < windowlen:
             raise ValueError, "Input list needs to be bigger than window size."
         if windowlen<3:
@@ -310,8 +316,59 @@ class Processor(object):
         """Find discrete fourier transform of y data"""
         return np.fft(x,y)
 
-    def removeoutliers(self, x, y, sigma=3):
-        """Remove outliers based on y values distance from mean"""
+    def percentile(self, x, y, percent=0.95):
+        """Find the percentile of a list of y values.
+        
+        @parameter percent - a float value from 0.0 to 1.0.
+        @return - the percentile of the values
+        adapted from http://code.activestate.com/recipes/511478/ """
 
-        return
+        key=lambda x:x
+        y = sorted(y)
+        if not y:
+            return None
+        k = (len(y)-1) * percent
+        f = math.floor(k)
+        c = math.ceil(k)
+        if f == c:
+            return key(y[int(k)])
+        d0 = key(y[int(f)]) * (c-k)
+        d1 = key(y[int(c)]) * (k-f)        
+        return d0+d1
+
+    def removeoutliers(self, x, y, percentile=0.95):
+        """Remove outliers based on nth percentile"""
+        p = self.percentile(x,y,percentile)
+        print p
+        rx=[]; ry=[]
+        for i,j in zip(x,y):
+            print j,p
+            if j<p:
+                rx.append(i)
+                ry.append(j)
+        return rx,ry
+
+    def normalise(self, x, y, value=1):
+        """Normalise data"""
+        sum = reduce(lambda i,j:i+j, y)
+        y = [i/(sum*1.0)*value for i in y]
+        return x,y
+
+    def omitrange(self, x, y, xmin='',xmax='', ymin='',ymax=''):
+        """Omit range of data points by given range"""
+        rx=[]; ry=[]
+        if xmin=='':
+            xmin=min(x)
+        if xmax=='':
+            xmax=max(x)
+        if ymin=='':
+            ymin=min(y)
+        if ymax=='':
+            ymax=max(y)
+        for i,j in zip(x,y)[:]:
+            print i,j,xmin,xmax,ymin,ymax         
+            if i>xmin and i<xmax and j>ymin and j<ymax:                
+                rx.append(i)
+                ry.append(j)
+        return rx,ry
 

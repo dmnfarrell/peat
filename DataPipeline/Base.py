@@ -80,7 +80,8 @@ class Pipeline(object):
                     'plotting': [('saveplots', 0), ('fontsize',9),                                    
                             ('normalise', 0), ('grayscale', 0), ('alpha',0.8),
                             ('font','sans-serif'), ('markersize',25), ('linewidth',1),
-                            ('showerrorbars',0), ('dpi', 100), ('marker','o')],
+                            ('showerrorbars',0), ('dpi', 100), ('marker','o'),
+                            ('markers','-,o'),('legend',0)],
                     'custom': [],
                     'fitting': [('xerror', 0), ('yerror', 0), ('iterations', 50),
                                 ('modelsfile','')],
@@ -585,14 +586,13 @@ class Pipeline(object):
         opts = dict(self.plotting)
         #print self.plotting
         for k in opts:
-            if opts[k] == '1':
-                opts[k] = True
-            elif opts[k] == '0':
-                opts[k] = False
-            if k=='alpha':
-                opts[k]=float(opts[k])
-            if k in ['dpi','markersize']:
-                opts[k]=int(opts[k])
+            if k=='markers':
+                opts[k]=list(opts[k].split(','))                
+            else:
+                try:
+                    opts[k] = eval(opts[k])
+                except:
+                    pass
         return opts
 
     def saveEkinPlotstoImages(self, E, filename, groupbylabel=False):
@@ -623,7 +623,7 @@ class Pipeline(object):
             c=1
             for g in groups:
                 ax=fig.add_subplot(cols,dim,c)                            
-                E.plotDatasets(g,figure=fig,axis=ax,plotoption=3,markers=['-','o'],
+                E.plotDatasets(g,figure=fig,axis=ax,plotoption=3,
                                 varyshapes=1,**plotopts)
                 c+=1
             fig.tight_layout(pad=0.8, w_pad=0.8, h_pad=1.0)
