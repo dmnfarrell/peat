@@ -1,0 +1,12 @@
+=======
+CHANGES
+=======
+
+------
+1.1
+------
+
+* Now use ~/.pipeline folder as default location
+* Added pre-processing filters as predefined functions
+* New test for functions using simulated spectral data
+* More plotting options available from config file
