@@ -41,7 +41,7 @@ import PEATDB.Ekin.Fitting as Fitting
 class Pipeline(object):
     """This class does all the pipeline processing and configuration"""
 
-    __version__ = '1.0.0'
+    __version__ = '1.1.0'
     configsections = ['base','files','fitting','models','variables','functions',
                       'excel','plotting','custom']
 
@@ -633,7 +633,7 @@ class Pipeline(object):
                 E.plotDatasets(g,figure=fig,axis=ax,plotoption=3,
                                 varyshapes=1,**plotopts)
                 c+=1
-            fig.tight_layout(pad=0.8, w_pad=0.8, h_pad=1.0)
+            #fig.tight_layout(pad=0.8, w_pad=0.8, h_pad=1.0)
             fig.savefig(filename,dpi=plotopts['dpi'])
         else:
             E.plotDatasets(dsets, filename=filename, plotoption=2,
