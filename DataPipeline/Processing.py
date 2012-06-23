@@ -39,15 +39,17 @@ class Processor(object):
                            'fouriernoisefilter','savitzkygolayfilter',
                            'baselinecorrection','removeoutliers','normalise',
                            'omitrange']
+        homepath = os.path.join(os.path.expanduser('~'))
+        confpath = os.path.join(homepath, '.pipeline')        
         if conffile==None:
-            conffile = os.path.join(os.path.expanduser('~'),'functions.conf')
+            conffile = os.path.join(confpath,'functions.conf')
         if not os.path.exists(conffile):
             self.createConfig(conffile)
         self.parseConfig(conffile)
         return
 
     def createConfig(self, conffile='functions.conf', **kwargs):
-        """Create a separate config file to store """
+        """Create a separate config file to store"""
 
         c = ConfigParser.ConfigParser()        
         defaults = {'smooth': [('window', 'hanning'),('windowlen', 11)],
@@ -207,9 +209,9 @@ class Processor(object):
         seg = int(len(x) * segmentsize)
         bx=[];by=[]
         for i in range(0,len(x),seg):
-            mean = np.min(y[i:i+seg])
+            m = np.min(y[i:i+seg])
             bx.append(i)
-            by.append(mean)
+            by.append(m)
         by = np.interp(x, bx, by)
         y=y-by
         return x, y

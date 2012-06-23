@@ -230,22 +230,32 @@ class Tester(object):
         p.run()
         return
 
-    def peakDetectionTest(self):
+    def peakDetectionTest(self, path=None, noise=0.08):
         """Use pre-processing funcs to detect peaks"""
-        path = "testfiles"
+        if path == None:
+            path = "testfiles"
         names = Utilities.createRandomStrings(8,6)
         fname = os.path.join(path,'spectraldata.txt')
-        Utilities.createSimulatedSpectralData(fname, names)
+        peaks = Utilities.createSimulatedSpectralData(fname, names, noise=noise)
         conf = {'format':'databycolumn', 'saveplots':1, 'marker':'-',
                 'markers':'-,x','alpha':0.7,'normalise':1,
-                'function1':'savitzkygolayfilter',  'function2':'baselinecorrection',
+                'function1':'smooth', 'function2':'baselinecorrection',
                 'function3':'detectpeaks',               
                 }
         p = Pipeline()
         p.createConfig('temp.conf',**conf)
         p.openRaw(fname)
-        p.run()
-        return
+        results = p.run()
+    
+        #compare predicted peaks
+        successrates=[]
+        for name in peaks:
+            #print name, sorted(peaks[name]), results[name][0]
+            orig = set(peaks[name])
+            pred = set(results[name][0])
+            s = float(len(orig.intersection(pred)))/(len(orig))
+            successrates.append(s)            
+        return np.mean(successrates)
 
     def renameFilesTest(self):
         import glob

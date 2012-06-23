@@ -47,8 +47,12 @@ class Pipeline(object):
 
     def __init__(self, conffile=None):
 
+        homepath = os.path.join(os.path.expanduser('~'))
+        self.defaultpath = os.path.join(homepath, '.pipeline')
+        if not os.path.exists(self.defaultpath):
+            os.mkdir(self.defaultpath)
         if conffile==None:
-            confpath = os.path.join(os.path.expanduser('~'),'default.conf')
+            confpath = os.path.join(self.defaultpath, 'default.conf')
             self.createConfig(confpath)
         self.savedir = os.getcwd()
         self.filename = ''
@@ -56,14 +60,15 @@ class Pipeline(object):
         self.queue = {}
         self.results = []
         self.sep = '__'   #symbol for internal separator
+
         return
 
     def createConfig(self, conffile='default.conf', **kwargs):
         """Create a basic config file with default options and/or custom values"""
 
         c = ConfigParser.ConfigParser()
-        wdir = os.path.join(os.path.expanduser('~'),'workingdir')
-        functionsconf = os.path.join(os.getcwd(),'functions.conf')
+        wdir = os.path.join(self.defaultpath,'workingdir')
+        functionsconf = os.path.join(self.defaultpath,'functions.conf')
         defaults = {'base': [('format', 'databyrow'), ('rowstart', 0), ('colstart', 0), ('rowend', 0),
                         ('colend', 0), ('colheaderstart', 0),('rowheaderstart', 0),
                         ('rowheader', ''), ('colheader', ''),
@@ -358,6 +363,7 @@ class Pipeline(object):
             else:
                  #if no fitting we just put the data in ekin
                 Em = self.getEkinProject(data)
+                results = data
             Em.saveProject(fname)
             Em.exportDatasets(fname)
             if self.model1 != '':
@@ -384,6 +390,7 @@ class Pipeline(object):
             self.saveEkinPlotstoImages(Em, fname)
         print 'processing done'
         print 'results saved to %s' %self.workingdir
+        self.results = results
         return results
 
     def processFits(self, rawdata, models=None, variables=None, ind=None,

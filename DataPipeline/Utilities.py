@@ -152,11 +152,10 @@ def createSimulatedSpectralData(fname, names, peaks=10, noise=0.08):
     cw = csv.writer(open(fname,'w'))
     cw.writerow(['temp']+names)
     offset=100
-    n=500
+    n=800
     pheight = offset*2
-    percnoise = offset*noise
-    #peakvals = {}  
-    baselinefunc = lambda x: offset + pheight*pow(.98/x,0.08)
+    percnoise = offset*noise    
+    baselinefunc = lambda x: offset + pheight*pow(.98/x,0.2)
     
     def gaussianpeaks(x, peaks):
         #add random gaussian-shaped peaks as signals
@@ -167,23 +166,25 @@ def createSimulatedSpectralData(fname, names, peaks=10, noise=0.08):
         return res
 
     data={}
+    freqs = [i+100 for i in range(0,n,1)]
+    peakdata = {}
     for name in names:
-        peakvals = [abs(int(random.normalvariate(n/3,n/4))) for p in range(peaks)]    
-        print name, sorted(peakvals )
+        peakvals = [int(random.normalvariate(n/2,n/4)) for p in range(peaks)]
+        print name, sorted(peakvals)
         vals=[]
-        for i in range(1,n,1):
+        for i in freqs:
             val = gaussianpeaks(i, peakvals)
             val += baselinefunc(i)+random.normalvariate(0,percnoise)
             vals.append(val)
         data[name] = vals
-
-    for x in range(0,n-1):
+        peakdata[name] = peakvals
+    for x in range(len(freqs)):
         row=[]
         for name in names:
             row.append(data[name][x])
-        row.insert(0,x)
+        row.insert(0,freqs[x])
         cw.writerow(row)
-    return
+    return peakdata
 
 def createSingleFileData(path='testfiles', clear=False):
     """Create sets of individual data files all in one folder,
