@@ -29,6 +29,17 @@
 from Base import Pipeline
 import os, random
 
+def loadProject(filename):
+    import pickle
+    try:
+        f = open(filename,'r')
+        p = pickle.load(f)
+        return p
+    except Exception,e:
+        print 'failed to load project'
+        print 'Error returned:', e
+        return
+
 def main():
     from optparse import OptionParser
     parser = OptionParser()
@@ -38,15 +49,20 @@ def main():
                         help="Raw file", metavar="FILE")
     parser.add_option("-d", "--dir", dest="directory",
                         help="Folder of raw files")    
+    parser.add_option("-p", "--project", dest="project",
+                        help="Project file", metavar="FILE")
 
     opts, remainder = parser.parse_args()
     P = Pipeline()
-    if opts.conf != None:
-        P.parseConfig(opts.conf)
-    if opts.file != None:
-        P.openRaw(opts.file)
-    if opts.directory != None:
-        P.addFolder(opts.directory)
+    if opts.project != None:
+        P = loadProject(opts.project)
+    else:
+        if opts.conf != None:
+            P.parseConfig(opts.conf)
+        if opts.file != None:
+            P.openRaw(opts.file)
+        if opts.directory != None:
+            P.addFolder(opts.directory)
     P.run()
     
 if __name__ == '__main__':
