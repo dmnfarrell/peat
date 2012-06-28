@@ -35,7 +35,8 @@ from PEATDB.Ekin.Base import EkinProject
 import Utilities
 
 class Tester(object):
-    """This class does all the pipeline tests"""
+    """This class does any manual pipeline tests, the remainder
+        are all in the Unittests module"""
 
     basictests = {1:({'format':'databyrow','model1':'Linear'},'databyrow1.txt'),
                   2:({'format':'databycolumn'},'databycol1.txt'),
@@ -81,7 +82,8 @@ class Tester(object):
         lines = p.openRaw(os.path.join(path,filename))
         data = p.doImport(lines)
         if p.model1 != '':
-            p.run()        
+            p.run()
+        print data
         if len(data) == 0:
             print 'test %s failed' %name
         else:            
@@ -273,7 +275,7 @@ class Tester(object):
 
 def main():
     t=Tester()
-    #t.formatTests(t.basictests, names=[9])
+    t.formatTests(t.basictests)
     #t.formatTests(t.exceltests)
     #t.multiFileTest()
     #t.groupedFileTest()
@@ -282,7 +284,7 @@ def main():
     #t.fitPropagationTest()
     #t.kineticsTest()
     #t.preProcessingTest() 
-    t.peakDetectionTest()   
+    #t.peakDetectionTest()   
     #t.renameFilesTest()
 
 if __name__ == '__main__':

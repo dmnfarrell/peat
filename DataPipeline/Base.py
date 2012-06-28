@@ -60,7 +60,6 @@ class Pipeline(object):
         self.queue = {}
         self.results = []
         self.sep = '__'   #symbol for internal separator
-
         return
 
     def createConfig(self, conffile='default.conf', **kwargs):
