@@ -93,11 +93,8 @@ class titdbWeb(PEATWeb):
                 </UL>'
 
         print '<a>If you wish to submit data to be included here, we currently recommend that you\
-                send the tabulated data (or even plotted curve images) by mail to us at</a> \
-                <a href="mailto:farrell.damien@gmail.com"> this address</a><p>'
-        print '<a> Alternatively, you may submit the data to the database using our PEAT\
-                software. Download PEAT at </a> <a href="http://code.google.com/p/peat/ </a><br><br>'
-        #print '</table>'
+                send the tabulated data in text format (or even plotted curve images) by mail to us at</a> \
+                <a href="mailto:titrationdb@gmail.com">titrationdb@gmail.com</a><p>'
         print '</div>'
         self.footer()
         return
@@ -108,7 +105,7 @@ class titdbWeb(PEATWeb):
 
         print '<div align=left>'
         print '<h2>Help information for using these pages is available <a href="http://enzyme.engr.ccny.cuny.edu/wiki/index.php/TitrationDB"> here</a></h2>'
-        print '<h3>Please report any bugs or requests for improvements to <a href="mailto:farrell.damien@gmail.com"> this address </a><br><br>'
+        print '<h3>Please report any bugs or requests for improvements to <a href="mailto:titrationdb@gmail.com">titrationdb@gmail.com</a><br><br>'
         print 'You may cite this database using the following reference:</h3>'
         print '<b>Farrell, D., et al., Titration_DB: Storage and analysis of NMR-monitored protein pH titration curves.<br>'
         print 'Proteins: Structure, Function, and Bioinformatics, 2010 Mar;78(4):843-57</b>'
@@ -310,7 +307,7 @@ class titdbWeb(PEATWeb):
 
         import re, urllib
         from PEATDB.PEATTables import PEATTableModel
-        from PEATDB.Ekin.Fitting import Fitting
+        import PEATDB.Ekin.Fitting as Fitting
         from PEATDB.Ekin.Web import EkinWeb
         DB = self.DB  
         EW = EkinWeb()
@@ -419,7 +416,7 @@ class titdbWeb(PEATWeb):
                                 if not foundfits.has_key(protein+'$'+col):
                                     foundfits[protein+'$'+col]={}
                                 X = Fitting.getFitter(model)
-                                pnames = X.names
+                                pnames = X.varnames
                                 i=0
                                 #check if first num is larger, then swap
                                 try:
