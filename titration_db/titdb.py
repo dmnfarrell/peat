@@ -94,9 +94,9 @@ class titdbWeb(PEATWeb):
 
         print '<a>If you wish to submit data to be included here, we currently recommend that you\
                 send the tabulated data (or even plotted curve images) by mail to us at</a> \
-                <a href="mailto:damien.farrell@ucd.ie"> this address</a><p>'
+                <a href="mailto:farrell.damien@gmail.com"> this address</a><p>'
         print '<a> Alternatively, you may submit the data to the database using our PEAT\
-                software. Download PEAT at </a> <a href="http://enzyme.ucd.ie/PEAT" > http://enzyme.ucd.ie/PEAT</a><br><br>'
+                software. Download PEAT at </a> <a href="http://code.google.com/p/peat/ </a><br><br>'
         #print '</table>'
         print '</div>'
         self.footer()
@@ -107,18 +107,16 @@ class titdbWeb(PEATWeb):
         self.show_DB_header(menu=1)
 
         print '<div align=left>'
-        print '<h2>Help information for using these pages is available <a href="http://enzyme.ucd.ie/main/index.php/Titration_DB"> here</a></h2>'
-        print '<h3>Please report any bugs or requests for improvements to <a href="mailto:damien.farrell@ucd.ie"> this address </a><br><br>'
+        print '<h2>Help information for using these pages is available <a href="http://enzyme.engr.ccny.cuny.edu/wiki/index.php/TitrationDB"> here</a></h2>'
+        print '<h3>Please report any bugs or requests for improvements to <a href="mailto:farrell.damien@gmail.com"> this address </a><br><br>'
         print 'You may cite this database using the following reference:</h3>'
         print '<b>Farrell, D., et al., Titration_DB: Storage and analysis of NMR-monitored protein pH titration curves.<br>'
-        print 'Proteins: Structure, Function, and Bioinformatics, 2009. In press. DOI: 10.1002/prot.22611</b>'
+        print 'Proteins: Structure, Function, and Bioinformatics, 2010 Mar;78(4):843-57</b>'
         print '<a href="http://www3.interscience.wiley.com/journal/122593997/abstract"> link </a>'
         print '</div>'
 
         self.footer()
-
         return
-
 
     def show_DB_header(self,title=None,menu=None):
         """show headings and column names for DB"""
