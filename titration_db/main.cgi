@@ -13,7 +13,7 @@ import cgi
 import cgitb
 cgitb.enable()
 import sys,os
-sys.path.append('/home/damien/python')
+sys.path.append('/home/farrell/python')
 #sys.path.append('/home/people/farrell/python')
 #from WebInterface import PEATWeb
 #from PEATDB.web import PEATWeb
@@ -24,6 +24,6 @@ P=titdbWeb(server='localhost',
     	  project='titration_db',
           user='guest',
           passwd='123',
-	  port=8080,
+	      port=8080,
           bindir='/titration_db',
           fullpath='/var/www/titration_db')

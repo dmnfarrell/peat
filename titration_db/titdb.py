@@ -25,7 +25,7 @@ class titdbWeb(PEATWeb):
     def __init__(self, server='localhost', project='test', port=8080,
                         user=None, passwd=None,
                         bindir='', fullpath=''):
-    
+
         """bindir : path to cgi script in server address
            fullpath : file system path to script  """
 
@@ -38,10 +38,10 @@ class titdbWeb(PEATWeb):
         self.project = project
         self.user = user
         self.password = passwd
-	self.port = port
-        
+        self.port = port
+
         self.bindir = bindir
-	dirname = os.path.basename(fullpath)
+        dirname = os.path.basename(fullpath)
         self.imgdir = '/' + dirname + '/images'
         self.plotsdir = '/'+ dirname + '/plots'
         self.imagepath = fullpath + '/plots'
@@ -132,9 +132,9 @@ class titdbWeb(PEATWeb):
         #print '<link href="http://%s/titration_db/styles.css" rel="stylesheet" type="text/css" />' %self.host
         print '<link href="%s/styles.css" rel="stylesheet" type="text/css" />' %self.bindir
         #print '<link rel="shortcut icon" href="http://%s/titration_db/favicon.ico" type="image/x-icon" />' %self.host
-	print '<link rel="shortcut icon" href="%s/favicon.ico" type="image/x-icon" />' %self.bindir
+        print '<link rel="shortcut icon" href="%s/favicon.ico" type="image/x-icon" />' %self.bindir
 
-        print '<script type="text/javascript" src="/scripts/checkbox.js"></script>'
+        print '<script type="text/javascript" src="%s/scripts/checkbox.js"></script>' %self.bindir
         print '</head>'
         print '<body>'
         print '<div class="header">'
@@ -143,7 +143,7 @@ class titdbWeb(PEATWeb):
         print '<p id="title">:an NMR protein titration database</p>'
 
         print '</div>'
-        print '<script type="text/javascript" src="/scripts/boxover.js"></script>'
+        print '<script type="text/javascript" src="%s/scripts/boxover.js"></script>' %self.bindir
         print '<hr>'
         print '<div>'
 
@@ -205,7 +205,7 @@ class titdbWeb(PEATWeb):
         print """<tr><td class="menu">\
              <input type=submit value="pKD" name=submit class="btn"\
              title="header=[Refresh] body=[Cross reference curves with calculated data from pKD server<br>\
-             <img src=http://enzyme.ucd.ie/pKD/slide8.bmp width=150>]"></td></tr>""" 
+             <img src=http://enzyme.ucd.ie/pKD/slide8.bmp width=150>]"></td></tr>"""
 
         print '</form>'
         print
@@ -275,8 +275,8 @@ class titdbWeb(PEATWeb):
     def showSummary(self):
         from PEATDB.Ekin.Titration import TitrationAnalyser
         self.show_DB_header(menu=1)
-        DB = self.DB = self.connect()      
-        sys.stdout.flush()        
+        DB = self.DB = self.connect()
+        sys.stdout.flush()
         t = TitrationAnalyser()
         ekindata = t.getEkinDicts(DB)
         t.dotitDBStats(ekindata)
@@ -288,12 +288,12 @@ class titdbWeb(PEATWeb):
         self.show_DB_header(menu=1)
         DB = self.DB = self.connect()
         sys.stdout.flush()
-     
+
         t = TitrationAnalyser()
         colnames = ['1H NMR','15N NMR','13C NMR']
 
-        for col in colnames:	    
-            p = t.extractpKas(DB,col,silent=True)	     
+        for col in colnames:
+            p = t.extractpKas(DB,col,silent=True)
             print '<div>'
             print "<h2>%s: Table of fitted 'reliable' pKas and distribution of associated &Delta;&delta;</h2>" %col
             img1, img2 = t.analysepKas(p, silent=True, prefix=col, path=self.imagepath)
@@ -304,7 +304,7 @@ class titdbWeb(PEATWeb):
         self.footer()
         return
 
- 
+
     def do_search(self, globalop, proteinop, proteins, residues, nucleus, pka):
         """Do searches for the various parameters, name, pka etc"""
 
@@ -312,7 +312,7 @@ class titdbWeb(PEATWeb):
         from PEATDB.PEATTables import PEATTableModel
         import PEATDB.Ekin.Fitting as Fitting
         from PEATDB.Ekin.Web import EkinWeb
-        DB = self.DB  
+        DB = self.DB
         EW = EkinWeb()
         ekincols = DB.ekintypes
 
@@ -371,7 +371,7 @@ class titdbWeb(PEATWeb):
         #now search for the other keys inside selected proteins if needed
         ekinfound={}; foundfits={}
         ignore =['__fit_matches__', '__Exp_Meta_Dat__', '__datatabs_fits__']
-        
+
         kys = list(DB.getRecs())
         kys.sort()
         if len(found) == 0 or globalop == 'or':
@@ -391,14 +391,14 @@ class titdbWeb(PEATWeb):
                 else:
                     fieldtype=None
                 if fieldtype in ekincols:
-                    dk = E.datasets                    
-                    fits = E.__datatabs_fits__                    
+                    dk = E.datasets
+                    fits = E.__datatabs_fits__
                     for k in dk:
                         meta = E.getMetaData(k)
                         try:
                             thisres = meta['residue']
                         except:
-                            thisres = k         
+                            thisres = k
                         if thisres == None:
                             thisres = k
                         if residues != '':
@@ -530,7 +530,7 @@ class titdbWeb(PEATWeb):
         self.show_DB_header(menu=1)
         sys.stdout.flush()
         self.DB = self.connect()
-       
+
         key=self.form.getfirst('key')
         matchmethod=self.form.getfirst('matchmethod')
         proteinmatchmethod=self.form.getfirst('proteinmatchmethod')
@@ -556,7 +556,7 @@ class titdbWeb(PEATWeb):
 
         self.show_DB_header(menu=1)
         sys.stdout.flush()
-        DB = self.DB = self.connect()        
+        DB = self.DB = self.connect()
 
         names = []
         for p in DB.getRecs():
@@ -636,7 +636,7 @@ class titdbWeb(PEATWeb):
 
         self.show_DB_header(menu=1)
         sys.stdout.flush()
-        DB = self.DB = self.connect()        
+        DB = self.DB = self.connect()
         protname = DB[protein]['name']
         pdbid = DB[protein]['PDB_link']['text']
         expdata = DB[protein][col]
@@ -670,7 +670,7 @@ class titdbWeb(PEATWeb):
         import PEATDB.Ekin.Utils as Utils
         t = TitrationAnalyser()
         c=calcs
-        
+
         EW = EkinWeb()
 
         if option == '2':
@@ -698,9 +698,9 @@ class titdbWeb(PEATWeb):
         if option == '3':
             print '<a>Just showing pKD data</a>'
             EW.showEkinPlots(project=Ec, datasets='ALL',
-                              path=self.plotsdir,                              
+                              path=self.plotsdir,
                               imgpath=self.imagepath)
-            return            
+            return
 
         #transform exp data names to match pKD ones
         s=':'
@@ -708,7 +708,7 @@ class titdbWeb(PEATWeb):
         #if pKD names have no chain id, we don't need one for exp names
         if Ec.datasets[0].startswith(':'):
             usechainid=False
-        for d in Ed.datasets[:]:            
+        for d in Ed.datasets[:]:
             r = Ed.getMetaData(d)
             if r != None:
                 if r['chain_id'] == None or usechainid == False:
