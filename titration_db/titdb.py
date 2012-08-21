@@ -129,8 +129,11 @@ class titdbWeb(PEATWeb):
             print '<title>Protein Titration Database</title>'
         else:
             print '<title>%s</title>' % title
-        print '<link href="http://%s/titration_db/styles.css" rel="stylesheet" type="text/css" />' %self.host
-        print '<link rel="shortcut icon" href="http://%s/titration_db/favicon.ico" type="image/x-icon" />' %self.host
+        #print '<link href="http://%s/titration_db/styles.css" rel="stylesheet" type="text/css" />' %self.host
+        print '<link href="%s/styles.css" rel="stylesheet" type="text/css" />' %self.bindir
+        #print '<link rel="shortcut icon" href="http://%s/titration_db/favicon.ico" type="image/x-icon" />' %self.host
+	print '<link rel="shortcut icon" href="%s/favicon.ico" type="image/x-icon" />' %self.bindir
+
         print '<script type="text/javascript" src="/scripts/checkbox.js"></script>'
         print '</head>'
         print '<body>'
