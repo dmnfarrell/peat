@@ -40,6 +40,7 @@ class PEATWeb:
         
         self.bindir = bindir
         dirname = os.path.basename(fullpath)
+
         self.imgdir = '/' + dirname + '/images'
         self.plotsdir = '/'+ dirname + '/plots'
         self.imagepath = fullpath + '/plots'
@@ -80,12 +81,8 @@ class PEATWeb:
         return
 
     def show_help(self):
-        '''Show help page'''
+        '''Show help page, override this '''
         self.show_DB_header(menu=1)
-
-        print '<div align=left>'
-        print '<h2>Help information for using these pages is available <a href="http://enzyme.ucd.ie/main/index.php/"> here</a></h2>'
-        print '</div>'
         self.footer()
         return
 
@@ -232,15 +229,17 @@ class PEATWeb:
 
     def connect(self):
         """Connect to the peat db"""        
-        saveout = sys.stdout
-        fsock = open('out.log', 'w')
+        saveout = sys.stdout	
+	logpath = os.path.abspath('out.log')
+	
+        fsock = open(logpath, 'w')
         sys.stdout = fsock
         sys.stdout.flush()
         print self.server
         DB = PDatabase(server=self.server, port=self.port,
                       username=self.user,
                       password=self.password,
-                      project=self.project)   
+                      project=self.project)
         sys.stdout.flush()
         sys.stdout = saveout
         fsock.close()     
@@ -319,9 +318,11 @@ class PEATWeb:
                             if link_text != None and link_text != '':
                                 if column == 'PDB_link':
                                     viewlink = 'http://firstglance.jmol.org/fg.htm?mol='+display_text
-                                    print '<td class=%s> <a href=%s target="_blank">%s</a> <a href=%s target="_blank"><img class="thumb" \
-                                        src="%s/fg.png"></a></td>' % (cls,link_text,display_text,viewlink, self.imgdir) 
-                                elif column == 'PMID_link':
+                                    #print '<td class=%s> <a href=%s target="_blank">%s</a> <a href=%s target="_blank"><img class="thumb" \
+                                    #    src="%s/fg.png"></a></td>' % (cls,link_text,display_text,viewlink, self.imgdir) 
+	  			    print '<td class=%s> <a href=%s target="_blank">%s</a> <a href=%s target="_blank"> view\
+					   </a></td>' % (cls,link_text,display_text,viewlink)
+                              	elif column == 'PMID_link':
                                     authors=''
                                     try:
                                         auth, title = DB[protein][column]['authors'], DB[protein][column]['title']
