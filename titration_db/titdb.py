@@ -26,8 +26,8 @@ class titdbWeb(PEATWeb):
                         user=None, passwd=None,
                         bindir='', fullpath=''):
 
-        """bindir : path to cgi script in server address
-           fullpath : file system path to script  """
+        """bindir : path to cgi scripts in server address, usually 'titration_db'
+           fullpath : file system path to script folder """
 
         import socket
         self.host = socket.getfqdn(socket.gethostname())
@@ -67,6 +67,8 @@ class titdbWeb(PEATWeb):
             self.show_datasets()
         elif action == 'search':
             self.show_search_results()
+        elif action == 'downloads':
+            self.showDownloads()
         elif action == 'selectpKD':
             self.selectpKD()
         elif action == 'showpKD':
@@ -78,12 +80,11 @@ class titdbWeb(PEATWeb):
         '''Show intro page'''
         self.show_DB_header(menu=1)
 
-        print '<div align=left>'
-        print '<big><big><a>Welcome to the protein pH titration database (Beta).</big></a>'
+        print '<div class="main">'
+        print '<h1><a>Welcome to the protein pH titration database.</h1></a>'
         print '<br>'
-        print '<br>'
-        print '<a>This web site provides raw NMR titration curves obtained from published sources. \
-                This web interface is designed to provide the following services:</a>'
+        print '<big><a>This web interface provides access to raw NMR titration curves obtained from published sources \
+                and is designed to provide the following services:</a>'
         print '<UL>\
                 <LI>Browse contents of the DB in one table\
                 <LI>Search for curves based on residue name, pka values, residue type etc.\
@@ -92,8 +93,8 @@ class titdbWeb(PEATWeb):
                 <LI>Download the raw data as csv/text files and refit/analyse\
                 </UL>'
 
-        print '<a>If you wish to submit data to be included here, we currently recommend that you\
-                send the tabulated data in text format (or even plotted curve images) by mail to us at</a> \
+        print '<a>If you wish to submit data to be included here, we currently request that you\
+                send the tabulated data in any appropriate text format by e-mail to us at</a> \
                 <a href="mailto:titrationdb@gmail.com">titrationdb@gmail.com</a><p>'
         print '</div>'
         self.footer()
@@ -103,8 +104,18 @@ class titdbWeb(PEATWeb):
         '''Show help page'''
         self.show_DB_header(menu=1)
 
-        print '<div align=left>'
-        print '<h2>Help information for using these pages is available <a href="http://enzyme.engr.ccny.cuny.edu/wiki/index.php/TitrationDB"> here</a></h2>'
+        print '<div class="main">'
+        print '<h2>The primary help information for using these pages is available <a href="http://enzyme.engr.ccny.cuny.edu/wiki/index.php/TitrationDB"> here</a></h2>'
+
+        print '<h2>Performing searches:</h2>'
+        print '<UL>\
+        <LI>Searching by protein name - these can be seperated by spaces - you may match any or all the words in the search phrase, by choosing in the match drop-down list\
+        <LI>Searching by pka value - enter values as ranges, eg. 3-6 or sets of ranges separated by spaces, eg. 1-2 3-4\
+        <LI>Searching by residue - simply enter names of each residue, eg. GLU. Or names separated by spaces, e.g. 45 34 67 will simply return any residues with those numbers in them\
+        <LI>searches are not case sensitive\
+        <LI>Searching/filtering by nucleus - choose one of the three nuclei from the drop down menu, if required\
+        </UL>'
+
         print '<h3>Please report any bugs or requests for improvements to <a href="mailto:titrationdb@gmail.com">titrationdb@gmail.com</a><br><br>'
         print 'You may cite this database using the following reference:</h3>'
         print '<b>Farrell, D., et al., Titration_DB: Storage and analysis of NMR-monitored protein pH titration curves.<br>'
@@ -129,23 +140,21 @@ class titdbWeb(PEATWeb):
             print '<title>Protein Titration Database</title>'
         else:
             print '<title>%s</title>' % title
-        #print '<link href="http://%s/titration_db/styles.css" rel="stylesheet" type="text/css" />' %self.host
-        print '<link href="%s/styles.css" rel="stylesheet" type="text/css" />' %self.bindir
-        #print '<link rel="shortcut icon" href="http://%s/titration_db/favicon.ico" type="image/x-icon" />' %self.host
-        print '<link rel="shortcut icon" href="%s/favicon.ico" type="image/x-icon" />' %self.bindir
 
+        print '<link href="%s/styles.css" rel="stylesheet" type="text/css" />' %self.bindir
+        print '<link rel="shortcut icon" href="%s/favicon.ico" type="image/x-icon" />' %self.bindir
         print '<script type="text/javascript" src="%s/scripts/checkbox.js"></script>' %self.bindir
         print '</head>'
         print '<body>'
         print '<div class="header">'
-        print '<img src="%s/titDB_logo.png" align=LEFT>' %imgdir
-        print '<img src="%s/banner_icon.png" style="float: right; padding-right:5;">' %imgdir
-        print '<p id="title">:an NMR protein titration database</p>'
-
+        #print '<img src="%s/titDB_logo.png" align=LEFT>' %imgdir
+        #print '<img src="%s/banner_icon.png" style="float: right; padding-right:5;">' %imgdir
+        #print '<p id="title">:an NMR protein titration database</p>'
         print '</div>'
+
         print '<script type="text/javascript" src="%s/scripts/boxover.js"></script>' %self.bindir
-        print '<hr>'
-        print '<div>'
+        #print '<hr>'
+        #print '<div>'
 
         if menu==1:
             self.menu()
@@ -158,8 +167,7 @@ class titdbWeb(PEATWeb):
         print '<br>'
         print '<p><center>Provided by <a href="http://enzyme.ucd.ie">Nielsen Research Group at UCD</a></center></p>'
         print '<p><center>Supported by <a href="http://www.sfi.ie">Science Foundation Ireland</a></center></p>'
-        print '<center><a href="http://www.sfi.ie"><img src="%s/sfi_logo.png" border="0"></a></center></p>' %self.imgdir
-
+        print '<center><a href="http://www.sfi.ie"><img src="%s/sfi_logo.png" width=200 border="0"></a></center></p>' %self.imgdir
         print '</div>'
         print '</div>'
         print '</body>'
@@ -167,11 +175,13 @@ class titdbWeb(PEATWeb):
 
     def menu(self):
         """Print the menu"""
-	#print bindir
-	bindir = self.bindir
+        #print bindir
+        bindir = self.bindir
         print '<div class="menu">'
         print '<table id="menu" valign=top align=left>'
-        print '<th><b>Menu</b></th>'
+
+        print '<td class="menu"><b><img src="%s/titDB_logo.png" width="230"></b></td>' %self.imgdir
+        print '<tr><th><b>Menu</b></th>'
 
         print '<form action="%s/main.cgi" METHOD="POST" ENCTYPE="multipart/form-data">' %bindir
         self.write_sessionkey('show_intro')
@@ -199,6 +209,13 @@ class titdbWeb(PEATWeb):
         print '<tr><td class="menu">\
             <input type=submit value="Analysis" name=submit class="btn"></td></tr>'
         print '</form>'
+
+        print '<form action="%s/main.cgi" METHOD="POST" ENCTYPE="multipart/form-data">' %bindir
+        self.write_sessionkey('downloads')
+        print '<tr><td class="menu">\
+            <input type=submit value="Downloads" name=submit class="btn"></td></tr>'
+        print '</form>'
+        print
 
         print '<form action="%s/main.cgi" METHOD="POST" ENCTYPE="multipart/form-data">' %bindir
         self.write_sessionkey('selectpKD')
@@ -267,6 +284,9 @@ class titdbWeb(PEATWeb):
         print '</td></tr>'
         print '<tr><td class="menu"><input type="submit" value="Search Now" class="btn"></td></tr>'
         print '</form>'
+
+        print '<tr><td class="menu"></tr>'
+        print '<td class="menu"><b><img src="%s/banner_icon.png" ></b></td>' %self.imgdir
         print '</table>'
         print '</div>'
         print '<div id="content">'
@@ -304,6 +324,16 @@ class titdbWeb(PEATWeb):
         self.footer()
         return
 
+    def showDownloads(self):
+        """Downloads links"""
+        self.show_DB_header(menu=1)
+        print '<div class="main">'
+        print '<h2>Downloads</h2><br>'
+        print '<h3>The entire dataset may be downloaded in text format as a single zip file</h3><br>'
+
+        print '</div>'
+        self.footer()
+        return
 
     def do_search(self, globalop, proteinop, proteins, residues, nucleus, pka):
         """Do searches for the various parameters, name, pka etc"""
