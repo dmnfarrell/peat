@@ -26,6 +26,7 @@
 #
 
 import math, sys, os, types
+import re
 import IO
 from Convert import EkinConvert
 from PEATDB.Ekin.Dataset import EkinDataset
@@ -237,6 +238,19 @@ class EkinProject(object):
             return
         self.copyDataset(currname, newname)
         self.deleteDataset(currname)
+        return
+
+    def batchRename(self, pattern='', replacement=''):
+        """Rename all datasets by replacing a pattern"""
+        if pattern == replacement:
+            return
+        count=0
+        for name in self.datasets[:]:    
+            newname = re.sub(pattern, replacement, name)
+            if newname != name:               
+                self.renameDataset(name, newname)
+                count+=1
+        print 'renamed %s datasets' %count
         return
 
     def copyDataset(self, name, newname=None):
@@ -1023,7 +1037,7 @@ class EkinProject(object):
 
     def exportDatasets(self, filename=None, format=None):
        """Export all datasets as csv
-       formatted as ..   """
+            formatted as ..   """
        if filename == None:
            return
        if os.path.splitext(filename) != '.csv':

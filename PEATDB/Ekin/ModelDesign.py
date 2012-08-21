@@ -36,8 +36,9 @@ from PEATDB.Ekin.Plotting import PlotPanel
 from PEATDB.Ekin.Base import EkinProject, EkinDataset
 import PEATDB.Ekin.Fitting as Fitting
 import Ekin_images
+from PEATDB.GUI_helper import *
 
-class ModelDesignApp(Frame):
+class ModelDesignApp(Frame, GUI_help):
     """Simple GUI for designing new models for use in ekin fitting"""
 
     def __init__(self, parent=None):
@@ -68,6 +69,7 @@ class ModelDesignApp(Frame):
 
     def setupGUI(self):
         """Do GUI elements"""
+        self.createMenuBar()
         m = PanedWindow(self.main,
                            orient=HORIZONTAL,
                            sashwidth=3,
@@ -138,6 +140,20 @@ class ModelDesignApp(Frame):
         m.add(self.previewer)
         return
 
+    def createMenuBar(self):
+        """Create the menu bar for the application"""
+        self.menu=Menu(self.main)
+        self.file_menu={'01Open models file':{'cmd':self.loadModelsFile},                        
+                        '02Quit':{'cmd':self.quit}}
+        self.file_menu=self.create_pulldown(self.menu,self.file_menu)
+        self.menu.add_cascade(label='File',menu=self.file_menu['var'])
+        self.help_menu={ '01Online Help':{'cmd': self.help},
+                         '02About':{'cmd': self.about},}
+        self.help_menu=self.create_pulldown(self.menu,self.help_menu)
+        self.menu.add_cascade(label='Help',menu=self.help_menu['var'])
+        self.main.config(menu=self.menu)
+        return
+
     def updateFileLabel(self):
         """Update the file name"""
         if self.filename == None:
@@ -147,6 +163,7 @@ class ModelDesignApp(Frame):
         return
 
     def createGuessEntryWidget(self, parent):
+        """Guess entry widget"""
         fr = Pmw.ScrolledFrame(parent,labelpos = 'n',
                                   label_text='guess')
         fr.pack(fill=BOTH,side=TOP,expand=1,padx=4)
@@ -177,6 +194,7 @@ class ModelDesignApp(Frame):
         return
 
     def renameModel(self):
+        """Rename a model"""
         currentname = self.modelselector.getcurselection()[0]
         name = tkSimpleDialog.askstring('Rename model','Enter a new name',
                                           initialvalue=currentname,
@@ -192,8 +210,10 @@ class ModelDesignApp(Frame):
         return
 
     def deleteModel(self):
-        currentname = self.modelselector.getcurselection()[0]
-        del self.modelsdict[currentname]
+        """Delete a model"""
+        names = currentname = self.modelselector.getcurselection()
+        for name in names:
+            del self.modelsdict[name]
         self.updateModelSelector()
         self.modelselector.setvalue(self.modelsdict.keys()[0])
         self.loadModel()
@@ -342,6 +362,30 @@ class ModelDesignApp(Frame):
             if val != '':
                 model['guess'][v] = val
         return model
+
+    def help(self):
+        import webbrowser
+        link='http://code.google.com/p/peat/wiki/ModelDesign'
+        webbrowser.open(link,autoraise=1)
+        return
+
+    def about(self):
+        win=Toplevel()
+        win.geometry('+500+350')
+        win.title('About ModelDesign')
+        win.maxsize(width=400,height=400)
+        '''logo = Images.logo()
+        label = Label(win,image=logo)
+        label.image = logo
+        label.pack(fill=BOTH,padx=4,pady=4)'''
+        text="""ModelDesign is an application that is used to create non-linear 
+             fitting models for use in the Ekin application or elsewhere.              
+             Released under GPL v3
+             (C) Copyright 2012- Damien Farrell """
+        text=text.replace('\t','')
+        text= ' '.join(text.split())
+        Label(win,text=text,wraplength=400).pack(fill=Y,side=TOP,pady=4)
+        return
 
     def quit(self):
         self.main.destroy()

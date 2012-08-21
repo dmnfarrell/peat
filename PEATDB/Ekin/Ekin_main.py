@@ -261,8 +261,9 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
                         '06Copy Dataset':{'cmd':self.copy_dataset},
                         '07Delete Dataset':{'cmd':self.deleteDataset},
                         '08Delete All':{'cmd':self.deleteAll},
-                        '09sep':{None:None},
-                        '10Adjust Data':{'cmd':self.adjustDataDialog}}
+                        '09Batch Rename':{'cmd':self.batchRename},
+                        '10sep':{None:None},
+                        '11Adjust Data':{'cmd':self.adjustDataDialog}}
 
         self.data_menu=self.create_pulldown(self.menu,self.data_menu)
         self.menu.add_cascade(label='Data',menu=self.data_menu['var'])
@@ -775,6 +776,22 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
         self.updateAll()
         return
 
+    def batchRename(self):
+        """Batch rename"""
+        mpDlg = MultipleValDialog(title='Batch Rename Datasets',
+                                   initialvalues=('',''),
+                                   labels=('pattern','replace with'), 
+                                   types=('string','string'),
+                                   parent=self.ekin_win)
+        if mpDlg.result == True:     
+            pattern = mpDlg.results[0]
+            replacement = mpDlg.results[1]  
+            self.E.batchRename(pattern, replacement)
+            self.currentdataset.set(self.E.datasets[0])
+            self.updateDatasetSelector() 
+            self.updateAll()
+        return
+
     def copy_dataset(self, newname=None):
         """Copy a dataset"""
         name = self.currentdataset.get()
@@ -898,13 +915,12 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
         """How many plots to display at once"""
         if self.display_multiple.get() == 1:
             self.display_all.set(0)
-            '''np=tkSimpleDialog.askinteger(title='Select multiple plots',
-                                             prompt='How many plots do you wish to\n view at once?',
-                                             parent=self.ekin_win)'''
+
             mpDlg = MultipleValDialog(title='No. of plots',
-                                        initialvalues=(self.no_multiplePlots.get(),self.no_multipleCols.get()),
-                                        labels=('no. of plots','no. of cols'), types=('int','int'),
-                                        parent=self.ekin_win)
+                        initialvalues=(self.no_multiplePlots.get(),self.no_multipleCols.get()),
+                        labels=('no. of plots','no. of cols'), 
+                        types=('int','int'),
+                        parent=self.ekin_win)
             if mpDlg.result == True:
                 np = mpDlg.results[0]
                 nc = mpDlg.results[1]
@@ -2221,8 +2237,6 @@ class FitterPanel(Frame):
         return
 
 
-
-
 class DataPanel(Frame):
     """Display ekin data"""
     def __init__(self, parent):
@@ -2347,13 +2361,33 @@ class MultipleValDialog(tkSimpleDialog.Dialog):
     def body(self, master):
 
         r=0
-        self.vrs=[];self.entries=[]
+        self.vrs=[];self.entries=[]        
         for i in range(len(self.labels)):
-            Label(master, text=self.labels[i]).grid(row=r, column=0)
-            self.vrs.append(IntVar())
-            self.vrs[i].set(self.initialvalues[i])
-            #self.vrs.set('')
-            self.entries.append(Entry(master, textvariable=self.vrs[i], bg='white'))
+            Label(master, text=self.labels[i]).grid(row=r, column=0,sticky='news')
+            if self.types[i] == 'int':
+                self.vrs.append(IntVar())
+            else:
+                self.vrs.append(StringVar())
+            if self.types[i] == 'password':
+                s='*'
+            else:
+                s=None
+
+            if self.types[i] == 'list':
+                button=Menubutton(master, textvariable=self.vrs[i],relief=RAISED)
+                menu=Menu(button,tearoff=0)
+                button['menu']=menu
+                choices=self.initialvalues[i]
+                for c in choices:
+                    menu.add_radiobutton(label=c,
+                                        variable=self.vrs[i],
+                                        value=c,
+                                        indicatoron=1)
+                self.entries.append(button)
+                self.vrs[i].set(self.initialvalues[i][0])
+            else:
+                self.vrs[i].set(self.initialvalues[i])
+                self.entries.append(Entry(master, textvariable=self.vrs[i], show=s, bg='white'))
             self.entries[i].grid(row=r, column=1,padx=2,pady=2,sticky='news')
             r+=1
 
@@ -2364,8 +2398,7 @@ class MultipleValDialog(tkSimpleDialog.Dialog):
         self.results = []
         for i in range(len(self.labels)):
             self.results.append(self.vrs[i].get())
-        #print self.vrs
-        return
+        return 
 
 
 def main():
