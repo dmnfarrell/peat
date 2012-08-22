@@ -78,7 +78,7 @@ class titdbWeb(PEATWeb):
 
     def show_intro(self):
         '''Show intro page'''
-        self.show_DB_header(menu=1)
+        self.showHeader(menu=1)
 
         print '<div class="main">'
         print '<h1><a>Welcome to the protein pH titration database.</h1></a>'
@@ -102,7 +102,7 @@ class titdbWeb(PEATWeb):
 
     def show_help(self):
         '''Show help page'''
-        self.show_DB_header(menu=1)
+        self.showHeader(menu=1)
 
         print '<div class="main">'
         print '<h2>The primary help information for using these pages is available <a href="http://enzyme.engr.ccny.cuny.edu/wiki/index.php/TitrationDB"> here</a></h2>'
@@ -126,8 +126,8 @@ class titdbWeb(PEATWeb):
         self.footer()
         return
 
-    def show_DB_header(self,title=None,menu=None):
-        """show headings and column names for DB"""
+    def showHeader(self,title=None,menu=None):
+        """Show page header"""
 
         imgdir = self.imgdir
         html_header = 'Content-Type: text/html; charset=utf-8\n'
@@ -147,18 +147,14 @@ class titdbWeb(PEATWeb):
         print '</head>'
         print '<body>'
         print '<div class="header">'
-        #print '<img src="%s/titDB_logo.png" align=LEFT>' %imgdir
-        #print '<img src="%s/banner_icon.png" style="float: right; padding-right:5;">' %imgdir
-        #print '<p id="title">:an NMR protein titration database</p>'
+        print '<a href="http://enzyme.engr.ccny.cuny.edu/wiki/index.php/TitrationDB">Help</a>'
+        print '<a href="mailto:titrationdb@gmail.com">Contact</a>'
         print '</div>'
 
         print '<script type="text/javascript" src="%s/scripts/boxover.js"></script>' %self.bindir
-        #print '<hr>'
-        #print '<div>'
 
         if menu==1:
             self.menu()
-
         return
 
     def footer(self):
@@ -192,8 +188,8 @@ class titdbWeb(PEATWeb):
         print '<form action="%s/main.cgi" METHOD="POST" ENCTYPE="multipart/form-data">'  %bindir
         self.write_sessionkey('show_all')
         print '<tr><td class="menu">'
-        print '<input type=submit value="Show All Records" name=submit class="btn"'
-        print """title="header=[Show all] body=[Show all records in the DB]"></td></tr>"""
+        print '<input type=submit value="Browse Records" name=submit class="btn"'
+        print """title="header=[Browse Database] body=[Browse all records in the DB]"></td></tr>"""
         print '</form>'
 
         print
@@ -223,7 +219,6 @@ class titdbWeb(PEATWeb):
              <input type=submit value="pKD" name=submit class="btn"\
              title="header=[Refresh] body=[Cross reference curves with calculated data from pKD server<br>\
              <img src=http://enzyme.ucd.ie/pKD/slide8.bmp width=150>]"></td></tr>"""
-
         print '</form>'
         print
 
@@ -247,7 +242,7 @@ class titdbWeb(PEATWeb):
         print '</select>'
         print '</td></tr>'
         print '<td class="menu">'
-        print """<input type="text" name="words" size=22 maxlength=50 value="" \
+        print """<input type="text" name="words" size=22 maxlength=50 value="" class="btn"\
                 title="header=[Protein search] body=[Enter multiple names seperated by a space.\
                     This search is not case sensitive]"></td></tr>"""
 
@@ -259,7 +254,7 @@ class titdbWeb(PEATWeb):
                  title="header=[Residue type] body=[Use three letter codes, e.g. GLU ASP LYS]"></td></tr>"""
         #pka search box
         print """<tr><td class="menu"> pKa range: <input type="text" name="pka" size=22 \
-                maxlength=30 value="" title="header=[pKa range] body=[Enter a range of values using \
+                maxlength=30 value="" class="btn" title="header=[pKa range] body=[Enter a range of values using \
                 this format: e.g. 5-6]"></td></tr>"""
 
         #nucleus search box
@@ -294,7 +289,7 @@ class titdbWeb(PEATWeb):
 
     def showSummary(self):
         from PEATDB.Ekin.Titration import TitrationAnalyser
-        self.show_DB_header(menu=1)
+        self.showHeader(menu=1)
         DB = self.DB = self.connect()
         sys.stdout.flush()
         t = TitrationAnalyser()
@@ -305,7 +300,7 @@ class titdbWeb(PEATWeb):
     def showAnalysis(self):
         """Analysis of current pKas"""
         from PEATDB.Ekin.Titration import TitrationAnalyser
-        self.show_DB_header(menu=1)
+        self.showHeader(menu=1)
         DB = self.DB = self.connect()
         sys.stdout.flush()
 
@@ -326,9 +321,9 @@ class titdbWeb(PEATWeb):
 
     def showDownloads(self):
         """Downloads links"""
-        self.show_DB_header(menu=1)
+        self.showHeader(menu=1)
         print '<div class="main">'
-        print '<h2>Downloads</h2><br>'
+        print '<h2>Downloads</h2>'
         print '<h3>The entire dataset may be downloaded in text format as a single zip file</h3><br>'
 
         print '</div>'
@@ -557,7 +552,7 @@ class titdbWeb(PEATWeb):
     def show_search_results(self):
         """Display search results"""
 
-        self.show_DB_header(menu=1)
+        self.showHeader(menu=1)
         sys.stdout.flush()
         self.DB = self.connect()
 
@@ -584,7 +579,7 @@ class titdbWeb(PEATWeb):
     def selectpKD(self):
         """Allow user to select a protein and field for pKD"""
 
-        self.show_DB_header(menu=1)
+        self.showHeader(menu=1)
         sys.stdout.flush()
         DB = self.DB = self.connect()
 
@@ -664,7 +659,7 @@ class titdbWeb(PEATWeb):
         col = self.form.getfirst('column')
         showopt = self.form.getfirst('option')
 
-        self.show_DB_header(menu=1)
+        self.showHeader(menu=1)
         sys.stdout.flush()
         DB = self.DB = self.connect()
         protname = DB[protein]['name']
