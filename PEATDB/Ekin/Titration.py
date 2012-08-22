@@ -17,13 +17,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Contact information:
-# Email: Jens.Nielsen_at_gmail.com 
+# Email: Jens.Nielsen_at_gmail.com
 # Normal mail:
 # Jens Nielsen
 # SBBS, Conway Institute
 # University College Dublin
 # Dublin 4, Ireland
-# 
+#
 
 """A class for doing some analyses on Ekin NMR titration data"""
 
@@ -130,7 +130,7 @@ class TitrationAnalyser():
     def __init__(self, data=None, parent=None):
         if parent!=None:
             self.parent = parent
-        self.currfile='/home/people/farrell/PEAT_projects/PROT_TITRA.PEAT'
+
         self.logfile='/tmp/nmr_titr_out.log'
 
         self.allmodels=['Linear', '1 pKa 2 Chemical shifts',
@@ -148,10 +148,10 @@ class TitrationAnalyser():
 
     def publicationSetting(self):
         pylab.rc("font", family="serif")
-        pylab.rc("font", size=22)   
+        pylab.rc("font", size=22)
         pylab.rc('text', usetex=True)
         return
-   
+
     def getEkinDicts(self, DB):
         '''reform peat db into sets of ekin data stored per nucleus type'''
 
@@ -169,7 +169,7 @@ class TitrationAnalyser():
         self.protnames=protnames
         self.ekindicts = ekindicts
         return ekindicts
- 
+
     def do_summary(self, DB, cols=None):
         """Print a summary of the current data loaded - no longer used"""
         summary=[]
@@ -234,11 +234,11 @@ class TitrationAnalyser():
         return summary
 
     def getProtNames(self, DB):
-        self.protnames={}       
+        self.protnames={}
         for protein in DB.getRecs():
             name = DB[protein]['name']
             self.protnames[protein] = name
-        return self.protnames              
+        return self.protnames
 
     @classmethod
     def getFitStats(cls, ekindata):
@@ -311,7 +311,7 @@ class TitrationAnalyser():
             for prot in ekinprjs:
                 proteinstats[prot]={}
                 proteinstats[prot][i]={}
-                E = ekinprjs[prot]                
+                E = ekinprjs[prot]
                 totaldatasets += len(E.datasets)
                 names[i]['total'] += len(E.datasets)
                 proteinstats[prot][i]['total'] = len(E.datasets)
@@ -401,12 +401,12 @@ class TitrationAnalyser():
         if proteins == None:
             proteins = DB.getRecs()
         self.getProtNames(DB)
-        
+
         c=0; f=0
         for prot in proteins:
             name = self.protnames[prot]
             print 'fitting', name
-            E = DB[prot][col] 
+            E = DB[prot][col]
             for d in E.datasets:
                 print name, d
                 if len(models)==1:
@@ -418,7 +418,7 @@ class TitrationAnalyser():
                     f+=1
                 c+=1
                 if fdata!=None:
-                    stats[fdata['model']]+=1           
+                    stats[fdata['model']]+=1
             DB[prot][col] = E
         print 'done. fitted %s datasets with %s failed' %(c, f)
         return stats
@@ -430,22 +430,22 @@ class TitrationAnalyser():
             if geterrs==True:
                 ferrs = E.estimateExpUncertainty(d, runs=20, xuncert=xuncert, yuncert=yuncert)
                 if ferrs == None:
-                    continue                
+                    continue
                 E.addMeta(d, 'exp_errors', ferrs)
-                    
+
         return E
-        
+
     def getExpErrs(self, E, xuncert=0.1, yuncert=0.03, runs=20):
-        """Get exp uncertainties on current fits"""  
+        """Get exp uncertainties on current fits"""
         for d in E.datasets:
             print d
-            ferrs = E.estimateExpUncertainty(d, runs=runs, 
+            ferrs = E.estimateExpUncertainty(d, runs=runs,
                                     xuncert=xuncert, yuncert=yuncert)
             if ferrs == None:
-                continue                
-            E.addMeta(d, 'exp_errors', ferrs)        
+                continue
+            E.addMeta(d, 'exp_errors', ferrs)
         return E
-        
+
     def showMeta(cls, ekindata):
         """Print out meta data for all recs - debug"""
         proteins = ekindata.keys()
@@ -461,10 +461,10 @@ class TitrationAnalyser():
     def dostrictchecking(cls, datapoints, fitdata):
         """Do some checking of pKa models as per McIntosh suggestions
            1. check pKa values are not too close to the end of the data points"""
-        
+
         ph = datapoints
         phmin = min(ph)
-        phmax = max(ph)        
+        phmax = max(ph)
         model = fitdata['model']
         vrs = Fitting.getFitVars(fitdata)
         X = Fitting.getFitter(model, vrs=vrs)
@@ -528,17 +528,20 @@ class TitrationAnalyser():
     def findpKas(cls, E, titratable=True, reliable=True, minspan=0.06):
         """Get pkas for an ekin project"""
         pkasdict = {}
-        for d in E.datasets:   
-            resdata = E.getMetaData(d)            
-            if not resdata.has_key('residue'): continue
+        for d in E.datasets:
+            resdata = E.getMetaData(d)
+            if not resdata.has_key('residue') or not resdata.has_key('res_num'):
+                print d
+                continue
             res = resdata['residue']
             try:
                 atom = resdata['atom']
             except:
                 atom = resdata['atom_type']
-            resnum = resdata['res_num']          
+
+            resnum = resdata['res_num']
             fitdata = E.getFitData(d)
-            
+
             if titratable == True and not res in cls.titratable:
                 continue
             if fitdata == None or len(fitdata)<2:
@@ -551,14 +554,14 @@ class TitrationAnalyser():
             else:
                 pnames, pvals, spans = cls.getallpKas(fitdata, minspan=minspan)
                 if pnames == None:
-                    continue                    
+                    continue
                 pkas = zip(pnames, pvals, spans)
 
             if len(pkas)>0 and pkas!=None:
                 pkasdict[d]={}
                 pkasdict[d]['res']=res
                 pkasdict[d]['resnum']=resnum
-                pkasdict[d]['atom']=atom               
+                pkasdict[d]['atom']=atom
                 pkasdict[d]['model']=fitdata['model']
                 for plst in pkas:
                     (p, pval, sp) = plst
@@ -575,17 +578,17 @@ class TitrationAnalyser():
                         pkaerr = 0.0
                         spanerr = 0.0
                     #print  d, plst#, pkaerr, spanerr
-                    if reliable==True and (pkaerr > 1.5 or spanerr > sp):                        
+                    if reliable==True and (pkaerr > 1.5 or spanerr > sp):
                         #print d, 'exp error too big, omitting: %s %s' %(pkaerr, spanerr)
                         continue
                     pkasdict[d][p]={}
                     pkasdict[d][p][p]=pval
-                    pkasdict[d][p]['span']=sp                       
+                    pkasdict[d][p]['span']=sp
                     pkasdict[d][p]['pkaerror']=pkaerr
                     pkasdict[d][p]['spanerror']=spanerr
 
-        return pkasdict        
-                        
+        return pkasdict
+
     def extractpKas(cls, DB, col, names=None, minspan=0.06, reliable=True,
                         titratable=True, silent=False):
         """Extract all or just reliable pKas from a set of ekin projects in the
@@ -593,38 +596,41 @@ class TitrationAnalyser():
            Returns a dictionary with record/dataset keys storing pka info"""
 
         cls.getProtNames(DB)
+        #print names
         if silent == False:
             print 'extracting pka values..'
         pkainfo={}
         total=0
-        for prot in DB.getRecs():           
+        for prot in DB.getRecs():
+
             name = cls.protnames[prot]
             if names != None and name not in names:
                 continue
             if not DB[prot].has_key(col):
                 continue
             if silent == False:
-                print 'processing %s' %name                         
+                print 'processing %s' %name
             E = DB[prot][col]
             pkainfo[name] = cls.findpKas(E, titratable=titratable,
                                          reliable=reliable, minspan=minspan)
-            
-            #if silent == False: print 'found %s' %len(pkainfo[name])
+
+            if silent == False: print 'found %s values' %len(pkainfo[name])
             total+=len(pkainfo[name])
-        print 'extracted %s total pKa values' %total
-        print '------------------------------------'
+        if silent == False:
+            print 'extracted %s total pKa values' %total
+            print '------------------------------------'
         return pkainfo
 
     def analysepKas(cls, pkainfo, satoms='all', path=None, exclude=[],
                         silent=False, prefix=''):
-        """Read in the pkainfo dict from extractpkas method and do 
+        """Read in the pkainfo dict from extractpkas method and do
           additional analyses, makes plots for titdb"""
-    
+
         if path==None:
             path=os.getcwd()
         aminoacids = cls.residue_names.keys()
-        titratable = cls.titratable        
-       
+        titratable = cls.titratable
+
         titrspans = {}      #histogram of reliable spans, for titr groups
         primaryspans = {}   #primary spans, for titr groups
         allspans = {}       #histogram of all spans for all groups
@@ -634,43 +640,44 @@ class TitrationAnalyser():
 
         for t in aminoacids:
             titravgshfts[t]=[]
+            atomshfts[t]={}
         for t in titratable:
             titrspans[t]=[]
             primaryspans[t]=[]
             spansbyres[t]={}
-            atomshfts[t]={}
+
         for t in aminoacids:
             allspans[t] = []
-            
+
         if silent == False:
             print
             print 'Analysing pKa info..'
 
         count=0
-        titrcount = 0       
-        for name in pkainfo.keys():            
+        titrcount = 0
+        for name in pkainfo.keys():
             for d in pkainfo[name].keys():
                 PI = pkainfo[name][d]
-                res = PI['res'] 
+                res = PI['res']
                 atom = PI['atom']
-                model = PI['model']  
+                model = PI['model']
                 for p in PI:
-                    #print p, d, '<p>'                    
+                    #print p, d, '<p>'
                     if 'pK' in p:
                         count += 1
                         pval = PI[p][p]
-                        sp = PI[p]['span']                    	                      
-                   
+                        sp = PI[p]['span']
+
                         #print  d, p, pval,  sp
                         #change atom if handling HB2/3 in ASP, HIS and GLU, so
                         #we group them together as HB* for the stats
-                        
+
                         #move to extract??
                         if res in ['ASP','GLU','HIS'] and atom in ['HB2', 'HB3']:
                             atom = 'HB*'
                         elif res == 'GLU' and atom in ['HG2','HG3']:
                             atom = 'HG*'
-                        
+
                         if model == '1 pKa 2 Chemical shifts' and res in titratable:
                             primaryspans[res].append(sp)
                         elif res in titratable:
@@ -678,8 +685,9 @@ class TitrationAnalyser():
                             titrcount+=1
                         else:
                             allspans[res].append(sp)
-                       
+
                         #assign spans by atom
+
                         if not atomshfts[res].has_key(atom):
                             atomshfts[res][atom] = []
                         if satoms != 'all' and not atom in satoms:
@@ -719,17 +727,17 @@ class TitrationAnalyser():
         print '</div>'
         print '<br>'
 
-        for r in atomshfts:
+        '''for r in atomshfts:
             print r
             for a in atomshfts[r]:
-                print a, len(atomshfts[r][a])
+                print a, len(atomshfts[r][a])'''
 
         pylab.rc("font", family="serif")
         pylab.rc("font", size=10)
         pylab.rc('text', usetex=True)
 
         fig1 = pylab.figure(1,figsize=(10,6))
-        fig1.text(0.5, 0.95, 'Distribution: $\Delta\delta$ of extracted pKas: '+prefix, horizontalalignment='center',
+        fig1.text(0.5, 0.95, 'Distribution of $\Delta\delta$ of extracted pKas: '+prefix, horizontalalignment='center',
                             fontproperties=FontProperties(size=18))
 
         #plot multiple histograms together in multiple subplots
@@ -738,10 +746,10 @@ class TitrationAnalyser():
             hdata[k] = {'primary':primaryspans[k], 'reliable':titrspans[k], 'other':otherspans[k]}
 
         cls.doMultipleHistograms(fig1, hdata, bins=30, xlabel='$\Delta\delta$ (ppm)',
-                                ylabel='no. curves', xticks=False, yticks=False)
+                                ylabel='no. datasets', xticks=False, yticks=False)
         img1 = prefix+'deltashifts_dist.png'
         fig1.savefig(os.path.join(path,img1), dpi=100)
-        pylab.clf()
+        '''pylab.clf()
         fig6 = pylab.figure(6,figsize=(10,6))
         fig6.text(0.5, 0.95, 'Distribution: $\Delta\delta$ by atom: '+prefix, horizontalalignment='center',
                             fontproperties=FontProperties(size=18))
@@ -749,18 +757,16 @@ class TitrationAnalyser():
         cls.doMultipleHistograms(fig6, atomshfts, bins=25, xlabel='$\Delta\delta$ (ppm)',
                                 xticks=True, yticks=True)
         img2 = prefix+'deltashifts_byatom.png'
-        fig6.savefig(os.path.join(path,img2) ,dpi=100)
+        fig6.savefig(os.path.join(path,img2) ,dpi=100)'''
 
         '''fig7 = pylab.figure(7,figsize=(10,6))
         cls.do3DHistograms(fig7, atomshfts, bins=25, xlabel='$\Delta\delta$ (ppm)',
                                 xticks=True, yticks=True)
         img3 = prefix+'deltashifts_3d.png'
         fig7.savefig(os.path.join(path,img3) ,dpi=100)'''
-
         #pylab.show()
         pylab.clf()
-
-        return img1, img2
+        return img1
 
     def makepKasTable(cls, pkainfo=None, outfile=None, primary=False):
         """make table of pka fit/analysis results"""
@@ -772,7 +778,7 @@ class TitrationAnalyser():
         kys = sorted(pkainfo.keys())
         resinfo = {}
         #for r in cls.titratable:
-        for r in cls.residue_names.keys():    
+        for r in cls.residue_names.keys():
             resinfo[r] = {}
 
         print '<table id="summary" width=80% align=center cellspacing="0">'
@@ -792,7 +798,7 @@ class TitrationAnalyser():
                     if not 'pK' in p: continue
                     pka = PI[p][p]
                     span = PI[p]['span']
-      
+
                     if primary == True and not '1 pKa' in model:
                         continue
                     if pkainfo[name][d][p].has_key('pkaerror'):
@@ -801,7 +807,7 @@ class TitrationAnalyser():
                     else:
                         pkaerr = 0
                         spanerr=0
-                                              
+
                     if not resinfo[res].has_key(atom):
                         resinfo[res][atom]={}
                         resinfo[res][atom]['pkas']=[]
@@ -854,10 +860,10 @@ class TitrationAnalyser():
         return
 
     def combineCurves(cls, d1, d2, factor=5):
-        """Combine 2 sets of chem shifts to get one pH titr"""     
+        """Combine 2 sets of chem shifts to get one pH titr"""
         ph1,ch1 = d1.getxy()
         ph2,ch2 = d2.getxy()
-        
+
         def getnearest(x, v):
             #get index of nearest val
             n=100
@@ -886,7 +892,7 @@ class TitrationAnalyser():
                 #get nearest in ph2 to v1
                 v2 = getnearest(ph2, v)
                 comb.append(sqrt(pow(ch1[v]-ref1,2)+pow((ch2[v2]-ref2)/factor,2)))
-        
+
         dc = EkinDataset(xy=[ph1, comb])
         return dc
 
@@ -924,7 +930,7 @@ class TitrationAnalyser():
                 f, p = Ec.findBestModel(d, models=cls.models, strictchecking=True, alpha=0.05)
             Ec.saveProject(name[:5]+'_combined')
             ekindatac[prot] = Ec.prepare_data()
-        return 
+        return
 
     def getClosest(cls, val, pkas):
         #print val ,pkas
@@ -943,10 +949,10 @@ class TitrationAnalyser():
                None if fails to find meaningful pKas from fits
                otherwise returns tuple of results"""
         reliable=True
-        try:    
+        try:
             res1 = E1.getMetaData(d)['residue']
         except:
-            res1 = cls.getResidue(E1.getDataset(d))             
+            res1 = cls.getResidue(E1.getDataset(d))
         if titratable == True and not res1 in cls.titratable:
             return None
         fitdata1 = E1.getFitData(d)
@@ -958,7 +964,7 @@ class TitrationAnalyser():
         if model1 != model2:
             print 'different models'
             #return None
-        
+
         p1,p1val,sp1 = cls.getMainpKa(fitdata1, res=res1)#,strict=False)
         p2,p2val,sp2 = cls.getMainpKa(fitdata2, res=res1)#,strict=False)
         allpkas1,allpkvals1,allsp1 = cls.getallpKas(fitdata1,minspan=0.03)
@@ -976,22 +982,22 @@ class TitrationAnalyser():
             if perr1>errcutoff or perr2>errcutoff: return None
             if p2val != pchk:
                 p2val = pchk
-        else:            
+        else:
             if p1val != None and p2val == None:
                 if len(allpkas2) > 0:
-                    p2val = cls.getClosest(p1val, allpkvals2)                   
-                else:                   
+                    p2val = cls.getClosest(p1val, allpkvals2)
+                else:
                     return None
             elif p2val != None and p1val == None:
                 if len(allpkas1) > 0:
-                    p1val = cls.getClosest(p2val, allpkvals1)                   
+                    p1val = cls.getClosest(p2val, allpkvals1)
                 else:
                     return None
             elif p1val==None and p2val==None:
                 return None
             perr1=perr2=None
             reliable = False
-            
+
         return p1val, p2val, sp1, sp2, perr1, perr2, reliable
 
     def compareAllpKas(cls, E1, E2, titratable=False, exclude=None, errcutoff=1e2):
@@ -999,32 +1005,32 @@ class TitrationAnalyser():
         relpkas1=[]
         relpkas2=[]
         relspans1=[]
-        relspans2=[]        
+        relspans2=[]
         otherpkas1=[]
         otherpkas2=[]
         errs1=[]
         errs2=[]
         names=[]
-        
+
         for d in E1.datasets:
             if exclude!=None and d in exclude: continue
             if not d in E2.datasets: continue
-            X = cls.comparepKas(E1, E2, d, titratable, errcutoff)            
+            X = cls.comparepKas(E1, E2, d, titratable, errcutoff)
             if X == None:
                 continue
             p1val, p2val, sp1, sp2, err1, err2, rel = X
             if rel == True:
                 relpkas1.append(p1val)
-                relpkas2.append(p2val)     
+                relpkas2.append(p2val)
                 relspans1.append(sp1)
                 relspans2.append(sp2)
                 errs1.append(err1)
                 errs2.append(err2)
                 names.append(d)
-            else:                
+            else:
                 otherpkas1.append(p1val)
-                otherpkas2.append(p2val)        
-            
+                otherpkas2.append(p2val)
+
         print 'reliable pkas matched:', len(relpkas1)
         print 'others:', len(otherpkas1)
 
@@ -1037,7 +1043,7 @@ class TitrationAnalyser():
         relpkas1=[]
         relpkas2=[]
         relspans1=[]
-        relspans2=[]        
+        relspans2=[]
         otherpkas1=[]
         otherpkas2=[]
         #names=[]
@@ -1046,11 +1052,11 @@ class TitrationAnalyser():
         for t in cls.residue_list:
             pkasbyres1[t]=[]
             pkasbyres2[t]=[]
-     
+
         cls.getProtNames(DB)
 
-        for prot in DB.getRecs():            
-            name = cls.protnames[prot]            
+        for prot in DB.getRecs():
+            name = cls.protnames[prot]
             if names != None and name not in names:
                 continue
             print 'processing protein', name
@@ -1058,22 +1064,22 @@ class TitrationAnalyser():
             if not DB[prot].has_key(col1) or not DB[prot].has_key(col2):
                 continue
             E1 = DB[prot][col1]
-            E2 = DB[prot][col2]            
-            
+            E2 = DB[prot][col2]
+
             X = cls.compareAllpKas(E1, E2, exclude=cls.excluded)
             print len(X)
             if X == None:
-                continue            
+                continue
             rp1, rp2, op1, op2, rsp1, rsp2, errs1, errs2, n = X
             relpkas1.extend(rp1)
             relpkas2.extend(rp2)
             otherpkas1.extend(op1)
             otherpkas2.extend(op2)
             #names.extend(n)
-            
+
         print 'reliable pkas matched:', len(relpkas1)
         print 'others:', len(otherpkas1)
-   
+
         f=pylab.figure(figsize=(10,20))
         ax1=f.add_subplot(211)
         ax2=f.add_subplot(212)
@@ -1084,14 +1090,14 @@ class TitrationAnalyser():
                         title='15N vs 1H : other pKas', xlabel='15N', ylabel='1H')
         print 'other pKas, correl coeff:', cc
         f.savefig('comparenuclei.png', dpi=300)
-        
+
         '''f=pylab.figure(figsize=(10,10))
         ax=f.add_subplot(111)
         i=0
         leglines = [];series=[]
         for r in pkasbyres1.keys():
             if len(pkasbyres1[r])==0:
-                continue            
+                continue
             if i >= len(cls.shapes) or i>=len(cls.pylabcolors):
                 i=0
             cls.doXYPlot(ax, pkasbyres1[r],pkasbyres2[r], symbol=cls.shapes[i], color=cls.pylabcolors[i],
@@ -1170,24 +1176,24 @@ class TitrationAnalyser():
                         nucleus='H',calculatespans=True):
         """Create mapping of pKas to nearby titratable groups, we use the
            dict of extracted pKas, but also requires the DB for structural info"""
-        
+
         self.getProtNames(DB)
         path = os.getcwd()
-        for prot in DB.getRecs():           
+        for prot in DB.getRecs():
             name = self.protnames[prot]
             fname = name.replace(' ','').replace('(','').replace(')','')
             if names != None and name not in names:
                 continue
             if not DB[prot].has_key(col):
                 continue
-            #structure    
+            #structure
             struct = DB[prot].Structure
             pdbname = fname+'.pdb'
             from PEATDB.Actions import DBActions
             DBActions.writePDB(struct, pdbname)
             #ekin project with exp data
             E = DB[prot][col]
-            
+
             #actual titr grp pKa values we get from labbook
             try:
                 titrpkas = DB.getLabbookSheet(name+'.pKas').data
@@ -1196,18 +1202,18 @@ class TitrationAnalyser():
                 print 'failed to get pKa values for %s' %name
             titrpkas = self.convertpkadict(titrpkas)
             print titrpkas
-            
+
             #call CSP analysis
             if calculatespans==True:
                 import pKaTool.Ghosts.Chemical_shift as ChemShift
                 C = ChemShift.CSP(pdbname, method='Coulomb', pKaDict=titrpkas, nucleus=nucleus)
                 calcspans = C.getSpanDict()
                 self.savePickle(calcspans, os.path.join(path,fname+'_'+nucleus+'_spans.pickle'))
-            else: 
+            else:
                 calcspans = self.loadPickle(fname+'_'+nucleus+'_spans.pickle')
-                
+
             #assign ghosts - we use the spans dict to match our exp fits
-            G = self.assignGhosts(pkainfo[name], calcspans, titrpkas, pdbname)            
+            G = self.assignGhosts(pkainfo[name], calcspans, titrpkas, pdbname)
             self.savePickle(G, fname+'_'+nucleus+'_ghosts.pickle')
             self.ghostStats(G)
             '''#save csp curves to an ekinproject
@@ -1215,30 +1221,30 @@ class TitrationAnalyser():
             Ecsp.saveProject('csps')
             #compare CSP curves to our actual curves
             rmsds = self.compareCSPCurves(E, Ecsp)'''
-            
-        return 
-  
+
+        return
+
     def assignGhosts(self, pkainfo, calculatedspans, titrpkas, pdbfile):
         """Rough attempt to assign titrations using calculated
            spans for all titr grps and exp fits"""
         ghosts = {}
-        
+
         from pKaTool.Ghosts.CSP_explicit import CSP_coulomb
         import pKaTool.Ghosts.utilities_CSP as CSPutils
         CC = CSP_coulomb(None, None)
         coordmol, chargemol = CC.parseCoordCharges(pdbfile, pdb=True)
-        
+
         #get titr residue coords first
         titrcoords = {}
-        for res in titrpkas:            
+        for res in titrpkas:
             ch,resnum,rescode = res.split(':')
-            r = int(resnum)            
+            r = int(resnum)
             try:
                 atom = CSPutils.distanceAtoms[rescode]
                 titrcoords[res] = coordmol[ch][r][atom]
             except:
                 pass
-        
+
         #iterate over spans and get matching exp fits
         for res in calculatedspans:
             #calculated titr spans for this residue
@@ -1255,7 +1261,7 @@ class TitrationAnalyser():
             #find exp fits for this residue
             for d in pkainfo:
                 F = pkainfo[d]
-                r = int(F['resnum'])                
+                r = int(F['resnum'])
                 rescode = F['res']
                 if r != resnum:
                     continue
@@ -1271,8 +1277,8 @@ class TitrationAnalyser():
                         cspan = calcspans[t]
                         if abs(cspan) < assignedspan:
                             continue
-                        if not titrcoords.has_key(t): continue             
-                        titrpka = titrpkas[t]                        
+                        if not titrcoords.has_key(t): continue
+                        titrpka = titrpkas[t]
                         xx,distance = CSPutils.getDistance(coord, titrcoords[t])
                         if self.filterGhost(cspan, expspan, titrpka, pka, distance) == True:
                             print distance
@@ -1280,10 +1286,10 @@ class TitrationAnalyser():
                             ghosts[d][p]=t
                             s = 'span' + p.strip('pKa')
                             ghosts[d][s] = expspan
-                            assignedspan = abs(cspan)                            
-        
+                            assignedspan = abs(cspan)
+
         return ghosts
-        
+
     def filterGhost(self, calcspan, expspan, titrpka, exppka, distance):
         """Apply criteria for assignment of ghost"""
         pkacutoff=1
@@ -1294,13 +1300,13 @@ class TitrationAnalyser():
         if calcspan>0 and expspan<0:
             return False
         if calcspan<0 and expspan>0:
-            return False 
+            return False
         if abs(exppka-titrpka) > pkacutoff:
             return False
         #if distance > 20:
         #    return False
         return True
-        
+
     def ghostStats(self,G):
         """Some stats on ghost titrations"""
         i=0
@@ -1308,25 +1314,25 @@ class TitrationAnalyser():
         assigned=[]
         for r in G:
             for p in G[r].keys():
-                if 'pK' in p:  
+                if 'pK' in p:
                     s = G[r][p]
                     if not r in assigned:
                         assigned.append(r)
-                   
+
         print '%s of %s residues assigned' %(len(assigned),total)
- 
+
         return
-            
+
     def compareGhosts(self, g1, g2):
         """Compare two ghosts dicts"""
-        
+
         return
-        
+
     def compareCSPCurves(self, E1, E2):
         """Get normalised rmsd between 2 ekin proj"""
         rmsdvals={}
         for d1 in E1.datasets:
-            ed1 = E1.getDataset(d1)                    
+            ed1 = E1.getDataset(d1)
             r = ed1['res_num']
             if not r in E2.datasets:
                 continue
@@ -1334,52 +1340,52 @@ class TitrationAnalyser():
             x1,y1 = ed1.getxy()
             x2,y2 = ed2.getxy()
             #offset y1 to zero
-            
-            #get rmsd, we assume x pts. match            
-            errs = sum([math.pow(i[0]-i[1],2) for i in zip(y1,y2)])           
-            nrmsd = math.sqrt(errs/len(y1)) / (max(y1)-min(y1))            
+
+            #get rmsd, we assume x pts. match
+            errs = sum([math.pow(i[0]-i[1],2) for i in zip(y1,y2)])
+            nrmsd = math.sqrt(errs/len(y1)) / (max(y1)-min(y1))
             rmsdvals[r] = nrmsd
         return rmsdvals
-        
+
     def dict2Ekin(self, data):
         E=EkinProject(mode='NMR titration')
         for d in data:
             ch, resnum = d.split(':')
-            resnum = str(int(resnum))            
-            x,y = (data[d].keys(), data[d].values())                  
+            resnum = str(int(resnum))
+            x,y = (data[d].keys(), data[d].values())
             E.insertDataset(newname=resnum,xydata=(x,y))
             #edata = E.getDataset(resnum)
-            #edata['res_num'] = resnum 
+            #edata['res_num'] = resnum
         return E
-        
+
     def convertpkadict(self, t):
-        """Convert pka info from table into format for CSP func"""        
+        """Convert pka info from table into format for CSP func"""
         P={}
         s=':'
         for r in t:
-            resnum = string.zfill(t[r]['resnum'], 4)   
+            resnum = string.zfill(t[r]['resnum'], 4)
             name = 'A'+s+resnum+s+t[r]['resname']
             if t[r]['pka'] != '':
                 P[name] = float(t[r]['pka'])
-           
+
         return P
-    
+
     def getkey(self, d, value):
         """find the key(s) as a list given a value"""
         return [item[0] for item in d.items() if item[1] == value]
 
-    def savePickle(self, data, filename):       
-        f=open(filename,'w')       
-        pickle.dump(data, f)        
+    def savePickle(self, data, filename):
+        f=open(filename,'w')
+        pickle.dump(data, f)
         f.close()
         return
-        
+
     def loadPickle(self, filename):
         f=open(filename,'r')
         data = pickle.load(f)
         f.close()
-        return data        
-    
+        return data
+
     def correlatewithStructure(cls, ekindata, peatdb, pdbs=None):
         """Correlate a structural or other single property with each residue pKa/span"""
         #example here is for %surface accessibility
@@ -1479,7 +1485,7 @@ class TitrationAnalyser():
            Returns a tuple of dataset name, residue code, residue no."""
         t=[]
         for d in E.datasets:
-            edata = E.getDataset(d)            
+            edata = E.getDataset(d)
             if edata.has_key('residue'):
                 if not edata.has_key('residue') or not edata.has_key('res_num'):
                     continue
@@ -1487,10 +1493,10 @@ class TitrationAnalyser():
                 res_num = edata['res_num']
                 if titratable == True and not res in cls.titratable:
                     continue
-                else:                    
+                else:
                     t.append((d,res,res_num))
         return t
-    
+
     @classmethod
     def getResidue(cls, recdata):
         """get residue info if present"""
@@ -1533,10 +1539,10 @@ class TitrationAnalyser():
     @classmethod
     def setResidueNames(cls, E):
         """Try to set residue names based on dataset labels"""
-        import string 
+        import string
         for d in E.datasets:
             #edata = E.getDataset(d)
-            name = string.upper(d[0:3])            
+            name = string.upper(d[0:3])
             found = 0
             if name in cls.residue_list:
                 #edata['residue'] = name
@@ -1554,7 +1560,7 @@ class TitrationAnalyser():
     def setResidueNumbers(cls, E):
         """Try to set residue numbers from dataset names"""
         import re
-        r=re.compile('\d+')  
+        r=re.compile('\d+')
         for d in E.datasets:
             #edata = E.getDataset(d)
             nums = r.findall(d)
@@ -1563,17 +1569,17 @@ class TitrationAnalyser():
                 #edata['res_num'] = nums[0]
                 E.addMeta(d, 'res_num', nums[0])
         return E
-        
+
     @classmethod
     def setAtomTypes(cls, E, atom=None):
         d_titatoms = {
             'GLU':'CD',
             'ASP':'CG',
             'GLN':'CD',
-            }     
-        for d in E.datasets:    
-            if atom!=None:              
-                E.addMeta(d, 'atom_type', atom)                       
+            }
+        for d in E.datasets:
+            if atom!=None:
+                E.addMeta(d, 'atom_type', atom)
         return E
 
     @classmethod
@@ -1583,9 +1589,9 @@ class TitrationAnalyser():
         t.setResidueNames(E)
         t.setResidueNumbers(E)
         if atom!=None:
-            t.setAtomTypes(E, atom=atom)        
+            t.setAtomTypes(E, atom=atom)
         return E
-        
+
     @classmethod
     def setMetaInfoFromDB(self, DB, col, proteins=None, atom=None):
         """Auto add Atom, residue info to ekin NMR data"""
@@ -1595,7 +1601,7 @@ class TitrationAnalyser():
             E = DB[prot][col]
             DB[prot][col] = self.setMetaInfo(E, atom=atom)
         return
-       
+
     @classmethod
     def checkStructMapProp(cls, structmap, prop):
         """Check if a particular property is in the struct map"""
@@ -1709,7 +1715,7 @@ class TitrationAnalyser():
                 if sp < minspan:
                     continue
                 pkas.append(fitdata[i])
-                pnames.append(p)                
+                pnames.append(p)
                 spans.append(sp)
 
         #print pkas, spans
@@ -1879,11 +1885,10 @@ class TitrationAnalyser():
     @classmethod
     def doMultipleHistograms(cls, fig, recs, bins=20, title='', xlabel=None, ylabel=None, color=None,
                          subplots=True, colors=False, xticks=True, yticks=True, xlim=None):
-        """Do a pylab histogram of a dict of 1 or more dicts """		
+        """Do a pylab histogram of a dict of 1 or more dicts """
         subplots=[]
         dim=int(math.ceil(len(recs)/2.0))
         i=1
-
         for r in recs:
             if len(recs[r])==0:
                 i=i+1
@@ -1921,7 +1926,7 @@ class TitrationAnalyser():
             i=i+1
 
         return
-    
+
     @classmethod
     def rmse(cls, ar1, ar2):
         """Mean squared error"""
@@ -1938,7 +1943,7 @@ class TitrationAnalyser():
                     xaxislabels=None, color=None, symbol=None, markersize=30):
         """Do xy plot of 2 lists and show correlation
            annotate is a list of tuples with x,y coord and text to print at that pt"""
-           
+
         if len(x) == 0:
             return None
         if color == None:
@@ -1953,32 +1958,32 @@ class TitrationAnalyser():
         if min(x)<min(y): a=min(x)-1
         else: a=min(y)-1
         if max(x)>max(y): b=max(x)+1
-        else: b=max(y)+1    
-        
+        else: b=max(y)+1
+
         ax.plot((a,b),(a,b),color='black')
-        ax.scatter(x, y, facecolor=clr, marker=symb, s=markersize, 
+        ax.scatter(x, y, facecolor=clr, marker=symb, s=markersize,
                             picker=4, alpha=0.6)
 
         if names!=None:
             c=0
-            for i in zip(x,y):                
-                if abs(i[0]-i[1])>err:  
+            for i in zip(x,y):
+                if abs(i[0]-i[1])>err:
                     #z = pylab.Circle((i[0], i[1]), 0.2,fill=False,alpha=0.7)
                     #ax.add_patch(z)
                     ax.annotate(names[c], (i[0]+0.1, i[1]),
                                 xytext=None, textcoords='data',
                                 fontsize=10)
                 c+=1
-                    
+
         ax.set_title(title)
         ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)
-        if xaxislabels != None:         
+        if xaxislabels != None:
             ax.set_xticklabels(xaxislabels, rotation='vertical', fontproperties=ft)
         if xerrs!=None or yerrs!=None:
             errline = ax.errorbar(x, y, xerr=xerrs, yerr=yerrs, fmt=None,
                                         elinewidth=.5, ecolor=clr, alpha=0.7)
-        ax.set_xlim(a,b); ax.set_ylim(a,b)    
+        ax.set_xlim(a,b); ax.set_ylim(a,b)
         cc = round(numpy.corrcoef(numpy.array([x,y]))[0][1],2)
         rmse = round(cls.rmse(x,y),2)
         print 'corr. coeff:', cc
@@ -1996,7 +2001,7 @@ class TitrationAnalyser():
                 index = i
             i=i+1
         return index
-    
+
     @classmethod
     def get_parameter_names(self, model):
         X= Fitting.getFitter(model)

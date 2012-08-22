@@ -162,12 +162,13 @@ class NMRTitration(Plugin, GUI_help):
         """Try to set residue numbers from dataset names"""
         return
 
-    def analysepKas(self):
+    def analysepKas(self, p=None):
         """Get the main pKas of all/titr group and do analysis"""
         E = self.currprj
         if E==None: return
         t = TitrationAnalyser()
-        p = t.findpKas(E, titratable=False, reliable=False, minspan=0.06)
+        if p == None:
+            p = t.findpKas(E, titratable=False, reliable=False, minspan=0.06)
         t.analysepKas(p)
         return
 
@@ -233,14 +234,14 @@ class NMRTitration(Plugin, GUI_help):
         plt.rc('font',size=28)
         plt.rc('savefig',dpi=300)
         plt.rc('axes',linewidth=.5)
-        plt.rc('text',usetex=True)
+        #plt.rc('text',usetex=True)
 
         nuclnames = {'1H NMR':'H','15N NMR':'N'}
         t = TitrationAnalyser()
         #extract reliable pkas from selected proteins
-        #p=t.extractpKas(DB, col, names=names, titratable=False, reliable=False, minspan=0.06)
-        #t.analysepKas(p)
-        t.compareNuclei(DB, '15N NMR', '1H NMR', names=names, titratable=True)
+        p = t.extractpKas(DB, col, names=names, titratable=False, reliable=False, minspan=0.06)
+        t.analysepKas(p)
+        #t.compareNuclei(DB, '15N NMR', '1H NMR', names=names, titratable=True)
 
         return
 
@@ -357,9 +358,9 @@ def main():
         complete = ['HEWL', 'Bovine Beta-Lactoglobulin',
                     'Plastocyanin (Anabaena variabilis)',
                     'Plastocyanin (Phormidium)',
-                    'Glutaredoxin', 'CexCD (Apo)',
+                    'Glutaredoxin',
                     'Protein G B1','Xylanase (Bacillus subtilus)']
-        app.analyseTitDB(DB, opts.col, complete)
+        app.analyseTitDB(DB, opts.col)#, complete)
         #app.addpKaTables(DB, complete)
 
     if opts.ekinprj != None:

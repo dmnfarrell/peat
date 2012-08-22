@@ -378,7 +378,6 @@ class PEATWeb:
         protein = self.form.getfirst('protein')
         rectype = self.form.getfirst('rectype')
         col = self.form.getfirst('column')
-        self.showHeader(title=str(protein+': '+col), menu=1)
         sys.stdout.flush()
 
         DB = self.DB = self.connect()
@@ -386,6 +385,8 @@ class PEATWeb:
         ekincols = ptmodel.ekintypes
         fieldtype = DB['userfields'][col]['field_type']
         protname = DB[protein]['name']
+
+        self.showHeader(title=str(protname+': '+col), menu=1)
         print '<div><a>Protein: %s </a><br>' %protname
         print 'Column data: %s </div>' %col
         from PEATDB.Ekin.Web import EkinWeb
