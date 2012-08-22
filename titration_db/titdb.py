@@ -93,8 +93,9 @@ class titdbWeb(PEATWeb):
                 <LI>Download the raw data as csv/text files and refit/analyse\
                 </UL>'
 
-        print '<a>If you wish to submit data to be included here, we currently request that you\
-                send the tabulated data in any appropriate text format by e-mail to us at</a> \
+        print '<a>We are continually trying to expand the dataset and rely on researchers to voluntarily provide \
+                  us with their data. If you wish to submit data to be included here, please send the \
+                 tabulated data in any convenient text format (see help page) by e-mail to us at</a> \
                 <a href="mailto:titrationdb@gmail.com">titrationdb@gmail.com</a><p>'
         print '</div>'
         self.footer()
@@ -302,20 +303,22 @@ class titdbWeb(PEATWeb):
         from PEATDB.Ekin.Titration import TitrationAnalyser
         self.showHeader(menu=1)
         DB = self.DB = self.connect()
+        t = TitrationAnalyser()
+
+        print '<div class="main">'
+        print '<a>Analysis for current dataset</a>'
         sys.stdout.flush()
 
-        t = TitrationAnalyser()
         colnames = ['1H NMR','15N NMR','13C NMR']
 
         for col in colnames:
-            p = t.extractpKas(DB,col,silent=True)
+            p = t.extractpKas(DB,col,silent=True,minspan=0.06)
             print '<div>'
-            print "<h2>%s: Table of fitted 'reliable' pKas and distribution of associated &Delta;&delta;</h2>" %col
-            img1, img2 = t.analysepKas(p, silent=True, prefix=col, path=self.imagepath)
-            t.makepKasTable(p)
-            print '<center><img src="%s/%s" align=center></center>' %(self.plotsdir, img2)
-            print '<div>'
-            print '<hr>'
+            print "<h2>%s: Distribution of &Delta;&delta; for fitted pKa values</h2>" %col
+            img1 = t.analysepKas(p, silent=True, prefix=col, path=self.imagepath)
+            #t.makepKasTable(p)
+            print '<center><img src="%s/%s" align=center width=800 border="2"></center>' %(self.plotsdir, img1)
+            print '</div>'
         self.footer()
         return
 
