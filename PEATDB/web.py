@@ -23,13 +23,13 @@ class PEATWeb:
     def __init__(self, server='localhost', project='test', port=8080,
                         user=None, passwd=None,
                         bindir='', fullpath=''):
-    
+
         """bindir : path to cgi script in server address
            fullpath : file system path to script  """
 
         import socket
         self.host = socket.getfqdn(socket.gethostname())
-      
+
         self.sessionkey=None
         self.form=cgi.FieldStorage()
         self.server = server
@@ -37,7 +37,7 @@ class PEATWeb:
         self.user = user
         self.password = passwd
         self.port = port
-        
+
         self.bindir = bindir
         dirname = os.path.basename(fullpath)
 
@@ -67,7 +67,7 @@ class PEATWeb:
 
     def show_intro(self):
         '''Show intro page'''
-        self.show_DB_header(menu=1)        
+        self.showHeader(menu=1)
         print '<div align=left>'
         print '<big><big><a>PEAT DB Web Interface, %s </big></a>' %self.project
         print '<br>'
@@ -82,11 +82,11 @@ class PEATWeb:
 
     def show_help(self):
         '''Show help page, override this '''
-        self.show_DB_header(menu=1)
+        self.showHeader(menu=1)
         self.footer()
         return
 
-    def show_DB_header(self,title=None,menu=None):
+    def showHeader(self,title=None,menu=None):
         """show headings and column names for DB"""
 
         imgdir = self.imgdir
@@ -105,7 +105,7 @@ class PEATWeb:
         print '<script type="text/javascript" src="/scripts/checkbox.js"></script>'
         print '</head>'
         print '<body>'
-        print '<div class="header">' 
+        print '<div class="header">'
         print '<p id="title">PEAT Web Interface: %s</p>' %self.project
         print '</div>'
         print '<script type="text/javascript" src="/scripts/boxover.js"></script>'
@@ -222,16 +222,16 @@ class PEATWeb:
            From the locally saved project if present, otherwise checkout'''
 
         self.DB = self.connect()
-        self.show_DB_header(menu=1)
+        self.showHeader(menu=1)
         sys.stdout.flush()
         self.show_DB()
         return
 
     def connect(self):
-        """Connect to the peat db"""        
-        saveout = sys.stdout	
+        """Connect to the peat db"""
+        saveout = sys.stdout
 	logpath = os.path.abspath('out.log')
-	
+
         fsock = open(logpath, 'w')
         sys.stdout = fsock
         sys.stdout.flush()
@@ -242,9 +242,9 @@ class PEATWeb:
                       project=self.project)
         sys.stdout.flush()
         sys.stdout = saveout
-        fsock.close()     
+        fsock.close()
         return DB
-        
+
 
     def show_DB(self, selected=None):
         """
@@ -293,7 +293,7 @@ class PEATWeb:
                 fieldtype=None
                 if DB['userfields'].has_key(column):
                     fieldtype=DB['userfields'][column]['field_type']
-                   
+
                 elif column == 'Structure':
                     fieldtype='structure'
                 if fieldtype==None:
@@ -319,7 +319,7 @@ class PEATWeb:
                                 if column == 'PDB_link':
                                     viewlink = 'http://firstglance.jmol.org/fg.htm?mol='+display_text
                                     #print '<td class=%s> <a href=%s target="_blank">%s</a> <a href=%s target="_blank"><img class="thumb" \
-                                    #    src="%s/fg.png"></a></td>' % (cls,link_text,display_text,viewlink, self.imgdir) 
+                                    #    src="%s/fg.png"></a></td>' % (cls,link_text,display_text,viewlink, self.imgdir)
 	  			    print '<td class=%s> <a href=%s target="_blank">%s</a> <a href=%s target="_blank"> view\
 					   </a></td>' % (cls,link_text,display_text,viewlink)
                               	elif column == 'PMID_link':
@@ -378,10 +378,10 @@ class PEATWeb:
         protein = self.form.getfirst('protein')
         rectype = self.form.getfirst('rectype')
         col = self.form.getfirst('column')
-        self.show_DB_header(title=str(protein+': '+col), menu=1)
+        self.showHeader(title=str(protein+': '+col), menu=1)
         sys.stdout.flush()
 
-        DB = self.DB = self.connect()    
+        DB = self.DB = self.connect()
         ptmodel = PEATTableModel(DB)
         ekincols = ptmodel.ekintypes
         fieldtype = DB['userfields'][col]['field_type']
@@ -394,9 +394,9 @@ class PEATWeb:
             fieldtype = 'ekindata'
         #plot ekin data curves, if fieldtype is ekindata
         if fieldtype == 'ekindata':
-            E = DB[protein][col]           
+            E = DB[protein][col]
             EW = EkinWeb()
-            EW.showEkinPlots(project=E, datasets='ALL', path=self.plotsdir,                            
+            EW.showEkinPlots(project=E, datasets='ALL', path=self.plotsdir,
                              imgpath=self.imagepath)
             print '</table>'
         #save the pdb structure to a file and provide url link to it
@@ -406,7 +406,7 @@ class PEATWeb:
                 print '<br><a> %s</a>' %str(k)
         elif fieldtype == 'Notes':
             recdata = DB[protein][col]
-            print '<br><a> %s</a>' %recdata['text']      
+            print '<br><a> %s</a>' %recdata['text']
         elif fieldtype == 'File':
             recdata = DB[protein][col]
             print '<p> This record contains a data file. Click link to open.'
@@ -423,12 +423,12 @@ class PEATWeb:
         logx = bool(self.form.getfirst('logx'))
         logy = bool(self.form.getfirst('logy'))
         legend = bool(self.form.getfirst('legend'))
-       
-        DB = self.DB = self.connect()       
+
+        DB = self.DB = self.connect()
         from PEATDB.Ekin.Web import EkinWeb
         ekincols = DB.ekintypes
 
-        self.show_DB_header(menu=1)
+        self.showHeader(menu=1)
         self.menu()
         sys.stdout.flush()
 
@@ -459,7 +459,7 @@ class PEATWeb:
             col = fields[1]
             d = fields[2]
             E = DB[protein][col]
-            fits = E.__datatabs_fits__       
+            fits = E.__datatabs_fits__
             meta = E.__meta_data__
             protname = DB[protein]['name']
             ekindata['__datatabs_fits__'][d+'_'+col+'_'+protname] = fits[d]
@@ -486,7 +486,7 @@ class PEATWeb:
         from PEATDB.PEATTables import PEATTableModel
         from PEATDB.Ekin.Fitting import Fitting
         from PEATDB.Ekin.Web import EkinWeb
-        DB = self.DB  
+        DB = self.DB
         EW = EkinWeb()
         ekincols = DB.ekintypes
 
@@ -545,7 +545,7 @@ class PEATWeb:
         #now search for the other keys inside selected proteins if needed
         ekinfound={}; foundfits={}
         ignore =['__fit_matches__', '__Exp_Meta_Dat__', '__datatabs_fits__']
-        
+
         kys = list(DB.getRecs())
         kys.sort()
         if len(found) == 0 or globalop == 'or':
@@ -565,14 +565,14 @@ class PEATWeb:
                 else:
                     fieldtype=None
                 if fieldtype in ekincols:
-                    dk = E.datasets                    
-                    fits = E.__datatabs_fits__                    
+                    dk = E.datasets
+                    fits = E.__datatabs_fits__
                     for k in dk:
                         meta = E.getMetaData(k)
                         try:
                             thisres = meta['residue']
                         except:
-                            thisres = k         
+                            thisres = k
                         if thisres == None:
                             thisres = k
                         if residues != '':
@@ -701,10 +701,10 @@ class PEATWeb:
     def show_search_results(self):
         """Display search results"""
 
-        self.show_DB_header(menu=1)
+        self.showHeader(menu=1)
         sys.stdout.flush()
         self.DB = self.connect()
-       
+
         key=self.form.getfirst('key')
         matchmethod=self.form.getfirst('matchmethod')
         proteinmatchmethod=self.form.getfirst('proteinmatchmethod')
@@ -733,5 +733,5 @@ if __name__ == '__main__':
           passwd='123',
           bindir='/cgi-bin/newtitdb',
           fullpath='/var/www/html/newtitdb')
-    
+
 
