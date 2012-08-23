@@ -306,7 +306,13 @@ class titdbWeb(PEATWeb):
         t = TitrationAnalyser()
 
         print '<div class="main">'
-        print '<a>Analysis for current dataset</a>'
+        print '<p>Selected plots below reflect some of the analysis shown in the \
+               <a href="%s/paper_2010.pdf"> original paper</a> updated for the current dataset. </p>' %self.bindir
+        print '<a>The distributions shown are of the change in chemical shift over all\
+                detected titrations. `Reliable` pKas are those associated with\
+                the largest chemical shift changes in a titration curve and that meets the criteria defined in\
+                the paper. We define primary pKa values simply as the subset of the reliable pKa values \
+                that originate from titration curves with with only one titration.</a>'
         sys.stdout.flush()
 
         colnames = ['1H NMR','15N NMR','13C NMR']
