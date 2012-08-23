@@ -166,26 +166,26 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
             def plotselected():
                 datasets = self.datasetstable.get_selectedRecordNames()
                 self.plotframe.plotCurrent(datasets=datasets, plotoption=self.overlayPlots.get())
-                
+
             def deleteselected():
                 datasets = self.datasetstable.get_selectedRecordNames()
                 for d in datasets:
                     print d
                     self.E.deleteDataset(d)
-                self.updateDatasetSelector()    
-                self.updateAll()    
-               
+                self.updateDatasetSelector()
+                self.updateAll()
+
             def createTable():
                 self.currentmodel = EkinProjModel(self.E)
                 self.datasetsframe = Frame(self.m)
                 self.m.add(self.datasetsframe,minsize=250)
                 self.datasetstable = EkinProjTable(self.datasetsframe, self.currentmodel)
                 self.datasetstable.createTableFrame()
-                
+
             def refresh():
                 self.currentmodel = EkinProjModel(self.E)
                 self.datasetstable.redrawTable()
-                
+
             createTable()
             b=Frame(self.datasetsframe)
             b.grid(row=3,column=1)
@@ -271,8 +271,8 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
         self.IE_menu={  '01Import from CSV file':{'cmd':self.import_csv},
                         '02Export Dataset':{'cmd':self.exportDataset},
                         '03Export All':{'cmd':self.exportAll},
-                        '04Import Sparky peak files':{'cmd':self.import_chem_shift},                  
-                        '05Import CcpNmr file':{'cmd':self.import_ccpnmr},                      
+                        '04Import Sparky peak files':{'cmd':self.import_chem_shift},
+                        '05Import CcpNmr file':{'cmd':self.import_ccpnmr},
                         '06sep':{None:None},
                         '07Import CD temperature scan':{'cmd':self.import_CD_tempscan},
                         '08Analyse temp dependence of CD data':{'cmd':self.insert_CD_temp_datatab}
@@ -515,7 +515,11 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
         """Update data table to reflect current dataset"""
         if len(self.E.datasets) == 0:
             return
-        ekindata = self.data[self.currentdataset.get()]
+        curr = self.currentdataset.get()
+        if curr not in self.E.datasets:
+            curr = self.E.datasets[0]
+            self.currentdataset.set(curr)
+        ekindata = self.data[curr]
         model = self.fitframe.model_type.get()
         self.tableframe.draw_Table(ekindata, model)
         self.tableframe.addBinding("<Return>", self.redrawGraph)
@@ -780,15 +784,15 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
         """Batch rename"""
         mpDlg = MultipleValDialog(title='Batch Rename Datasets',
                                    initialvalues=('',''),
-                                   labels=('pattern','replace with'), 
+                                   labels=('pattern','replace with'),
                                    types=('string','string'),
                                    parent=self.ekin_win)
-        if mpDlg.result == True:     
+        if mpDlg.result == True:
             pattern = mpDlg.results[0]
-            replacement = mpDlg.results[1]  
+            replacement = mpDlg.results[1]
             self.E.batchRename(pattern, replacement)
             self.currentdataset.set(self.E.datasets[0])
-            self.updateDatasetSelector() 
+            self.updateDatasetSelector()
             self.updateAll()
         return
 
@@ -918,7 +922,7 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
 
             mpDlg = MultipleValDialog(title='No. of plots',
                         initialvalues=(self.no_multiplePlots.get(),self.no_multipleCols.get()),
-                        labels=('no. of plots','no. of cols'), 
+                        labels=('no. of plots','no. of cols'),
                         types=('int','int'),
                         parent=self.ekin_win)
             if mpDlg.result == True:
@@ -1209,7 +1213,7 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
             for d in self.E.datasets:
                 if self.stopfit == True:
                     return
-                
+
                 if len(models)==1:
                     try:
                         fdata, X = self.E.fitDataset(d, model=models[0],silent=True,noiter=no_itervar.get(),
@@ -1311,14 +1315,14 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
         return
 
     def loadModelsFile(self, filename=None):
-        """load a new models file"""        
+        """load a new models file"""
         if filename==None:
             filename = tkFileDialog.askopenfilename(defaultextension='.dict',
                                                   initialdir=self.path,
                                                   filetypes=[("dict","*.dict"),
                                                              ("All files","*.*")],
                                                   parent=self.ekin_win)
-        if filename:    
+        if filename:
             Fitting.loadModelsFile(filename)
         self.createFitFrame()
         return
@@ -1327,7 +1331,7 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
     # Import and export functions, most should use the Importer class to do the actual
     # importing stuff and get the returned dataset that we simply insert
     #
-    
+
     def exportAll(self):
         filename = tkFileDialog.asksaveasfilename(parent=self.ekin_win,
                                                 defaultextension='.csv',
@@ -1337,7 +1341,7 @@ class EkinApp(Frame, Ekin_map_annotate, GUI_help):
         if filename:
             self.E.exportDatasets(filename)
         return
-        
+
     def import_csv(self, event=None):
         """Will allow import of multiple or single text files"""
         self.importer.path = self.path
@@ -2361,7 +2365,7 @@ class MultipleValDialog(tkSimpleDialog.Dialog):
     def body(self, master):
 
         r=0
-        self.vrs=[];self.entries=[]        
+        self.vrs=[];self.entries=[]
         for i in range(len(self.labels)):
             Label(master, text=self.labels[i]).grid(row=r, column=0,sticky='news')
             if self.types[i] == 'int':
@@ -2398,7 +2402,7 @@ class MultipleValDialog(tkSimpleDialog.Dialog):
         self.results = []
         for i in range(len(self.labels)):
             self.results.append(self.vrs[i].get())
-        return 
+        return
 
 
 def main():

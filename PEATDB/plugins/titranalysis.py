@@ -168,7 +168,7 @@ class NMRTitration(Plugin, GUI_help):
         if E==None: return
         t = TitrationAnalyser()
         if p == None:
-            p = t.findpKas(E, titratable=False, reliable=False, minspan=0.06)
+            p = t.findpKas(E, titratable=True, reliable=False, minspan=0.06)
         t.analysepKas(p)
         return
 

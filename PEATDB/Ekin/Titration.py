@@ -435,7 +435,7 @@ class TitrationAnalyser():
 
         return E
 
-    def getExpErrs(self, E, xuncert=0.1, yuncert=0.03, runs=20):
+    def getExpErrs(self, E, xuncert=0.1, yuncert=0.03, runs=10):
         """Get exp uncertainties on current fits"""
         for d in E.datasets:
             print d
@@ -531,7 +531,7 @@ class TitrationAnalyser():
         for d in E.datasets:
             resdata = E.getMetaData(d)
             if not resdata.has_key('residue') or not resdata.has_key('res_num'):
-                print d
+                #print d
                 continue
             res = resdata['residue']
             try:
