@@ -323,8 +323,19 @@ class titdbWeb(PEATWeb):
             print "<h2>%s: Distribution of &Delta;&delta; for fitted pKa values</h2>" %col
             img1 = t.analysepKas(p, silent=True, prefix=col, path=self.imagepath)
             #t.makepKasTable(p)
-            print '<center><img src="%s/%s" align=center width=800 border="2"></center>' %(self.plotsdir, img1)
+            print '<center><img src="%s/%s" align=center width=800 border="1"></center>' %(self.plotsdir, img1)
             print '</div>'
+            sys.stdout.flush()
+
+        #compare nuclei
+        img2 = t.compareNuclei(DB, '15N NMR', '1H NMR', titratable=False, silent=True, path=self.imagepath)
+        print '<p>Below is an analysis of the correspondence between fitted pKas for 1H and 15N \
+                where they are available for the same residue in the same protein. This is the same\
+                plot as figure 4 in the original paper updated for the current dataset.\
+                The plots are divided into reliable and other pKas for comparison.</p>'
+        print '<div>'
+        print '<center><img src="%s/%s" align=center width=600 border="1"></center>' %(self.plotsdir, img2)
+        print '</div>'
         self.footer()
         return
 
