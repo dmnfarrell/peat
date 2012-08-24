@@ -333,8 +333,16 @@ class titdbWeb(PEATWeb):
         self.showHeader(menu=1)
         print '<div class="main">'
         print '<h2>Downloads</h2>'
-        print '<h3>The entire dataset may be downloaded in text format as a single zip file</h3><br>'
+        print '<h3>The entire dataset may be downloaded in text format as a single zip file.</h3>'
+        print
+        #print '<p>Exporting current data, please wait a moment...</p>'
+        sys.stdout.flush()
 
+        DB = self.DB = self.connect()
+        from PEATDB.Ekin.Titration import TitrationAnalyser
+        t = TitrationAnalyser()
+        filename = t.exportAll(DB)
+        print '<h2><a href="%s/%s"> download zip</a></h2>' %(self.bindir,os.path.basename(filename))
         print '</div>'
         self.footer()
         return
