@@ -32,7 +32,7 @@ import sys,os,math
 import pickle
 import Pmw
 import numpy
-import string
+import string, re
 try:
     import matplotlib
     #matplotlib.use('TkAgg')
@@ -1585,27 +1585,27 @@ class TitrationAnalyser():
     @classmethod
     def setResidueNames(cls, E):
         """Try to set residue names based on dataset labels"""
-        import string
+
         for d in E.datasets:
-            #edata = E.getDataset(d)
             name = string.upper(d[0:3])
+            chars = re.findall(r'\D+', d)
+            #print chars
             found = 0
-            if name in cls.residue_list:
-                #edata['residue'] = name
-                E.addMeta(d, 'residue', name)
-                found = 1
-            #if not found from 1st three letters try one-letter code
-            if found == 0:
-                if name[0] in cls.residue_letters.keys():
-                    res = cls.residue_letters[name[0]]
-                    #edata['residue'] = res
+            for c in chars:
+                c = string.upper(c)
+                if len(c) == 3 and c in cls.residue_list:
+                    E.addMeta(d, 'residue', c)
+                    break
+                elif len(c) == 1 and c in cls.residue_letters.keys():
+                    res = cls.residue_letters[c]
                     E.addMeta(d, 'residue', res)
+                    break
         return E
 
     @classmethod
     def setResidueNumbers(cls, E):
         """Try to set residue numbers from dataset names"""
-        import re
+
         r=re.compile('\d+')
         for d in E.datasets:
             #edata = E.getDataset(d)
