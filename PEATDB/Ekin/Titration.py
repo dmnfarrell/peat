@@ -995,10 +995,12 @@ class TitrationAnalyser():
                None if fails to find meaningful pKas from fits
                otherwise returns tuple of results"""
         reliable=True
+        #print d
         try:
             res1 = E1.getMetaData(d)['residue']
         except:
-            res1 = cls.getResidue(E1.getDataset(d))
+            #print E1.getDataset(d)
+            return
         if titratable == True and not res1 in cls.titratable:
             return None
         fitdata1 = E1.getFitData(d)
@@ -1007,8 +1009,8 @@ class TitrationAnalyser():
             return None
         model1 = fitdata1['model']
         model2 = fitdata2['model']
-        if model1 != model2:
-            print 'different models'
+        #if model1 != model2:
+        #    print 'different models'
             #return None
 
         p1,p1val,sp1 = cls.getMainpKa(fitdata1, res=res1)#,strict=False)
@@ -1023,7 +1025,7 @@ class TitrationAnalyser():
                 perr2 = round(E2.getMeta(d, 'exp_errors')[p2][1],4)
             except:
                 return None
-            print d, p1val, p2val, perr1, perr2
+            #print d, p1val, p2val, perr1, perr2
             #print errcutoff
             if perr1>errcutoff or perr2>errcutoff: return None
             if p2val != pchk:
@@ -1077,12 +1079,12 @@ class TitrationAnalyser():
                 otherpkas1.append(p1val)
                 otherpkas2.append(p2val)
 
-        print 'reliable pkas matched:', len(relpkas1)
-        print 'others:', len(otherpkas1)
-
+        #print 'reliable pkas matched:', len(relpkas1)
+        #print 'others:', len(otherpkas1)
         return relpkas1, relpkas2, otherpkas1, otherpkas2, relspans1, relspans2, errs1, errs2, names
 
-    def compareNuclei(cls, DB, col1, col2, names=None, titratable=True):
+    def compareNuclei(cls, DB, col1, col2, names=None, titratable=True,
+                        silent=False, path=None):
         """Compare corresponding datasets for proteins that have data
           for 2 different NMR nuclei e.g. 1H vs 15N over entire DB"""
 
@@ -1105,15 +1107,16 @@ class TitrationAnalyser():
             name = cls.protnames[prot]
             if names != None and name not in names:
                 continue
-            print 'processing protein', name
-            print '-------------------------'
+            if silent==False:
+                print 'processing protein', name
+                print '-------------------------'
             if not DB[prot].has_key(col1) or not DB[prot].has_key(col2):
                 continue
             E1 = DB[prot][col1]
             E2 = DB[prot][col2]
 
-            X = cls.compareAllpKas(E1, E2, exclude=cls.excluded)
-            print len(X)
+            X = cls.compareAllpKas(E1, E2, titratable, exclude=cls.excluded)
+
             if X == None:
                 continue
             rp1, rp2, op1, op2, rsp1, rsp2, errs1, errs2, n = X
@@ -1122,20 +1125,25 @@ class TitrationAnalyser():
             otherpkas1.extend(op1)
             otherpkas2.extend(op2)
             #names.extend(n)
-
-        print 'reliable pkas matched:', len(relpkas1)
-        print 'others:', len(otherpkas1)
+        if silent==False:
+            print 'reliable pkas matched:', len(relpkas1)
+            print 'others:', len(otherpkas1)
 
         f=pylab.figure(figsize=(10,20))
         ax1=f.add_subplot(211)
         ax2=f.add_subplot(212)
         cc = cls.doXYPlot(ax1, relpkas1, relpkas2, #names=names,
-                        title='15N vs 1H: reliable pKas', xlabel='15N', ylabel='1H')
-        print 'reliable pKas, correl coeff:', cc
+                        title='15N vs 1H: reliable pKas', xlabel='15N (pH units)', ylabel='1H (pH units)')
+        #print 'reliable pKas, correl coeff:', cc
         cc = cls.doXYPlot(ax2, otherpkas1, otherpkas2, color='r',
-                        title='15N vs 1H : other pKas', xlabel='15N', ylabel='1H')
-        print 'other pKas, correl coeff:', cc
-        f.savefig('comparenuclei.png', dpi=300)
+                        title='15N vs 1H : other pKas', xlabel='15N (pH units)', ylabel='1H (pH units)')
+        f.suptitle('Comparison of corresponding 1H vs 15N fitted pKas',fontsize=24)
+        #print 'other pKas, correl coeff:', cc
+
+        if path==None:
+            path = os.getcwd()
+        fname = 'comparenuclei.png'
+        f.savefig(os.path.join(path,fname), dpi=300)
 
         '''f=pylab.figure(figsize=(10,10))
         ax=f.add_subplot(111)
@@ -1160,7 +1168,7 @@ class TitrationAnalyser():
         leg.draw_frame(False)
         f.savefig('comparenuclei_relbyres.png', dpi=300)'''
         #pylab.show()
-        return
+        return fname
 
     def compareExtractedpKas(cls, DB, col, prot1, prot2):
         """Compare extracted pKas across similar proteins and plot correlations per res"""
@@ -2021,6 +2029,7 @@ class TitrationAnalyser():
                                 fontsize=10)
                 c+=1
 
+        pylab.rc('font',size=18)
         ax.set_title(title)
         ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)
@@ -2032,8 +2041,8 @@ class TitrationAnalyser():
         ax.set_xlim(a,b); ax.set_ylim(a,b)
         cc = round(numpy.corrcoef(numpy.array([x,y]))[0][1],2)
         rmse = round(cls.rmse(x,y),2)
-        print 'corr. coeff:', cc
-        print 'RMSE:', rmse
+        #print 'corr. coeff:', cc
+        #print 'RMSE:', rmse
         return cc, rmse
 
     @classmethod

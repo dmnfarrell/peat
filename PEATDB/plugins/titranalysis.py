@@ -241,7 +241,7 @@ class NMRTitration(Plugin, GUI_help):
         #extract reliable pkas from selected proteins
         p = t.extractpKas(DB, col, names=names, titratable=False, reliable=False, minspan=0.06)
         t.analysepKas(p)
-        #t.compareNuclei(DB, '15N NMR', '1H NMR', names=names, titratable=True)
+        t.compareNuclei(DB, '15N NMR', '1H NMR', names=names, titratable=True)
 
         return
 
