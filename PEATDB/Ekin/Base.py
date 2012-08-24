@@ -26,6 +26,7 @@
 #
 
 import math, sys, os, types
+import copy
 import re
 import IO
 from Convert import EkinConvert
@@ -121,7 +122,7 @@ class EkinProject(object):
 
     def loadData(self, data=None):
         """Load the data into self.data and update selector etc"""
-        import copy
+
         # Did we get data or should we just add an empty data window?
         if data == None or type(data) is types.StringType:
             self.data={}
@@ -245,9 +246,9 @@ class EkinProject(object):
         if pattern == replacement:
             return
         count=0
-        for name in self.datasets[:]:    
+        for name in self.datasets[:]:
             newname = re.sub(pattern, replacement, name)
-            if newname != name:               
+            if newname != name:
                 self.renameDataset(name, newname)
                 count+=1
         print 'renamed %s datasets' %count
@@ -262,7 +263,6 @@ class EkinProject(object):
             print 'error, new name exists'
             return
         else:
-            import copy
             self.data[newname] = copy.deepcopy(self.data[name])
             for f in self.ekinfields:
                 if not self.__dict__.has_key(f) or type(self.__dict__[f]) is not types.DictType:
@@ -273,12 +273,11 @@ class EkinProject(object):
             self.length = len(self.datasets)
         return
 
-    def getDataset(self, dataset):
+    def getDataset(self, name):
         """Get a dataset"""
-        try:
-            return self.data[dataset]
-        except:
-            return None
+        data = self.data[name]
+        ek = self.checkDataset(data)
+        return ek
 
     def deleteAll(self):
         """Delete All"""
@@ -314,16 +313,16 @@ class EkinProject(object):
         #print self.getMetaData(name)
         return
 
-    def checkDataset(self, dataset):
+    def checkDataset(self, data):
         """Check for old format or bad dataset"""
-        if type(dataset) is types.DictType:
-            #old format
-            x,y,a,xerr,yerr = EkinConvert.ekin2xy(dataset, getall=1, geterrors=True)
+
+        if type(data) is types.DictType: #old format
+            x,y,a,xerr,yerr = EkinConvert.ekin2xy(data, getall=1, geterrors=True)
             return EkinDataset(x=x,y=y,active=a,xerrs=xerr,yerrs=yerr)
-        elif not type(dataset) is EkinDataset:
-            return False
+        elif not type(data) is EkinDataset:
+            return None
         else:
-            return dataset
+            return data
 
     def checkDatasets(self):
         """Check corrupt datasets and remove"""
@@ -444,7 +443,7 @@ class EkinProject(object):
 
     def prepare_data(self):
         """Prepare data for saving or return to another app ie. PEAT"""
-        import copy
+
         data = copy.deepcopy(self.data)
         data = self.data
         #print self.__meta_data__
@@ -618,7 +617,6 @@ class EkinProject(object):
         thisdata = self.data[dataset]
         #print 'models', models
         if models == None:
-            import copy
             models = copy.deepcopy(self.mode_definition[self.currentmode])
 
         fitdata, p = Fitting.findBestModel(thisdata, models, checkfunc=checkfunc, conv=conv,
@@ -694,10 +692,10 @@ class EkinProject(object):
            Note: errorbars are drawn +/- value supplied"""
 
         status = self.setPylab(size)
-        prms = Params(**kwargs)       
-        self.current = datasets        
+        prms = Params(**kwargs)
+        self.current = datasets
         shapes = Options.shapes
-        
+
         plt.rc('font', family=prms.font)
         plt.rc('font', size=prms.fontsize)
         plt.rc('text', usetex=prms.usetex)
@@ -708,7 +706,7 @@ class EkinProject(object):
             print 'sorry, install pylab..'
             return
         if figure != None:
-            fig = figure           
+            fig = figure
         else:
             fig = plt.figure(figsize=size, dpi=80)
         #fig.clf()
@@ -719,12 +717,12 @@ class EkinProject(object):
             plt.rc('font', size=9.0)
             if prms.title != None:
                 fig.suptitle(prms.title, fontsize=prms.fontsize)
-        else:           
+        else:
             if axis != None:
                 ax = axis
             else:
                 ax = fig.add_subplot(111)
-            ax.cla()      
+            ax.cla()
             self.ax = ax
 
         legendlines = []
@@ -757,15 +755,15 @@ class EkinProject(object):
 
         i=0
         cc=0
-        for name in datasets:            
+        for name in datasets:
             if cc >= len(prms.colors):
                 cc=0
             if prms.varyshapes == True:
                 if prms.markers != None and len(prms.markers)>cc:
                     prms.marker = prms.markers[cc]
                 else:
-                    prms.marker = shapes[cc]            
-            if plotoption == 2:                
+                    prms.marker = shapes[cc]
+            if plotoption == 2:
                 ax = fig.add_subplot(int(dim),int(cols),n)
                 ax.set_title(name, fontsize=prms.fontsize, fontweight='bold')
                 if cols<4:
@@ -785,7 +783,7 @@ class EkinProject(object):
             self.currydata = y
             if len(x) == 0:
                 continue
-            if prms.normalise == True:             
+            if prms.normalise == True:
                 self.mindata=min(y); self.maxdata=max(y)
                 y = normList(y, inputmin=self.mindata, inputmax=self.maxdata)
             if prms.graphtype == 'XY':
@@ -986,7 +984,7 @@ class EkinProject(object):
 
     def addProject(self, E, overwrite=False, label=''):
         """Combine another project with the current one, duplicates are renamed"""
-        import copy
+
         for d in E.datasets:
             edata = copy.deepcopy(E.getDataset(d))
             fitdata = E.getFitData(d)
@@ -1037,7 +1035,7 @@ class EkinProject(object):
 
     def exportDatasets(self, filename=None, format=None):
        """Export all datasets as csv
-            formatted as ..   """
+            formatted as x-y columns per dataset """
        if filename == None:
            return
        if os.path.splitext(filename) != '.csv':
@@ -1052,6 +1050,7 @@ class EkinProject(object):
            cw.writerows(sorted(zip(x,y)))
            cw.writerow('')
        return
+
 #
 # These methods are dataset based and could be handled by the ekindataset class
 #

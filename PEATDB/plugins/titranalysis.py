@@ -309,6 +309,11 @@ class NMRTitration(Plugin, GUI_help):
         DB.saveLabbooktoFile('titdb.labbook')
         return
 
+    def exportAll(self, DB, col=None):
+        t = TitrationAnalyser()
+        t.exportAll(DB, col)
+        return
+
 def main():
     """Run some analysis"""
     from optparse import OptionParser
@@ -319,7 +324,8 @@ def main():
                         help="Open a local db")
     parser.add_option("-e", "--ekinprj", dest="ekinprj",
                         help="Open an ekin project")
-    parser.add_option("-t", "--titdb", dest="titdb", action='store_true',
+    parser.add_option("-s", "--server", dest="server", help="field")
+    parser.add_option("-t", "--analysis", dest="analysis", action='store_true',
                        help="titr db analysis", default=False)
     parser.add_option("-r", "--refit", dest="refit", action='store_true',
                        help="refit specific ekin data", default=False)
@@ -330,6 +336,8 @@ def main():
     parser.add_option("-p", "--protein", dest="protein", help="protein")
     parser.add_option("-c", "--col", dest="col", help="field")
     parser.add_option("-a", "--atom", dest="atom", help="atom")
+    parser.add_option("-x", "--export", dest="export", action='store_true',
+                       help="export db", default=False)
     parser.add_option("-b", "--benchmark", dest="benchmark", action='store_true',
                        help="benchmark some stuff", default=False)
     parser.add_option("-g", "--gui", dest="gui", action='store_true',
@@ -338,6 +346,10 @@ def main():
     opts, remainder = parser.parse_args()
     if opts.file != None and os.path.exists(opts.file):
         app.loadDB(opts.file)
+    elif opts.server != None:
+        DB = PDatabase(server='localhost', username='guest',
+                       password='123', project='titration_db',
+                       port=8080)
 
     if opts.gui == True:
         app.main()
@@ -350,29 +362,31 @@ def main():
     except:
         yuncert=None
 
-    #some tit db funcs
-    if opts.titdb == True:
-        DB = PDatabase(server='localhost', username='guest',
-                       password='123', project='titration_db',
-                       port=8080)
+    if opts.ekinprj != None:
+        E = EkinProject()
+        E.openProject(opts.ekinprj)
+
+    #some tit db analysis
+    if opts.analysis == True and opts.server != None:
         complete = ['HEWL', 'Bovine Beta-Lactoglobulin',
                     'Plastocyanin (Anabaena variabilis)',
                     'Plastocyanin (Phormidium)',
                     'Glutaredoxin',
                     'Protein G B1','Xylanase (Bacillus subtilus)']
-        app.analyseTitDB(DB, opts.col)#, complete)
-        #app.addpKaTables(DB, complete)
-
-    if opts.ekinprj != None:
-        E = EkinProject()
-        E.openProject(opts.ekinprj)
+        if opts.col == None:
+            print 'provide a column'
+        else:
+            app.analyseTitDB(DB, opts.col)#, complete)
+            #app.addpKaTables(DB, complete)
 
     if opts.benchmark == True:
         app.benchmarkExpErr(DB)
-    elif opts.col!=None or E!=None:
+    elif opts.col != None or E != None:
         app.titDBUtils(DB, opts.col, opts.protein, a=opts.atom, E=E,
                         refit=opts.refit, addmeta=opts.addmeta,
                         getexperrs=opts.getexperrs, yuncert=yuncert)
+    elif opts.export == True:
+        app.exportAll(DB, col=opts.col)
 
 if __name__ == '__main__':
     main()

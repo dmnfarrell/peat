@@ -386,6 +386,52 @@ class TitrationAnalyser():
         print '</div>'
         return
 
+    def gettimestamp(self):
+        from time import gmtime, strftime
+        return strftime("%Y-%m-%d", gmtime())
+
+    def exportAll(self, DB, col=None):
+        """Export all data as text to a single zipped file"""
+
+        import shutil
+        path = os.path.join(os.getcwd(), 'DBexport')
+        if os.path.exists(path):
+            shutil.rmtree(path)
+        os.mkdir(path)
+        self.getProtNames(DB)
+        #print 'exporting..'
+        total=0
+        #if column not given we use all three
+        if col == None:
+            cols = ['1H NMR','15N NMR','13C NMR']
+        else:
+            cols = [col]
+        for col in cols:
+            colpath = os.path.join(path, col)
+            if not os.path.exists(colpath):
+                os.mkdir(colpath)
+            for prot in DB.getRecs():
+                if not DB[prot].has_key(col):
+                    continue
+                name = self.protnames[prot]
+                #print 'processing %s' %name
+                E = DB[prot][col]
+                filename = os.path.join(colpath, name.replace('/','_'))
+                E.exportDatasets(filename)
+
+        #zip everything into one file
+        import zipfile
+        zfname = 'titrdb_exported_'+self.gettimestamp()+'.zip'
+        zfname = os.path.join(os.getcwd(), zfname)
+        zf = zipfile.ZipFile(zfname, mode='w')
+        os.chdir(path)
+
+        for root, dirs, filenames in os.walk(path):
+            for fname in filenames:
+                relpath = os.path.basename(root) #path from current dir
+                fullname = os.path.join(relpath, fname)
+                zf.write(fullname)
+        return zfname
 
     def fitAll(self, DB, col, proteins=None, models=None, strictchecking=False):
         """Fit selected recs/col in DB using find best model"""
