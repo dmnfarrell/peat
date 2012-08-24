@@ -243,7 +243,7 @@ class titdbWeb(PEATWeb):
         print '</select>'
         print '</td></tr>'
         print '<td class="menu">'
-        print """<input type="text" name="words" size=22 maxlength=50 value="" class="btn"\
+        print """<input type="text" name="words" size=22 maxlength=50 value="" class="btn1"\
                 title="header=[Protein search] body=[Enter multiple names seperated by a space.\
                     This search is not case sensitive]"></td></tr>"""
 
@@ -251,11 +251,11 @@ class titdbWeb(PEATWeb):
         print '<tr><td class="menu">'
         print 'Residue: '
         print '<tr><td class="menu">'
-        print """<input type="text" name="residue" size=22 maxlength=40 value="" class="btn"\
+        print """<input type="text" name="residue" size=22 maxlength=40 value="" class="btn1"\
                  title="header=[Residue type] body=[Use three letter codes, e.g. GLU ASP LYS]"></td></tr>"""
         #pka search box
         print """<tr><td class="menu"> pKa range: <input type="text" name="pka" size=22 \
-                maxlength=30 value="" class="btn" title="header=[pKa range] body=[Enter a range of values using \
+                maxlength=30 value="" class="btn1" title="header=[pKa range] body=[Enter a range of values using \
                 this format: e.g. 5-6]"></td></tr>"""
 
         #nucleus search box
