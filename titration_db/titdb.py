@@ -81,10 +81,19 @@ class titdbWeb(PEATWeb):
         self.showHeader(menu=1)
 
         print '<div class="main">'
-        print '<h1><a>Welcome to the protein pH titration database.</h1></a>'
+        print '<right><img src="%s/intro_image.png" width=250 class="align-right"></a></right>' %self.imgdir
+        print '<h1><a>Welcome to the protein NMR pH titration database.</h1></a>'
+
+        print '<h3>NMR-monitored pH titration experiments are routinely used to measure\
+                site-specific protein pKa values. Accurate experimental pKa values are\
+                essential in dissecting enzyme catalysis, in studying the pH-dependence of protein\
+                stability and ligand binding and ultimately in understanding electrostatic effects in proteins.\
+                It is therefore important to retain the raw NMR spectroscopic data to allow for\
+                possible reinterpretation.'
         print '<br>'
-        print '<big><a>This web interface provides access to raw NMR titration curves obtained from published sources \
-                and is designed to provide the following services:</a>'
+        print 'This web interface provides access to a database of experimental NMR pH titration\
+                curves obtained largely from published sources.</h3>'
+        print '<a>It is designed to provide the following services:</a>'
         print '<UL>\
                 <LI>Browse contents of the DB in one table\
                 <LI>Search for curves based on residue name, pka values, residue type etc.\
@@ -252,7 +261,8 @@ class titdbWeb(PEATWeb):
         print 'Residue: '
         print '<tr><td class="menu">'
         print """<input type="text" name="residue" size=22 maxlength=40 value="" class="btn1"\
-                 title="header=[Residue type] body=[Use three letter codes, e.g. GLU ASP LYS]"></td></tr>"""
+                 title="header=[Residue type] body=[Use three letter codes,\
+                 separated by a space e.g. GLU ASP LYS]"></td></tr>"""
         #pka search box
         print """<tr><td class="menu"> pKa range: <input type="text" name="pka" size=22 \
                 maxlength=30 value="" class="btn1" title="header=[pKa range] body=[Enter a range of values using \
@@ -323,18 +333,18 @@ class titdbWeb(PEATWeb):
             print "<h2>%s: Distribution of &Delta;&delta; for fitted pKa values</h2>" %col
             img1 = t.analysepKas(p, silent=True, prefix=col, path=self.imagepath)
             #t.makepKasTable(p)
-            print '<center><img src="%s/%s" align=center width=800 border="1"></center>' %(self.plotsdir, img1)
+            print '<img src="%s/%s" align=center width=800 class="plot">' %(self.plotsdir, img1)
             print '</div>'
             sys.stdout.flush()
 
         #compare nuclei
-        img2 = t.compareNuclei(DB, '15N NMR', '1H NMR', titratable=False, silent=True, path=self.imagepath)
+        img2, img3 = t.compareNuclei(DB, '15N NMR', '1H NMR', titratable=False, silent=True, path=self.imagepath)
         print '<p>Below is an analysis of the correspondence between fitted pKas for 1H and 15N \
                 where they are available for the same residue in the same protein. This is the same\
                 plot as figure 4 in the original paper updated for the current dataset.\
                 The plots are divided into reliable and other pKas for comparison.</p>'
         print '<div>'
-        print '<center><img src="%s/%s" align=center width=600 border="1"></center>' %(self.plotsdir, img2)
+        print '<center><img src="%s/%s" align=center width=600 class="plot"></center>' %(self.plotsdir, img2)
         print '</div>'
         self.footer()
         return
