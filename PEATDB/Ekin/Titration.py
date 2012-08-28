@@ -263,30 +263,6 @@ class TitrationAnalyser():
         """Stats for titration datasets - takes a dict of ekindata, with the nmr
            column name as the key"""
 
-        #stats on fits first
-        stats={}
-
-        for i in ekindata:
-            s = self.getFitStats(ekindata[i])
-            stats[i] = s
-            modls=s.keys()
-
-        print '<div>'
-        print '<table id="mytable" width=60%>'
-        print '<th></th>'
-        for m in modls:
-            print '<th>%s</th>' %m
-        for x in stats:
-            print '<tr><td>%s</td>' %x
-            for m in modls:
-                print '<td>%s</td>' %stats[x][m]
-            #print '<td>%s</td>' %total
-            print '</tr>'
-        print '</table>'
-        #plot bar chart of stats
-
-        print '</div>'
-
 
         totaldatasets=0
         totalphpoints=[]
@@ -333,8 +309,7 @@ class TitrationAnalyser():
                     except:
                         pass
 
-
-        print '<div id="left">'
+        print '<div>'
         print '<h3>Global statistics for current data:</h3>'
         print '<a>'
         print 'total no of datasets: %s <br>' %totaldatasets
@@ -366,11 +341,35 @@ class TitrationAnalyser():
         print '</a>'
         print '</div>'
 
+        #stats on fits
+        stats={}
+
+        for i in ekindata:
+            s = self.getFitStats(ekindata[i])
+            stats[i] = s
+            modls=s.keys()
+
+        print '<div id="right">'
+        print '<h3>Model fitting:</h3>'
+        print '<table id="mytable" width=60%>'
+        print '<th></th>'
+        for m in modls:
+            print '<th>%s</th>' %m
+        for x in stats:
+            print '<tr><td>%s</td>' %x
+            for m in modls:
+                print '<td>%s</td>' %stats[x][m]
+            #print '<td>%s</td>' %total
+            print '</tr>'
+        print '</table>'
+        print '</div>'
+
+        #breakdown
         print '<div id="right">'
         print '<table id="summary" width=60% align=center cellspacing=0>'
         print '<h3>Breakdown by Residue:</h3>'
 
-        print '<th>%s</th> <th>%s</th> <th>(%s)</th>' %('res','no.','% total')
+        print '<th>%s</th> <th>%s</th> <th>(%s)</th>' %('residue','curves','% total')
         for r in residuestats:
             print '<tr>'
             if Utils.getDictSum(residuestats) == 0:
