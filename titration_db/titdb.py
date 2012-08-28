@@ -84,7 +84,7 @@ class titdbWeb(PEATWeb):
         print '<right><img src="%s/intro_image.png" width=250 class="align-right"></a></right>' %self.imgdir
         print '<h1><a>Welcome to the protein NMR pH titration database.</h1></a>'
 
-        print '<h3>NMR-monitored pH titration experiments are routinely used to measure\
+        print 'NMR-monitored pH titration experiments are routinely used to measure\
                 site-specific protein pKa values. Accurate experimental pKa values are\
                 essential in dissecting enzyme catalysis, in studying the pH-dependence of protein\
                 stability and ligand binding and ultimately in understanding electrostatic effects in proteins.\
@@ -92,7 +92,8 @@ class titdbWeb(PEATWeb):
                 possible reinterpretation.'
         print '<br>'
         print 'This web interface provides access to a database of experimental NMR pH titration\
-                curves obtained largely from published sources.<br>'
+                curves obtained largely from published sources.'
+        print '<br><br>'
         print '<a>It is designed to provide the following services:'
         print '<UL>\
                 <LI>Browse contents of the DB in one table\
@@ -106,7 +107,6 @@ class titdbWeb(PEATWeb):
                  us with their data. If you wish to submit data to be included here, please send the \
                  tabulated data in any convenient text format (see help page) by e-mail to us at \
                  <a href="mailto:titrationdb@gmail.com">titrationdb@gmail.com</a><p>'
-        print '</h3><br>'
 
         print '<center><img src="%s/banner_icon.png"></center>' %self.imgdir
         print '</div>'
@@ -143,9 +143,11 @@ class titdbWeb(PEATWeb):
         """Show page header"""
 
         imgdir = self.imgdir
-        html_header = 'Content-Type: text/html; charset=utf-8\n'
-        html_header += '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/loose.dtd">\n\n'
-        print html_header
+        #html_header = 'Content-Type: text/html; charset=utf-8\n'
+        #html_header += '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/loose.dtd">\n\n'
+        print "Content-type: text/html; charset=utf-8\n"
+        print '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">'
+
         print '<html>'
         print '<head>'
 
@@ -306,7 +308,9 @@ class titdbWeb(PEATWeb):
         sys.stdout.flush()
         t = TitrationAnalyser()
         ekindata = t.getEkinDicts(DB)
+        print '<div class="main">'
         t.dotitDBStats(ekindata)
+        print '</div>'
         return
 
     def showAnalysis(self):
