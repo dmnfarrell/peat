@@ -92,8 +92,8 @@ class titdbWeb(PEATWeb):
                 possible reinterpretation.'
         print '<br>'
         print 'This web interface provides access to a database of experimental NMR pH titration\
-                curves obtained largely from published sources.</h3>'
-        print '<a>It is designed to provide the following services:</a>'
+                curves obtained largely from published sources.<br>'
+        print '<a>It is designed to provide the following services:'
         print '<UL>\
                 <LI>Browse contents of the DB in one table\
                 <LI>Search for curves based on residue name, pka values, residue type etc.\
@@ -102,10 +102,13 @@ class titdbWeb(PEATWeb):
                 <LI>Download the raw data as csv/text files and refit/analyse\
                 </UL>'
 
-        print '<a>We are continually trying to expand the dataset and rely on researchers to voluntarily provide \
-                  us with their data. If you wish to submit data to be included here, please send the \
-                 tabulated data in any convenient text format (see help page) by e-mail to us at</a> \
-                <a href="mailto:titrationdb@gmail.com">titrationdb@gmail.com</a><p>'
+        print 'We are continually trying to expand the dataset and rely on researchers to voluntarily provide \
+                 us with their data. If you wish to submit data to be included here, please send the \
+                 tabulated data in any convenient text format (see help page) by e-mail to us at \
+                 <a href="mailto:titrationdb@gmail.com">titrationdb@gmail.com</a><p>'
+        print '</h3><br>'
+
+        print '<center><img src="%s/banner_icon.png"></center>' %self.imgdir
         print '</div>'
         self.footer()
         return
@@ -187,7 +190,7 @@ class titdbWeb(PEATWeb):
         print '<table id="menu" valign=top align=left>'
 
         print '<td class="menu"><b><img src="%s/titDB_logo.png" width="230"></b></td>' %self.imgdir
-        print '<tr><th><b>Menu</b></th>'
+        #print '<tr><th><b>Menu</b></th>'
 
         print '<form action="%s/main.cgi" METHOD="POST" ENCTYPE="multipart/form-data">' %bindir
         self.write_sessionkey('show_intro')
@@ -240,7 +243,7 @@ class titdbWeb(PEATWeb):
         print
 
         searchmessage = 'Enter your search here'
-        print '<tr><td class="menu"><a><b>SEARCH</a></td></tr>'
+        print '<tr><td class="menu"><a>SEARCH OPTIONS</td><a></tr>'
         print '<form action="%s/main.cgi" METHOD="POST" ENCTYPE="multipart/form-data">' %bindir
         self.write_sessionkey('search')
         #protein search box
@@ -291,8 +294,6 @@ class titdbWeb(PEATWeb):
         print '<tr><td class="menu"><input type="submit" value="Search Now" class="btn"></td></tr>'
         print '</form>'
 
-        print '<tr><td class="menu"></tr>'
-        print '<td class="menu"><b><img src="%s/banner_icon.png" ></b></td>' %self.imgdir
         print '</table>'
         print '</div>'
         print '<div id="content">'
