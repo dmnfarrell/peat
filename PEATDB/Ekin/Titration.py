@@ -1143,10 +1143,10 @@ class TitrationAnalyser():
         if path==None:
             path = os.getcwd()
         fname = 'comparenuclei.png'
-        f.savefig(os.path.join(path,fname), dpi=300)
+        f.savefig(os.path.join(path,fname), dpi=100)
 
-        '''f=pylab.figure(figsize=(10,10))
-        ax=f.add_subplot(111)
+        f1=pylab.figure(figsize=(10,10))
+        ax=f1.add_subplot(111)
         i=0
         leglines = [];series=[]
         for r in pkasbyres1.keys():
@@ -1166,9 +1166,10 @@ class TitrationAnalyser():
                              numpoints=1,loc='lower right',
                              prop=FontProperties(size="small"))
         leg.draw_frame(False)
-        f.savefig('comparenuclei_relbyres.png', dpi=300)'''
+        fname1 = 'comparenuclei_relbyres.png'
+        f1.savefig(os.path.join(path,fname1), dpi=150)
         #pylab.show()
-        return fname
+        return fname, fname1
 
     def compareExtractedpKas(cls, DB, col, prot1, prot2):
         """Compare extracted pKas across similar proteins and plot correlations per res"""
