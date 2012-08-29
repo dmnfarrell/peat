@@ -324,6 +324,12 @@ class titdbWeb(PEATWeb):
         print '<div>'
         print '<center><img src="%s/%s" align=center width=600 class="plot"></center>' %(self.plotsdir, img2)
         print '</div>'
+        print '<p>The same plot as above broken down by residue type and shown only for titratable\
+                residues.</p>'
+        print '<div>'
+        print '<center><img src="%s/%s" align=center width=600 class="plot"></center>' %(self.plotsdir, img3)
+        print '</div>'
+
         self.footer()
         return
 
