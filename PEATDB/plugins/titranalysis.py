@@ -239,8 +239,8 @@ class NMRTitration(Plugin, GUI_help):
         nuclnames = {'1H NMR':'H','15N NMR':'N'}
         t = TitrationAnalyser()
         #extract reliable pkas from selected proteins
-        p = t.extractpKas(DB, col, names=names, titratable=False, reliable=False, minspan=0.06)
-        t.analysepKas(p)
+        #p = t.extractpKas(DB, col, names=names, titratable=False, reliable=False, minspan=0.06)
+        #t.analysepKas(p)
         t.compareNuclei(DB, '15N NMR', '1H NMR', names=names, titratable=True)
 
         return
@@ -379,7 +379,7 @@ def main():
             app.analyseTitDB(DB, opts.col)#, complete)
             #app.addpKaTables(DB, complete)
 
-    if opts.benchmark == True:
+    elif opts.benchmark == True:
         app.benchmarkExpErr(DB)
     elif opts.col != None or E != None:
         app.titDBUtils(DB, opts.col, opts.protein, a=opts.atom, E=E,
