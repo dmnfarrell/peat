@@ -184,65 +184,38 @@ class titdbWeb(PEATWeb):
         print '</body>'
         return
 
+    def showFormButton(self, action, label, helptext=None):
+        """Add a button"""
+
+        bindir = self.bindir
+        print '<form action="%s/main.cgi" METHOD="POST" ENCTYPE="multipart/form-data">'  %bindir
+        self.write_sessionkey(action)
+        print '<tr><td class="menu">'
+        print '<input type=submit value="%s" name=submit class="btn"' %label
+        if helptext != None:
+            print 'title="header=[%s] body=[%s]"></td></tr>' %(label,helptext)
+        else:
+            print '></td></tr>'
+        print '</form>'
+        print
+        return
+
     def menu(self):
         """Print the menu"""
-        #print bindir
+
         bindir = self.bindir
         print '<div class="menu">'
         print '<table id="menu" valign=top align=left>'
-
         print '<td class="menu"><b><img src="%s/titDB_logo.png" width="230"></b></td>' %self.imgdir
-        #print '<tr><th><b>Menu</b></th>'
-
-        print '<form action="%s/main.cgi" METHOD="POST" ENCTYPE="multipart/form-data">' %bindir
-        self.write_sessionkey('show_intro')
-        print '<tr><td class="menu">\
-            <input type=submit value="Home" name=submit size=20 class="btn"></td></tr>'
-        print '</form>'
-        print
-        print '<form action="%s/main.cgi" METHOD="POST" ENCTYPE="multipart/form-data">'  %bindir
-        self.write_sessionkey('show_all')
-        print '<tr><td class="menu">'
-        print '<input type=submit value="Browse Records" name=submit class="btn"'
-        print """title="header=[Browse Database] body=[Browse all records in the DB]"></td></tr>"""
-        print '</form>'
-
-        print
-        print '<form action="%s/main.cgi" METHOD="POST" ENCTYPE="multipart/form-data">' %bindir
-        self.write_sessionkey('summary')
-        print '<tr><td class="menu">\
-            <input type=submit value="Summary" name=submit class="btn"></td></tr>'
-        print '</form>'
-
-        print
-        print '<form action="%s/main.cgi" METHOD="POST" ENCTYPE="multipart/form-data">' %bindir
-        self.write_sessionkey('analysis')
-        print '<tr><td class="menu">\
-            <input type=submit value="Analysis" name=submit class="btn"></td></tr>'
-        print '</form>'
-
-        print '<form action="%s/main.cgi" METHOD="POST" ENCTYPE="multipart/form-data">' %bindir
-        self.write_sessionkey('downloads')
-        print '<tr><td class="menu">\
-            <input type=submit value="Downloads" name=submit class="btn"></td></tr>'
-        print '</form>'
         print
 
-        print '<form action="%s/main.cgi" METHOD="POST" ENCTYPE="multipart/form-data">' %bindir
-        self.write_sessionkey('selectpKD')
-        print """<tr><td class="menu">\
-             <input type=submit value="pKD" name=submit class="btn"\
-             title="header=[Refresh] body=[Cross reference curves with calculated data from pKD server<br>\
-             <img src=http://enzyme.ucd.ie/pKD/slide8.bmp width=150>]"></td></tr>"""
-        print '</form>'
-        print
-
-        print '<form action="%s/main.cgi" METHOD="POST" ENCTYPE="multipart/form-data">' %bindir
-        self.write_sessionkey('show_help')
-        print '<tr><td class="menu">\
-            <input type=submit value="Help" name=submit class="btn"></td></tr>'
-        print '</form>'
-        print
+        self.showFormButton('show_intro', 'Home')
+        self.showFormButton('show_all', 'Browse Records', 'Browse all records in the DB')
+        self.showFormButton('summary', 'Summary','Summary statistics')
+        self.showFormButton('analysis', 'Analysis')
+        self.showFormButton('downloads', 'Downloads', 'Export data in text format')
+        self.showFormButton('selectpKD', 'pKD','Cross reference curves with calculated data from pKD server')
+        self.showFormButton('show_help', 'Help')
 
         searchmessage = 'Enter your search here'
         print '<tr><td class="menu"><a>SEARCH OPTIONS</td><a></tr>'
