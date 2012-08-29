@@ -1008,6 +1008,7 @@ class TitrationAnalyser():
             return None
         model1 = fitdata1['model']
         model2 = fitdata2['model']
+
         #if model1 != model2:
         #    print 'different models'
             #return None
@@ -1049,15 +1050,14 @@ class TitrationAnalyser():
 
     def compareAllpKas(cls, E1, E2, titratable=False, exclude=None, errcutoff=1e2):
         """Compare all pKas from 2 ekin projects"""
-        relpkas1=[]
-        relpkas2=[]
-        relspans1=[]
-        relspans2=[]
-        otherpkas1=[]
-        otherpkas2=[]
+
+        relpkas1=[]; relpkas2=[]
+        relspans1=[]; relspans2=[]
+        otherpkas1=[]; otherpkas2=[]
         errs1=[]
         errs2=[]
         names=[]
+        residues=[]
 
         for d in E1.datasets:
             if exclude!=None and d in exclude: continue
@@ -1074,13 +1074,15 @@ class TitrationAnalyser():
                 errs1.append(err1)
                 errs2.append(err2)
                 names.append(d)
+                res = E1.getMetaData(d)['residue']
+                residues.append(res)
             else:
                 otherpkas1.append(p1val)
                 otherpkas2.append(p2val)
-
+        #print names,residues
         #print 'reliable pkas matched:', len(relpkas1)
         #print 'others:', len(otherpkas1)
-        return relpkas1, relpkas2, otherpkas1, otherpkas2, relspans1, relspans2, errs1, errs2, names
+        return relpkas1, relpkas2, otherpkas1, otherpkas2, relspans1, relspans2, errs1, errs2, residues
 
     def compareNuclei(cls, DB, col1, col2, names=None, titratable=True,
                         silent=False, path=None):
@@ -1118,12 +1120,19 @@ class TitrationAnalyser():
 
             if X == None:
                 continue
-            rp1, rp2, op1, op2, rsp1, rsp2, errs1, errs2, n = X
+            rp1, rp2, op1, op2, rsp1, rsp2, errs1, errs2, resnames = X
             relpkas1.extend(rp1)
             relpkas2.extend(rp2)
             otherpkas1.extend(op1)
             otherpkas2.extend(op2)
-            #names.extend(n)
+
+            for vals in zip(resnames,rp1,rp2):
+                r,a,b=vals
+                #print r,a,b
+                if r in cls.titratable:
+                    pkasbyres1[r].append(a)
+                    pkasbyres2[r].append(b)
+
         if silent==False:
             print 'reliable pkas matched:', len(relpkas1)
             print 'others:', len(otherpkas1)
@@ -1144,7 +1153,7 @@ class TitrationAnalyser():
         fname = 'comparenuclei.png'
         f.savefig(os.path.join(path,fname), dpi=100)
 
-        f1=pylab.figure(figsize=(10,10))
+        f1=pylab.figure(figsize=(8,8))
         ax=f1.add_subplot(111)
         i=0
         leglines = [];series=[]
@@ -1155,7 +1164,7 @@ class TitrationAnalyser():
                 i=0
             cls.doXYPlot(ax, pkasbyres1[r],pkasbyres2[r], symbol=cls.shapes[i], color=cls.pylabcolors[i],
                             markersize=40,
-                            title='1H vs 15N: reliable pKa values', xlabel='15N', ylabel='1H')
+                            title='1H vs 15N: reliable pKa values by residue', xlabel='15N', ylabel='1H')
             l = pylab.Line2D(range(10), range(10), color=cls.pylabcolors[i], alpha=0.7,
                                 marker=cls.shapes[i])
             leglines.append(l)
@@ -1166,7 +1175,7 @@ class TitrationAnalyser():
                              prop=FontProperties(size="small"))
         leg.draw_frame(False)
         fname1 = 'comparenuclei_relbyres.png'
-        f1.savefig(os.path.join(path,fname1), dpi=150)
+        f1.savefig(os.path.join(path,fname1), dpi=100)
         #pylab.show()
         return fname, fname1
 
