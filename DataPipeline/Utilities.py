@@ -139,10 +139,10 @@ def createCDData(fname, names, tm, noise=0.2):
     cw = csv.writer(open(fname,'w'))
     cw.writerow(['temp']+names)
     for x in range(250,350,1):
-        val = 10/(1+exp((tm-x)/2))        
+        val = 10/(1+exp((tm-x)/2))
         vals = [round(val+random.normalvariate(0,noise),2) for j in range(len(names))]
         vals.insert(0,x)
-        cw.writerow(vals)        
+        cw.writerow(vals)
     return
 
 def createSimulatedSpectralData(fname, names, peaks=10, noise=0.08):
@@ -154,9 +154,9 @@ def createSimulatedSpectralData(fname, names, peaks=10, noise=0.08):
     offset=100
     n=800
     pheight = offset*2
-    percnoise = offset*noise    
+    percnoise = offset*noise
     baselinefunc = lambda x: offset + pheight*pow(.98/x,0.2)
-    
+
     def gaussianpeaks(x, peaks):
         #add random gaussian-shaped peaks as signals
         res=0
@@ -191,7 +191,7 @@ def createSingleFileData(path='testfiles', clear=False):
        one per xy datasew with multiple copies for each label representing ph values"""
 
     createDirectory(path)
-    names = Utilities.createRandomStrings(8,6)
+    names = createRandomStrings(8,6)
     reps = range(1,2)
     for name in names:
         for i in np.arange(2,10,1.0):
@@ -206,7 +206,7 @@ def createGroupedData(path='testfiles', clear=False, names=None):
 
     createDirectory(path)
     if names == None:
-        names = Utilities.createRandomStrings(3,6)
+        names = createRandomStrings(3,6)
     for i in np.arange(2,10,1.0):
         val = 1/(1+exp((i-5)/1.2))
         fname = os.path.join(path,'ph_'+str(i)+'__xx_.txt')

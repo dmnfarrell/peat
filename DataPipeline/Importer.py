@@ -85,6 +85,8 @@ class BaseImporter(object):
             if self.ignorecomments==True and lines[row].startswith('#'):
                 continue
             rowdata = string.strip(lines[row]).split(self.delimeter)
+            if len(rowdata) < col+1:
+                continue
             vals.append(rowdata[col])
         if grouped == False:
             return vals
@@ -96,6 +98,15 @@ class BaseImporter(object):
 
     def getColumnHeader(self, lines, grouped=False):
         """Column headers are taken from relevant row"""
+
+        if self.colheaderlabels != '':
+            #if a column header provided in conf file
+            #pad with xdata col and return it
+            #print self.colheaderlabels
+            colheader = list(self.colheaderlabels.split(','))
+            colheader.insert(0,'x')
+            return colheader
+
         if self.colheader == '':
             row = self.rowstart
         else:
@@ -111,7 +122,7 @@ class BaseImporter(object):
         if self.colheader == '':
             col = self.colstart
         else:
-            col = self.rowheader
+            col = 0
         return self.getColumn(lines, col, grouped)
 
     def groupList(self, n, l, padvalue=None):
@@ -204,20 +215,26 @@ class DatabyColImporter(BaseImporter):
         if self.rowend == 0:
             self.rowend=len(lines)
         xdata = self.getRowHeader(lines,grouped=True)
+        #print xdata
         header = self.getColumnHeader(lines)
         if self.colend == 0:
             self.colend = len(header)
         if xdata == None:
             return
-
+        #print header
         for col in range(self.colstart+1, self.colend):
+            #print col, header
             coldata = self.getColumn(lines, col, grouped=True)
             #print xdata, coldata
             if coldata == None: continue
             for xd,yd in zip(xdata,coldata):
                 if len(xd)<=1 or len(yd)<=1: continue
-                name = yd[0]
-                x,y = self.getXYValues(xd[1:],yd[1:])
+                if self.colheaderlabels == '':
+                    name = yd[0]
+                else:
+                    name = header[col]
+
+                x,y = self.getXYValues(xd,yd)
                 data[name] = [x,y]
         return data
 
@@ -233,19 +250,19 @@ class DatabyRowImporter(BaseImporter):
         return
 
     def doImport(self, lines):
-        
-        data = {}        
+
+        data = {}
         self.guessRowStart(lines)
         xdata = self.getColumnHeader(lines,grouped=True)
         if xdata == None:
             return
         if self.rowend == 0:
             self.rowend=len(lines)
-            
+
         for row in range(self.rowstart+1, self.rowend):
             if row>=len(lines):
                 break
-            rowdata = self.getRow(lines,row,grouped=True)            
+            rowdata = self.getRow(lines,row,grouped=True)
             #print xdata, rowdata
             if rowdata == None: continue
             for xd,yd in zip(xdata,rowdata):

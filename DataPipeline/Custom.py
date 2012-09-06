@@ -54,8 +54,8 @@ class KineticsDataImporter(BaseImporter):
 
         data = {}
         #assumes the column header has labels
-        names = self.colheader.split(',')
-        rowlabels = self.rowheader.split(',')
+        names = self.colheaderlabels.split(',')
+        rowlabels = self.rowheaderlabels.split(',')
 
         if self.rowend == 0:
             self.rowend=len(lines)-12

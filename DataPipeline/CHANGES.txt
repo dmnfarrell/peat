@@ -3,6 +3,17 @@ CHANGES
 =======
 
 ------
+1.2
+------
+
+* Added the use of rowheaderlabels and colheaderlabels to specify header manually
+* New extension option to allow file extension filtering of inputs
+* New groupbyfield option allows grouping of imported data by column/row labels
+* Can now normalise plots in previewer
+* Unittests added to cover all tests in Testing.py
+* Added kinetics data to testfiles folder
+
+------
 1.1
 ------
 

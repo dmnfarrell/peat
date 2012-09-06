@@ -71,17 +71,18 @@ class Pipeline(object):
         defaults = {'base': [('format', 'databyrow'), ('rowstart', 0), ('colstart', 0), ('rowend', 0),
                         ('colend', 0), ('colheaderstart', 0),('rowheaderstart', 0),
                         ('rowheader', ''), ('colheader', ''),
+                        ('colheaderlabels', ''), ('rowheaderlabels', ''),
                         ('rowrepeat', 0), ('colrepeat', 0), ('delimeter', ','),
                         ('workingdir', wdir), ('functionsconf',functionsconf),
                         ('ignorecomments', 1),
                         ('decimalsymbol', '.'), ('preprocess',''),
-                        ('xformat',''),('yformat','')],
+                        ('xformat',''), ('yformat',''), ('groupbyfields', 0)],
                     'files': [('groupbyname', 0), ('parsenamesindex', 0),
-                                ('replicates',0)],
+                              ('replicates',0), ('extension','.txt')],
                     'models': [('model1', '')], 'variables': [('variable1', '')],
                     'functions':[('function1','')],
                     'excel': [('sheet', 0), ('numsheets', 1)],
-                    'plotting': [('saveplots', 0), ('fontsize',9),                                    
+                    'plotting': [('saveplots', 0), ('fontsize',9),
                             ('normalise', 0), ('grayscale', 0), ('alpha',0.8),
                             ('font','sans-serif'), ('markersize',25), ('linewidth',1),
                             ('showerrorbars',0), ('dpi', 100), ('marker','o'),
@@ -169,17 +170,20 @@ class Pipeline(object):
         return
 
     def loadModels(self):
-        print self.modelsfile
+        #print self.modelsfile
         if self.modelsfile != '':
             try:
                 Fitting.loadModelsFile(self.modelsfile)
             except:
                 pass
-        print Fitting.currentmodels.keys()
+        #print Fitting.currentmodels.keys()
         return
 
     def openRaw(self, filename=None, callback=None):
         """Open raw file, display preview and get some info about them"""
+
+        if not os.path.exists(filename):
+            return None
 
         if os.path.splitext(filename)[1] == '.xls':
             lines = self.openExcel(filename)
@@ -277,7 +281,7 @@ class Pipeline(object):
 
     def doProcessingStep(self, data, fname):
         """Apply a pre-defined processing step to the data"""
-       
+
         X = Processor(self.functionsconf)
         names = [i[1] for i in self.functions]
         for n in names:
@@ -286,10 +290,10 @@ class Pipeline(object):
                 return data
         #user may want to see raw data before processing, so we plot here
         if self.saveplots == 1:
-            Er = self.getEkinProject(data)            
+            Er = self.getEkinProject(data)
         data = X.doFunctions(names, data)
         if self.saveplots == 1:
-            Em = self.getEkinProject(data)      
+            Em = self.getEkinProject(data)
             Er.addProject(Em,label='proc')
             Er.saveProject(fname+'_processed')
             self.saveEkinPlotstoImages(Er, fname+'_processed',groupbylabel=True)
@@ -303,28 +307,31 @@ class Pipeline(object):
         self.prepareData()
         print 'processing files in queue..'
 
-        if self.groupbyname == 1:
-            labels = self.parseFileNames(self.queue, ind=self.parsenamesindex)
-        else:
-            labels = self.queue
+        #try to parse filenames
+        labels = self.parseFileNames(self.queue, ind=self.parsenamesindex)
 
         self.labels = labels
         imported = {}   #raw data
         results = {}    #fitted data
 
-        #print 'queue'
         #print self.queue
         #print filelabels
 
         for key in self.queue:
             filename = self.queue[key]
             lines = self.openRaw(filename)
+            if lines == None:
+                continue
             data = self.doImport(lines)
             imported[key] = data
 
         #try to average replicates here before we process
         if self.replicates == 1:
             imported = self.handleReplicates(imported)
+
+        #re-arrange the imported dict if we want to group our output per field
+        if self.groupbyfields == 1:
+            imported = self.groupDictbySecondaryKey(imported, labels)
 
         total = len(imported)
         c=0.0
@@ -349,6 +356,7 @@ class Pipeline(object):
             #if we have models to fit this means we might need to propagate fit data
             if self.model1 != '':
                 Em = EkinProject()
+                #grouping by file labels handled here
                 if self.groupbyname == 1:
                     #we don't pass the last model if it has to be
                     #reserved for a final round of fitting from the files dict
@@ -362,12 +370,12 @@ class Pipeline(object):
             else:
                  #if no fitting we just put the data in ekin
                 Em = self.getEkinProject(data)
-                results = data
+                results[label] = data
+
             Em.saveProject(fname)
-            Em.exportDatasets(fname)
+            Em.exportDatasets(fname, append=True)
             if self.model1 != '':
                 self.saveFitstoCSV(Em, fname)
-
             if self.saveplots == 1:
                 self.saveEkinPlotstoImages(Em, fname)
             c+=1.0
@@ -376,7 +384,6 @@ class Pipeline(object):
 
         #if grouped by file names then we process that here from results
         if self.groupbyname == 1:
-            #print results.keys()
             results = self.extractSecondaryKeysFromDict(results)
             Em = EkinProject()
             E,fits = self.processFits(rawdata=results, Em=Em)
@@ -401,6 +408,7 @@ class Pipeline(object):
             returns: final set of fits"""
 
         nesting = self.getDictNesting(rawdata)
+        #print rawdata
         if models == None:
             models = self.models
             variables = self.variables
@@ -426,7 +434,7 @@ class Pipeline(object):
         #print nesting,currmodel,currvariable,parentkey
 
         if nesting == 0:
-            #final level of nesting, we just fit
+            #bottom level of nesting, we just fit
             xerror = float(self.xerror); yerror = float(self.yerror)
             E = self.getEkinProject(rawdata, xerror=xerror, yerror=yerror)
             E,fit = self.getFits(E, currmodel, currvariable, str(parentkey))
@@ -440,7 +448,7 @@ class Pipeline(object):
                     lbl = str(l)+'_'+str(parentkey)
                 else:
                     lbl = l
-                #now we pass each child node to the same function
+                #now we pass each child node recursively
                 E,fit = self.processFits(rawdata[l], ind=ind-1, parentkey=lbl, Em=Em)
                 fitdata[l] = fit
             E = self.getEkinProject(fitdata)
@@ -545,9 +553,12 @@ class Pipeline(object):
         labels = {}
         for f in filenames:
             bname = os.path.basename(f)
-            l = re.findall("([0-9.]*[0-9]+)", bname)[ind]
-            labels[f] = l
-            print ind, f, labels[f]
+            try:
+                l = re.findall("([0-9.]*[0-9]+)", bname)[ind]
+                labels[f] = l
+            except:
+                labels[f] = f
+            #print ind, f, labels[f]
         return labels
 
     def parseString(self, filename):
@@ -555,10 +566,11 @@ class Pipeline(object):
 
         return
 
-    def addFolder(self, path, ext='.txt'):
+    def addFolder(self, path):
         """Add a folder to the queue"""
 
         D = {}
+        ext = self.extension
         #print os.path.basename(path), os.path.normpath(path)
         for root, dirs, files in os.walk(path):
             for d in dirs:
@@ -566,14 +578,12 @@ class Pipeline(object):
                     dirs.remove(d)
             for f in files:
                 fname = os.path.join(root,f)
-                #absname = os.path.abspath(fname)
-                if ext in os.path.splitext(fname)[1]:
+                if ext in os.path.splitext(fname)[1] or ext == '':
                     #print root,fname
                     label = os.path.relpath(fname,  os.path.normpath(path))
                     label = label.replace(os.path.sep,'_')
                     #print label
                     D[label] = fname
-        #self.addtoQueue(D.values())
         self.queue = D
         return D
 
@@ -593,7 +603,7 @@ class Pipeline(object):
         #print self.plotting
         for k in opts:
             if k=='markers':
-                opts[k]=list(opts[k].split(','))                
+                opts[k]=list(opts[k].split(','))
             else:
                 try:
                     opts[k] = eval(opts[k])
@@ -603,17 +613,17 @@ class Pipeline(object):
 
     def saveEkinPlotstoImages(self, E, filename, groupbylabel=False):
         """Save the ekin plots to png images
-           groupbylabel allows commonly labelled datasets 
+           groupbylabel allows commonly labelled datasets
            to be overlayed - useful for viewing processing results"""
         title = os.path.basename(filename)
         filename = os.path.join(self.workingdir, filename)
         filename = filename + '.png'
         #limit to 30 plots per image
         dsets = E.datasets
-        if len(dsets) > 30: 
+        if len(dsets) > 30:
             dsets = E.datasets[:30]
         plotopts = self.getPlotOptions()
-        #the following functionality should be integrated into ekin plotter    
+        #the following functionality should be integrated into ekin plotter
         if groupbylabel == True:
             import itertools
             import pylab as plt
@@ -628,7 +638,7 @@ class Pipeline(object):
             cols, dim = E.getGeometry(groups, 0)
             c=1
             for g in groups:
-                ax=fig.add_subplot(cols,dim,c)                            
+                ax=fig.add_subplot(cols,dim,c)
                 E.plotDatasets(g,figure=fig,axis=ax,plotoption=3,
                                 varyshapes=1,**plotopts)
                 c+=1
@@ -678,6 +688,27 @@ class Pipeline(object):
                 E.insertDataset(ek, d)
                 #print ek.errors
         return E
+
+    @classmethod
+    def groupDictbySecondaryKey(self, data, labels, sep='__'):
+        """Re-arrange a dict of dicts by each records secondary keys"""
+
+        newdata = {}
+        if not type(data) is types.DictType:
+            return data
+        key1 = data.keys()[0]
+        if type(data[key1]) is types.DictType:
+            fields = data[key1].keys()
+        for f in fields:
+            newdata[f] = {}
+        for f in fields:
+            for d in data.keys():
+                #print d
+                lbl = labels[d]
+                if data[d].has_key(f):
+                    xy = data[d][f]
+                    newdata[f][lbl] = xy
+        return newdata
 
     @classmethod
     def extractSecondaryKeysFromDict(self, data):

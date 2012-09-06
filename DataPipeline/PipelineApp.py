@@ -195,7 +195,8 @@ class PipeApp(Frame, GUI_help):
 
     def createConfig(self):
         filename = self.saveFilename()
-        self.p.createConfig(filename)
+        if filename:
+            self.p.createConfig(filename)
         return
 
     def loadConfig(self, filename=None):
@@ -209,7 +210,7 @@ class PipeApp(Frame, GUI_help):
     def reloadConfig(self):
         self.loadConfig(self.p.configurationfile)
         return
-        
+
     def editConfig(self):
         self.editFile(self.p.configurationfile)
         return
@@ -396,7 +397,7 @@ class PipeApp(Frame, GUI_help):
         return
 
     def startTextEditor(self):
-        t = TextEditor(parent=self)        
+        t = TextEditor(parent=self)
         return
 
     def batchFileRename(self):
@@ -482,6 +483,9 @@ class PlotPreviewer(Frame):
         self.numplotscounter.pack()
         self.overlayvar = BooleanVar(); self.overlayvar.set(False)
         Checkbutton(fr, text='overlay plots', variable=self.overlayvar, command=self.replot).pack(side=TOP,fill=BOTH)
+        self.normalizevar = BooleanVar(); self.normalizevar.set(False)
+        Checkbutton(fr, text='normalize', variable=self.normalizevar, command=self.replot).pack(side=TOP,fill=BOTH)
+
         fr.pack(side=LEFT)
         self.plotframe = PlotPanel(parent=self, side=BOTTOM, height=200, tools=True)
         self.dsindex = 0
@@ -493,6 +497,12 @@ class PlotPreviewer(Frame):
 
     def replot(self):
         """Replot"""
+
+        if len(self.E.datasets) == 0:
+            print 'no datasets to plot, check your config'
+            self.clear()
+            return
+
         p = int(self.numplotscounter.getvalue())
         if p > self.E.length: p = self.E.length
         if p>1:
@@ -513,8 +523,8 @@ class PlotPreviewer(Frame):
         else:
             plotopt = 2
             self.plotframe.Opts.opts['title']=None
-        self.plotframe.plotCurrent(dsets,
-                                    cols=c, plotoption=plotopt)
+        self.plotframe.Opts.opts['normalise'] = self.normalizevar.get()
+        self.plotframe.plotCurrent(dsets, cols=c, plotoption=plotopt)
         return
 
     def loadData(self, data):
