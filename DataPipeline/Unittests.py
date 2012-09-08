@@ -74,6 +74,10 @@ class FitPropagationTestCase(BaseTestCase):
     def runTest(self):
         Testing.fitPropagationTest()
 
+class GroupbyFieldsTestCase(BaseTestCase):
+    def runTest(self):
+        Testing.groupbyFieldsTest()
+
 class KineticsDataTestCase(BaseTestCase):
     def runTest(self):
         Testing.kineticsTest()
@@ -93,12 +97,12 @@ def _add_test(name, filename, conf):
     setattr(ImporterTestCase, 'test_'+name, testmethod)
     testmethod.__name__ = 'test_'+name
 
-#dynamically create format tests from dictionary
+#create format tests from dictionary
 for t in sorted(basictests.keys()):
     info = basictests[t]
     conf = info[0]
     filename = info[1]
-    #_add_test(str(t), filename, conf)
+    _add_test(str(t), filename, conf)
 
 #remaining tests are more complex
 test1 = MultiFileTestCase()
@@ -106,9 +110,10 @@ test2 = GroupedFilesTestCase()
 test3 = MultiFolderTestCase()
 test4 = ReplicatesTestCase()
 test5 = FitPropagationTestCase()
-test6 = KineticsDataTestCase()
-test7 = PreProcessingTestCase()
-test8 = PeakDetectionTestCase()
+test6 = GroupbyFieldsTestCase()
+test7 = KineticsDataTestCase()
+test8 = PreProcessingTestCase()
+test9 = PeakDetectionTestCase()
 
 if __name__ == '__main__':
     unittest.main()

@@ -191,7 +191,7 @@ def createSingleFileData(path='testfiles', clear=False):
        one per xy datasew with multiple copies for each label representing ph values"""
 
     createDirectory(path)
-    names = createRandomStrings(8,6)
+    names = createRandomStrings(3,6)
     reps = range(1,2)
     for name in names:
         for i in np.arange(2,10,1.0):

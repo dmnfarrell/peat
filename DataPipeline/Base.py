@@ -77,7 +77,7 @@ class Pipeline(object):
                         ('ignorecomments', 1),
                         ('decimalsymbol', '.'), ('preprocess',''),
                         ('xformat',''), ('yformat',''), ('groupbyfields', 0)],
-                    'files': [('groupbyname', 0), ('parsenamesindex', 0),
+                    'files': [('groupbyname', 0), ('parsenamesindex', 0), ('parsenumericindex', 0),
                               ('replicates',0), ('extension','.txt')],
                     'models': [('model1', '')], 'variables': [('variable1', '')],
                     'functions':[('function1','')],
@@ -299,6 +299,18 @@ class Pipeline(object):
             self.saveEkinPlotstoImages(Er, fname+'_processed',groupbylabel=True)
         return data
 
+    def parseLabels(self):
+        """Get labels from filenames"""
+        self.numericlabels = self.parseFileNames(self.queue, ind=self.parsenumericindex)
+        self.namelabels = self.parseFileNames(self.queue, match='words',
+                                                ind=self.parsenamesindex)
+        return
+
+    def getLabels(self, data):
+        self.numericlabels=self.data.keys()
+        self.namelabels={}
+        return
+
     def run(self, callback=None):
         """Do initial import/fitting run with the current config"""
 
@@ -307,15 +319,15 @@ class Pipeline(object):
         self.prepareData()
         print 'processing files in queue..'
 
-        #try to parse filenames
-        labels = self.parseFileNames(self.queue, ind=self.parsenamesindex)
+        #try to parse filenames for both numeric and word values
 
-        self.labels = labels
+        self.parseLabels()
+        #self.labels = labels
         imported = {}   #raw data
         results = {}    #fitted data
 
         #print self.queue
-        #print filelabels
+        #print namelabels.values(), numericlabels.values()
 
         for key in self.queue:
             filename = self.queue[key]
@@ -331,9 +343,15 @@ class Pipeline(object):
 
         #re-arrange the imported dict if we want to group our output per field
         if self.groupbyfields == 1:
-            imported = self.groupDictbySecondaryKey(imported, labels)
+            imported = self.arrangeDictbySecondaryKey(imported, self.namelabels)
+
+        #arrange dict if there are common namelabels in primary keys,
+        #otherwise we overwrite results..??
+        #imported = self.groupDictbyLabels(imported, self.namelabels,self.numericlabels)
 
         total = len(imported)
+        #print imported[imported.keys()[0]]
+
         c=0.0
         for key in imported:
             if self.stop == True:
@@ -347,12 +365,13 @@ class Pipeline(object):
             if self.function1 != '':
                 data = self.doProcessingStep(data, fname)
 
-            if labels.has_key(key):
-                label = labels[key]
+            if not self.namelabels.has_key(key):
+                namelabel = key; numericlabel = 0
             else:
-                label = key
-            #print key,fname,label
-
+                namelabel = self.namelabels[key]
+                numericlabel = self.numericlabels[key]
+            #print namelabel, numericlabel
+            #print data
             #if we have models to fit this means we might need to propagate fit data
             if self.model1 != '':
                 Em = EkinProject()
@@ -366,11 +385,12 @@ class Pipeline(object):
                                                models=models,variables=variables)
                 else:
                     E,fits = self.processFits(rawdata=data, Em=Em)
-                results[label] = fits
+                results[numericlabel] = fits
+                #print E.datasets, numericlabel
             else:
-                 #if no fitting we just put the data in ekin
+                #if no fitting we just put the data in ekin
                 Em = self.getEkinProject(data)
-                results[label] = data
+                results[namelabel] = data
 
             Em.saveProject(fname)
             Em.exportDatasets(fname, append=True)
@@ -386,13 +406,13 @@ class Pipeline(object):
         if self.groupbyname == 1:
             results = self.extractSecondaryKeysFromDict(results)
             Em = EkinProject()
+            #print results
             E,fits = self.processFits(rawdata=results, Em=Em)
             fname = os.path.join(self.workingdir, 'final')
             Em.saveProject(os.path.join(self.workingdir, fname))
             Em.exportDatasets(os.path.join(self.workingdir, fname))
             if self.model1 != '':
                 self.saveFitstoCSV(Em, fname)
-            #if self.saveplots == 1:
             self.saveEkinPlotstoImages(Em, fname)
         print 'processing done'
         print 'results saved to %s' %self.workingdir
@@ -408,7 +428,7 @@ class Pipeline(object):
             returns: final set of fits"""
 
         nesting = self.getDictNesting(rawdata)
-        #print rawdata
+
         if models == None:
             models = self.models
             variables = self.variables
@@ -465,7 +485,7 @@ class Pipeline(object):
         import operator
         from itertools import groupby
         newdata = {}
-        labels = self.labels
+        labels = self.namelabels
         sorteditems = sorted(labels.iteritems(), key=operator.itemgetter(1))
 
         for key, group in groupby(sorteditems, lambda x: x[1]):
@@ -547,24 +567,37 @@ class Pipeline(object):
             else:
                 return 0
 
-    def parseFileNames(self, filenames, ind=0):
+    def parseFileNames(self, filenames, match='numeric', ind=0):
         """Parse file names to extract a numerical value
            ind: extract the ith instance of a number in the filename"""
         labels = {}
+        if match == 'numeric':
+            func = self.findNumeric
+        elif match == 'alphanumeric':
+            func = self.findAlphanumeric
+        elif match == 'words':
+            func = self.findWords
         for f in filenames:
             bname = os.path.basename(f)
             try:
-                l = re.findall("([0-9.]*[0-9]+)", bname)[ind]
+                l = func(bname)[ind]
                 labels[f] = l
             except:
                 labels[f] = f
             #print ind, f, labels[f]
         return labels
 
-    def parseString(self, filename):
-        """Parse string to extract a pattern"""
+    def findNumeric(self, line):
+        """Parse string to extract all numerical values"""
+        return re.findall("([0-9.]*[0-9]+)", line)
 
-        return
+    def findWords(self, line):
+        """Parse string to extract all non-numeric strings"""
+        return re.findall(r'[a-z]*[A-Z]+', line)
+
+    def findAlphanumeric(self, line):
+        """Parse string to extract all non-numeric strings"""
+        return re.findall(r'^\w+', line)
 
     def addFolder(self, path):
         """Add a folder to the queue"""
@@ -690,7 +723,24 @@ class Pipeline(object):
         return E
 
     @classmethod
-    def groupDictbySecondaryKey(self, data, labels, sep='__'):
+    def groupDictbyLabels(self, data, labels1, labels2):
+        """Re-arrange a flat dict by provided labels"""
+        newdata = {}
+        for key in data:
+            pri = labels1[key]
+            sec = labels2[key]
+            print key, pri, sec
+            if not newdata.has_key(pri):
+                newdata[pri] = {}
+                if len(data[key])==1:
+                    item = data[key][data[key].keys()[0]]
+                else:
+                    item = data[key]
+                newdata[pri][sec] = item
+        return newdata
+
+    @classmethod
+    def arrangeDictbySecondaryKey(self, data, labels, sep='__'):
         """Re-arrange a dict of dicts by each records secondary keys"""
 
         newdata = {}
