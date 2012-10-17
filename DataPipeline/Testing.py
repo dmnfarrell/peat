@@ -288,8 +288,8 @@ def main():
 
     #formatTests(basictests)
     #formatTests(exceltests)
-    multiFileTest()
-    #groupedFilesTest()
+    #multiFileTest()
+    groupedFilesTest()
     #multiFolderTest()
     #replicatesTest()
     #fitPropagationTest()

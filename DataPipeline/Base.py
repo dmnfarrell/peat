@@ -41,7 +41,7 @@ import PEATDB.Ekin.Fitting as Fitting
 class Pipeline(object):
     """This class does all the pipeline processing and configuration"""
 
-    __version__ = '1.1.0'
+    __version__ = '1.2.0'
     configsections = ['base','files','fitting','models','variables','functions',
                       'excel','plotting','custom']
 
@@ -290,10 +290,10 @@ class Pipeline(object):
                 return data
         #user may want to see raw data before processing, so we plot here
         if self.saveplots == 1:
-            Er = self.getEkinProject(data)
+            Er = Utilities.getEkinProject(data)
         data = X.doFunctions(names, data)
         if self.saveplots == 1:
-            Em = self.getEkinProject(data)
+            Em = Utilities.getEkinProject(data)
             Er.addProject(Em,label='proc')
             Er.saveProject(fname+'_processed')
             self.saveEkinPlotstoImages(Er, fname+'_processed',groupbylabel=True)
@@ -328,6 +328,8 @@ class Pipeline(object):
 
         #print self.queue
         #print namelabels.values(), numericlabels.values()
+        #from Data import Dataset
+        #D = Dataset()
 
         for key in self.queue:
             filename = self.queue[key]
@@ -336,6 +338,8 @@ class Pipeline(object):
                 continue
             data = self.doImport(lines)
             imported[key] = data
+            #D[key] = data
+            #print D
 
         #try to average replicates here before we process
         if self.replicates == 1:
@@ -347,7 +351,7 @@ class Pipeline(object):
 
         #arrange dict if there are common namelabels in primary keys,
         #otherwise we overwrite results..??
-        #imported = self.groupDictbyLabels(imported, self.namelabels,self.numericlabels)
+        #imported = self.groupDictbyLabels(imported, self.namelabels, self.numericlabels)
 
         total = len(imported)
         #print imported[imported.keys()[0]]
@@ -389,7 +393,7 @@ class Pipeline(object):
                 #print E.datasets, numericlabel
             else:
                 #if no fitting we just put the data in ekin
-                Em = self.getEkinProject(data)
+                Em = Utilities.getEkinProject(data)
                 results[namelabel] = data
 
             Em.saveProject(fname)
@@ -456,7 +460,7 @@ class Pipeline(object):
         if nesting == 0:
             #bottom level of nesting, we just fit
             xerror = float(self.xerror); yerror = float(self.yerror)
-            E = self.getEkinProject(rawdata, xerror=xerror, yerror=yerror)
+            E = Utilities.getEkinProject(rawdata, xerror=xerror, yerror=yerror)
             E,fit = self.getFits(E, currmodel, currvariable, str(parentkey))
             Em.addProject(E, label=parentkey)
             return E,fit
@@ -471,7 +475,7 @@ class Pipeline(object):
                 #now we pass each child node recursively
                 E,fit = self.processFits(rawdata[l], ind=ind-1, parentkey=lbl, Em=Em)
                 fitdata[l] = fit
-            E = self.getEkinProject(fitdata)
+            E = Utilities.getEkinProject(fitdata)
             if parentkey == '': parentkey = 'final'
             E,fit = self.getFits(E, currmodel, currvariable, str(parentkey))
             Em.addProject(E,label=parentkey)
@@ -560,7 +564,7 @@ class Pipeline(object):
         return
 
     def getDictNesting(self, data):
-        """Get level of nesting"""
+        """Find if bottom level of nesting or not"""
         for d in data.keys():
             if type(data[d]) is types.DictType:
                 return 1
@@ -691,36 +695,6 @@ class Pipeline(object):
         EM = EkinProjModel(E)
         EM.exportCSV(filename)
         return
-
-    @classmethod
-    def getEkinProject(self, data, xerror=None, yerror=None, sep='__'):
-        """Get an ekin project from a dict of the form
-             {label:([x],[y]),..} or
-             {label:([x],[y],[xerr],[yerr]),..}"""
-
-        E = EkinProject(mode='General')
-        for d in data.keys():
-            if type(data[d]) is types.DictType:
-                for lbl in data[d]:
-                    name = str(d)+sep+str(lbl)
-                    xy = data[d][lbl]
-                    ek=EkinDataset(xy=xy)
-                    E.insertDataset(ek, name)
-            else:
-                #print data[d]
-                if len(data[d]) == 4:
-                    x,y,xerrs,yerrs = data[d]
-                else:
-                    x,y = data[d]
-                    xerrs = []; yerrs=[]
-                    if xerror!=None:
-                        xerrs=[xerror for i in x]
-                    if yerror!=None:
-                        yerrs=[yerror for i in y]
-                ek = EkinDataset(xy=[x,y], xerrs=xerrs, yerrs=yerrs)
-                E.insertDataset(ek, d)
-                #print ek.errors
-        return E
 
     @classmethod
     def groupDictbyLabels(self, data, labels1, labels2):

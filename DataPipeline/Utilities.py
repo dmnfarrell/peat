@@ -27,12 +27,13 @@
 
 '''Module containing utility classes and functions'''
 
-import os, random, string
+import os, random, string, types
 import re, glob
 import csv
 import ConfigParser
 from math import *
 import numpy as np
+from PEATDB.Ekin.Base import EkinProject, EkinDataset
 
 def setAttributesfromConfigParser(obj, cp):
     """A helper method that makes the options in a ConfigParser object
@@ -236,6 +237,35 @@ def createNestedData():
                 y = [i * random.normalvariate(1,0.03) for i in y]
                 data[n][p][s] = (x,y)
     return data
+
+def getEkinProject(data, xerror=None, yerror=None, sep='__'):
+    """Get an ekin project from a dict of the form
+         {label:([x],[y]),..} or
+         {label:([x],[y],[xerr],[yerr]),..}"""
+
+    E = EkinProject(mode='General')
+    for d in data.keys():
+        if type(data[d]) is types.DictType:
+            for lbl in data[d]:
+                name = str(d)+sep+str(lbl)
+                xy = data[d][lbl]
+                ek=EkinDataset(xy=xy)
+                E.insertDataset(ek, name)
+        else:
+            #print data[d]
+            if len(data[d]) == 4:
+                x,y,xerrs,yerrs = data[d]
+            else:
+                x,y = data[d]
+                xerrs = []; yerrs=[]
+                if xerror!=None:
+                    xerrs=[xerror for i in x]
+                if yerror!=None:
+                    yerrs=[yerror for i in y]
+            ek = EkinDataset(xy=[x,y], xerrs=xerrs, yerrs=yerrs)
+            E.insertDataset(ek, d)
+            #print ek.errors
+    return E
 
 def differentiate(self, x,y):
     dy = numpy.diff(y,1)
