@@ -82,15 +82,7 @@ def doTest(info, name='test', path='testfiles'):
     data = p.doImport(lines)
     if p.model1 != '':
         p.run()
-    '''print data
-    if len(data) == 0:
-        print 'test %s failed' %name
-        result = False
-    else:
-        print 'test %s completed' %name
-        result = True
-    print '-------------------'
-    '''
+
     return
 
 def formatTests( testinfo, names=None):
@@ -107,7 +99,7 @@ def multiFileTest():
     path = 'testfiles/singlefiles'
     Utilities.createSingleFileData(path)
     conf = {'format':'databycolumn', 'groupbyname':1,  'parsenamesindex':0,
-            'parsenumericindex':0, #'saveplots':1,
+            'parsemethod':'numeric', 'filenameseparator':'_',
             'model1':'linear','variable1':'a','model2':'sigmoid','variable2':'tm'}
     p = Pipeline()
     p.createConfig('temp.conf',**conf)
@@ -120,7 +112,7 @@ def groupedFilesTest():
          sets of datasets in all files"""
     path = 'testfiles/grouped'
     Utilities.createGroupedData(path)
-    conf = {'format':'databycolumn','groupbyname':1, 'parsenumericindex':0, 'saveplots':1,
+    conf = {'format':'databycolumn','groupbyname':1, 'parsenamesindex':0, 'parsemethod':'numeric',
             'model1':'linear','variable1':'a','model2':'sigmoid','variable2':'tm'}
     p = Pipeline()
     p.createConfig('temp.conf',**conf)
@@ -131,8 +123,8 @@ def groupedFilesTest():
 def multiFolderTest():
     """Handling of multiple folders in a hierarchy with replicates"""
     p = Pipeline()
-    conf = {'format':'databycolumn','groupbyname':1,
-            'saveplots':1,'replicates':1,
+    conf = {'format':'databycolumn','groupbyname':1,'parsenamesindex':0, 'parsemethod':'numeric',
+            'replicates':1, #'saveplots':1,
             'model1':'linear','variable1':'a','model2':'sigmoid','variable2':'tm'}
     p.createConfig('temp.conf',**conf)
     path = 'testfiles/multifolders'
@@ -144,7 +136,7 @@ def multiFolderTest():
     for i in phs:
         #sigmoid dependence of the slopes on 'ph'
         #so we know we are getting the right results
-        val = 1/(1+exp((i-4)/1.2))
+        val = 1/(1+exp((i-4)/1.04))
         folder = os.path.join(path,'ph'+str(i))
         Utilities.createDirectory(folder)
         for r in reps:
@@ -158,8 +150,8 @@ def replicatesTest():
     """Tests handling of replicates"""
 
     p = Pipeline()
-    conf = {'format':'databycolumn','groupbyname':1, 'parsenamesindex':1,
-            'saveplots':1, 'replicates':1,
+    conf = {'format':'databycolumn','groupbyname':1, 'parsenamesindex':1, 'parsemethod':'numeric',
+            'replicates':1,
             'model1':'linear','variable1':'a','model2':'sigmoid','variable2':'tm'}
     p.createConfig('temp.conf',**conf)
     reps = ['rep1','rep2','rep3']
@@ -180,7 +172,7 @@ def fitPropagationTest():
     p = Pipeline()
     conf = {'model1':'linear','model2':'Michaelis-Menten','model3':'sigmoid',
             'variable1':'a','variable2':'Km','variable3':'tm',#'xerror':.1,'yerror':0.05,
-            'saveplots':1}
+            }
     p.createConfig('temp.conf',**conf)
     data = Utilities.createNestedData()
     Em = EkinProject()
@@ -198,6 +190,7 @@ def groupbyFieldsTest():
     """Tests grouping by fields function using NMRdata"""
 
     conf = {'format':'databycolumn','colheaderlabels':'15N,1H',
+            'parsenamesindex':0,'parsemethod':'numeric',
             'delimeter':' ', 'groupbyfields':1,'extension':'.inp'}
     path = 'testfiles/NMRdata'
     p = Pipeline()
@@ -216,7 +209,7 @@ def kineticsTest():
             'rowrepeat':9,
             'colheaderlabels':colheaderlabels, 'rowheaderlabels':rowheaderlabels,
             'decimalsymbol':',','xformat':'%M:%S',
-            'groupbyname':1, 'parsenumericindex':2,
+            'groupbyname':1, 'parsenamesindex':2,  'parsemethod':'numeric',
             'model1':'linear','model2':'Michaelis-Menten','model3':'1 pKa 2 Chemical shifts',
             'variable1':'a','variable2':'Km','variable3':'pKa',#'xerror':.1,'yerror':0.05,
             }
@@ -288,8 +281,8 @@ def main():
 
     #formatTests(basictests)
     #formatTests(exceltests)
-    #multiFileTest()
-    groupedFilesTest()
+    multiFileTest()
+    #groupedFilesTest()
     #multiFolderTest()
     #replicatesTest()
     #fitPropagationTest()

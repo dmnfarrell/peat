@@ -104,17 +104,6 @@ for t in sorted(basictests.keys()):
     filename = info[1]
     _add_test(str(t), filename, conf)
 
-#remaining tests are more complex
-test1 = MultiFileTestCase()
-test2 = GroupedFilesTestCase()
-test3 = MultiFolderTestCase()
-test4 = ReplicatesTestCase()
-test5 = FitPropagationTestCase()
-test6 = GroupbyFieldsTestCase()
-test7 = KineticsDataTestCase()
-test8 = PreProcessingTestCase()
-test9 = PeakDetectionTestCase()
-
 if __name__ == '__main__':
     unittest.main()
 

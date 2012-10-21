@@ -77,7 +77,8 @@ class Pipeline(object):
                         ('ignorecomments', 1),
                         ('decimalsymbol', '.'), ('preprocess',''),
                         ('xformat',''), ('yformat',''), ('groupbyfields', 0)],
-                    'files': [('groupbyname', 0), ('parsenamesindex', 0), ('parsenumericindex', 0),
+                    'files': [('groupbyname', 0), ('parsenamesindex', ''),
+                              ('filenameseparator',''), ('parsemethod','words'),
                               ('replicates',0), ('extension','.txt')],
                     'models': [('model1', '')], 'variables': [('variable1', '')],
                     'functions':[('function1','')],
@@ -301,14 +302,10 @@ class Pipeline(object):
 
     def parseLabels(self):
         """Get labels from filenames"""
-        self.numericlabels = self.parseFileNames(self.queue, ind=self.parsenumericindex)
-        self.namelabels = self.parseFileNames(self.queue, match='words',
-                                                ind=self.parsenamesindex)
-        return
 
-    def getLabels(self, data):
-        self.numericlabels=self.data.keys()
-        self.namelabels={}
+        self.namelabels = Utilities.parseFileNames(self.queue, ind=self.parsenamesindex,
+                                                     sep=self.filenameseparator,
+                                                     match=self.parsemethod)
         return
 
     def run(self, callback=None):
@@ -319,17 +316,10 @@ class Pipeline(object):
         self.prepareData()
         print 'processing files in queue..'
 
-        #try to parse filenames for both numeric and word values
-
         self.parseLabels()
-        #self.labels = labels
         imported = {}   #raw data
         results = {}    #fitted data
-
         #print self.queue
-        #print namelabels.values(), numericlabels.values()
-        #from Data import Dataset
-        #D = Dataset()
 
         for key in self.queue:
             filename = self.queue[key]
@@ -338,23 +328,27 @@ class Pipeline(object):
                 continue
             data = self.doImport(lines)
             imported[key] = data
-            #D[key] = data
-            #print D
+
+        #rebuild dict into a nested structure if it's flat (i.e. from single files)
+        '''from Data import NestedData
+        D = NestedData(imported)
+        D.buildNestedStructure([0,1])
+        D.show()'''
 
         #try to average replicates here before we process
         if self.replicates == 1:
-            imported = self.handleReplicates(imported)
+            if self.namelabels != None:
+                imported = Utilities.addReplicates(imported, self.namelabels)
+            else:
+                print 'no replicates detected from labels'
 
         #re-arrange the imported dict if we want to group our output per field
         if self.groupbyfields == 1:
-            imported = self.arrangeDictbySecondaryKey(imported, self.namelabels)
-
-        #arrange dict if there are common namelabels in primary keys,
-        #otherwise we overwrite results..??
-        #imported = self.groupDictbyLabels(imported, self.namelabels, self.numericlabels)
+            imported = Utilities.arrangeDictbySecondaryKey(imported, self.namelabels)
 
         total = len(imported)
-        #print imported[imported.keys()[0]]
+        #print imported
+        #print self.namelabels
 
         c=0.0
         for key in imported:
@@ -369,12 +363,11 @@ class Pipeline(object):
             if self.function1 != '':
                 data = self.doProcessingStep(data, fname)
 
-            if not self.namelabels.has_key(key):
-                namelabel = key; numericlabel = 0
+            if self.namelabels == None or not self.namelabels.has_key(key):
+                namelabel = key
             else:
                 namelabel = self.namelabels[key]
-                numericlabel = self.numericlabels[key]
-            #print namelabel, numericlabel
+
             #print data
             #if we have models to fit this means we might need to propagate fit data
             if self.model1 != '':
@@ -389,8 +382,8 @@ class Pipeline(object):
                                                models=models,variables=variables)
                 else:
                     E,fits = self.processFits(rawdata=data, Em=Em)
-                results[numericlabel] = fits
-                #print E.datasets, numericlabel
+                results[namelabel] = fits
+                print E.datasets, namelabel
             else:
                 #if no fitting we just put the data in ekin
                 Em = Utilities.getEkinProject(data)
@@ -408,9 +401,9 @@ class Pipeline(object):
 
         #if grouped by file names then we process that here from results
         if self.groupbyname == 1:
-            results = self.extractSecondaryKeysFromDict(results)
+            results = Utilities.extractSecondaryKeysFromDict(results)
             Em = EkinProject()
-            #print results
+            print results
             E,fits = self.processFits(rawdata=results, Em=Em)
             fname = os.path.join(self.workingdir, 'final')
             Em.saveProject(os.path.join(self.workingdir, fname))
@@ -461,6 +454,7 @@ class Pipeline(object):
             #bottom level of nesting, we just fit
             xerror = float(self.xerror); yerror = float(self.yerror)
             E = Utilities.getEkinProject(rawdata, xerror=xerror, yerror=yerror)
+            print rawdata.keys(), parentkey, currmodel
             E,fit = self.getFits(E, currmodel, currvariable, str(parentkey))
             Em.addProject(E, label=parentkey)
             return E,fit
@@ -480,43 +474,6 @@ class Pipeline(object):
             E,fit = self.getFits(E, currmodel, currvariable, str(parentkey))
             Em.addProject(E,label=parentkey)
             return E,fit
-
-    def handleReplicates(self, data):
-        """If the configuration specifies replicates than we average the
-           corresponding data points in the raw dict """
-
-        print 'processing replicates..'
-        import operator
-        from itertools import groupby
-        newdata = {}
-        labels = self.namelabels
-        sorteditems = sorted(labels.iteritems(), key=operator.itemgetter(1))
-
-        for key, group in groupby(sorteditems, lambda x: x[1]):
-            c = 0
-            subdata = []
-            for g in group:
-                f = g[0]    #key in corresponding data dict
-                c+=1
-                subdata.append(data[f])
-                print f
-            newdata[key] = self.averageDicts(subdata)
-            print '%s replicates for label %s' %(c, key)
-        #print newdata
-        return newdata
-
-    def averageDicts(self, dictslist):
-        """Average dicts of the form
-           {label1: [[x1],[y1]],..],label2:[[x2],[y2]]...}"""
-
-        newdata = {}
-        names = dictslist[0].keys()
-        for n in names:
-            arrs = []
-            for D in dictslist:
-                arrs.append(np.array(D[n]))
-            newdata[n] = list(sum(arrs)/len(arrs))
-        return newdata
 
     def getFits(self, E, model, varname='a', filename=None):
         """Fit an Ekin project
@@ -570,38 +527,6 @@ class Pipeline(object):
                 return 1
             else:
                 return 0
-
-    def parseFileNames(self, filenames, match='numeric', ind=0):
-        """Parse file names to extract a numerical value
-           ind: extract the ith instance of a number in the filename"""
-        labels = {}
-        if match == 'numeric':
-            func = self.findNumeric
-        elif match == 'alphanumeric':
-            func = self.findAlphanumeric
-        elif match == 'words':
-            func = self.findWords
-        for f in filenames:
-            bname = os.path.basename(f)
-            try:
-                l = func(bname)[ind]
-                labels[f] = l
-            except:
-                labels[f] = f
-            #print ind, f, labels[f]
-        return labels
-
-    def findNumeric(self, line):
-        """Parse string to extract all numerical values"""
-        return re.findall("([0-9.]*[0-9]+)", line)
-
-    def findWords(self, line):
-        """Parse string to extract all non-numeric strings"""
-        return re.findall(r'[a-z]*[A-Z]+', line)
-
-    def findAlphanumeric(self, line):
-        """Parse string to extract all non-numeric strings"""
-        return re.findall(r'^\w+', line)
 
     def addFolder(self, path):
         """Add a folder to the queue"""
@@ -695,89 +620,4 @@ class Pipeline(object):
         EM = EkinProjModel(E)
         EM.exportCSV(filename)
         return
-
-    @classmethod
-    def groupDictbyLabels(self, data, labels1, labels2):
-        """Re-arrange a flat dict by provided labels"""
-        newdata = {}
-        for key in data:
-            pri = labels1[key]
-            sec = labels2[key]
-            print key, pri, sec
-            if not newdata.has_key(pri):
-                newdata[pri] = {}
-                if len(data[key])==1:
-                    item = data[key][data[key].keys()[0]]
-                else:
-                    item = data[key]
-                newdata[pri][sec] = item
-        return newdata
-
-    @classmethod
-    def arrangeDictbySecondaryKey(self, data, labels, sep='__'):
-        """Re-arrange a dict of dicts by each records secondary keys"""
-
-        newdata = {}
-        if not type(data) is types.DictType:
-            return data
-        key1 = data.keys()[0]
-        if type(data[key1]) is types.DictType:
-            fields = data[key1].keys()
-        for f in fields:
-            newdata[f] = {}
-        for f in fields:
-            for d in data.keys():
-                #print d
-                lbl = labels[d]
-                if data[d].has_key(f):
-                    xy = data[d][f]
-                    newdata[f][lbl] = xy
-        return newdata
-
-    @classmethod
-    def extractSecondaryKeysFromDict(self, data):
-        """Re-arrange a dict of the form {key1:([names],[values]),..
-           into the form {name1:([keys],[values]),..}"""
-
-        newdata = {}
-        kys = data.keys()
-        datasets = data[kys[0]][0]
-        for d in datasets:
-            newdata[d] = []
-        for l in data:
-            names, vals, xerr, yerr = data[l]
-            #print zip(names, vals)
-            for d,v in zip(names, vals):
-                newdata[d].append((l,v))
-        for d in newdata:
-            newdata[d] = zip(*newdata[d])
-        return newdata
-
-class FolderStructure(object):
-    """Class to hold structure rawdata that makes handling it easier"""
-
-    def __init__(self, path):
-        self.path = path
-        self.rootdir = os.path.basename(path)
-        self.info = Utilities.getdirectoryStructure(path)
-        print self.rootdir
-        print '------------------'
-        print self.info
-        self.traverse(self.info)
-        return
-
-    def traverse(self, data):
-        for i in data:
-            if type(data[i]) is types.DictType:
-                self.traverse(data[i])
-            else:
-                print i, data[i]
-
-    def report(self):
-        """report on structure found in path"""
-        print 'rootdir is %s' %self.rootdir
-        folders = len(self.info)
-        print '%s files found in %s folders' %(self.p)
-        return
-
 

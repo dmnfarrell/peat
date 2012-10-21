@@ -267,6 +267,178 @@ def getEkinProject(data, xerror=None, yerror=None, sep='__'):
             #print ek.errors
     return E
 
+def getFits(E, model, varname='a', filename=None,
+            iterations=50, xerror=0, yerror=0):
+    """Fit an Ekin project
+       model: model to fit
+       varname: variable to extract"""
+
+    fits = []
+    xerrors = []
+    yerrors = []
+    E.fitDatasets('ALL', models=[model], noiter=iterations,
+                  conv=1e-9, grad=1e-8, silent=True)
+    labels = E.datasets
+    if xerror != 0 or yerror != 0:
+        print 'getting exp uncert'
+        expUncert(E, xerr=float(xerror))
+        for d in labels:
+            yerrors.append(E.getMeta(d,'exp_errors')[varname][1])
+
+    for d in labels:
+        fits.append(E.getMetaData(d)[varname])
+    '''if self.saveplots == 1 and filename != None and filename != '':
+        print 'plotting %s' %filename
+        self.saveEkinPlotstoImages(E, filename)'''
+    return E,(labels,fits,xerrors,yerrors)
+
+def expUncert(E, xerr=0, yerr=0):
+    """Get fitted variable errors using the iterative method"""
+
+    for d in E.datasets:
+        ferrs = E.estimateExpUncertainty(d, runs=10, xuncert=xerr, yuncert=yerr)
+        E.addMeta(d, 'exp_errors', ferrs)
+    E.saveProject()
+    return
+
+def parseFileNames(filenames, ind=0, sep='', match='numeric'):
+    """Parse file names"""
+    filenames = [os.path.basename(f) for f in filenames]
+    if ind == '':
+        labels = None
+    else:
+        labels = parseNames(filenames, ind, sep, match)
+    return labels
+
+def parseNames(filenames, ind=0, sep='', match='numeric'):
+    """Parse a list of strings to extract a numerical value
+       match: whether to match numeric, string or whole word values
+       ind: extract the ith instance of a number in the filename
+       returns: a dict of the original keys with labels as items
+       """
+
+    labels = {}
+    if match == 'numeric':
+        expr = r'([0-9.]*[0-9]+)'
+    elif match == 'alphanumeric':
+        expr = r'[a-z]*[A-Z]+'
+    elif match == 'words':
+        expr = r'^\w+'
+
+    if sep != '':
+        expr = sep+'+'+expr
+    print expr
+    r = re.compile(expr,re.I)
+    for f in filenames:
+        print r.split(f), r.findall(f)
+        l = r.findall(f)[ind]
+        labels[f] = l
+        #print ind, f, labels[f]
+    return labels
+
+def findNumeric(line):
+    """Parse string to extract all numerical values"""
+    return re.findall("([0-9.]*[0-9]+)", line)
+
+def findWords(line):
+    """Parse string to extract all non-numeric strings"""
+    return re.findall(r'[a-z]*[A-Z]+', line, re.I)
+
+def findAlphanumeric(line):
+    """Parse string to extract all non-numeric strings"""
+    return re.findall(r'^\w+', line)
+
+def addReplicates(data, labels):
+    """If the configuration specifies replicates than we average the
+       corresponding data points in the raw dict """
+
+    print 'processing replicates..'
+    import operator
+    from itertools import groupby
+    newdata = {}
+
+    sorteditems = sorted(labels.iteritems(), key=operator.itemgetter(1))
+    for key, group in groupby(sorteditems, lambda x: x[1]):
+        c = 0
+        subdata = []
+        for g in group:
+            f = g[0]    #key in corresponding data dict
+            c+=1
+            subdata.append(data[f])
+            #print f
+        newdata[key] = averageDicts(subdata)
+        print '%s replicates for label %s' %(c, key)
+
+    #print newdata
+    return newdata
+
+def averageDicts(dictslist):
+    """Average dicts of the form
+       {label1: [[x1],[y1]],..],label2:[[x2],[y2]]...}"""
+
+    newdata = {}
+    names = dictslist[0].keys()
+    for n in names:
+        arrs = []
+        for D in dictslist:
+            arrs.append(np.array(D[n]))
+        newdata[n] = list(sum(arrs)/len(arrs))
+    return newdata
+
+def arrangeDictbySecondaryKey(data, labels, sep='__'):
+    """Re-arrange a dict of dicts by each records secondary keys"""
+
+    newdata = {}
+    if not type(data) is types.DictType:
+        return data
+    key1 = data.keys()[0]
+    if type(data[key1]) is types.DictType:
+        fields = data[key1].keys()
+    for f in fields:
+        newdata[f] = {}
+    for f in fields:
+        for d in data.keys():
+            #print d
+            lbl = labels[d]
+            if data[d].has_key(f):
+                xy = data[d][f]
+                newdata[f][lbl] = xy
+    return newdata
+
+def extractSecondaryKeysFromDict(data):
+    """Re-arrange a dict of the form {key1:([names],[values]),..
+       into the form {name1:([keys],[values]),..}"""
+
+    newdata = {}
+    kys = data.keys()
+    datasets = data[kys[0]][0]
+    for d in datasets:
+        newdata[d] = []
+    for l in data:
+        names, vals, xerr, yerr = data[l]
+        #print zip(names, vals)
+        for d,v in zip(names, vals):
+            newdata[d].append((l,v))
+    for d in newdata:
+        newdata[d] = zip(*newdata[d])
+    return newdata
+
+def buildNestedStructure(data, labels1, labels2):
+    """Rebuild a nested dictionary from a flat sructure according to labels"""
+    newdata = {}
+    for key in data:
+        pri = labels1[key]
+        sec = labels2[key]
+        print key, pri, sec
+        if not newdata.has_key(pri):
+            newdata[pri] = {}
+            if len(data[key])==1:
+                item = data[key][data[key].keys()[0]]
+            else:
+                item = data[key]
+            newdata[pri][sec] = item
+    return newdata
+
 def differentiate(self, x,y):
     dy = numpy.diff(y,1)
     dx = x[:len(dy)]

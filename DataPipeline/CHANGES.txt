@@ -12,6 +12,8 @@ CHANGES
 * Can now normalise plots in previewer
 * Unittests added to cover all tests in Testing.py
 * Added kinetics data to testfiles folder
+* Moved most helper functions from Base.py to Utilities module
+* Added NestedData class for future use
 
 ------
 1.1
