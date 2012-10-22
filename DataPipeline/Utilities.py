@@ -320,19 +320,27 @@ def parseNames(filenames, ind=0, sep='', match='numeric'):
     labels = {}
     if match == 'numeric':
         expr = r'([0-9.]*[0-9]+)'
-    elif match == 'alphanumeric':
+    elif match == 'text':
         expr = r'[a-z]*[A-Z]+'
+    elif match == 'both':
+        expr = r'([a-z]*[A-Z]+?)|([0-9.]*[0-9]+?)'
     elif match == 'words':
         expr = r'^\w+'
 
-    if sep != '':
-        expr = sep+'+'+expr
-    print expr
+    #print expr
     r = re.compile(expr,re.I)
     for f in filenames:
-        print r.split(f), r.findall(f)
-        l = r.findall(f)[ind]
-        labels[f] = l
+        vals = r.findall(f)
+        if match == 'both':
+            result = []
+            for v in vals:
+                for i in v:
+                    if i != '':
+                        result.append(i)
+        else:
+            result = vals
+        labels[f] = result[ind]
+        #print result
         #print ind, f, labels[f]
     return labels
 

@@ -96,17 +96,18 @@ class NestedData(object):
         print self.data
         return
 
-    def buildNestedStructure(self, parsenamesindex=[]):
+    def buildNestedStructure(self, indexes=[0], match='both'):
         """Rebuild a nested dictionary from a flat sructure according to labels
            extracted from the key names, which must be separated by some symbol"""
 
+        print indexes
         data = self.data
         keys = data.keys()
         labels = []
         #get set of labels in the correct order
-        for i in parsenamesindex:
-            labels.append(Utilities.parseNames(keys, ind=i, sep='', match='numeric'))
-
+        for i in indexes:
+            labels.append(Utilities.parseNames(keys, ind=i, sep='', match=match))
+        #print labels
         self.data = self.recursiveBuild(labels, data, 0)
         return
 

@@ -303,7 +303,13 @@ class Pipeline(object):
     def parseLabels(self):
         """Get labels from filenames"""
 
-        self.namelabels = Utilities.parseFileNames(self.queue, ind=self.parsenamesindex,
+        #parseindex can be a list, we currently just take first element
+        if type(self.parsenamesindex) is not types.IntType and self.parsenamesindex!='':
+            index = self.parsenamesindex.split(',')
+            index = int(index[0])
+        else:
+            index = self.parsenamesindex
+        self.namelabels = Utilities.parseFileNames(self.queue, ind=index,
                                                      sep=self.filenameseparator,
                                                      match=self.parsemethod)
         return
@@ -332,8 +338,10 @@ class Pipeline(object):
         #rebuild dict into a nested structure if it's flat (i.e. from single files)
         '''from Data import NestedData
         D = NestedData(imported)
-        D.buildNestedStructure([0,1])
-        D.show()'''
+        D.buildNestedStructure([0,2])
+        D.show()
+        imported = D.data
+        self.namelabels = None'''
 
         #try to average replicates here before we process
         if self.replicates == 1:
@@ -367,8 +375,9 @@ class Pipeline(object):
                 namelabel = key
             else:
                 namelabel = self.namelabels[key]
-
+            #print namelabel, key
             #print data
+
             #if we have models to fit this means we might need to propagate fit data
             if self.model1 != '':
                 Em = EkinProject()
@@ -383,7 +392,7 @@ class Pipeline(object):
                 else:
                     E,fits = self.processFits(rawdata=data, Em=Em)
                 results[namelabel] = fits
-                print E.datasets, namelabel
+                #print E.datasets, namelabel
             else:
                 #if no fitting we just put the data in ekin
                 Em = Utilities.getEkinProject(data)
@@ -403,7 +412,7 @@ class Pipeline(object):
         if self.groupbyname == 1:
             results = Utilities.extractSecondaryKeysFromDict(results)
             Em = EkinProject()
-            print results
+            #print results
             E,fits = self.processFits(rawdata=results, Em=Em)
             fname = os.path.join(self.workingdir, 'final')
             Em.saveProject(os.path.join(self.workingdir, fname))

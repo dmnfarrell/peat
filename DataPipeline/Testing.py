@@ -98,8 +98,8 @@ def multiFileTest():
     """Test handling of single datasets per file with grouping per filename"""
     path = 'testfiles/singlefiles'
     Utilities.createSingleFileData(path)
-    conf = {'format':'databycolumn', 'groupbyname':1,  'parsenamesindex':0,
-            'parsemethod':'numeric', 'filenameseparator':'_',
+    conf = {'format':'databycolumn', 'groupbyname':1,  'parsenamesindex':'0,1',
+            'parsemethod':'both',
             'model1':'linear','variable1':'a','model2':'sigmoid','variable2':'tm'}
     p = Pipeline()
     p.createConfig('temp.conf',**conf)
