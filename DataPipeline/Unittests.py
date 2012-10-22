@@ -54,9 +54,9 @@ class ImporterTestCase(BaseTestCase):
         if p.model1 != '':
             p.run()
 
-class MultiFileTestCase(BaseTestCase):
+'''class MultiFileTestCase(BaseTestCase):
     def runTest(self):
-        Testing.multiFileTest()
+        Testing.multiFileTest()'''
 
 class MultiFolderTestCase(BaseTestCase):
     def runTest(self):
