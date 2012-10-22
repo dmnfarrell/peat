@@ -1033,14 +1033,17 @@ class EkinProject(object):
         self.insertDataset(ek,'testdata5')
         return
 
-    def exportDatasets(self, filename=None, format=None):
+    def exportDatasets(self, filename=None, format=None, append=False):
        """Export all datasets as csv
             formatted as x-y columns per dataset """
        if filename == None:
            return
        if os.path.splitext(filename) != '.csv':
            filename = os.path.splitext(filename)[0]+'.csv'
-       f=open(filename,'wb')
+       if append==True:
+           f=open(filename,'a')
+       else:
+           f=open(filename,'wb')
        import csv
        cw=csv.writer(f)
        for d in self.datasets:
