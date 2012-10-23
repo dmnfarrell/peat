@@ -16,7 +16,7 @@ shutil.rmtree('datapipeline', ignore_errors=True)
 path=os.path.abspath('../../..')
 pipepath=os.path.abspath('../../../DataPipeline')
 peatpath=os.path.abspath('../../../PEATDB')
-version = '1.0'
+version = '1.2'
 
 f = Freezer('datapipeline', excludes=('wx'))
 f.addScript(os.path.join(pipepath, "PipelineApp.py"))
