@@ -3,14 +3,14 @@ import sys,os
 home=os.path.expanduser('~')
 
 #requires we copy the source dir to the current directory first
-setup(name='DataPipeline', version='1.0',
+setup(name='DataPipeline', version='1.2',
 	description='DataPipeline Tool',
 	author='Damien Farrell',
 	author_email='farrell.damien[at]gmail.com',
-	url='http://code.google.com/p/peat/wiki/DataPipeline',
+	url='http://pypi.python.org/packages/source/D/DataPipeline/',
 	license='GPL v3',
-	packages=['DataPipeline'],	
-    	include_package_data = True,
+	packages=['DataPipeline'],
+    include_package_data = True,
 	package_data={'DataPipeline':['app.ico','testfiles/*.txt']},
 	install_requires=['numpy>=1.1',
                       'matplotlib>=0.98.5.2',
