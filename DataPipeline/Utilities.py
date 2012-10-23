@@ -437,7 +437,7 @@ def buildNestedStructure(data, labels1, labels2):
     for key in data:
         pri = labels1[key]
         sec = labels2[key]
-        print key, pri, sec
+        #print key, pri, sec
         if not newdata.has_key(pri):
             newdata[pri] = {}
             if len(data[key])==1:

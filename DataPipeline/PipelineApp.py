@@ -42,6 +42,7 @@ from Helper import HelperDialog
 from Editor import TextEditor
 from Rename import BatchRenameApp
 import Images
+import Utilities
 
 class PipeApp(Frame, GUI_help):
     """Data pipe GUI for importing and fitting of raw data.
@@ -306,9 +307,8 @@ class PipeApp(Frame, GUI_help):
 
     def runTests(self):
         """Run tests"""
-        from Testing import Tester
-        t=Tester()
-        t.formatTests(t.basictests)
+        import Testing
+        Testing.formatTests(Testing.basictests)
         print 'tests completed ok'
         return
 
@@ -432,7 +432,7 @@ class PipeApp(Frame, GUI_help):
         label = Label(win,image=logo)
         label.image = logo
         label.pack(fill=BOTH,padx=4,pady=4)
-        text="""DataPipeline App, Version 1.0
+        text="""DataPipeline App, Version 1.2
              is a python desktop and web application
              that uses a configuration file to automate the import of
              raw data in a variety of formats.\n
@@ -529,7 +529,7 @@ class PlotPreviewer(Frame):
 
     def loadData(self, data):
         """Load dict into datasets"""
-        E = self.E = Pipeline.getEkinProject(data)
+        E = self.E = Utilities.getEkinProject(data)
         self.plotframe.setProject(E)
         self.totalvar.set(self.E.length)
         return
@@ -612,13 +612,13 @@ class queueManager(Frame):
     def removeSelected(self):
         """Remove selected items from queue"""
         p = self.app.p
-        if len(self.p.queue) == 0:
+        if len(p.queue) == 0:
             return
         p.queue.values()
         selected = self.listbox.getcurselection()
         for key, value in p.queue.items():
             if value in selected:
-                del self.p.queue[key]
+                del p.queue[key]
         self.update()
         self.app.updateFromQueue()
         return
