@@ -1368,8 +1368,7 @@ class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
             self.pDB_open.refresh_primer()
         return
 
-
-if __name__=="__main__":
+def main():
     """Run the app"""
     import sys, os
     from optparse import OptionParser
@@ -1378,7 +1377,6 @@ if __name__=="__main__":
                         help="Open a project", metavar="FILE")
 
     opts, remainder = parser.parse_args()
-
     if opts.projectfile != None:
         import pickle
         fd=open(opts.projectfile)
@@ -1387,8 +1385,8 @@ if __name__=="__main__":
         app = MainWindow(data_passed=data)
     else:
         app = MainWindow()
-
     app.mainloop()
 
-
+if __name__=="__main__":
+    main()
 
