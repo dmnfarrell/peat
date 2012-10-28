@@ -1133,11 +1133,10 @@ class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
             if key in self.preferences.prefs:
                 self.__dict__[key].set(self.preferences.get(key))
             else:
-                self.preferences.set(key, defaultprefs[key])
+                self.preferences.set(key, self.defaultprefs[key])
 
         self.update_window_formatting()
         return
-
 
     def update_window_formatting(self):
         """Do this only when display setup changes are applied. Ensures all objects, including
@@ -1148,7 +1147,6 @@ class MainWindow(Frame, DNA_IO, DNA_Edit, Restriction_Digest,
         if self.show_comp_sequence.get==1:
            self.sequ_win.refresh_DNAseq()
         return
-
 
     def overview_on_off(self):
         """Turn the over view window on and off"""
