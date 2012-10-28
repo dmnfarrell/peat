@@ -37,6 +37,7 @@
     <ROW Directory="Brazil_Dir" Directory_Parent="tzdata_Dir" DefaultDir="Brazil"/>
     <ROW Directory="Canada_Dir" Directory_Parent="tzdata_Dir" DefaultDir="Canada"/>
     <ROW Directory="Chile_Dir" Directory_Parent="tzdata_Dir" DefaultDir="Chile"/>
+    <ROW Directory="DesktopFolder" Directory_Parent="TARGETDIR" DefaultDir="Deskto~1|DesktopFolder" IsPseudoRoot="1"/>
     <ROW Directory="EGGINFO_1_Dir" Directory_Parent="transaction1.3.0py2.6.egg_Dir" DefaultDir="EGG-INFO"/>
     <ROW Directory="EGGINFO_2_Dir" Directory_Parent="zc.lockfile1.0.0py2.6.egg_Dir" DefaultDir="EGG-INFO"/>
     <ROW Directory="EGGINFO_3_Dir" Directory_Parent="zconfig2.9.3py2.6.egg_Dir" DefaultDir="EGG-INFO"/>
@@ -57,6 +58,7 @@
     <ROW Directory="North_Dakota_Dir" Directory_Parent="America_Dir" DefaultDir="North_~1|North_Dakota"/>
     <ROW Directory="Pacific_Dir" Directory_Parent="tzdata_Dir" DefaultDir="Pacific"/>
     <ROW Directory="ProgramFilesFolder" Directory_Parent="TARGETDIR" DefaultDir="Progra~1|ProgramFilesFolder" IsPseudoRoot="1"/>
+    <ROW Directory="SHORTCUTDIR" Directory_Parent="TARGETDIR" DefaultDir="SHORTC~1|SHORTCUTDIR" IsPseudoRoot="1"/>
     <ROW Directory="SystemV_Dir" Directory_Parent="tzdata_Dir" DefaultDir="SystemV"/>
     <ROW Directory="TARGETDIR" DefaultDir="SourceDir"/>
     <ROW Directory="US_Dir" Directory_Parent="tzdata_Dir" DefaultDir="US"/>
@@ -194,6 +196,7 @@
     <ROW Component="ProductInformation" ComponentId="{204894AA-1C2B-49E2-A9C5-2F7392E6ED56}" Directory_="APPDIR" Attributes="4" KeyPath="Version"/>
     <ROW Component="README.txt" ComponentId="{493CDBF4-BBB2-4F9D-AB37-A0D3DA7E1402}" Directory_="library_Dir" Attributes="0" KeyPath="README.txt_3" Type="0"/>
     <ROW Component="README.txt_1" ComponentId="{7C124A58-2682-4FDF-B6AA-6CD11C6F7850}" Directory_="zipsource_Dir" Attributes="0" KeyPath="README.txt_4" Type="0"/>
+    <ROW Component="SHORTCUTDIR" ComponentId="{4E939DE0-54F4-4002-B0F8-9FD719B7FA9F}" Directory_="SHORTCUTDIR" Attributes="0"/>
     <ROW Component="__init__.pyc" ComponentId="{841F6051-01B9-4592-81C2-8C4FC4719B5C}" Directory_="zc_Dir" Attributes="0" KeyPath="__init__.pyc_8" Type="0"/>
     <ROW Component="__init__.pyc_1" ComponentId="{7D33DAB1-7532-452E-A024-C63B917FBEF9}" Directory_="components_Dir" Attributes="0" KeyPath="__init__.pyc_13" Type="0"/>
     <ROW Component="__init__.pyc_2" ComponentId="{A80C085E-29E1-4EE7-9EDD-A170F76C2CEB}" Directory_="foo_Dir" Attributes="0" KeyPath="__init__.pyc_18" Type="0"/>
@@ -223,7 +226,7 @@
     <ROW Component="cache_simul.pyc" ComponentId="{864080F0-14AD-47BE-8DBD-88DD2312E9C9}" Directory_="scripts_1_Dir" Attributes="0" KeyPath="cache_simul.pyc" Type="0"/>
     <ROW Component="cfgparser.pyc" ComponentId="{E35DB3D1-14D6-4EA8-A85D-A712A200BA8E}" Directory_="ZConfig_Dir" Attributes="0" KeyPath="cfgparser.pyc" Type="0"/>
     <ROW Component="client.pyc" ComponentId="{57502DC6-712E-4E2C-AE75-BEE0D16500FD}" Directory_="zrpc_Dir" Attributes="0" KeyPath="client.pyc" Type="0"/>
-    <ROW Component="cmb10.ttf" ComponentId="{0B0F6DF9-D6BC-485C-BD22-BE70CEC313C9}" Directory_="ttf_Dir" Attributes="0" Type="0"/>
+    <ROW Component="cmb10.ttf" ComponentId="{0B0F6DF9-D6BC-485C-BD22-BE70CEC313C9}" Directory_="ttf_Dir" Attributes="0" KeyPath="COPYRIGHT.TXT" Type="0"/>
     <ROW Component="cmex10.afm" ComponentId="{3FF5827A-F771-4F6C-8C72-B0D464DFF89C}" Directory_="afm_Dir" Attributes="0" KeyPath="cmex10.afm" Type="0"/>
     <ROW Component="compat.pyc" ComponentId="{29C3F0DD-C532-4237-83F8-7B0BFB64F019}" Directory_="transaction_Dir" Attributes="0" KeyPath="compat.pyc" Type="0"/>
     <ROW Component="component.xml" ComponentId="{D40988CA-266B-4A3B-9176-D452E10FA61F}" Directory_="basic_Dir" Attributes="0" KeyPath="component.xml_1" Type="0"/>
@@ -285,7 +288,7 @@
     <ROW Component="zconfig" ComponentId="{F64D04BC-73AB-44F0-9EE9-E52147480365}" Directory_="scripts_Dir" Attributes="0" KeyPath="zconfig" Type="0"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiFeatsComponent">
-    <ROW Feature="MainFeature" Title="MainFeature" Description="Description" Display="1" Level="1" Directory_="APPDIR" Attributes="0" Components="ACT AST4 Abidjan Acre ActivityMonitor.pyc Adak Aden Alaska Amsterdam Antananarivo Apia Atlantic Azores BTreeItemsTemplate.c BajaNorte BasicStorage.pyc Buenos_Aires CET CHANGES.txt C_pH610_set9_0901.pda Casey Center Continental CourierBold.afm Ekin_main.exe FileStorage.pyc GMT Indianapolis Longyearbyen Louisville ModelDesign.exe PipelineApp.exe PipelineCommand.exe ProductInformation README.txt README.txt_1 __init__.pyc __init__.pyc_1 __init__.pyc_2 __init__.pyc_3 __init__.pyc_4 abstract.xml adapter.pyc advisory_testing.pyc af.msg alltests.pyc altTheme.tcl analyze.pyc anilabel.tcl app.ico ascii.enc auth_digest.pyc auth_plaintext.pyc auto.tcl autotemp.pyc back.png basedatatype1.xml basemapping.pyc batch.pyc bgerror.tcl cPersistence.c cache.pyc cache_simul.pyc cfgparser.pyc client.pyc cmb10.ttf cmex10.afm compat.pyc component.xml component.xml_1 component.xml_2 component.xml_3 component.xml_4 convenience.txt cs.msg databycol1.txt dependency_links.txt dependency_links.txt_1 dependency_links.txt_2 dependency_links.txt_3 dependency_links.txt_4 dependency_links.txt_5 dependency_links.txt_6 dependency_links.txt_7 earth.gif extras.xml foosample.zip fstail.txt http.tcl idatetime.pyc lineprops.glade logo.eps nokill.pyc optparse.tcl persistent.txt ph_2.0__xx_.txt ph_2.0__xx_.txt_1 ph_2.0__xx_.txt_2 ph_2.0__xx_.txt_3 py.exe python26.dll r1_20121022.txt r1_20121022.txt_1 r1_20121022.txt_2 r1_20121022.txt_3 r1_20121022.txt_4 r1_20121022.txt_5 r1_20121022.txt_6 r1_20121022.txt_7 setF_010109_dilutions.xls setF_011208_ast.xls setF_270109_1_pH10.txt setF_280109_2_pH10.txt setF_290109_3_pH10.txt tcl85.dll testBTrees.pyc test_batch.pyc test_logger.pyc test_mapping.pyc testblob.pyc testchecker.fs tests.pyc tk85.dll txt.inp zconfig"/>
+    <ROW Feature="MainFeature" Title="MainFeature" Description="Description" Display="1" Level="1" Directory_="APPDIR" Attributes="0" Components="ACT AST4 Abidjan Acre ActivityMonitor.pyc Adak Aden Alaska Amsterdam Antananarivo Apia Atlantic Azores BTreeItemsTemplate.c BajaNorte BasicStorage.pyc Buenos_Aires CET CHANGES.txt C_pH610_set9_0901.pda Casey Center Continental CourierBold.afm Ekin_main.exe FileStorage.pyc GMT Indianapolis Longyearbyen Louisville ModelDesign.exe PipelineApp.exe PipelineCommand.exe ProductInformation README.txt README.txt_1 SHORTCUTDIR __init__.pyc __init__.pyc_1 __init__.pyc_2 __init__.pyc_3 __init__.pyc_4 abstract.xml adapter.pyc advisory_testing.pyc af.msg alltests.pyc altTheme.tcl analyze.pyc anilabel.tcl app.ico ascii.enc auth_digest.pyc auth_plaintext.pyc auto.tcl autotemp.pyc back.png basedatatype1.xml basemapping.pyc batch.pyc bgerror.tcl cPersistence.c cache.pyc cache_simul.pyc cfgparser.pyc client.pyc cmb10.ttf cmex10.afm compat.pyc component.xml component.xml_1 component.xml_2 component.xml_3 component.xml_4 convenience.txt cs.msg databycol1.txt dependency_links.txt dependency_links.txt_1 dependency_links.txt_2 dependency_links.txt_3 dependency_links.txt_4 dependency_links.txt_5 dependency_links.txt_6 dependency_links.txt_7 earth.gif extras.xml foosample.zip fstail.txt http.tcl idatetime.pyc lineprops.glade logo.eps nokill.pyc optparse.tcl persistent.txt ph_2.0__xx_.txt ph_2.0__xx_.txt_1 ph_2.0__xx_.txt_2 ph_2.0__xx_.txt_3 py.exe python26.dll r1_20121022.txt r1_20121022.txt_1 r1_20121022.txt_2 r1_20121022.txt_3 r1_20121022.txt_4 r1_20121022.txt_5 r1_20121022.txt_6 r1_20121022.txt_7 setF_010109_dilutions.xls setF_011208_ast.xls setF_270109_1_pH10.txt setF_280109_2_pH10.txt setF_290109_3_pH10.txt tcl85.dll testBTrees.pyc test_batch.pyc test_logger.pyc test_mapping.pyc testblob.pyc testchecker.fs tests.pyc tk85.dll txt.inp zconfig"/>
     <ATTRIBUTE name="CurrentFeature" value="MainFeature"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiFilesComponent">
@@ -2293,6 +2296,9 @@
     <ROW Dialog_="MaintenanceTypeDlg" Control_="RemoveButton" Event="NewDialog" Argument="VerifyRemoveDlg" Condition="AI_MAINT AND InstallMode = &quot;Remove&quot;" Ordering="601"/>
     <ROW Dialog_="MaintenanceTypeDlg" Control_="RepairButton" Event="NewDialog" Argument="VerifyRepairDlg" Condition="AI_MAINT AND InstallMode = &quot;Repair&quot;" Ordering="601"/>
   </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiCreateFolderComponent">
+    <ROW Directory_="SHORTCUTDIR" Component_="SHORTCUTDIR"/>
+  </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiCustActComponent">
     <ROW Action="AI_DOWNGRADE" Type="19" Target="4010"/>
     <ROW Action="AI_InstallModeCheck" Type="1" Source="aicustact.dll" Target="UpdateInstallMode" WithoutSeq="true"/>
@@ -2329,6 +2335,10 @@
   <COMPONENT cid="caphyon.advinst.msicomp.MsiRegsComponent">
     <ROW Registry="Path" Root="-1" Key="Software\[Manufacturer]\[ProductName]" Name="Path" Value="[APPDIR]" Component_="ProductInformation"/>
     <ROW Registry="Version" Root="-1" Key="Software\[Manufacturer]\[ProductName]" Name="Version" Value="[ProductVersion]" Component_="ProductInformation"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiShortsComponent">
+    <ROW Shortcut="DataPipeline" Directory_="DesktopFolder" Name="DataPi~1|DataPipeline" Component_="PipelineApp.exe" Target="[#PipelineApp.exe]" Hotkey="0" Icon_="PipelineApp.exe" IconIndex="0" ShowCmd="1" WkDir="datapipeline_Dir"/>
+    <ROW Shortcut="DataPipeline_1" Directory_="SHORTCUTDIR" Name="DataPi~1|DataPipeline" Component_="PipelineApp.exe" Target="[#PipelineApp.exe]" Hotkey="0" Icon_="PipelineApp.exe" IconIndex="0" ShowCmd="1" WkDir="datapipeline_Dir"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiThemeComponent">
     <ATTRIBUTE name="UsedTheme" value="classic"/>
