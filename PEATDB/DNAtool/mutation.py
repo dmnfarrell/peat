@@ -17,13 +17,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Contact information:
-# Email: Jens.Nielsen_at_gmail.com 
+# Email: Jens.Nielsen_at_gmail.com
 # Normal mail:
 # Jens Nielsen
 # SBBS, Conway Institute
 # University College Dublin
 # Dublin 4, Ireland
-# 
+#
 
 from Tkinter import *
 from seq_utils import *
@@ -52,34 +52,24 @@ genetic_code={'TTT':'PHE', 'TTC':'PHE','TTA':'LEU','TTG':'LEU','TCT':'SER','TCC'
               'AAT':'ASN','AAC':'ASN','AAA':'LYS','AAG':'LYS','AGT':'SER','AGC':'SER','AGA':'ARG','AGG':'ARG',
               'GTT':'VAL','GTC':'VAL','GTA':'VAL','GTG':'VAL','GCT':'ALA','GCC':'ALA','GCA':'ALA','GCG':'ALA',
               'GAT':'ASP','GAC':'ASP','GAA':'GLU','GAG':'GLU','GGT':'GLY','GGC':'GLY','GGA':'GLY','GGG':'GLY'}
-#
-# -----------------------------
-#
 
 def get_codons(AA):
     """Get all the codons that code for amino acid AA"""
-    
+
     posskey = []
-    for codon in genetic_code.keys():   
+    for codon in genetic_code.keys():
         if genetic_code[codon].upper()==AA.upper():
             posskey.append(codon)
     return posskey
 
-#
-# -----------------------------
-#
 
-#
 # Inverse genetic code
-#
 inverse_genetic_code={}
 for key in three_to_one.keys():
     inverse_genetic_code[key]=get_codons(key)
-#
-# Define DNA complementarity
-#
-complementary={'A':'T','T':'A','C':'G','G':'C'}
 
+# Define DNA complementarity
+complementary={'A':'T','T':'A','C':'G','G':'C'}
 
 try:
     from Numeric import *
@@ -93,40 +83,36 @@ class restriction_digest:
 
     def __init__(self):
         """Initialise"""
-        #
+
         # Find the file with the restriction enzymes
-        #
         found=None
-        for scriptdir in sys.path:
-            restriction_enzyme_file=os.path.join(scriptdir,'restriction_enzymes.DAT')
+        #try module path first, most reliable
+        import PEATDB.DNAtool
+        paths = [os.path.dirname(PEATDB.DNAtool.__file__)]
+        paths = paths + sys.path
+        for scriptdir in paths:
+            restriction_enzyme_file = os.path.join(scriptdir, 'restriction_enzymes.DAT')
             if os.path.isfile(restriction_enzyme_file):
                 found=1
                 break
-            restriction_enzyme_file=os.path.join(scriptdir,'DNAtool','restriction_enzymes.DAT')
+            restriction_enzyme_file = os.path.join(scriptdir,'DNAtool','restriction_enzymes.DAT')
             if os.path.isfile(restriction_enzyme_file):
                 found=1
                 break
-        #
+
         # Did we find the file?
-        #
         if not found:
             print
             print 'File holding description of restriction enzymes could not be found'
             print
-            return 
-        #
-        # Open the file
-        #
+            return
+
         fd=open(restriction_enzyme_file)
         lines=fd.readlines()
         fd.close()
-        #
-        # Parse the lines
-        #
+
         self.restriction_lines=[]
-        #
-        # Is this a REBASE file?
-        #
+
         found=None
         count=0
         while not found:
@@ -139,26 +125,15 @@ class restriction_digest:
             tkMessageBox.showwarning('Not a REBASE file',
                                      'The restriction enzyme definition file is not in REBASE format')
             return
-        #
-        # OK, REBASE file - this is the only format we deal with right now
-        #
-        self.parse_REBASE(lines)
-        #
-        # Vars
-        #
-        self.exclude_promiscuous_enzymes=1
-        #
-        # Pre-compile all the regular expressions
-        #
-        self.compile_regexs()
-        #
-        # Success
-        #
-        return
 
-    #
-    # ----------
-    #
+        # OK, REBASE file - this is the only format we deal with right now
+        self.parse_REBASE(lines)
+        self.exclude_promiscuous_enzymes=1
+
+        # Pre-compile all the regular expressions
+        self.compile_regexs()
+        # Success
+        return
 
     def parse_REBASE(self,lines):
         """Parse a REBASE restriction enzyme file"""
@@ -176,34 +151,26 @@ class restriction_digest:
             self.restriction_lines.append('%s %s' %(name,rec_seq))
             count=count+1
         return
-            
-
-    #
-    # -----------
-    #
 
     def compile_regexs(self):
-        #
         # Compile all the regular expressions and store them in a ditionary (self.enzymes_regexs)
-        #
+
         self.enzymes_regexs={}
-        import re, string
-        #
+
+        if not hasattr(self, 'restriction_lines'):
+            return
+
         # Loop over the enzyme definitions
-        #
         for line in self.restriction_lines:
-            #
+
             # Get the enzyme name
-            #
             enz_name=line.split()[0]
-            #
             # Compile the regex
-            #
             rec_seq=line.split()[1]
-            #
+
             # Deal with the (x/y) statements
             # These mean that we add max(x,y) Ns to the sequence and insert cuts at those positions
-            #
+
             while rec_seq.find('(')!=-1:
                 p_start=rec_seq.find('(')
                 p_end=rec_seq.find(')')
@@ -224,50 +191,38 @@ class restriction_digest:
                 else:
                     new_txt=new_txt[:max_N-second_site+1]+'^'+new_txt[max_N-second_site+1:]
                 rec_seq=rec_seq.replace(txt,new_txt)
-            #
+
             # Find all positions where the enzyme cuts
-            #
             poscuts=[]
             count=0
             for l in rec_seq:
                 if l=='^':
                     poscuts.append(count-len(poscuts))
                 count=count+1
-            #
+
             # If no position is specified, then we guess at the middle
-            #
             if poscuts==[]:
                 poscuts=[int(len(rec_seq)/2)]
-            #
+
             # Produce the regular expression
-            #
             rec_seq =  re.sub ( r"\^", r"", rec_seq )
             rec_seq=self.expand_recognition_sequence(rec_seq)
-            #
+
             # We only inlude enzymes with N's in their recognition sequence if the flags are right
-            # 
-            if rec_seq.find('N')>0:                
+            if rec_seq.find('N')>0:
                 if self.exclude_promiscuous_enzymes==1:
                     continue
             comp_seq=re.compile(rec_seq)
-            #
+
             # Add the enzyme
-            #
             self.enzymes_regexs[enz_name]={'re':comp_seq,'realseq':rec_seq,'poscut':poscuts,
                 'ncuts':len(poscuts)}
-        #
-        # Done
-        #
-        return 
 
-        #
-        # ----------
-        #
-        
+        return
+
     def expand_recognition_sequence(self,seq):
-        #
         # Expand all the aliases
-        #
+
         old_seq=seq
         seq = string.replace(seq,'R','[AG]')
         seq = string.replace(seq,'Y','[TC]')
@@ -290,131 +245,77 @@ class restriction_digest:
             if old_seq!=seq:
                 return 'Do not include'
         return seq
-        
-    #
-    # ---------------------
-    #
 
     def get_restriction_sites(self,DNA_sequence,enzyme_list):
-        #
         # Get all the restriction sites
-        #
+
         if enzyme_list!=None:
-            #
+
             # If we get a certain list of enzymes then use that one
-            #
+
             sites=self._get_restriction_sites(DNA_sequence,enzyme_list)
         else:
-            #
             # Just use all enzymes
-            #
             sites=self._get_restriction_sites(DNA_sequence,self.list_of_enzymes)
         return sites
 
-    #
-    # -----------
-    #
-
     def _get_restriction_sites(self,DNA_seq,enzyme_list):
-        #
         # Find the restriction sites by matching regular expressions
-        #
+
         sites={}
         for enzyme_name in enzyme_list:
             if self.enzymes_regexs.has_key(enzyme_name):
                 reg_ex=self.enzymes_regexs[enzyme_name]['re']
-                #
                 # Find the sites
-                #
                 iterator=reg_ex.finditer(DNA_seq)
-                #
                 # Loop over each site (each site is a re.match object in iterator)
-                #
                 for match in iterator:
-                    #
                     # do we have an entry for this enzyme already?
-                    #
                     if not sites.has_key(enzyme_name):
                         sites[enzyme_name]=[]
-                    #
                     # Find the exact position of the cut and append it to the list
-                    #
                     for cut in self.enzymes_regexs[enzyme_name]['poscut']:
                         sites[enzyme_name].append([cut+match.start()])
-            #
-            # done
-            #
         return sites
 
 
-# =============================================================================
-
-
 def match(base1,base2):
-    #
     # Check the bases pair
-    #
+
     if base1==complementary[base2]:
         return 1
-        
+
     return None
 
-#
-# --------
-#
-
 def get_reverse_complementary(DNA_seq):
-    #
     # Produce the reverse complementary DNA sequence
-    #
+
     inverted_DNA_compl=''
     for base in DNA_seq:
-        inverted_DNA_compl=complementary[base]+inverted_DNA_compl 
+        inverted_DNA_compl=complementary[base]+inverted_DNA_compl
     return inverted_DNA_compl
 
-#
-# ---------
-#
-        
 class scan_primer:
 
     """Scan the DNA sequence for binding sites for a primer"""
 
     def __init__(self,DNA_seq):
-        #
         # Store the DNA sequence and the inverted complementary DNA sequence
-        #
-        import string
         self.DNA_seq=string.upper(DNA_seq)
-        #
         # Make the inverted complementary sequence
-        #
         self.inverted_DNA_compl=get_reverse_complementary(DNA_seq)
-        #
-        # done
-        #
         return
 
-    #
-    # --------
-    #
 
     def match(self,base1,base2):
-        #
         # Check the bases pair
-        #
         if match(base1,base2):
             return 1
         return -1
 
-    #
-    # ----------
-    #
-
     def scan(self,primer):
-        #
         # Scan over the DNA sequence to see if we have any other good binding sites
-        #
+
         bad_pos = {}
         bad_pos_DNA_seq = {}
         for pos in range (0,(len(self.inverted_DNA_compl)-len(primer))):
@@ -423,36 +324,29 @@ class scan_primer:
             for j in range (0, len(primer)):
                 selfscorematch=selfscorematch+self.match(primer[j],self.inverted_DNA_compl[pos+j])
                 DNA_seq_selfscorematch=DNA_seq_selfscorematch+self.match(primer[j],self.DNA_seq [pos+j])
-            #
+
             # Done looping for this starting position
-            #
             sum_inverted_DNA_compl=selfscorematch
             sum_DNA_seq=DNA_seq_selfscorematch
-            #
+
             # Store the resulst in a dictionary
-            #
             if sum_inverted_DNA_compl >= 8:
                 bad_pos [pos] = {primer:sum_inverted_DNA_compl}
             if sum_DNA_seq >= 8:
                 bad_pos_DNA_seq [pos] = {primer:sum_DNA_seq}
-        return bad_pos, bad_pos_DNA_seq 
+        return bad_pos, bad_pos_DNA_seq
 
-#
-# ==================================================================
-#
 
 def initialise():
-    #
     # Get the restriction enzyme definitions and the test sequence
-    #
+
     s=getRNA_seq()
     return s,enzymes
 
 
 def getRNA_seq():
-    #
     # Read the RandomRNA.seq file
-    #
+
     fd = open ('testDNA', 'r')
     DNAseqs = fd.readlines ()#Reads lines and returns the lines in a list
     fd.close ()
@@ -460,11 +354,6 @@ def getRNA_seq():
     s = string.join (DNAseqs,'')
     s=string.upper(s)
     return s
-
-#
-# -------------------
-# 
-
 
 def check_DNA(DNA_sequence):
     """Check that we have a DNA sequence without junk"""
@@ -486,9 +375,6 @@ def check_DNA(DNA_sequence):
         return ok, DNA_sequence
     return ok,garbage.keys()
 
-#
-# -------------------
-# 
 
 def translate(DNA_sequence):
     """Translate the DNA sequence in three forward frames"""
@@ -529,7 +415,7 @@ def translate(DNA_sequence):
 #
 # ----------------
 #
-    
+
 
 def PCR_primer(DNA_seq,Tm_desired=65):
     SP = 1
@@ -546,7 +432,7 @@ def PCR_primer(DNA_seq,Tm_desired=65):
         for i in range (0, len(s)):
             if changedbase-i>=0:
                 primer_backward = s[changedbase-i:changedbase]
-                AUcount, GCcount, Tm_backward, base_count_backward = AT_GC_Tm_base_count (primer_backward)                
+                AUcount, GCcount, Tm_backward, base_count_backward = AT_GC_Tm_base_count (primer_backward)
             if changedbase+i<=len(s):
                 primer_forward = s[changedbase:changedbase+i]
                 AUcount, GCcount, Tm_forward, base_count_forward = AT_GC_Tm_base_count (primer_forward)
@@ -554,8 +440,8 @@ def PCR_primer(DNA_seq,Tm_desired=65):
                     Tm = Tm_backward+Tm_forward
                     primer = primer_backward + primer_forward
                     megaprimer_dict [changedbase] = primer
-                    break        
-    #    
+                    break
+    #
     #inverts the primer starting in FP
     #
     inverted = ''
@@ -605,11 +491,11 @@ def get_primer_Tm(DNAseq,primer,primer_start,method='Stratagene'):
         # No alignment
         #
         #GC_count=get_base_count(primer, 'GC')
-        
+
         for base in primer:
             if base=='G' or base=='C':
                 GC_count=GC_count+1
-        
+
     perc_GC=float(GC_count)/float(len(primer))*100.0
     #
     # Different Tm calculation formulas
@@ -633,11 +519,11 @@ def get_primer_Tm(DNAseq,primer,primer_start,method='Stratagene'):
     elif method =='Basic' or DNASeq==None:
         #
         # Use the simplest, Tm = 2AT + 4GC
-        # 
+        #
         AT=get_base_count(primer, 'AT')
         GC=get_base_count(primer, 'GC')
-        return 2*AT + 4*GC,0.0,'Basic'        
-        
+        return 2*AT + 4*GC,0.0,'Basic'
+
     return 0.0,0.0,'None'
 
 
@@ -674,7 +560,7 @@ def hairpin_propensity (primer):
             #
             afterloop = primer[pos+loop_length:]
             length=min(len(b4loop),len(afterloop))
-            score = 0    
+            score = 0
             for i in range(length):
                 base_before=b4loop_r[i]
                 base_after=afterloop[i]
@@ -699,7 +585,7 @@ def hairpin_propensity (primer):
 # ----------
 #
 
-    
+
 def self_complementarity_propensity(primer):
     #
     # score for self-complementary sequence ###
@@ -707,7 +593,7 @@ def self_complementarity_propensity(primer):
     #
     # This function needs to be tested to see if it is accurate
     #
-    
+
     selfscoredict = {}
     inverted_primer = ''
     partial_primer = ''
@@ -720,13 +606,13 @@ def self_complementarity_propensity(primer):
         inverted_primer=inverted_primer+primer[pos]
     ##construction of the matching matrix##
     for j in range (0,len(primer)):
-        for i in range (0,len(inverted_primer)): 
+        for i in range (0,len(inverted_primer)):
            if (primer [j] == 'A' and inverted_primer [i] == 'T') or (primer [j] == 'C' and inverted_primer [i] == 'G') or (primer [j] == 'G' and inverted_primer [i] == 'C') or (primer[j] == 'T' and inverted_primer[i] == 'A'):
                  matrix[j,i]= 1
            if (primer [j] == 'A' and inverted_primer [i] != 'T') or (primer [j] == 'C' and inverted_primer [i] != 'G') or (primer [j] == 'G' and inverted_primer [i] != 'C') or (primer[j] == 'T' and inverted_primer[i] != 'A'):
                  matrix[j,i]= -1
-                    
-                   
+
+
     for j in range(-len(primer),len(primer)):
         score_dict[j]=(trace(matrix,j))
         score.append(trace(matrix,j))
@@ -787,7 +673,7 @@ def exhaustive_research(DNA_sequence,AA_number,NewAA,Tm_desired,Tm_method,enzyme
     #print AA_sequence
     #stop
     for item in AA_sequence3:
-        res_comb.append(inverse_genetic_code[item])   
+        res_comb.append(inverse_genetic_code[item])
     #
     # Call add_next
     #
@@ -907,7 +793,7 @@ def exhaustive_research(DNA_sequence,AA_number,NewAA,Tm_desired,Tm_method,enzyme
         hairpin_dict, maxscorelist = hairpin_propensity (primer)
         complementarity_dict,maxselfscorelist = self_complementarity_propensity (primer)
         if maxselfscorelist < 8:
-            maxselfscorelist = 'OK' 
+            maxselfscorelist = 'OK'
         elif maxselfscorelist >= 8:
             maxselfscorelist = 'BAD'
         if maxscorelist < 8:
@@ -925,8 +811,8 @@ def exhaustive_research(DNA_sequence,AA_number,NewAA,Tm_desired,Tm_method,enzyme
 #
 # ---------
 #
-           
-    
+
+
 def add_next (res_comb):
     """ Generates all the possible permutations by calling itself"""
     l = []
@@ -967,7 +853,7 @@ def get_defaults():
     # number: number
     # res_list: List of residue numbers
     # T/F: True/False: If you give the argument then set to true, otherwise false
-    # 
+    #
     defaults={'seq':['HEWL.fasta','text'],'mutation':['L10C','text'],'pir':[1,'T/F'],
               'fasta':[None,'T/F'],'Tm':[65.0,'number'],'no_restriction_site':[None,'T/F']}
     return defaults.copy()
@@ -1025,8 +911,8 @@ def main():
     seq_file=params['seq']
     new_AA=params['mutation'][-1]
     AA_number=int(params['mutation'][1:-1])
-    
-    
+
+
     S=DNA_sequence.sequence()
     DNA_seq=S.readpir(seq_file)
     Tm_desired=params['Tm']
@@ -1044,12 +930,12 @@ def main():
     #
     new_enzymes, primers_results_dict, enzymes_that_already_cut, primer_starting_position,comb_on_Tm = exhaustive_research(DNA_seq,AA_number,new_AA,Tm_desired,find_restriction_site,enzyme_list=None)
     megaprimer_dict =  megaprimer (DNA_seq,Tm_desired=65)
-    return 
+    return
 
 #
 # --------
 #
-   
+
 
 if __name__=='__main__':
     #import profile
@@ -1064,4 +950,4 @@ if __name__=='__main__':
     #    usage()
 
 
-    
+
