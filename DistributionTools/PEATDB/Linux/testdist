@@ -1,0 +1,14 @@
+#this script creates the source distribution and installs in the
+#virtual environment in /local/enc
+
+ver="2.3"
+rm -rf PEATDB;
+rm -rf PEATDB-$ver
+svn export ../../../PEATDB PEATDB;
+python setup.py sdist;
+source /local/env/bin/activate;
+tar -xzvf dist/PEATDB-$ver.tar.gz;
+pip uninstall PEATDB;
+cd PEATDB-$ver;
+python setup.py install;
+deactivate;

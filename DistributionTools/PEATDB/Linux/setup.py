@@ -2,7 +2,7 @@ from setuptools import setup
 import sys,os
 home=os.path.expanduser('~')
 
-setup(name='PEATDB', version='2.2',
+setup(name='PEATDB', version='2.3',
 	description='Protein Engineering Analysis Tool',
 	author='Nielsen Group, UCD',
 	author_email='farrell.damien[at]gmail.com',
@@ -20,5 +20,6 @@ setup(name='PEATDB', version='2.2',
                       'MySQL-python','relstorage>=1.4'],
     entry_points = { 'gui_scripts': [
                      'peatdb = PEATDB.PEATApp:main',
-                     'ekin= PEATDB.Ekin.Ekin_main:main'],}
+                     'ekin= PEATDB.Ekin.Ekin_main:main',
+		     'dnatool = PEATDB.DNAtool.DNAtool:main']}
 )
