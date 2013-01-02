@@ -256,7 +256,7 @@ class ghost_analyzer:
                     # convert to kJ/mol
                     #
                     exp_value,angle_degrees=EF.get_energy(exp_value,'%s:%s' %(residue,nucleus),titgroup)
-                    if abs(90.0-angle_degrees)>10.0 and abs(270-angle_degrees)>10.0:
+                    if abs(90.0-angle_degrees)>20.0 and abs(270-angle_degrees)>20.0:
                         vals.append([exp_value,exp_error,nucleus])
                 Edict[titgroup][residue]=vals[:]
         #
