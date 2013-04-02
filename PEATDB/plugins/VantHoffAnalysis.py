@@ -38,7 +38,8 @@ import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
 from PEATDB.Ekin.Base import EkinProject,EkinDataset
-import PEATDB.Ekin.Fitting
+import PEATDB.Ekin.Fitting as Fitting
+import tkFileDialog
 
 class VantHoff(Plugin):
     """A plugin to do Van't Hoff Analysis of temperature melting curves"""
@@ -100,10 +101,10 @@ class VantHoff(Plugin):
         self.conversions.pack()
         self.methods = Pmw.RadioSelect(fr,
                 buttontype = 'checkbutton',
-                orient = 'horizontal',
+                orient = 'vertical',
                 labelpos = 'w',
                 label_text = 'Methods:')
-        for m in ['method 1','method 2','method 3']:
+        for m in ['method 1','method 2','method 3', 'method 4']:
             self.methods.add(m)
         self.methods.invoke('method 1')
         self.methods.pack()
@@ -181,7 +182,7 @@ class VantHoff(Plugin):
 
     def loadEkin(self):
         """Load the ekin prj"""
-        import tkFileDialog
+
         filename=tkFileDialog.askopenfilename(defaultextension='.ekinprj',
                                                   initialdir=os.getcwd(),
                                                   filetypes=[("ekinprj","*.ekinprj"),
@@ -199,7 +200,6 @@ class VantHoff(Plugin):
         """save proj"""
         if self.E != None:
             if self.E.filename == None:
-                import tkFileDialog
                 self.E.filename = tkFileDialog.asksaveasfilename(defaultextension='.ekinprj',
                                                           initialdir=os.getcwd(),
                                                           filetypes=[("ekinprj","*.ekinprj"),
@@ -222,11 +222,13 @@ class VantHoff(Plugin):
                 self.fitVantHoff(E=self.E,d=self.dmenu.getcurselection(),
                         transwidth=int(self.tw.getvalue()))
             if 'method 2' in methods:
-                self.fitDifferentialCurve(E=self.E,d=self.dmenu.getcurselection(),
-                                            smooth=int(self.sm.getvalue()))
-            if 'method 3' in methods:
                 self.fitElwellSchellman(E=self.E,d=self.dmenu.getcurselection(),
                                             transwidth=int(self.tw.getvalue()))
+            if 'method 3' in methods:
+                self.fitDifferentialCurve(E=self.E,d=self.dmenu.getcurselection(),
+                                            smooth=int(self.sm.getvalue()))
+            if 'method 4' in methods:
+                self.breslauerMethod(E=self.E,d=self.dmenu.getcurselection())#,invert=opts.invert)
         return
 
     def guessMidpoint(self,x,y):
@@ -448,7 +450,9 @@ class VantHoff(Plugin):
         ax=f.add_subplot(111)
         ax.set_xlabel('T')
         p=ax.plot(x,y,'o',alpha=0.5)
-        A,X=Fitting.doFit(expdata=zip(x,y),model='Unfolding',conv=1e-7,noiter=40)
+        d50 = self.guessMidpoint(x,y)
+        A,X=Fitting.doFit(expdata=zip(x,y),model='Unfolding',conv=1e-7,noiter=60,
+                            guess=False,startvalues=[1,1,1,1,1,d50])
         fity = X.getFitLine(x)
         p=ax.plot(x,fity,'r',lw=2)
         fd=X.getFitDict()

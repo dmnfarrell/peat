@@ -17,13 +17,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Contact information:
-# Email: Jens.Nielsen_at_gmail.com 
+# Email: Jens.Nielsen_at_gmail.com
 # Normal mail:
 # Jens Nielsen
 # SBBS, Conway Institute
 # University College Dublin
 # Dublin 4, Ireland
-# 
+#
 
 from Tkinter import *
 import tkSimpleDialog, tkFileDialog, tkMessageBox
@@ -110,7 +110,7 @@ class askyesnocancel(Frame):
 
         #self.win.initial_focus.focus_set()
         self.win.bind("&lt;Return>", self.yes)
-        self.win.bind("&lt;Escape>", self.cancel)        
+        self.win.bind("&lt;Escape>", self.cancel)
         self.win.wait_window(self.win)
         return None
 
@@ -177,7 +177,7 @@ class PEATDialog(Tk):
         progrlbl = Label(self.progress_win,text=message)
         progrlbl.grid(row=0,column=0,sticky='news',padx=6,pady=4)
         progrlbl2 = Label(self.progress_win,text='Please Wait..')
-        progrlbl2.grid(row=1,column=0,sticky='news',padx=6,pady=4)       
+        progrlbl2.grid(row=1,column=0,sticky='news',padx=6,pady=4)
         self.progress_win.update()
         return
 
@@ -243,16 +243,16 @@ class PEATDialog(Tk):
 
     @classmethod
     def createBusyBar(cls, parent):
-        import BusyBar        
-        bb = BusyBar.BusyBar(parent, text='Busy')        
+        import BusyBar
+        bb = BusyBar.BusyBar(parent, text='Busy')
         return bb
-    
+
     @classmethod
     def createProgressBar(cls, parent):
         import ProgressBar
-        bar = ProgressBar.ProgressBar(parent)        
+        bar = ProgressBar.ProgressBar(parent)
         return bar
-    
+
     def show_pmw_dialog(self):
         """Show a pmw dialog window"""
         import Pmw
@@ -317,22 +317,22 @@ class TopLevelModalDialog(Toplevel):
         Toplevel.__init__(self, parent)
         self.transient(parent)
         self.title('PEATSA Results Export')
-        self.parent = parent        
-        self.geometry('%sx%s+300+200' %(width,height)) 
+        self.parent = parent
+        self.geometry('%sx%s+300+200' %(width,height))
         self.body = Frame(self)
         self.initial_focus = self.body
-        self.body.pack(fill=BOTH,expand=1,padx=5, pady=5)        
+        self.body.pack(fill=BOTH,expand=1,padx=5, pady=5)
         self.grab_set()
         if not self.initial_focus:
             self.initial_focus = self
-        self.protocol("WM_DELETE_WINDOW", self.cancel)        
+        self.protocol("WM_DELETE_WINDOW", self.cancel)
         return
 
     def cancel(self):
         self.parent.focus_set()
-        self.destroy()      
+        self.destroy()
         return
-        
+
 class MultipleValDialog(tkSimpleDialog.Dialog):
     """Simple dialog to get multiple values"""
 
@@ -346,7 +346,7 @@ class MultipleValDialog(tkSimpleDialog.Dialog):
     def body(self, master):
 
         r=0
-        self.vrs=[];self.entries=[]        
+        self.vrs=[];self.entries=[]
         for i in range(len(self.labels)):
             Label(master, text=self.labels[i]).grid(row=r, column=0,sticky='news')
             if self.types[i] == 'int':
@@ -383,4 +383,4 @@ class MultipleValDialog(tkSimpleDialog.Dialog):
         self.results = []
         for i in range(len(self.labels)):
             self.results.append(self.vrs[i].get())
-        return        
+        return
