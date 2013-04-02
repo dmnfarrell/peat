@@ -420,7 +420,7 @@ class VantHoff(Plugin):
         fd=X.getFitDict()
         self.drawParams(ax1,fd)
         deltaH=fd['deltaH']; deltacp=fd['deltacp']; Tm=fd['Tm']
-        f.suptitle("Method 2 - deltaH: %2.2f deltaCp: %2.2f Tm: %2.2f" %(deltaH,deltacp,Tm),size=18)
+        f.suptitle("Method 2 - deltaH: %2.2f deltaCp: %2.2e Tm: %2.2f" %(deltaH,deltacp,Tm),size=18)
         if show == True:
             self.showTkFigure(f)
 

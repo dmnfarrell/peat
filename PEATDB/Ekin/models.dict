@@ -60,24 +60,24 @@ p31
 (dp32
 g23
 (dp33
-sS'name'
-p34
-g31
-sS'equation'
-p35
-S'span1*(x/pKa3 + 1)/(1+x/pKa2+x/pKa3+x*x/(pKa1*pKa3))+offset'
-p36
-sS'varnames'
-p37
-S'pKa1,pKa2,pKa3,offset,span1'
-p38
-sS'Name'
-p39
-g31
 sS'description'
-p40
+p34
 S'titration curve with 3 independent pkas'
+p35
+sS'equation'
+p36
+S'span1*(x/pKa3 + 1)/(1+x/pKa2+x/pKa3+x*x/(pKa1*pKa3))+offset'
+p37
+sS'varnames'
+p38
+S'pKa1,pKa2,pKa3,offset,span1'
+p39
+sS'Name'
+p40
+g31
+sS'name'
 p41
+g31
 ssS'3 pKas, 4 Chemical shifts'
 p42
 (dp43
@@ -96,33 +96,33 @@ sS'pKa3'
 p50
 S'min(x)+(max(x)-min(x))*0.75'
 p51
-sS'span2'
+sS'offset'
 p52
-S'(max(y)-min(y))/3'
+S'min(y)'
 p53
 sS'span1'
 p54
-g53
-sS'span3'
+S'(max(y)-min(y))/3'
 p55
-g53
-sS'offset'
+sS'span3'
 p56
-S'min(y)'
+g55
+sS'span2'
 p57
+g55
 ssg40
-S''
-p58
-sg35
+g42
+sg36
 S'span1/(1+10**(pKa1-x))+span2/(1+10**(-x+pKa2))+span3/(1+10**(-x+pKa3))+offset'
+p58
+sg41
+g42
+sg38
+S'pKa1,pKa2,pKa3,offset,span1,span2,span3'
 p59
 sg34
-g42
-sg37
-S'pKa1,pKa2,pKa3,offset,span1,span2,span3'
+S''
 p60
-sg39
-g42
 ssS'Residual Activity'
 p61
 (dp62
@@ -141,18 +141,18 @@ p68
 S'max(y)'
 p69
 ssg40
-S'fits thermal denaturation data (basic sigmoid)'
-p70
-sg35
+g61
+sg36
 S'top/(1+math.pow(x/t50,slope))'
+p70
+sg41
+g61
+sg38
+S't50,slope,top'
 p71
 sg34
-g61
-sg37
-S't50,slope,top'
+S'fits thermal denaturation data (basic sigmoid)'
 p72
-sg39
-g61
 ssS'2 pKas, 3 Chemical shifts'
 p73
 (dp74
@@ -167,9 +167,9 @@ p78
 sS'guess'
 p79
 (dp80
-S'span2'
+S'offset'
 p81
-S'(max(y)-min(y))/2'
+S'min(y)'
 p82
 sS'span1'
 p83
@@ -183,9 +183,9 @@ sS'pKa2'
 p87
 S'min(x)+(max(x)-min(x))*0.75'
 p88
-sS'offset'
+sS'span2'
 p89
-S'min(y)'
+S'(max(y)-min(y))/2'
 p90
 ssS'description'
 p91
@@ -205,7 +205,7 @@ sS'b'
 p99
 S'max(y)-min(y)/max(x)-min(x)'
 p100
-ssS'Name'
+ssS'name'
 p101
 S'Linear'
 p102
@@ -221,25 +221,25 @@ sS'varnames'
 p107
 S'a,b'
 p108
-sS'name'
+sS'Name'
 p109
 g102
 ssS'Power'
 p110
 (dp111
-g37
+g38
 S'a,b'
 p112
-sg35
+sg36
 S'(x**a)+b'
 p113
-sg39
-g110
 sg40
+g110
+sg41
+g110
+sg34
 S'fit to data that obeys a power law'
 p114
-sg34
-g110
 ssS'1 pKa 2 Chemical shifts'
 p115
 (dp116
@@ -247,18 +247,18 @@ g44
 S"{'pKa': 'min(x)+(max(x)-min(x))/2.0', 'span': 'max(y)-min(y)', 'offset': 'min(y)'}"
 p117
 sg40
-S'titration curve with 1 independent pka'
-p118
-sg35
+g115
+sg36
 S'span/(1+10**(-x+pKa))+offset'
+p118
+sg41
+g115
+sg38
+S'pKa,span,offset'
 p119
 sg34
-g115
-sg37
-S'pKa,span,offset'
+S'titration curve with 1 independent pka'
 p120
-sg39
-g115
 ssS'Exponential Growth'
 p121
 (dp122
@@ -269,18 +269,18 @@ p124
 S'max(y)'
 p125
 ssg40
-S'Exponential Association'
+S'Exponential Growth'
 p126
-sg35
+sg36
 S'p*(1-math.exp(-K*x))'
 p127
-sg34
+sg41
 g121
-sg37
+sg38
 S'K,p'
 p128
-sg39
-S'Exponential Growth'
+sg34
+S'Exponential Association'
 p129
 ssS'Substrate Depletion'
 p130
@@ -288,18 +288,18 @@ p130
 g23
 (dp132
 sg34
-g130
-sg35
-S'M * (1 - math.exp(-D*(x-x0)))'
-p133
-sg37
-S'x0,M,D'
-p134
-sg39
-g130
-sg40
 S'fit substrate depletion data'
+p133
+sg36
+S'M * (1 - math.exp(-D*(x-x0)))'
+p134
+sg38
+S'x0,M,D'
 p135
+sg40
+g130
+sg41
+g130
 ssS'Modified Hill'
 p136
 (dp137
@@ -324,18 +324,18 @@ p144
 g23
 (dp146
 sg34
-g144
-sg35
-S'scale*(1.0/(math.pow(10,-pH)/math.pow(10,-pKa2)+1+math.pow(10,-pKa1)/math.pow(10,-pH)))'
-p147
-sg37
-S'pka1,pka2,scale'
-p148
-sg39
-g144
-sg40
 S'pH activity profile'
+p147
+sg36
+S'scale*(1.0/(math.pow(10,-pH)/math.pow(10,-pKa2)+1+math.pow(10,-pKa1)/math.pow(10,-pH)))'
+p148
+sg38
+S'pka1,pka2,scale'
 p149
+sg40
+g144
+sg41
+g144
 ssS'Michaelis-Menten'
 p150
 (dp151
@@ -404,18 +404,18 @@ p179
 S'min(x)'
 p180
 ssg40
-S'fit to a denaturation curve. with 6 parameters, including baseline slopes'
+S'Unfolding'
 p181
-sg35
+sg36
 S'((an + bn * x) + (ad + bd * x) * math.exp(m * (x-d50))) / (1+math.exp(m * (x-d50)))'
 p182
-sg34
+sg41
 g172
-sg37
+sg38
 S'an,bn,ad,bd,m,d50'
 p183
-sg39
-S'Unfolding'
+sg34
+S'fit to a denaturation curve. with 6 parameters, including baseline slopes'
 p184
 ssS'DSC2state'
 p185
@@ -423,18 +423,18 @@ p185
 g23
 (dp187
 sg34
-g185
-sg35
-S'deltaH / (R*math.pow(x,2)) * f * (1-f)'
-p188
-sg37
-S'Tm,deltaH'
-p189
-sg39
-g185
-sg40
 S'fit simple two state model to DSC data'
+p188
+sg36
+S'deltaH / (R*math.pow(x,2)) * f * (1-f)'
+p189
+sg38
+S'Tm,deltaH'
 p190
+sg40
+g185
+sg41
+g185
 ssS'Sigmoid'
 p191
 (dp192
@@ -442,83 +442,86 @@ g44
 S"{'slope': '1', 'top': 'max(y)', 'tm': '(max(x)-min(x))/2+min(x)', 'bottom': 'min(y)'}"
 p193
 sg40
-S'simple sigmoid'
-p194
-sg35
+g191
+sg36
 S'bottom+(top-bottom)/(1+math.exp((tm-x)/slope))'
+p194
+sg41
+g191
+sg38
+S'tm,bottom,top,slope'
 p195
 sg34
-g191
-sg37
-S'tm,bottom,top,slope'
+S'simple sigmoid'
 p196
-sg39
-g191
 ssS'diffDenaturation'
 p197
 (dp198
-g3
-S'A,f'
-p199
-sg5
-S'A * f * (1-f) *(math.pow(x,2))'
-p200
-sg7
-(dp201
-S'A'
-p202
-S'3e4'
-p203
-sS'f'
-p204
-S'8e-3'
-p205
-ssg15
-S'Fit to a 3 parameter differential denaturation curve,\n        ref. John/Weeks Protein Science 2000'
-p206
-ssS'Gaussian'
-p207
-(dp208
 S'varnames'
-p209
-S'a,b,c'
-p210
+p199
+S'A,deltaH,f'
+p200
 sS'equation'
-p211
-S'a*exp(-(pow((x-b),2)/(pow(2*c,2))))'
-p212
+p201
+S'A * (deltaH / (8.1e-3 * math.pow(x,2)) ) *f *(1-f)'
+p202
 sS'guess'
-p213
-(dp214
-Va
-p215
-S'max(y)'
-p216
-sVc
-p217
-S'100'
-p218
+p203
+(dp204
+S'A'
+p205
+S'1'
+p206
+sS'f'
+p207
+g206
 ssS'description'
+p208
+S'Fit to a 3 parameter differential denaturation curve,\n        ref. John/Weeks Protein Science 2000'
+p209
+ssS'Gaussian'
+p210
+(dp211
+S'varnames'
+p212
+S'a,b,c'
+p213
+sS'equation'
+p214
+S'a*exp(-(pow((x-b),2)/(pow(2*c,2))))'
+p215
+sS'guess'
+p216
+(dp217
+Va
+p218
+S'max(y)'
 p219
-S'gaussian function, a bell-shaped curve'
+sVc
 p220
-ssS'Arrhenius'
+S'100'
 p221
-(dp222
-S'guess'
+ssS'description'
+p222
+S'gaussian function, a bell-shaped curve'
 p223
-(dp224
-sg39
-g221
-sg35
-S'A*exp(-Ea/RT)'
-p225
-sg34
-g221
-sg37
-S'A,Ea'
+ssS'Arrhenius'
+p224
+(dp225
+S'guess'
 p226
-sg40
+(dp227
+sg34
 S'arrhenius equation'
-p227
+p228
+sg36
+S'A*exp(-Ea/RT)'
+p229
+sg41
+g224
+sg38
+S'A,Ea'
+p230
+sg40
+g224
 ss.

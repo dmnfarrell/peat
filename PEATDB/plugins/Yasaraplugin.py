@@ -17,13 +17,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Contact information:
-# Email: Jens.Nielsen_at_gmail.com 
+# Email: Jens.Nielsen_at_gmail.com
 # Normal mail:
 # Jens Nielsen
 # SBBS, Conway Institute
 # University College Dublin
 # Dublin 4, Ireland
-# 
+#
 
 from Plugins import Plugin
 from Tkinter import *
@@ -36,15 +36,15 @@ class YasaraPlugin(Plugin, GUI_help):
     requires = ['yasaramodule']
     menuentry = 'Yasara Control'
     gui_methods = []
-    about = 'Handles an open yasara instance'    
+    about = 'Handles an open yasara instance'
 
-    def main(self, parent):      
+    def main(self, parent):
         if parent==None:
             return
         self.parent = parent
         self.DB = parent.DB
         self.parentframe = None
-        
+
         try:
             self._doImport()
         except:
@@ -52,43 +52,43 @@ class YasaraPlugin(Plugin, GUI_help):
             tkMessageBox.showwarning('Failed',
                                      'No yasara specified in settings!')
             return
-        self._doFrame() 
+        self._doFrame()
         return
 
     def _doImport(self):
         """Same as DBActions"""
         import sys,os
-        self.preferences=self.parent.preferences       
+        self.preferences=self.parent.preferences
         yasaradir = self.preferences.get('molgraphAppPath')
         if not os.path.isdir(yasaradir):
             yasaradir=os.path.split(yasaradir)[0]
         dirname=os.path.split(yasaradir)[1]
         if dirname.lower()=='yasara.app':
             yasaradir=os.path.join(yasaradir,'yasara')
-       
+
         sys.path.append(os.path.join(yasaradir,'pym'))
         sys.path.append(os.path.join(yasaradir,'plg'))
         import yasaramodule as yasara
         self.yasara = yasara
         return
-    
+
     def _doFrame(self):
         if 'uses_sidepane' in self.capabilities:
-            self.mainwin = self.parent.createChildFrame()    
+            self.mainwin = self.parent.createChildFrame()
         else:
             self.mainwin=Toplevel()
             self.mainwin.title('Yasara control')
-            self.mainwin.geometry('800x600+200+100')            
+            self.mainwin.geometry('800x600+200+100')
 
         methods = self._getmethods()
-        methods = [m for m in methods if m[0] in self.gui_methods]       
+        methods = [m for m in methods if m[0] in self.gui_methods]
         l=Label(self.mainwin, text='Yasara plugin')
         l.pack(side=TOP,fill=BOTH)
         yc = YasaraControl(self.mainwin, self.yasara)
         yc.pack()
         return
-      
+
     def quit(self):
         self.mainwin.destroy()
         return
-    
+
