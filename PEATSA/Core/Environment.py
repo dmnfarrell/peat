@@ -180,6 +180,7 @@ class Configuration:
 		default.add_section('PKA SCAN OUTPUT')
 		default.add_section('PATHS')
 		default.add_section('WORKING DIRECTORY')
+		default.add_section('PDBS')
 	    
 		# pKa calculation parameters
 		default.set('PKA SCAN PARAMETERS', 'pKMCsteps', str(200000))
