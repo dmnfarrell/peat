@@ -517,19 +517,70 @@ def WhatIfMakeMoleculeCommand(inputFile):
 	
 	return command, outputFile
 
-def CleanPDB(inputFile, outputFile, removeWater=True, removeLigand=True, removeAltLoc=True, addHydrogens=True, correct=True):
+def CleanPDB2PQR(inputFile, outputFile, forceField="amber", removeWater=True, removeLigand=True, removeAltLoc=True, addHydrogens=True, correct=True):
 
-	'''Cleans a PDB by adding hydrogens, remove waters, ligands and altlocs and correct bad rotamers (default)
+	'''Cleans a PDB by using PDB2PQR
 	
-	The specific cleaning tasks done can be set using the function keywords arguments
-	
-	Parameters:
-		inputFile - The location of the pdb to clean
-		outputFile - The location where the cleaned pdb should be written.
+	See CleanPDB for argument details
+
+	Note: With pdb2pqr you cannot remove-water or ligands.
 		
 	Errors: 
 		Raises an exception if the inputFile is not a valid PDB file.'''
 
+	import Protool
+
+	try:
+		command = 'pdb2pqr --chain --ff=%s' % (forceField)
+
+		if removeWater == True:
+			print >>sys.stderr, 'Warn: Currently PDB2PQR does not remove waters from pdb files'
+
+		if removeLigand == True:
+			print >>sys.stderr, 'Warn: Currently PDB2PQR can not be used to remove heterogens from PDB files'
+
+		if addHydrogens == False:
+			print >>sys.stderr, 'Warn: Turning of Hydrogen addition with PDB2PQR automatically turns of rotamer correction'
+			command = command + " --clean "
+		else:
+			if correct == False:
+				command = command + " --nodebump "
+
+		#Protool ignores altlocs so we can use it to remove them 
+		#Do this first as Protool as when protool reads then writes a pdb2pqr cleaned file 
+		#it raises an error on reading it again 
+		if removeAltLoc is True:
+			pdb = Protool.structureIO()
+			pdb.readpdb(inputFile)
+			pdb.writepdb(outputFile)
+
+			inputFile = outputFile
+
+		command = command + ' %s %s' % (inputFile, outputFile)
+		print 'Using: ', command
+
+		process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+		stdout, stderr = process.communicate()
+
+		if process.returncode != 0:
+			raise ProteinDesignToolException, 'Error using pdb2pqr to clean pdb file %s' % inputFile
+		
+	except BaseException, data:
+		print 'Encountered an exception cleaning pdb %s' % inputFile
+		if stdout is not None:
+			print 'PDB2PQR output follows:'
+			print stdout
+		
+		raise 			
+
+	print 'FINSIHED'
+
+def CleanWHATIF(inputFile, outputFile, removeWater=True, removeLigand=True, removeAltLoc=True, addHydrogens=True, correct=True):
+
+	'''Cleans a PDB using WHAT-IF		
+
+	Errors: 
+		Raises an exception if the inputFile is not a valid PDB file.'''
 
 	import pKarun.WI_tools, Protool
 	
@@ -588,6 +639,44 @@ def CleanPDB(inputFile, outputFile, removeWater=True, removeLigand=True, removeA
 				print line
 		
 		raise 			
+
+def CleanPDB(inputFile, outputFile, removeWater=True, removeLigand=True, removeAltLoc=True, addHydrogens=True, correct=True):
+
+	'''Cleans a PDB by adding hydrogens, remove waters, ligands and altlocs and correct bad rotamers (default)
+	
+	The specific cleaning tasks done can be set using the function keywords arguments
+	
+	Parameters:
+		inputFile - The location of the pdb to clean
+		outputFile - The location where the cleaned pdb should be written.
+		
+	Errors: 
+		Raises an exception if the inputFile is not a valid PDB file.'''
+
+	cleanProgram = Environment.appConfiguration.pdbCleanProgram()
+	if cleanProgram == "WHATIF":
+		CleanWHATIF(inputFile, outputFile, 
+			removeWater=removeWater, 
+			removeLigand=removeLigand, 
+			removeAltLoc=removeAltLoc, 
+			addHydrogens=addHydrogens, 
+			correct=correct)
+	elif cleanProgram == "pdb2pqr": 
+		if Environment.appConfiguration.has_option('PDBS', 'forceField'):
+			forceField = Environment.appConfiguration.get('PDBS', 'forceField')
+		else:
+			forceField = 'amber'	
+
+		CleanPDB2PQR(inputFile, outputFile, 
+			forceField=forceField,
+			removeWater=removeWater, 
+			removeLigand=removeLigand, 
+			removeAltLoc=removeAltLoc, 
+			addHydrogens=addHydrogens, 
+			correct=correct)
+	else:
+		print "Unknown pdb clean program %s specified in configuration - aborting" % cleanProgram
+
 	
 class CommandLineParser:
 

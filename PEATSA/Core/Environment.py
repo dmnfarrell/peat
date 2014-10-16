@@ -214,6 +214,8 @@ class Configuration:
 		default.set('WORKING DIRECTORY', 'copyLocation', os.getcwd())
 		default.set('WORKING DIRECTORY', 'overwriteExistingCopies', str(0))
 		default.set('WORKING DIRECTORY', 'useUniqueID', str(0))
+
+		default.set('PDBS', 'pdbCleanProgram', 'WHATIF')
 	
 		#If requested write out this default configuration 
 		#wherever the program is being run from
@@ -406,6 +408,15 @@ class Configuration:
 		'''Returns True if pKaCalculations are available'''
 		
 		return self.pKaToolAvailable
+
+	def pdbCleanProgram(self):
+
+		'''Returns the program to use to clean pdbs'''
+
+		if self.configuration.has_option('PDBS', 'pdbCleanProgram'):
+			return self.configuration.get('PDBS', 'pdbCleanProgram')
+		else:
+			return 'WHATIF'
 			
 class WorkingDirectory:
 
